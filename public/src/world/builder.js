@@ -42,6 +42,8 @@ export function buildScene(spec, quality = {}) {
 
   /** @type {BuiltScene['anims']} */
   const anims = [];
+  /** Things the scene tells whoever is showing it. */
+  const hooks = { lightning: null };
   /** @type {BuiltScene['colliders']} */
   const colliders = [];
   const anchors = new Map();
@@ -72,13 +74,16 @@ export function buildScene(spec, quality = {}) {
         nextFlash -= dt;
         if (nextFlash <= 0) {
           flash = 1;
-          nextFlash = 7 + Math.random() * 18;
+          nextFlash = 9 + Math.random() * 22;
+          hooks.lightning?.();
         }
         if (flash > 0) {
           flash = Math.max(0, flash - dt * 2.6);
+          // Two quick strokes, then the afterglow.
           const f = flash > 0.75 || (flash > 0.35 && flash < 0.5) ? 2.6 : 1 + flash;
           rainMat.color.copy(base).multiplyScalar(f);
           if (moon) moon.intensity = moonBase * (1 + (f - 1) * 3);
+          hemi.intensity = hemiBase * (1 + (f - 1) * 0.45);
         }
       }
     });
@@ -269,6 +274,7 @@ export function buildScene(spec, quality = {}) {
   // -------------------------------------------------------- ambient + moon
   const amb = spec.ambient ?? {};
   const hemi = new THREE.HemisphereLight(amb.sky ?? 0x5a7890, amb.ground ?? 0x241a12, amb.hemi ?? 0.55);
+  const hemiBase = hemi.intensity;
   root.add(hemi);
 
   let moon = null;
@@ -316,6 +322,7 @@ export function buildScene(spec, quality = {}) {
     bounds,
     round,
     anims,
+    hooks,
     anchors,
     spawn,
     height: H,

@@ -733,7 +733,7 @@ If the detective shows him the Harrowgate record proving Lucy survived, or shows
     short: "Conrad Vale's wife.",
     role: "Conrad Vale's widow",
     look: LOOKS.ivale,
-    where: [{ if: 'act>=2', loc: 'vale_yacht', p: [-1.55, -0.85], r: 65 }],
+    where: [{ if: 'act>=2', loc: 'vale_yacht', p: [-0.9, -0.85], r: 40 }],
     observe: [{ text: 'Forty-nine, immaculate at six in the morning. She has not sat down and her handbag has not left the crook of her arm since you came aboard.' }],
     greet: [
       { if: 'met:ivale', text: 'Detective. Is there more?' },

@@ -3,6 +3,8 @@
 
 import { el, add, icon, prose } from './dom.js';
 
+const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
 function aiLine(ai) {
   const text = ai?.live
     ? `Every character is played live by ${ai.label}.`
@@ -243,7 +245,7 @@ export function showEnding(cards, game, run) {
           el('p', { class: 'muted', style: { textAlign: 'center', margin: '0 0 18px' }, text: ending.rankLine }),
           el('div', { class: 'section-label', text: `What you uncovered · ${found} of ${ending.truths.length}` }),
           ending.truths.map((t) => el('div', { class: `truth ${t.found ? '' : 'missed'}` }, icon(t.found ? 'check' : 'close', 16), t.label)),
-          el('p', { class: 'muted', style: { fontSize: '13px', marginTop: '14px' }, text: `${ending.stats.exchanges} questions asked · ${ending.stats.hints} moments of thought · ${ending.stats.wrong} wrong turns on the board` }),
+          el('p', { class: 'muted', style: { fontSize: '13px', marginTop: '14px' }, text: [count(ending.stats.exchanges, 'question asked', 'questions asked'), count(ending.stats.hints, 'moment of thought', 'moments of thought'), count(ending.stats.wrong, 'wrong turn on the board', 'wrong turns on the board')].join(' · ') }),
         );
         add(actions, el('button', { class: 'btn solid', type: 'button', text: 'A new case file', onClick: () => close('new') }), el('button', { class: 'btn quiet', type: 'button', text: 'Stay a while', onClick: () => close('stay') }));
         if (!streamed) card.scrollTop = 0;

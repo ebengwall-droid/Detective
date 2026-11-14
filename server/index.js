@@ -34,7 +34,7 @@ const STATIC_ROOTS = [
 
 // The only parts of the case the page needs: set dressing and faces. The rest
 // (the story, the facts, who is lying) is not served unless asked for.
-const CORE_PUBLIC = new Set(['/core/cases/lamplighter/scenes.js', '/core/cases/lamplighter/looks.js']);
+const CORE_PUBLIC = new Set(['/core/cases/lamplighter/scenes.js', '/core/cases/lamplighter/looks.js', '/core/conditions.js']);
 const SERVE_CORE = process.env.GREYHAVEN_SERVE_CORE === '1';
 
 const MIME = {
@@ -119,7 +119,10 @@ async function handleRpc(req, res) {
   const streaming = STREAMING_METHODS.has(method);
   const abort = new AbortController();
   res.on('close', () => {
-    if (!res.writableEnded) abort.abort();
+    if (res.writableEnded) return;
+    // The player closed the tab or walked away mid-reply: stop paying for it.
+    abort.abort();
+    if (process.env.GREYHAVEN_DEBUG) console.warn(`[rpc ${method}] client went away before the reply finished`);
   });
 
   if (streaming) {

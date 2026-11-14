@@ -357,7 +357,7 @@ export const SCENES = {
     ceiling: 'wallCream',
     skirting: false,
     ambient: { sky: 0x8aa4b4, ground: 0x3a2c1e, fog: 0x0d1418, hemi: 1.0, density: 0.022, exposure: 1.42, storm: true },
-    spawn: { p: [-2.6, 0.5], yaw: -80 },
+    spawn: { p: [-3.0, 0.3], yaw: -82 },
     props: [
       { t: 'beam', p: [0, -1.2], len: 7.8, h: 0.1, mat: 'wallTeak' },
       { t: 'beam', p: [0, 0], len: 7.8, h: 0.1, mat: 'wallTeak' },

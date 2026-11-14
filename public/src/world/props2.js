@@ -23,20 +23,80 @@ function doubleSided(material) {
 
 // -------------------------------------------------------------- crime scene
 
+// Stations along a covered body, head to feet: [z, height, half-width].
+const BODY_STATIONS = [
+  [-1.06, 0.0, 0.05],
+  [-0.96, 0.15, 0.09],
+  [-0.84, 0.225, 0.105],
+  [-0.69, 0.15, 0.1],
+  [-0.56, 0.215, 0.235],
+  [-0.36, 0.245, 0.225],
+  [-0.06, 0.21, 0.2],
+  [0.3, 0.165, 0.17],
+  [0.56, 0.15, 0.15],
+  [0.8, 0.13, 0.13],
+  [0.93, 0.235, 0.115],
+  [1.03, 0.0, 0.06],
+];
+
+function smooth(t) {
+  const k = Math.min(1, Math.max(0, t));
+  return k * k * (3 - 2 * k);
+}
+
+/** One continuous cloth surface draped over a lying figure (far better than a row of lumps). */
+function drapedSheetGeometry(halfWidth = 0.46) {
+  const NZ = 44;
+  const NX = 18;
+  const z0 = BODY_STATIONS[0][0];
+  const z1 = BODY_STATIONS[BODY_STATIONS.length - 1][0];
+  const at = (z) => {
+    let i = 0;
+    while (i < BODY_STATIONS.length - 2 && z > BODY_STATIONS[i + 1][0]) i++;
+    const a = BODY_STATIONS[i];
+    const b = BODY_STATIONS[i + 1];
+    const t = smooth((z - a[0]) / (b[0] - a[0]));
+    return [a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+  };
+  const positions = [];
+  const uvs = [];
+  const index = [];
+  for (let iz = 0; iz <= NZ; iz++) {
+    const z = z0 + ((z1 - z0) * iz) / NZ;
+    const [hb, wb] = at(z);
+    for (let ix = 0; ix <= NX; ix++) {
+      const x = -halfWidth + (2 * halfWidth * ix) / NX;
+      const a = Math.abs(x);
+      let h;
+      if (a <= wb) h = hb * (0.74 + 0.26 * Math.cos((a / wb) * (Math.PI / 2)));
+      else h = hb * 0.74 * Math.pow(1 - smooth((a - wb) / (0.1 + hb * 0.55)), 1.6);
+      // Cloth never lies quite flat: a little fold where it meets the floor.
+      const fold = 0.012 + 0.006 * (1 + Math.sin(z * 23 + x * 17)) * smooth(a / halfWidth);
+      positions.push(x, Math.max(h, fold), z);
+      uvs.push(x, z);
+    }
+  }
+  for (let iz = 0; iz < NZ; iz++) {
+    for (let ix = 0; ix < NX; ix++) {
+      const a = iz * (NX + 1) + ix;
+      const b = a + 1;
+      const c = a + NX + 1;
+      const d = c + 1;
+      index.push(a, c, b, b, c, d);
+    }
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(index);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
 /** A body under a sheet, lying along Z with the head toward -Z. */
 def('bodySheet', (g, o) => {
-  const m = o.mat ?? 'fabricWhite';
-  const y = 0;
-  const part = (r, sx, sy, sz, px, py, pz) => {
-    const s = sph(g, r, m, px, y + py, pz, 10);
-    s.scale.set(sx, sy, sz);
-  };
-  part(0.13, 1, 0.95, 1.05, 0, 0.12, -0.78);
-  part(0.3, 0.92, 0.42, 1.2, 0, 0.11, -0.38);
-  part(0.28, 0.9, 0.36, 1.1, 0, 0.09, 0.06);
-  part(0.24, 0.85, 0.32, 1.9, 0, 0.07, 0.48);
-  part(0.11, 1.3, 1.1, 0.8, 0, 0.11, 0.9);
-  box(g, 0.66, 0.012, 2.02, m, 0, y + 0.008, 0.06);
+  const mesh = new THREE.Mesh(drapedSheetGeometry(o.halfWidth ?? 0.46), mat(o.mat ?? 'fabricWhite'));
+  g.add(mesh);
   return { c: o.solid ? [0.66, 2.0] : null, h: 0.3 };
 });
 
@@ -171,7 +231,7 @@ def('autopsyTable', (g, o, ctx) => {
   cyl(g, 0.04, 0.04, 0.3, 'steelDark', 0.2, 0.74, 0.9, 8);
   if (o.body) {
     const b = group(g, 0, 0.92, 0);
-    PROPS.bodySheet(b, {}, ctx);
+    PROPS.bodySheet(b, { halfWidth: 0.34 }, ctx);
   }
   shadowBlob(g, 0.9, 2.1);
   return { c: [0.76, 2.04], h: 1.2 };

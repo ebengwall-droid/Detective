@@ -214,6 +214,7 @@ export class World {
       const q = QUALITY[this.quality];
       this.built = buildScene(loc.scene, { shadows: q.shadows, shadowSize: q.shadowSize, maxLights: q.maxLights });
       this.scene.add(this.built.root);
+      this.built.hooks.lightning = () => this.emit('lightning');
       this.scene.background = new THREE.Color(this.built.fog.color);
       this.scene.fog = new THREE.FogExp2(this.built.fog.color, this.built.fog.density);
       this.renderer.toneMappingExposure = this.built.exposure * this.brightness;

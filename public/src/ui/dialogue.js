@@ -95,6 +95,7 @@ export function createDialogue(panels, game) {
         log.append(el('div', { class: 'line note' }, el('button', { class: 'btn small', type: 'button', text: current.finale ? 'It is over' : 'She is gone', onClick: () => api.close() })));
         scrollDown();
         busy = false;
+        panel?.classList.remove('busy');
         return;
       }
       setChips(res.suggestions);

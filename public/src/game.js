@@ -191,6 +191,8 @@ export class Game {
       else if (key === 'escape') this.open('menu');
     });
     w.on('step', () => this.audio.step());
+    // Light first, sound after: the storm is a little way out over the water.
+    w.on('lightning', () => setTimeout(() => this.audio.thunder(), 600 + Math.random() * 1600));
     w.on('lock', (locked) => this.hud.setLocked(locked));
     w.on('slow', (from) => {
       const next = from === 'high' ? 'medium' : 'low';

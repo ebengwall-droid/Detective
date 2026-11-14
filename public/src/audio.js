@@ -111,6 +111,20 @@ export class Audio {
     }
     this.droneGain.connect(this.master);
 
+    // Mains hum for rooms that have refrigeration.
+    this.humGain = c.createGain();
+    this.humGain.gain.value = 0;
+    for (const [f, g] of [[100, 1], [200, 0.35], [300.4, 0.12]]) {
+      const o = c.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = f;
+      const og = c.createGain();
+      og.gain.value = g;
+      o.connect(og).connect(this.humGain);
+      o.start();
+    }
+    this.humGain.connect(this.master);
+
     this.setAmbience(this.ambience);
     this.schedule();
   }
@@ -129,6 +143,7 @@ export class Audio {
     this.rainFilter.frequency.setTargetAtTime(a.cutoff, t, 0.8);
     this.windGain.gain.setTargetAtTime(a.wind ?? 0, t, 1.2);
     this.droneGain.gain.setTargetAtTime(a.drone, t, 1.0);
+    this.humGain.gain.setTargetAtTime(a.hum ? 0.011 : 0, t, 0.6);
   }
 
   /** Occasional events: a foghorn, a few piano notes. Driven by timeouts, not a busy loop. */
@@ -141,8 +156,40 @@ export class Audio {
       this.phrase();
       this.timers[1] = setTimeout(piano, 9000 + Math.random() * 15000);
     };
+    const creak = () => {
+      if (AMBIENCE[this.ambience]?.creak) this.creak();
+      this.timers[2] = setTimeout(creak, 7000 + Math.random() * 12000);
+    };
     this.timers[0] = setTimeout(horn, 14000 + Math.random() * 20000);
     this.timers[1] = setTimeout(piano, 5000);
+    this.timers[2] = setTimeout(creak, 6000);
+  }
+
+  /** A hull easing against its fenders. */
+  creak() {
+    if (!this.ctx || !this.enabled) return;
+    const c = this.ctx;
+    const t = c.currentTime;
+    const o = c.createOscillator();
+    o.type = 'sawtooth';
+    const from = 62 + Math.random() * 20;
+    o.frequency.setValueAtTime(from, t);
+    o.frequency.linearRampToValueAtTime(from * 0.78, t + 0.7);
+    const f = c.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.value = 340;
+    f.Q.value = 5;
+    const g = c.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.03, t + 0.15);
+    g.gain.linearRampToValueAtTime(0, t + 0.8);
+    const send = c.createGain();
+    send.gain.value = 0.5;
+    o.connect(f).connect(g);
+    g.connect(this.master);
+    g.connect(send).connect(this.reverb);
+    o.start(t);
+    o.stop(t + 0.9);
   }
 
   tone(freq, { type = 'sine', gain = 0.1, attack = 0.01, decay = 1, when = 0, wet = 0.4, detune = 0 } = {}) {
@@ -262,7 +309,10 @@ export class Audio {
   }
 
   thunder() {
-    this.noiseBurst({ gain: 0.22, freq: 110, q: 0.5, decay: 2.4, type: 'lowpass' });
+    // A crack, then the long roll behind it.
+    this.noiseBurst({ gain: 0.16, freq: 420, q: 0.4, decay: 0.5, type: 'lowpass' });
+    this.noiseBurst({ gain: 0.2, freq: 110, q: 0.5, decay: 2.8, type: 'lowpass', when: 0.12 });
+    this.noiseBurst({ gain: 0.12, freq: 70, q: 0.5, decay: 4.2, type: 'lowpass', when: 0.9 });
   }
 
   typeKey() {

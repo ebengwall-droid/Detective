@@ -463,6 +463,7 @@ button.row:hover { border-color: var(--line-2); background: var(--ink-3); }
 .card-kicker { font-size: 12px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--brass); margin-bottom: 10px; }
 .card-title { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 7vw, 46px); letter-spacing: 0.05em; margin: 0 0 6px; line-height: 1.12; text-wrap: balance; }
 .card-date { font-family: var(--mono); font-size: 13px; color: var(--dim); letter-spacing: 0.14em; margin-bottom: 26px; }
+.card-title + .card-lines { margin-top: 22px; }
 .card-lines p { font-family: var(--display); font-size: clamp(17px, 2.6vw, 20px); line-height: 1.5; margin: 0 0 14px; opacity: 0; animation: line-in 0.9s ease forwards; text-wrap: pretty; }
 @keyframes line-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; } }
 .card-actions { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
