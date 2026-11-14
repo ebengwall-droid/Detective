@@ -22,9 +22,9 @@ const REACH_NPC = 2.7;
 // post: the finishing pass (bloom, focus, grade). samples: edge smoothing for
 // the room itself. detail: how much geometry the room is given (bevels, dust).
 const QUALITY = {
-  high: { shadows: true, shadowSize: 2048, pixelRatio: 1.75, maxLights: 9, post: true, samples: 4, detail: 2 },
-  medium: { shadows: true, shadowSize: 1024, pixelRatio: 1.3, maxLights: 7, post: true, samples: 4, detail: 1 },
-  low: { shadows: false, shadowSize: 512, pixelRatio: 1, maxLights: 5, post: false, samples: 0, detail: 0 },
+  high: { shadows: true, shadowSize: 2048, pixelRatio: 1.75, maxLights: 9, post: true, samples: 4, detail: 2, ao: 12, dof: true },
+  medium: { shadows: true, shadowSize: 1024, pixelRatio: 1.3, maxLights: 7, post: true, samples: 4, detail: 1, ao: 6, dof: true },
+  low: { shadows: false, shadowSize: 512, pixelRatio: 1, maxLights: 5, post: false, samples: 0, detail: 0, ao: 0, dof: false },
 };
 
 /** Screen markers are drawn white (with a dark edge) and tinted per use. */
@@ -200,7 +200,10 @@ export class World {
     const ratio = Math.min(window.devicePixelRatio || 1, q.pixelRatio);
     this.renderer.setPixelRatio(ratio);
     this.renderer.setSize(w, h, false);
-    if (this.post && q.post) this.post.setSize(w, h, ratio, q.samples);
+    if (this.post && q.post) {
+      this.post.configure({ ao: q.ao, dof: q.dof });
+      this.post.setSize(w, h, ratio, q.samples);
+    }
     this.camera.aspect = w / h;
     // A tall phone screen needs a wider vertical field of view to feel right.
     this.baseFov = w / h < 0.8 ? 84 : w / h < 1.2 ? 76 : 66;
@@ -710,6 +713,7 @@ export class World {
   }
 
   frame(dt, now) {
+    this.lastDt = dt;
     this.time += dt;
     const t = this.time;
     if (!this.built) return;
@@ -849,7 +853,7 @@ export class World {
         const want = talking ? 1 : this.mode === 'title' ? 0.7 : 0;
         this.dof = (this.dof ?? 0) + (want - (this.dof ?? 0)) * 0.08;
         const focus = talking ? Math.hypot(talking.pos.x - this.player.x, talking.pos.z - this.player.z) : 2.4;
-        this.post.render(this.scene, this.camera, { exposure, dof: this.dof < 0.01 ? 0 : this.dof, focus, time: t, bloom: 0.55 });
+        this.post.render(this.scene, this.camera, { exposure, dof: this.dof < 0.01 ? 0 : this.dof, focus, time: t, dt: this.lastDt, bloom: 0.55 });
       } catch (err) {
         console.warn('Finishing pass failed; drawing plainly from here on:', err?.message);
         this.post = null;
