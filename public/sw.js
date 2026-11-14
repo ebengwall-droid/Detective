@@ -5,7 +5,7 @@
 // whatever was fetched last is kept as the fallback. The game's own calls to
 // the server (/api/) are never touched.
 
-const CACHE = 'greyhaven-v3';
+const CACHE = 'greyhaven-v4';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -28,8 +28,9 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE);
-      // Models and textures are large and do not change between versions of this cache: once is enough.
-      if (url.pathname.includes('/assets/')) {
+      // Models and pictures are large and do not change between versions of this cache: once is enough.
+      // The lists of them are small and say what there is to fetch, so those are always asked for afresh.
+      if (url.pathname.includes('/assets/') && !url.pathname.endsWith('.json')) {
         const kept = await cache.match(req);
         if (kept) return kept;
       }

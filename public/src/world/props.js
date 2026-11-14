@@ -527,16 +527,37 @@ def('door', (g, o) => {
 // ----------------------------------------------------------------- lighting
 
 def('deskLamp', (g, o, ctx) => {
-  cyl(g, 0.09, 0.1, 0.02, 'brass', 0, 0.01, 0, 14);
-  cyl(g, 0.012, 0.012, 0.3, 'brass', 0, 0.16, 0, 6);
-  const shade = cyl(g, 0.07, 0.07, 0.26, o.shade ?? 'enamelGreen', 0, 0.33, 0.02, 10, { rz: 90 });
-  shade.scale.set(1, 1, 0.75);
+  // A banker's lamp: a trough of coloured glass slung in a brass yoke, a pull chain under it.
   const on = o.lit !== false;
+  const foot = cyl(g, 0.086, 0.1, 0.016, 'brass', 0, 0.008, 0, 20);
+  foot.scale.set(1.25, 1, 0.82);
+  const step = cyl(g, 0.05, 0.062, 0.014, 'brass', 0, 0.023, 0, 16);
+  step.scale.set(1.25, 1, 0.82);
+  cyl(g, 0.01, 0.014, 0.2, 'brass', 0, 0.13, -0.025, 8);
+  sph(g, 0.017, 'brass', 0, 0.232, -0.025, 8);
+  box(g, 0.262, 0.01, 0.012, 'brass', 0, 0.238, -0.025);
+  for (const x of [-0.131, 0.131]) {
+    box(g, 0.01, 0.075, 0.012, 'brass', x, 0.272, -0.02);
+    const pin = cyl(g, 0.009, 0.009, 0.014, 'brass', x, 0.305, 0.02, 8);
+    pin.rotation.z = Math.PI / 2;
+  }
+  // The shade: half a tube, closed at the ends, open underneath.
+  const glass = new THREE.CylinderGeometry(0.066, 0.066, 0.25, 16, 1, false, 0, Math.PI);
+  const shade = new THREE.Mesh(glass, mat(o.shade ?? 'enamelGreen'));
+  shade.rotation.z = Math.PI / 2;
+  shade.scale.set(0.82, 1, 1);
+  shade.position.set(0, 0.292, 0.02);
+  g.add(shade);
+  for (const z of [-0.046, 0.086]) box(g, 0.256, 0.007, 0.007, 'brass', 0, 0.292, z);
   if (on) {
-    box(g, 0.22, 0.012, 0.07, glow(0xfff0c0, 1.6), 0, 0.285, 0.02, { dyn: true });
+    box(g, 0.244, 0.008, 0.126, glow(0xfff0c0, 1.6), 0, 0.292, 0.02, { dyn: true });
     ctx.halo(g, WARM, 0.55, 0, 0.27, 0.04, 0.55);
     if (o.light !== false) ctx.light(g, { color: WARM, intensity: o.intensity ?? 2.2, distance: 4.5, x: 0, y: 0.24, z: 0.08 });
+  } else {
+    box(g, 0.244, 0.006, 0.126, 'plasticBlack', 0, 0.292, 0.02);
   }
+  cyl(g, 0.002, 0.002, 0.07, 'brass', 0.07, 0.253, 0.05, 4);
+  sph(g, 0.006, 'brass', 0.07, 0.215, 0.05, 6);
   return { c: null, h: 0.4 };
 });
 
@@ -685,20 +706,44 @@ def('lanternCluster', (g, o, ctx) => {
 });
 
 def('floodlight', (g, o, ctx) => {
+  // A scene-of-crime work light: a finned lamp head in a yoke, on a telescopic tripod.
   for (let i = 0; i < 3; i++) {
-    const a = (i / 3) * Math.PI * 2;
-    const leg = cyl(g, 0.012, 0.012, 1.0, 'steelDark', Math.cos(a) * 0.22, 0.46, Math.sin(a) * 0.22, 5);
+    const a = (i / 3) * Math.PI * 2 + 0.5;
+    const leg = cyl(g, 0.011, 0.014, 1.0, 'steelDark', Math.cos(a) * 0.22, 0.46, Math.sin(a) * 0.22, 6);
     leg.rotation.z = Math.cos(a) * 0.45;
     leg.rotation.x = -Math.sin(a) * 0.45;
+    cyl(g, 0.02, 0.024, 0.03, 'rubber', Math.cos(a) * 0.44, 0.015, Math.sin(a) * 0.44, 8);
   }
-  cyl(g, 0.016, 0.016, 0.7, 'steelDark', 0, 1.2, 0, 6);
-  const head = group(g, 0, 1.6, 0);
+  cyl(g, 0.034, 0.034, 0.07, 'plasticBlack', 0, 0.92, 0, 10);
+  cyl(g, 0.019, 0.019, 0.42, 'steelDark', 0, 1.1, 0, 8);
+  cyl(g, 0.026, 0.026, 0.045, 'plasticBlack', 0, 1.31, 0, 10);
+  cyl(g, 0.013, 0.013, 0.2, 'steel', 0, 1.42, 0, 8);
+  const knob = cyl(g, 0.014, 0.014, 0.05, 'plasticBlack', 0.04, 1.31, 0, 6);
+  knob.rotation.z = Math.PI / 2;
+  // The yoke the head swings in.
+  box(g, 0.39, 0.014, 0.036, 'steelDark', 0, 1.5, 0);
+  for (const x of [-0.19, 0.19]) {
+    box(g, 0.012, 0.15, 0.036, 'steelDark', x, 1.575, 0);
+    const pivot = cyl(g, 0.022, 0.022, 0.022, 'plasticBlack', x * 1.07, 1.63, 0, 8);
+    pivot.rotation.z = Math.PI / 2;
+  }
+  const head = group(g, 0, 1.63, 0);
   head.rotation.x = ((o.tilt ?? 20) * Math.PI) / 180;
-  box(head, 0.34, 0.24, 0.1, 'plasticYellow', 0, 0, 0);
-  box(head, 0.3, 0.2, 0.02, glow(0xf2f8ff, 2.6), 0, 0, 0.055, { dyn: true });
-  ctx.halo(g, COOL, 1.3, 0, 1.6, 0.1, 0.6);
+  box(head, 0.33, 0.23, 0.05, 'steelDark', 0, 0, 0.012);
+  // Cooling fins down the back.
+  for (let i = 0; i < 9; i++) box(head, 0.008, 0.2, 0.04, 'steelDark', -0.14 + i * 0.035, 0, -0.03);
+  // A hi-vis rim round the lens, and a carrying handle.
+  box(head, 0.35, 0.022, 0.03, 'plasticYellow', 0, 0.115, 0.04);
+  box(head, 0.35, 0.022, 0.03, 'plasticYellow', 0, -0.115, 0.04);
+  box(head, 0.022, 0.21, 0.03, 'plasticYellow', -0.164, 0, 0.04);
+  box(head, 0.022, 0.21, 0.03, 'plasticYellow', 0.164, 0, 0.04);
+  box(head, 0.016, 0.05, 0.016, 'plasticBlack', -0.07, 0.15, 0.0);
+  box(head, 0.016, 0.05, 0.016, 'plasticBlack', 0.07, 0.15, 0.0);
+  box(head, 0.17, 0.018, 0.022, 'plasticBlack', 0, 0.18, 0.0);
+  box(head, 0.3, 0.2, 0.012, glow(0xf2f8ff, 2.6), 0, 0, 0.042, { dyn: true });
+  ctx.halo(g, COOL, 1.3, 0, 1.63, 0.1, 0.6);
   if (o.light !== false) {
-    ctx.light(g, { color: 0xdcecff, intensity: o.intensity ?? 12, distance: 9, x: 0, y: 1.55, z: 0.3, shadow: o.shadow });
+    ctx.light(g, { color: 0xdcecff, intensity: o.intensity ?? 12, distance: 9, x: 0, y: 1.58, z: 0.3, shadow: o.shadow });
   }
   shadowBlob(g, 0.6, 0.6);
   return { c: [0.4, 0.4], h: 1.75 };

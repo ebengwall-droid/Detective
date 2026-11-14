@@ -10,6 +10,7 @@ import { LOOKS } from '/core/cases/lamplighter/looks.js';
 import { check } from '/core/conditions.js';
 import { assets } from './world/assets.js';
 import { modelsFor } from './world/dress.js';
+import { setNightView } from './world/glass.js';
 
 const params = new URLSearchParams(location.search);
 const locId = params.get('loc') ?? 'precinct';
@@ -46,6 +47,8 @@ async function main() {
     await assets.loadPeople(Object.keys(LOOKS));
     await assets.loadProps(modelsFor(spec.props));
     if (await assets.loadSurfaces()) useSurfaces((name) => assets.surface(name));
+    const night = await assets.loadNight();
+    if (night) setNightView(night);
   }
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Number(params.get('dpr') ?? 1));

@@ -10,6 +10,7 @@ import { buildEnvironment, canvasTexture, useSurfaces } from './materials.js';
 import { createCharacter, figureLight } from './characters.js';
 import { assets } from './assets.js';
 import { modelsFor } from './dress.js';
+import { setNightView } from './glass.js';
 import { Nav } from './nav.js';
 import { Controls } from './controls.js';
 import { Post } from './post.js';
@@ -258,6 +259,9 @@ export class World {
         this.scene.environmentIntensity = 0.42;
         picture.dispose();
         pmrem.dispose();
+      }),
+      assets.loadNight().then((picture) => {
+        if (picture) setNightView(picture);
       }),
     ]).then(() => {
       this.surroundings = true;

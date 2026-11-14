@@ -720,5 +720,15 @@
   "file": "env.jpg",
   "source": "old_room",
   "bytes": 74060
+ },
+ "night": {
+  "file": "night.jpg",
+  "bytes": 144830,
+  "lite": {
+   "file": "night.m.jpg",
+   "bytes": 48081
+  },
+  "degrees": 45,
+  "source": "blue_lagoon_night"
  }
 }

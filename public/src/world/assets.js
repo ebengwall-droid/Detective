@@ -18,6 +18,9 @@ import { MeshoptDecoder as PlainDecoder } from './lib/meshopt-reference.js';
  * not start, the same job is done in plain JavaScript, a little more slowly.
  */
 let fast;
+// The WebAssembly decoder starts itself when its file is read. Where a host refuses it, say now that
+// the refusal is expected, so it is not reported as an error nobody caught.
+FastDecoder.ready?.catch?.(() => {});
 const decoder = {
   supported: true,
   ready: Promise.resolve(),
@@ -276,6 +279,19 @@ export const assets = {
     try {
       const t = await pictures.loadAsync(this.base + this.things.env.file);
       t.mapping = THREE.EquirectangularReflectionMapping;
+      t.colorSpace = THREE.SRGBColorSpace;
+      return t;
+    } catch {
+      return null;
+    }
+  },
+
+  /** The photograph the windows look out on: a sea front at night. Null if it cannot be had. */
+  async loadNight() {
+    const info = this.things?.night;
+    if (!info) return null;
+    try {
+      const t = await pictures.loadAsync(this.base + pick(info, this.lite).file);
       t.colorSpace = THREE.SRGBColorSpace;
       return t;
     } catch {

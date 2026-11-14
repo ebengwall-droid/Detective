@@ -67,6 +67,13 @@ test('every surface has its three pictures at both sizes, and the environment is
   assert.ok(size(things.env.file) > 10000);
 });
 
+test('the night the windows look out on is there, at both sizes', () => {
+  assert.ok(things.night, 'the manifest lists it');
+  assert.ok(size(things.night.file) > 20000);
+  assert.ok(size(things.night.lite.file) > 10000);
+  assert.ok(size(things.night.lite.file) < size(things.night.file));
+});
+
 test('nothing shipped is too big for the hosted build, and the whole set stays modest', () => {
   let total = 0;
   for (const entry of fs.readdirSync(assets, { recursive: true, withFileTypes: true })) {

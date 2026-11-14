@@ -204,4 +204,61 @@ if ((all || flag('env')) && config.env) {
   console.log(`env              ${(manifest.env.bytes / 1024).toFixed(0).padStart(5)} KB  (${config.env.src})`);
 }
 
+// --------------------------------------------------------- the night outside
+
+// What the windows look out on: a photograph of a sea front at night. Only the band around the
+// horizon is kept (45 degrees up and down; nothing else is ever seen through a window), which buys
+// twice the detail for the same size.
+//
+// Two things are done to it. A night photograph is a long exposure, far brighter than the night
+// was, so the sky is taken back down to dark and the lamps left as they are. And the photographer
+// stood on a floodlit quay, so the half below the horizon is replaced with water: the sky and its
+// lights upside down, dimmer and drawn out downwards, as a harbour shows them.
+if ((all || flag('env')) && config.night) {
+  const files = listing(config.night.src);
+  const big = download(files.tonemapped.url, path.join(cache, 'hdris', `${config.night.src}.jpg`));
+  const meta = await sharp(big, { limitInputPixels: false }).metadata();
+  const W = 4096;
+  const half = 512;
+  const { data } = await sharp(big, { limitInputPixels: false })
+    .extract({ left: 0, top: Math.round(meta.height / 4), width: meta.width, height: Math.round(meta.height / 4) })
+    .resize({ width: W, height: half, fit: 'fill', kernel: 'lanczos3' })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const toLinear = (v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  const toScreen = (v) => (v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055);
+  const darker = config.night.darken ?? 2.5;
+  const curve = Uint8Array.from({ length: 256 }, (_, i) => Math.round(255 * toScreen(toLinear(i / 255) ** darker)));
+  for (let i = 0; i < data.length; i++) data[i] = curve[data[i]];
+  const raw = { raw: { width: W, height: half, channels: 3 } };
+  const sky = await sharp(data, raw).png().toBuffer();
+  const smeared = await sharp(sky).flip().resize({ width: W, height: half / 8, fit: 'fill', kernel: 'cubic' }).png().toBuffer();
+  const water = await sharp(smeared)
+    .resize({ width: W, height: half, fit: 'fill', kernel: 'cubic' })
+    .blur(2)
+    .linear([0.5, 0.56, 0.66], [0, 0, 0])
+    .png()
+    .toBuffer();
+  const band = await sharp({ create: { width: W, height: half * 2, channels: 3, background: '#000' } })
+    .composite([
+      { input: sky, left: 0, top: 0 },
+      { input: water, left: 0, top: half },
+    ])
+    .png()
+    .toBuffer();
+  const dest = path.join(outDir, 'night.jpg');
+  const small = path.join(outDir, 'night.m.jpg');
+  await sharp(band).blur(0.6).jpeg({ quality: 86, mozjpeg: true }).toFile(dest);
+  await sharp(band).resize({ width: W / 2, height: half, fit: 'fill' }).jpeg({ quality: 84, mozjpeg: true }).toFile(small);
+  manifest.night = {
+    file: 'night.jpg',
+    bytes: fs.statSync(dest).size,
+    lite: { file: 'night.m.jpg', bytes: fs.statSync(small).size },
+    degrees: 45,
+    source: config.night.src,
+  };
+  console.log(`night            ${(manifest.night.bytes / 1024).toFixed(0).padStart(5)} KB  (${config.night.src}), ${(manifest.night.lite.bytes / 1024).toFixed(0)} KB for phones`);
+}
+
 fs.writeFileSync(manifestFile, `${JSON.stringify(manifest, null, 1)}\n`);

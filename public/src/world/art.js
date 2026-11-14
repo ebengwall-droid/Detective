@@ -559,45 +559,6 @@ export const ART = {
     ctx.textBaseline = 'alphabetic';
   },
 
-  /** Night sea through a window: horizon glow and rain. Animated by scrolling. */
-  rainGlass(ctx, w, h, rnd) {
-    const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#16252f');
-    g.addColorStop(0.55, '#22394a');
-    g.addColorStop(1, '#0c151b');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, w, h);
-    // Distant harbour lights, smeared.
-    for (let i = 0; i < 9; i++) {
-      const x = rnd() * w;
-      const y = h * (0.55 + rnd() * 0.2);
-      const r = 6 + rnd() * 16;
-      const glowG = ctx.createRadialGradient(x, y, 0, x, y, r);
-      glowG.addColorStop(0, `rgba(${rnd() > 0.4 ? '255,196,120' : '150,200,220'},0.55)`);
-      glowG.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = glowG;
-      ctx.fillRect(x - r, y - r, r * 2, r * 2);
-    }
-    ctx.lineCap = 'round';
-    for (let i = 0; i < 140; i++) {
-      const x = rnd() * w;
-      const y = rnd() * h;
-      const len = 8 + rnd() * 40;
-      ctx.strokeStyle = `rgba(190,215,230,${0.08 + rnd() * 0.22})`;
-      ctx.lineWidth = 0.6 + rnd() * 1.4;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + len * 0.08, y + len);
-      ctx.stroke();
-    }
-    for (let i = 0; i < 60; i++) {
-      ctx.fillStyle = `rgba(200,225,240,${0.15 + rnd() * 0.3})`;
-      ctx.beginPath();
-      ctx.arc(rnd() * w, rnd() * h, 0.8 + rnd() * 1.8, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  },
-
   /** Tide table / duty roster style ruled notice. */
   notice(ctx, w, h, rnd, opts = {}) {
     paperGround(ctx, w, h, rnd, '#dcd6c2');

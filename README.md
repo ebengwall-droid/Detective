@@ -174,6 +174,10 @@ test/                 Tests
   lights everything that reflects. Rooms are still laid out as data
   (`core/cases/lamplighter/scenes.js`); `world/dress.js` puts the model for
   each prop where the layout says, fitted to the space.
+- **The windows** look out on a photograph of a sea front at night. A pane
+  shows whatever lies in the direction you are looking through it, so the
+  view shifts as you walk; the rain is on the glass, and each drop bends the
+  lights behind it (`world/glass.js`).
 - **The finish** is [postprocessing](https://github.com/pmndrs/postprocessing)
   and [N8AO](https://github.com/N8python/n8ao): ambient occlusion, depth of
   field behind whoever you are talking to, bloom on lamps, filmic tone

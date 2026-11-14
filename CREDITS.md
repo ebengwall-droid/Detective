@@ -34,18 +34,19 @@ are used. The models in `public/assets/characters` and the clips in
 
 ## Furniture, props, surfaces and light
 
-Models, photographed materials and the lighting environment are from
-**Poly Haven**, released into the public domain (CC0).
+Models, photographed materials, the lighting environment and the night
+outside the windows are from **Poly Haven**, released into the public domain
+(CC0).
 <https://polyhaven.com>
 
 `scripts/assets/props.json` lists each one by its Poly Haven name. CC0 asks
 for no credit; these are the artists whose work is in the game, with thanks:
 
 Amal Kumar, Aron Łyczek, Arrangemonk, Benny Weimer, Charlotte Baglioni,
-Dairon Sanchez, Dario Barresi, Derek Wight, Dimitrios Savva, Guillaume
-Monsergent, Hank Kaamura, James Ray Cock, Jenelle van Heerden, Joe Seabuhr,
-John Malcolm, Jurita Burger, Kirill Sannikov, Kuutti Siitonen, L, Luca B,
-Luis José Fernández Rodríguez, Mateusz Sadek, Monsta3D, PierreB3D,
+Dairon Sanchez, Dario Barresi, Derek Wight, Dimitrios Savva, Greg Zaal,
+Guillaume Monsergent, Hank Kaamura, James Ray Cock, Jenelle van Heerden, Joe
+Seabuhr, John Malcolm, Jurita Burger, Kirill Sannikov, Kuutti Siitonen, L,
+Luca B, Luis José Fernández Rodríguez, Mateusz Sadek, Monsta3D, PierreB3D,
 ProgrammerOnCoffee, Rajil Jose Macatangay, Rico Cilliers, Rob Tuytel,
 Satyaki Mandal, Sean Buckley, Sergej Majboroda, Serhii Khromov, SV Garip,
 Tina, Ulan Cabanilla and Yann Kervran.

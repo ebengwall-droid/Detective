@@ -6,6 +6,7 @@ import { box, cyl, plane, group, mergeStatic, DEG } from './geo.js';
 import { mat, glow, artMaterial, haloTexture, shaftTexture, mulberry32 } from './materials.js';
 import { ART } from './art.js';
 import { PROPS } from './props.js';
+import { rainGlass } from './glass.js';
 import './props2.js';
 import './dress.js';
 
@@ -57,20 +58,13 @@ export function buildScene(spec, quality = {}) {
   let rainMat = null;
   const rainMaterial = () => {
     if (rainMat) return rainMat;
-    const m = artMaterial('rainGlass', 256, 256, (c, w, h, r) => ART.rainGlass(c, w, h, r), { basic: true });
-    // Own copy so each scene can scroll and flash independently.
-    rainMat = m.clone();
-    rainMat.map = m.map.clone();
-    rainMat.map.wrapS = rainMat.map.wrapT = THREE.RepeatWrapping;
-    rainMat.map.needsUpdate = true;
-    rainMat.side = THREE.DoubleSide;
-    disposables.push(rainMat, rainMat.map);
-    const base = new THREE.Color(spec.ambient?.glass ?? 0xffffff);
-    rainMat.color.copy(base);
+    // One sheet of glass for the room, so its windows share a view, a storm and a clock.
+    rainMat = rainGlass({ tint: spec.ambient?.glass, turn: spec.ambient?.view, gain: spec.ambient?.night });
+    disposables.push(rainMat);
     let flash = 0;
     let nextFlash = 6 + rnd() * 14;
     anims.push((t, dt) => {
-      rainMat.map.offset.y = (t * 0.22) % 1;
+      rainMat.tick(t);
       if (spec.ambient?.storm) {
         nextFlash -= dt;
         if (nextFlash <= 0) {
@@ -82,7 +76,7 @@ export function buildScene(spec, quality = {}) {
           flash = Math.max(0, flash - dt * 2.6);
           // Two quick strokes, then the afterglow.
           const f = flash > 0.75 || (flash > 0.35 && flash < 0.5) ? 2.6 : 1 + flash;
-          rainMat.color.copy(base).multiplyScalar(f);
+          rainMat.strike(f - 1);
           if (moon) moon.intensity = moonBase * (1 + (f - 1) * 3);
           hemi.intensity = hemiBase * (1 + (f - 1) * 0.45);
         }
@@ -563,10 +557,7 @@ function buildWindow(g, o, sill, top, t, ctx) {
   const h = top - sill;
   const frame = o.frame ?? 'woodBlack';
   const cy = (sill + top) / 2;
-  const glass = plane(g, w, h, ctx.rainMaterial(), o.at, cy, -t / 2 + 0.02, { dyn: true });
-  // Map the whole rain texture over roughly a metre and a half of glass.
-  const uv = glass.geometry.attributes.uv;
-  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / 1.5 + o.at * 0.37, uv.getY(i) / 1.5);
+  plane(g, w, h, ctx.rainMaterial(), o.at, cy, -t / 2 + 0.02, { dyn: true });
   box(g, w + 0.1, 0.06, t + 0.06, frame, o.at, sill - 0.03, 0.02);
   box(g, w + 0.1, 0.05, t + 0.02, frame, o.at, top + 0.025, 0);
   box(g, 0.05, h, t + 0.02, frame, o.at - w / 2 - 0.025, cy, 0);
@@ -607,9 +598,7 @@ function buildRoundRoom(g, spec, H, ctx) {
     box(pg, chord, 0.05, 0.2, 'brassDull', 0, parapet + 0.025, -0.06);
     const isDoor = (spec.doorPanes ?? []).includes(i);
     const paneH = H - parapet - 0.3;
-    const glass = plane(pg, chord - 0.06, paneH, ctx.rainMaterial(), 0, parapet + 0.05 + paneH / 2, -0.06, { dyn: true });
-    const uv = glass.geometry.attributes.uv;
-    for (let k = 0; k < uv.count; k++) uv.setXY(k, uv.getX(k) / 1.6 + i * 0.31, uv.getY(k) / 1.6);
+    plane(pg, chord - 0.06, paneH, ctx.rainMaterial(), 0, parapet + 0.05 + paneH / 2, -0.06, { dyn: true });
     box(pg, 0.06, H - parapet, 0.08, 'iron', -chord / 2, parapet + (H - parapet) / 2, -0.06);
     box(pg, chord, 0.3, 0.14, 'iron', 0, H - 0.15, -0.07);
     box(pg, chord - 0.06, 0.03, 0.05, 'iron', 0, parapet + 0.05 + paneH * 0.5, -0.05);
