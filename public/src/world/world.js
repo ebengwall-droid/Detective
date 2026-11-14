@@ -393,9 +393,25 @@ export class World {
 
   // ------------------------------------------------------------ picking
 
-  /** What is under a screen point? Nearest hit among hotspots and people. */
+  /** What is under a screen point? A marker if one is close, otherwise the nearest thing hit. */
   pickAt(x, y) {
     const { w, h } = this.viewport;
+    // People aim for the glowing marker, which floats above the thing itself.
+    let best = null;
+    let bestDist = this.controls.isTouch ? 36 : 22;
+    const near = (marker, pick) => {
+      if (marker.material.opacity < 0.08) return;
+      const v = this.tmpV.copy(marker.position).project(this.camera);
+      if (v.z < -1 || v.z > 1) return;
+      const d = Math.hypot(((v.x + 1) / 2) * w - x, ((1 - v.y) / 2) * h - y);
+      if (d < bestDist) {
+        bestDist = d;
+        best = pick;
+      }
+    };
+    for (const [id, hs] of this.hotspots) near(hs.marker, { type: 'hotspot', id });
+    for (const [id, n] of this.npcs) near(n.marker, { type: 'npc', id });
+    if (best) return best;
     this.raycaster.setFromCamera(new THREE.Vector2((x / w) * 2 - 1, -(y / h) * 2 + 1), this.camera);
     const hits = this.raycaster.intersectObjects(this.pickables, false);
     if (hits.length) return { ...hits[0].object.userData.pick, point: hits[0].point };
@@ -611,7 +627,7 @@ export class World {
       n.ch.update(t, dt, { lookAt: this.camera.position, talking: n.talking, mood: n.mood });
       const dist = Math.hypot(p.x - n.pos.x, p.z - n.pos.z);
       const pulsing = t < this.pulseUntil;
-      n.marker.material.opacity = this.mode === 'explore' ? (pulsing ? 1 : THREE.MathUtils.clamp(1.25 - dist / 7, 0.3, 0.95)) : 0;
+      n.marker.material.opacity = this.mode === 'explore' ? (pulsing ? 1 : THREE.MathUtils.clamp(1.4 - dist / 9, 0.6, 1)) : 0;
       n.marker.position.y = n.head + 0.42 + Math.sin(t * 2 + n.pos.x) * 0.03;
       n.marker.scale.setScalar(0.3 * THREE.MathUtils.clamp(dist / 3.2, 0.85, 2) * (pulsing ? 1.25 : 1));
     }
@@ -622,7 +638,7 @@ export class World {
       const dist = h.centre.distanceTo(this.camera.position);
       const isTarget = this.target?.type === 'hotspot' && this.target.id === id;
       const fresh = !h.data.done;
-      let opacity = fresh ? THREE.MathUtils.clamp(1.3 - dist / 8, 0.42, 1) : dist < 3.2 ? 0.22 : 0;
+      let opacity = fresh ? THREE.MathUtils.clamp(1.4 - dist / 9, 0.6, 1) : dist < 3.2 ? 0.22 : 0;
       if (pulsing) opacity = fresh ? 1 : 0.5;
       if (this.mode !== 'explore') opacity = 0;
       const beat = fresh ? 1 + Math.sin(t * 3 + h.phase) * 0.12 : 1;

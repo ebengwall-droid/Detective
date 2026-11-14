@@ -4,6 +4,9 @@
 import { el, clear, icon, prose } from './dom.js';
 
 const HOT_MOODS = new Set(['angry', 'shaken', 'nervous', 'cold', 'breaking', 'wavering']);
+/** How long a reply may take before the player is told why, and what they can do about it. */
+const SLOW_MS = 10000;
+let slowTipShown = false;
 
 export function createDialogue(panels, game) {
   let panel = null;
@@ -60,6 +63,15 @@ export function createDialogue(panels, game) {
     abort = new AbortController();
     let streamed = false;
     game.world.setTalking(current.id, false);
+    // The best model thinks before it speaks. Say so once, and offer the quicker one.
+    const ai = game.client.ai;
+    const slow = setTimeout(() => {
+      if (streamed || slowTipShown || !ai?.live) return;
+      slowTipShown = true;
+      const tip = ai.hosted && ai.pref !== 'quick' ? 'Claude Opus thinks before it answers. For quicker replies, choose Fast in the menu.' : 'Still thinking…';
+      pending.append(el('div', { class: 'slow-tip', text: tip }));
+      scrollDown();
+    }, SLOW_MS);
     try {
       const res = await run({
         signal: abort.signal,
@@ -101,8 +113,11 @@ export function createDialogue(panels, game) {
       setChips(res.suggestions);
     } catch (err) {
       pending.remove();
-      if (err?.name !== 'AbortError') log.append(lineNode({ who: 'note', text: err.message || 'Something went wrong. Try again.' }));
+      // Walking away mid-answer is not an error worth reporting.
+      if (!abort.signal.aborted) log.append(lineNode({ who: 'note', text: err.message || 'Something went wrong. Try again.' }));
       if (current) game.world.setTalking(current.id, false);
+    } finally {
+      clearTimeout(slow);
     }
     setBusy(false);
     if (!game.isTouch) input.focus({ preventScroll: true });

@@ -2,6 +2,8 @@
 
 A 3D detective mystery where every character is played live by Claude.
 
+![A crime scene: the study at 9 Gull Street](docs/crime-scene.jpg)
+
 Someone in a rain-soaked harbour town is drowning old men in their own
 armchairs and leaving a lit storm lantern in the window. You are the new
 detective. Walk the crime scenes, bag evidence, hear the autopsy, search
@@ -33,6 +35,8 @@ earned. The rules of the case are code; the voices are Claude.
 
 The game uses Claude Opus (`claude-opus-5-5`).
 
+![Questioning your partner](docs/conversation.jpg)
+
 ## Play
 
 ```bash
@@ -57,6 +61,7 @@ the game.
 | Look | Drag | Drag, or press `F` for mouse-look |
 | Examine or talk | Tap the glowing marker | Click it, or look at it and press `E` |
 | Light up everything | **Look** | `Q` |
+| Catch a lie | In a conversation, **Show** puts evidence in front of them | The same |
 | Notebook, laptop, map | Buttons along the top | `N`, `L`, `M` |
 | Hint | **Think** | `T` |
 
