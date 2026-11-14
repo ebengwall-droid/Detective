@@ -382,7 +382,7 @@ export const DEDUCTIONS = {
     q: "The Captain's name is on the car, the drug book and the sealed file. What does that tell you?",
     if: { min: 2, of: ['fact:pool_car', 'fact:drug_log', 'fact:archive_log', 'fact:button_found'] },
     options: [
-      { id: 'guilty', text: 'Hale is the Lamplighter, silencing the men who know what he did.', no: 'A heavy man with a cane did not go over a garden gate, and he was at a dinner when his login was used. It does not hold.' },
+      { id: 'guilty', text: 'Hale is the Lamplighter, silencing the men who know what he did.', no: 'A man with a bad hip and a cane did not go over a garden gate, and he was at a dinner when his login was used. It does not hold.' },
       { id: 'both', text: 'Hale and Fenn are in it together.', no: 'Nothing joins them but a ferry. It does not hold.' },
       { id: 'framed', text: "Someone is writing the Captain's name for him.", needs: { any: ['fact:hale_dinner', 'fact:button_planted', 'fact:hale_token', 'fact:tunic_missing', ['fact:photo_cape', 'fact:hale_limp'], ['fact:cape_can', 'fact:hale_limp']] } },
     ],

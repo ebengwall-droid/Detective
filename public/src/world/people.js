@@ -164,6 +164,9 @@ export function createPerson(look) {
   const root = new THREE.Group();
   const rig = SkeletonUtils.clone(src.model.scene);
   root.add(rig);
+  // The same few bodies have to play nine people: broaden the heavy-set, narrow the slight.
+  const girth = { heavy: 1.08, slim: 0.97 }[look.build] ?? 1;
+  rig.scale.set(girth, 1, girth * (look.build === 'heavy' ? 1.03 : 1));
 
   const faces = [];
   const skins = [];
@@ -191,6 +194,7 @@ export function createPerson(look) {
     shoulderL: bone('Bip01_L_Clavicle'),
     L: arm('L'),
     R: arm('R'),
+    legs: ['L', 'R'].map((s) => ({ calf: bone(`Bip01_${s}_Calf`), foot: bone(`Bip01_${s}_Foot`), out: s === 'L' ? 1 : -1 })),
   };
   // The clips do not move the eyes, so they have to be put back before each new glance.
   const eyeRest = [bones.eyeL, bones.eyeR].map((eye) => eye.quaternion.clone());
@@ -246,9 +250,21 @@ export function createPerson(look) {
   if (seated) {
     // Where they are placed is where they sit: put the hips over that spot, not the feet.
     const hips = bones.pelvis.getWorldPosition(new THREE.Vector3());
-    rig.position.set(-hips.x, 0, -hips.z);
+    // Someone tied up is on the floor, not on a chair: lower them until they are sitting on it.
+    rig.position.set(-hips.x, pose === 'bound' ? -Math.max(0, hips.y - 0.13) : 0, -hips.z);
     root.updateMatrixWorld(true);
   }
+  /** On the floor the legs go out in front, where a chair would have let them hang. */
+  function legsOut() {
+    root.updateWorldMatrix(true, true);
+    for (const leg of bones.legs) {
+      const knee = leg.calf.getWorldPosition(va);
+      const shin = leg.foot.getWorldPosition(vb).sub(knee).normalize();
+      const along = vc.set(leg.out * 0.1, -0.07, 1).normalize().transformDirection(root.matrixWorld);
+      turnWorld(leg.calf, qa.setFromUnitVectors(shin, along));
+    }
+  }
+  if (pose === 'bound') legsOut();
   const eyeHeight = bones.head.getWorldPosition(new THREE.Vector3()).y + 0.1;
 
   // --- face ---------------------------------------------------------------
@@ -408,8 +424,9 @@ export function createPerson(look) {
           ring.position.y = i * 0.036;
           g.add(ring);
         }
-        g.position.copy(local(bones.waist)).add(new THREE.Vector3(0, 0.07, -0.015));
-        hang(g, bones.waist);
+        // Round the chest and the upper arms.
+        g.position.copy(local(bones.chest)).add(new THREE.Vector3(0, -0.07, -0.01));
+        hang(g, bones.chest);
       } else if (item === 'lantern') {
         const g = new THREE.Group();
         const base = part(new THREE.CylinderGeometry(0.045, 0.055, 0.05, 14), BRASS);
@@ -475,6 +492,7 @@ export function createPerson(look) {
     const low = TONE[mood] === 'sad';
     play(s.clip && has(s.clip) ? s.clip : wanted(s));
     mixer.update(dt);
+    if (pose === 'bound') legsOut();
     talk += ((s.talking ? 1 : 0) - talk) * (1 - Math.exp(-dt * 9));
 
     // Head and eyes toward whoever they are looking at. The clip keeps moving

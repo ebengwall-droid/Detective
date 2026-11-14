@@ -39,11 +39,11 @@ export const NPCS = {
     observe: [
       {
         if: 'act>=2',
-        text: "Thirty or so. Sharp eyes with not enough sleep behind them; a trench coat that has seen weather. The brass bosun's whistle is still at her collar, but it hangs from a leather bootlace now. Yesterday it was on a chain.",
+        text: "Thirty or so. Sharp eyes with not enough sleep behind them; hair tied back, a pinstripe suit that has seen weather. The brass bosun's whistle is still at her collar, but it hangs from a leather bootlace now. Yesterday it was on a chain.",
         facts: ['vance_whistle_cord'],
       },
       {
-        text: "Thirty or so. Sharp eyes with not enough sleep behind them; a trench coat that has seen weather. At her collar, on a fine brass chain, a bosun's whistle worn smooth, like a thing handled every day for years.",
+        text: "Thirty or so. Sharp eyes with not enough sleep behind them; hair tied back, a pinstripe suit that has seen weather. At her collar, on a fine brass chain, a bosun's whistle worn smooth, like a thing handled every day for years.",
         facts: ['vance_whistle_chain'],
       },
     ],
@@ -162,12 +162,12 @@ She chose the new detective on purpose: an honest outsider who would follow the 
     look: LOOKS.hale,
     phone: true,
     where: [
-      { if: 'act>=4', loc: 'lighthouse', p: [-0.7, -3.55], r: 10, pose: 'bound', accessories: ['rope', 'badge'] },
+      { if: 'act>=4', loc: 'lighthouse', p: [-0.76, -3.86], r: 10, pose: 'bound', accessories: ['rope', 'badge'] },
       { loc: 'precinct', p: [5.25, -4.15], r: 0 },
     ],
     observe: [
       {
-        text: 'Fifty-eight and heavy with it. He moves slowly on a bad hip and leans on the cane even standing still. A grey moustache, a wedding ring worn thin. He looks like a man who has not slept properly in a month.',
+        text: 'Fifty-eight and solid with it. He moves slowly on a bad hip and leans on the cane even standing still. A shaved head, shirtsleeves and a waistcoat, a wedding ring worn thin. He looks like a man who has not slept properly in a month.',
         facts: ['hale_limp'],
       },
     ],
@@ -262,7 +262,7 @@ He is NOT the killer and has no idea who is. He has not signed for any Morvane, 
     look: LOOKS.okoro,
     phone: true,
     where: [{ loc: 'morgue', p: [-0.95, 1.0], r: 35 }],
-    observe: [{ text: 'Fifties, neat grey beard, glasses pushed up into his hair and forgotten. He holds a clipboard the way other men hold a drink.' }],
+    observe: [{ text: 'Forty, perhaps. A check suit and a purple shirt where you expected a white coat, the tie pulled loose hours ago. He holds a clipboard the way other men hold a drink.' }],
     greet: [
       { if: ['act>=2', '!told:okoro.o_vale'], text: "Two in two days. Mr Vale is on the second table. I'll save you the suspense: same hand, same water. But this one fought." },
       { if: 'met:okoro', text: 'Detective. Come to keep the dead company?' },
@@ -340,7 +340,7 @@ He speaks only to what the bodies show. He does not speculate about who did it, 
       { if: 'act>=2', loc: 'vale_yacht', p: [1.75, 0.35], r: -80 },
       { loc: 'brook_house', p: [0.3, 0.6], r: -50 },
     ],
-    observe: [{ text: 'Late twenties, fair, careful. Navy coveralls with the cuffs taped. He keeps glancing at his markers the way a shepherd counts sheep.' }],
+    observe: [{ text: 'Late twenties, careful. Uniform pressed, cap square, a camera on a strap round his neck. He keeps glancing at his markers the way a shepherd counts sheep.' }],
     greet: [
       { if: 'act>=2', text: "Detective. Second one. Watchman saw a lamp burning in the saloon at half five and thought, that's no yacht lamp. And there's something else. It's about Gull Street. I'd rather you heard it from me." },
       { if: 'met:brandt', text: 'Detective. Find anything I missed?' },
@@ -400,7 +400,7 @@ He speaks only to what the bodies show. He does not speculate about who did it, 
     role: "Leland Brook's housekeeper",
     look: LOOKS.dray,
     where: [{ loc: 'brook_house', p: [-1.4, 0.6], r: -40 }],
-    observe: [{ text: 'Late fifties, grey hair in a bun, hands red from a lifetime of hot water. She has been crying and has stopped. Every so often her eyes go to the bureau in the corner and come away again.' }],
+    observe: [{ text: 'Fifty or so, dark hair tied back, hands red from a lifetime of hot water. She has been crying and has stopped. Every so often her eyes go to the bureau in the corner and come away again.' }],
     greet: [
       { if: 'told:dray.d_truth', text: "I've told you all of it now. God forgive me for the rest." },
       { if: 'met:dray', text: 'You again. I told you what I know.' },
@@ -463,7 +463,7 @@ She has said nothing because it would mean admitting she is a thief, and because
     role: 'the landlady of the Anchor & Lamp tavern',
     look: LOOKS.carrow,
     where: [{ loc: 'tavern', p: [-0.7, -3.05], r: 0 }],
-    observe: [{ text: 'Seventy if she is a day, white hair escaping in every direction, forearms like a stevedore. She polishes the same glass the whole time she looks at you, and she misses nothing.' }],
+    observe: [{ text: 'Sixty if she is a day, fair hair cut blunt, spectacles she looks over rather than through. She polishes the same glass the whole time she looks at you, and she misses nothing.' }],
     greet: [
       { if: 'met:carrow', text: 'Back again. Pint or question?' },
       { text: "Police. I can smell the notebook. Bess Carrow; it's my name over the door. What'll it be, a pint or a question?" },
@@ -535,7 +535,7 @@ She has the key to Pell's room, which she has not touched since he died.`,
     role: 'the crime reporter of the Greyhaven Ledger',
     look: LOOKS.strand,
     where: [{ loc: 'tavern', p: [2.75, -1.85], r: -65 }],
-    observe: [{ text: "Mid-forties, sharp moustache, ink on both cuffs. A trench coat one size too large and a hat he doesn't take off indoors. There's a camera case under the bench, and it has been opened recently: the strap is still wet." }],
+    observe: [{ text: "Forty-odd, unshaven, ink on both cuffs. A jacket that has been slept in and a notebook he never quite puts away. There's a camera case under the bench, and it has been opened recently: the strap is still wet." }],
     greet: [
       { if: 'met:strand', text: 'Detective. Still trading?' },
       { text: "Milo Strand, the Ledger. You're the new detective. I'd say welcome, but look at the week you've picked. Sit. I'll trade you: one true thing for one true thing." },
@@ -619,11 +619,11 @@ He is not the killer. He is a man deciding what kind of man he is.`,
     role: 'the lamp-maker Tobias Fenn',
     look: LOOKS.fenn,
     where: [
-      { if: 'act>=3', loc: 'precinct', p: [4.6, 4.42], r: 180, pose: 'sit' },
+      { if: 'act>=3', loc: 'precinct', p: [4.6, 4.72], r: 180, pose: 'sit' },
       { loc: 'lamp_shop', p: [1.9, -1.8], r: 0 },
     ],
     observe: [{
-      text: 'Sixty-six, white hair he has stopped cutting, spectacles mended with wire. His hands shake, a fine constant tremor, and he keeps them flat on the counter so you will not see.',
+      text: 'Sixty-six, white-haired, in a tweed jacket older than the shop sign. His hands shake, a fine constant tremor, and he keeps them flat on the counter so you will not see.',
       facts: ['fenn_tremor'],
     }],
     greet: [
@@ -734,7 +734,7 @@ If the detective shows him the Harrowgate record proving Lucy survived, or shows
     role: "Conrad Vale's widow",
     look: LOOKS.ivale,
     where: [{ if: 'act>=2', loc: 'vale_yacht', p: [-0.9, -0.85], r: 40 }],
-    observe: [{ text: 'Forty-nine, immaculate at six in the morning. She has not sat down and her handbag has not left the crook of her arm since you came aboard.' }],
+    observe: [{ text: 'Forty-nine, immaculate at six in the morning. She has not sat down, and she has not once looked at the sheet on the saloon floor.' }],
     greet: [
       { if: 'met:ivale', text: 'Detective. Is there more?' },
       { text: "Isolde Vale. Yes, I'm his wife. No, I shan't cry for you, Detective; I did that at six this morning and I've finished. Ask." },

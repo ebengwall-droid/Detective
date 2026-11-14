@@ -99,7 +99,7 @@ async function main() {
     const ids = only ?? Object.keys(LOOKS);
     ids.forEach((id, i) => {
       for (const row of only ? [0] : [0, 1]) {
-        const ch = createCharacter({ ...LOOKS[id], pose: params.get('pose') ?? undefined });
+        const ch = createCharacter({ ...LOOKS[id], pose: params.get('pose') ?? undefined, accessories: params.get('acc')?.split(',').filter(Boolean) ?? LOOKS[id].accessories });
         ch.root.position.set((i - (ids.length - 1) / 2) * 1.05, 0, row ? -2.2 : -0.4);
         ch.root.rotation.y = row ? Math.PI : 0;
         scene.add(ch.root);
