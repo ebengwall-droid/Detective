@@ -3,12 +3,21 @@
 // The browser is a thin client in this mode. Every player action is an RPC to
 // the GameSession living here, so the case file (who did it, who is lying)
 // never leaves the server and the Anthropic API key stays private.
+//
+// Environment:
+//   PORT, HOST               where to listen (default 0.0.0.0:3000)
+//   ANTHROPIC_API_KEY        brings the characters to life (see README)
+//   GREYHAVEN_MODEL          model override
+//   GREYHAVEN_AI=off         force scripted mode
+//   GREYHAVEN_DATA           where saves are written (default ./data/saves)
+//   GREYHAVEN_SERVE_CORE=1   also serve the case file, for testing ?mode=local
 
 import http from 'node:http';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { GameSession, RPC_METHODS, STREAMING_METHODS, assertCaseValid } from '../core/engine.js';
+import { META } from '../core/cases/lamplighter/story.js';
 import { createAnthropicProvider } from './anthropic-provider.js';
 import { SaveStore } from './store.js';
 
@@ -22,6 +31,11 @@ const STATIC_ROOTS = [
   { prefix: '/core/', dir: path.join(root, 'core') },
   { prefix: '/', dir: path.join(root, 'public') },
 ];
+
+// The only parts of the case the page needs: set dressing and faces. The rest
+// (the story, the facts, who is lying) is not served unless asked for.
+const CORE_PUBLIC = new Set(['/core/cases/lamplighter/scenes.js', '/core/cases/lamplighter/looks.js']);
+const SERVE_CORE = process.env.GREYHAVEN_SERVE_CORE === '1';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -39,7 +53,7 @@ const MIME = {
 
 assertCaseValid();
 const ai = createAnthropicProvider();
-const store = new SaveStore(path.join(root, 'data', 'saves'));
+const store = new SaveStore(process.env.GREYHAVEN_DATA ? path.resolve(process.env.GREYHAVEN_DATA) : path.join(root, 'data', 'saves'));
 
 /** Live sessions, keyed by save id. @type {Map<string, GameSession>} */
 const sessions = new Map();
@@ -123,8 +137,10 @@ async function handleRpc(req, res) {
       const hooks = streaming
         ? { onText: (text) => write({ t: 'text', text }), signal: abort.signal }
         : { signal: abort.signal };
+      // "Is there a saved case?" is a normal question at the title screen, not an error.
+      if (method === 'view' && !session.state) return null;
       const out = await session[method](params[0] && typeof params[0] === 'object' ? params[0] : {}, hooks);
-      await store.save(sid, session.state);
+      if (session.state) await store.save(sid, session.state);
       return out;
     });
     if (streaming) {
@@ -152,6 +168,10 @@ function serveStatic(req, res, pathname) {
     decoded = decodeURIComponent(pathname);
   } catch {
     res.writeHead(400).end('Bad request');
+    return;
+  }
+  if (decoded.startsWith('/core/') && !SERVE_CORE && !CORE_PUBLIC.has(decoded)) {
+    res.writeHead(404, { 'content-type': 'text/plain' }).end('Not found');
     return;
   }
   for (const { prefix, dir } of STATIC_ROOTS) {
@@ -183,7 +203,7 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url ?? '/', 'http://localhost');
   try {
     if (url.pathname === '/api/status' && req.method === 'GET') {
-      return sendJson(res, 200, { ok: true, ai: ai.describe() });
+      return sendJson(res, 200, { ok: true, ai: ai.describe(), case: { title: META.title, series: META.series, tagline: META.tagline } });
     }
     if (url.pathname === '/api/rpc' && req.method === 'POST') {
       return await handleRpc(req, res);

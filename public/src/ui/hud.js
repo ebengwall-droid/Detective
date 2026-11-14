@@ -1,0 +1,253 @@
+// The heads-up display: where you are, what you are looking at, what just
+// happened, and the small panels that sit over the 3D view.
+
+import { el, clear, icon, prose, typeInto } from './dom.js';
+
+const TOAST_MS = 5200;
+
+export function createHud(root, game) {
+  const name = el('div', { class: 'hud-name' });
+  const sub = el('div', { class: 'hud-sub' });
+  // Every tool carries its name: nobody should have to guess what an icon does.
+  const tool = (iconName, caption, label, onClick) => el('button', { class: 'ibtn tool', type: 'button', 'aria-label': label, title: label, onClick }, icon(iconName), el('span', { class: 'tool-cap', text: caption }));
+  const tools = {
+    scan: tool('eye', 'Look', 'Look around: light up everything you can examine (Q)', () => game.scan()),
+    think: tool('bulb', 'Think', 'Think: a nudge when you are stuck (T)', () => game.think()),
+    notebook: tool('notebook', 'Notes', 'Notebook (N)', () => game.open('notebook')),
+    laptop: tool('laptop', 'Laptop', 'Laptop (L)', () => game.open('laptop')),
+    map: tool('map', 'Map', 'Map (M)', () => game.open('map')),
+    menu: tool('gear', 'Menu', 'Menu', () => game.open('menu')),
+  };
+  const objective = el('button', { class: 'hud-objective', type: 'button', onClick: () => game.open('notebook', 'case') }, el('span'));
+  const reticle = el('div', { class: 'reticle' });
+  const prompt = el('button', { class: 'hud-prompt', type: 'button', hidden: true, onClick: () => game.useTarget() }, el('span', { class: 'verb' }), el('span', { class: 'what' }), el('kbd', { text: 'E' }));
+  const subtitle = el('div', { class: 'hud-subtitle', role: 'status' });
+  const coach = el('div', { class: 'hud-coach', role: 'status' });
+
+  const hud = el(
+    'div',
+    { id: 'hud', class: 'off' },
+    el('header', { class: 'hud-top' }, el('div', { class: 'hud-bar' }, el('div', { class: 'hud-place' }, name, sub), el('nav', { class: 'hud-tools', 'aria-label': 'Tools' }, Object.values(tools))), objective),
+    reticle,
+    subtitle,
+    coach,
+    prompt,
+  );
+  const toasts = el('div', { id: 'toasts', 'aria-live': 'polite' });
+  root.append(hud, toasts);
+
+  let subtitleTimer = 0;
+  let coachTimer = 0;
+  let touch = false;
+
+  const api = {
+    el: hud,
+
+    setVisible(on) {
+      hud.classList.toggle('off', !on);
+    },
+
+    setTouch(on) {
+      touch = on;
+      prompt.querySelector('kbd').hidden = on;
+    },
+
+    setLocked(on) {
+      reticle.classList.toggle('on', on);
+    },
+
+    setView(view) {
+      name.textContent = view.location.name;
+      sub.textContent = `${view.location.sub} · ${view.act.date}`;
+      const current = view.objectives.find((o) => !o.done);
+      objective.hidden = !current;
+      if (current && objective.firstElementChild.textContent !== current.text) {
+        objective.firstElementChild.textContent = current.text;
+        // Draw the eye to a new instruction.
+        objective.classList.remove('flash');
+        void objective.offsetWidth;
+        objective.classList.add('flash');
+      }
+      const openQuestions = view.deductions.some((d) => !d.solved);
+      tools.notebook.classList.toggle('badge', openQuestions || game.unseen.notebook);
+      tools.laptop.classList.toggle('badge', game.unseen.laptop);
+      tools.map.classList.toggle('badge', game.unseen.map);
+    },
+
+    /** Show what the player is aiming at, or hide the prompt. */
+    setTarget(t) {
+      reticle.classList.toggle('hot', !!t);
+      if (!t) {
+        prompt.hidden = true;
+        return;
+      }
+      prompt.hidden = false;
+      prompt.classList.toggle('done', !!t.done);
+      prompt.children[0].textContent = t.verb;
+      prompt.children[0].hidden = !t.verb;
+      prompt.children[1].textContent = t.label;
+    },
+
+    subtitle(text, ms = 6000) {
+      clearTimeout(subtitleTimer);
+      subtitle.textContent = text;
+      subtitle.classList.add('on');
+      subtitleTimer = setTimeout(() => subtitle.classList.remove('on'), ms);
+    },
+
+    /** A one-off instruction in the middle of the screen. html is trusted (our own copy). */
+    coach(html, ms = 6500) {
+      clearTimeout(coachTimer);
+      coach.innerHTML = html;
+      coach.classList.add('on');
+      coachTimer = setTimeout(() => coach.classList.remove('on'), ms);
+    },
+
+    hideCoach() {
+      clearTimeout(coachTimer);
+      coach.classList.remove('on');
+    },
+
+    toast({ kind = '', iconName = 'doc', title, text, onClick }) {
+      const node = el('button', { class: `toast ${kind}`, type: 'button' }, icon(iconName, 20), el('div', {}, el('div', { class: 'toast-title', text: title }), text ? el('div', { class: 'toast-text', text }) : null));
+      const remove = () => {
+        node.classList.add('out');
+        setTimeout(() => node.remove(), 280);
+      };
+      node.addEventListener('click', () => {
+        remove();
+        onClick?.();
+      });
+      toasts.append(node);
+      while (toasts.children.length > 4) toasts.firstElementChild.remove();
+      setTimeout(remove, TOAST_MS);
+    },
+
+    clearToasts() {
+      clear(toasts);
+    },
+  };
+  return api;
+}
+
+/** The panel shown after examining something. Resolves when dismissed. */
+export function showInspect(panels, { title, text, taken = [], actions = [] }) {
+  return new Promise((resolve) => {
+    const body = el('div', { class: 'panel-body' });
+    const close = (value) => {
+      panel.remove();
+      window.removeEventListener('keydown', onKey);
+      resolve(value);
+    };
+    const onKey = (e) => {
+      if (e.code === 'Escape' || e.code === 'Enter' || e.code === 'KeyE' || e.code === 'Space') {
+        e.preventDefault();
+        close(null);
+      }
+    };
+    const foot = el(
+      'div',
+      { class: 'inspect-foot' },
+      taken.map((t) => el('span', { class: 'tagline' }, icon(t.icon ?? 'bag', 16), `Bagged: ${t.name}`)),
+      el('span', { class: 'spacer' }),
+      actions.map((a) => el('button', { class: 'btn small', type: 'button', text: a.label, onClick: () => close(a.id) })),
+      el('button', { class: 'btn small solid', type: 'button', text: 'Continue', onClick: () => close(null) }),
+    );
+    const panel = el('section', { class: 'panel inspect', role: 'dialog', 'aria-label': title }, el('div', { class: 'panel-head' }, el('div', { class: 'panel-title', text: title })), body, foot);
+    panels.append(panel);
+    typeInto(body, text, { cps: 140 });
+    setTimeout(() => window.addEventListener('keydown', onKey), 150);
+  });
+}
+
+/** The detective's inner voice. `run` streams text into the panel. */
+export function showThink(panels, run) {
+  return new Promise((resolve) => {
+    const body = el('div', { class: 'panel-body' }, el('div', { class: 'dots' }, el('i'), el('i'), el('i')));
+    const kicker = el('div', { class: 'panel-kicker', text: 'You think it over' });
+    const close = () => {
+      panel.remove();
+      scrim.remove();
+      window.removeEventListener('keydown', onKey);
+      resolve();
+    };
+    const onKey = (e) => {
+      if (e.code === 'Escape' || e.code === 'Enter') close();
+    };
+    const scrim = el('div', { class: 'scrim', onClick: close });
+    const panel = el(
+      'section',
+      { class: 'panel think', role: 'dialog', 'aria-label': 'Thinking' },
+      el('div', { class: 'panel-head' }, el('div', { style: { flex: '1' } }, kicker), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close', onClick: close }, icon('close'))),
+      body,
+    );
+    panels.append(scrim, panel);
+    window.addEventListener('keydown', onKey);
+    let streamed = false;
+    run((soFar) => {
+      streamed = true;
+      body.replaceChildren(prose(soFar));
+    })
+      .then(({ text, objective }) => {
+        if (objective) kicker.textContent = objective;
+        if (streamed) body.replaceChildren(prose(text));
+        else typeInto(body, text, { cps: 60 });
+      })
+      .catch((err) => {
+        body.replaceChildren(el('p', { class: 'muted', text: err.message || 'Nothing comes.' }));
+      });
+  });
+}
+
+/**
+ * A full-screen title card: act openings and other scene breaks.
+ * Lines fade in one after another. Resolves when the player continues.
+ */
+export function showCard(cards, { kicker, title, date, lines = [], button = 'Continue', veil = false }) {
+  return new Promise((resolve) => {
+    const go = el('button', { class: 'btn solid', type: 'button', text: button });
+    const linesEl = el('div', { class: 'card-lines' }, lines.map((line, i) => el('p', { text: line, style: { animationDelay: `${0.5 + i * 1.15}s` } })));
+    const card = el(
+      'section',
+      { class: `card ${veil ? 'veil' : ''}`, role: 'dialog', 'aria-label': title ?? 'Scene' },
+      el('div', { class: 'card-inner' }, kicker ? el('div', { class: 'card-kicker', text: kicker }) : null, title ? el('h1', { class: 'card-title', text: title }) : null, date ? el('div', { class: 'card-date', text: date }) : null, linesEl, el('div', { class: 'card-actions' }, go)),
+    );
+    const done = () => {
+      window.removeEventListener('keydown', onKey);
+      card.style.transition = 'opacity 0.4s';
+      card.style.opacity = '0';
+      setTimeout(() => {
+        card.remove();
+        resolve();
+      }, 380);
+    };
+    const onKey = (e) => {
+      if (e.code === 'Enter' || e.code === 'Space') {
+        e.preventDefault();
+        done();
+      }
+    };
+    go.addEventListener('click', done);
+    cards.append(card);
+    setTimeout(() => {
+      window.addEventListener('keydown', onKey);
+      go.focus({ preventScroll: true });
+    }, 400);
+  });
+}
+
+/** Yes/no question in the game's own style (the host page cannot show confirm()). */
+export function confirmCard(cards, { title, text, yes = 'Yes', no = 'Not yet' }) {
+  return new Promise((resolve) => {
+    const close = (value) => {
+      card.remove();
+      resolve(value);
+    };
+    const card = el(
+      'section',
+      { class: 'card veil', role: 'alertdialog', 'aria-label': title },
+      el('div', { class: 'card-inner' }, el('h2', { class: 'card-title', style: { fontSize: 'clamp(24px, 5vw, 32px)' }, text: title }), el('div', { class: 'rule' }), el('p', { class: 'epilogue', style: { textAlign: 'center' }, text }), el('div', { class: 'card-actions' }, el('button', { class: 'btn quiet', type: 'button', text: no, onClick: () => close(false) }), el('button', { class: 'btn solid', type: 'button', text: yes, onClick: () => close(true) }))),
+    );
+    cards.append(card);
+  });
+}

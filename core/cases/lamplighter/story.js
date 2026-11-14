@@ -457,6 +457,35 @@ export const FINALE = {
   },
 };
 
+// ------------------------------------------------------- laptop prompts
+// Suggested searches shown under the HARBORNET prompt, so a player always has
+// somewhere to start. `done` hides a suggestion once its record is open.
+
+export const LAPTOP_HINTS = [
+  { q: 'Leland Brook', done: 'rec:brook_bio' },
+  { if: 'ev:token_0155', q: 'Vale Lines boarding token', done: 'rec:token_ref' },
+  { if: 'fact:lantern_maker', q: 'Tobias Fenn', done: 'rec:fenn_bio' },
+  { if: 'rec:fenn_bio', q: 'Eastgate custody record E-4471', done: 'rec:custody_eastgate' },
+  { if: 'fact:calliope_known', q: 'The loss of the Calliope', done: 'rec:calliope_summary' },
+  { if: 'fact:calliope_known', q: 'Calliope inquiry timeline', done: 'rec:inquiry_timeline' },
+  { if: 'fact:plate_7k4', q: 'Number plate 7K4', done: 'rec:motor_pool' },
+  { if: { any: ['fact:sedative_morvane', 'fact:ampoule_cap'] }, q: 'Morvane', done: 'rec:morvane_ref' },
+  { if: 'act>=2', q: 'Conrad Vale', done: 'rec:vale_bio' },
+  { if: 'act>=2', q: 'Marina gate log, night of the 11th', done: 'rec:marina_log' },
+  { if: { any: ['fact:timeline_known', 'fact:pell_lodger'] }, q: 'Ambrose Pell', done: 'rec:pell_bio' },
+  { if: 'rec:pell_bio', q: 'Sudden death report SD-0922', done: 'rec:pell_death_report' },
+  { if: { any: ['ev:letter_1', 'ev:letter_2', 'ev:letter_3'] }, q: 'Front desk deliveries', done: 'rec:desk_log' },
+  { if: 'ev:tunic_button', q: 'Scene photographs, 9 Gull Street', done: 'rec:scene_photos' },
+  { if: ['fact:calliope_known', 'act>=2'], q: 'Who has opened the sealed inquiry file?', done: 'rec:archive_access' },
+  { if: 'fact:archive_log', q: 'Terminal B-12', done: 'rec:terminal_register' },
+  { if: 'fact:archive_log', q: 'Where was Hale on 19 September?', done: 'rec:ledger_dinner' },
+  { if: 'flag:unsealed', q: 'Unsealed inquiry evidence', done: 'rec:sealed_file' },
+  { if: ['fact:calliope_known', 'act>=3'], q: 'Calliope casualty list', done: 'rec:casualties' },
+  { if: ['fact:fenn_protecting', 'fact:lucy_not_found'], q: 'Was a child found down the coast after the wreck?', done: 'rec:harrowgate_request' },
+  { q: 'DS Nora Vance', if: { any: ['ded:insider', 'fact:pool_car'] }, done: 'rec:vance_bio' },
+  { q: 'Captain Desmond Hale', if: { any: ['fact:brook_called_hale', 'fact:hale_cox'] }, done: 'rec:hale_bio' },
+];
+
 // ------------------------------------------------------------- director
 
 export const DIRECTOR = {

@@ -3,12 +3,18 @@
 //
 //   node scripts/playtest.mjs            golden path (best ending)
 //   node scripts/playtest.mjs --verbose  print every line of dialogue
+//   node scripts/playtest.mjs --record f  also write every action to f as JSON
+//                                         (the browser tests replay it)
 //
 // It is also the fastest way to read the whole story in order.
 
+import fs from 'node:fs';
 import { GameSession, assertCaseValid } from '../core/engine.js';
 
 const verbose = process.argv.includes('--verbose');
+const recordTo = process.argv.includes('--record') ? process.argv[process.argv.indexOf('--record') + 1] : null;
+/** @type {{method: string, args: object, act: number}[]} */
+const recorded = [];
 const failures = [];
 let session;
 let last;
@@ -31,6 +37,7 @@ const has = {
 };
 
 async function act(method, args = {}) {
+  recorded.push({ method, args, act: session.state?.act ?? 0 });
   last = await session[method](args, {});
   for (const e of last.events) {
     if (e.type === 'act') console.log(`\n=== ACT ${e.act}: ${e.title} (${e.date}) — step ${session.state.steps} ===`);
@@ -271,6 +278,7 @@ async function main() {
   const missing = Object.keys(session.case.facts).filter((f) => !(f in session.state.facts));
   if (missing.length) console.log(`Not reached on this path: ${missing.join(', ')}`);
 
+  if (recordTo) fs.writeFileSync(recordTo, JSON.stringify(recorded));
   if (failures.length) {
     console.log(`\n${failures.length} FAILURE(S)`);
     process.exit(1);

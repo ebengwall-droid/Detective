@@ -10,8 +10,8 @@
     "dev": "node --watch server/index.js",
     "typecheck": "tsc -p jsconfig.json --noEmit",
     "playtest": "node scripts/playtest.mjs",
-    "test": "node --test test/",
-    "build:artifact": "node scripts/build-artifact.mjs"
+    "test": "node --test test/*.test.mjs",
+    "build": "node scripts/build-artifact.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

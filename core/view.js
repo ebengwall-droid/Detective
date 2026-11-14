@@ -168,6 +168,7 @@ export function buildView(state, caseData, ai) {
     people,
     deductions,
     objectives,
+    laptopHints: caseData.laptopHints.filter((h) => check(h.if, s) && !check(h.done, s)).slice(0, 5).map((h) => h.q),
     rest: restDef ? { can: check(restDef.if, s), why: restDef.why ?? null, warn: restDef.warn } : null,
     letterWaiting: !!s.flags.letter_waiting,
     labPending: evidence.filter((e) => e.lab?.status === 'pending').length,

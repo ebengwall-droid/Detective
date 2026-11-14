@@ -172,9 +172,8 @@ export class Brain {
     if (!top.length) {
       return { answer: 'NO RECORD FOUND.\nTry a surname, a place, an object, or a number from the evidence.', open: [] };
     }
-    const lead = top[0].rec;
-    const lines = lead.body.split('\n').filter((l) => l.trim()).slice(0, 3).join('\n');
-    return { answer: `${top.length} RECORD${top.length > 1 ? 'S' : ''} FOUND.\n${lead.title}\n${lines}`, open: top.map((t) => t.id) };
+    const titles = top.map((t) => `  ${t.rec.title}`).join('\n');
+    return { answer: `${top.length} RECORD${top.length > 1 ? 'S' : ''} FOUND. OPENED BELOW AND FILED UNDER RECORDS.\n${titles}`, open: top.map((t) => t.id) };
   }
 
   // ---------------------------------------------------------- inner voice

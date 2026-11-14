@@ -399,7 +399,7 @@ He speaks only to what the bodies show. He does not speculate about who did it, 
     short: "Leland Brook's housekeeper for nine years. She found him.",
     role: "Leland Brook's housekeeper",
     look: LOOKS.dray,
-    where: [{ loc: 'brook_house', p: [-1.0, 1.7], r: -55 }],
+    where: [{ loc: 'brook_house', p: [-1.4, 0.6], r: -40 }],
     observe: [{ text: 'Late fifties, grey hair in a bun, hands red from a lifetime of hot water. She has been crying and has stopped. Every so often her eyes go to the bureau in the corner and come away again.' }],
     greet: [
       { if: 'told:dray.d_truth', text: "I've told you all of it now. God forgive me for the rest." },

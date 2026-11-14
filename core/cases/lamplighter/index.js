@@ -8,7 +8,7 @@ import { RECORDS } from './records.js';
 import { LOCATIONS } from './locations.js';
 import { SCENES } from './scenes.js';
 import { NPCS, PEOPLE } from './npcs.js';
-import { META, WORLD, ACTS, ACT4_CARDS, BEATS, OBJECTIVES, REST, DEDUCTIONS, ACCUSE, FINALE, DIRECTOR, ENDINGS } from './story.js';
+import { META, WORLD, ACTS, ACT4_CARDS, BEATS, OBJECTIVES, REST, DEDUCTIONS, ACCUSE, FINALE, LAPTOP_HINTS, DIRECTOR, ENDINGS } from './story.js';
 import { conditionRefs } from '../../conditions.js';
 
 // Two records simply reprint a document the detective can also hold.
@@ -34,6 +34,7 @@ export const CASE = {
   deductions: DEDUCTIONS,
   accuse: ACCUSE,
   finale: FINALE,
+  laptopHints: LAPTOP_HINTS,
   director: DIRECTOR,
   endings: ENDINGS,
 };
@@ -227,6 +228,10 @@ export function validateCase(c = CASE) {
   for (const t of c.endings.truths) checkCond(t.if, `ending truth ${t.id}`);
   for (const list of [c.director.did, c.director.missed]) for (const item of list) checkCond(item.if, 'director');
   for (const p of Object.values(c.people)) checkCond(p.if, 'people');
+  for (const h of c.laptopHints) {
+    checkCond(h.if, `laptop hint "${h.q}"`);
+    checkCond(h.done, `laptop hint "${h.q}"`);
+  }
 
   return problems;
 }

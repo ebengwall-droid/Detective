@@ -113,7 +113,7 @@ export const SCENES = {
       { wall: 'n', at: -1.5, w: 1.3, h: 1.8, sill: 0.8 },
       { wall: 'n', at: 0.3, w: 1.3, h: 1.8, sill: 0.8 },
     ],
-    spawn: { p: [-2.6, 2.3], yaw: -35 },
+    spawn: { p: [-3.1, 2.55], yaw: -50 },
     props: [
       { t: 'rug', p: [0.6, 0.2], w: 4.4, d: 3.2, color: '#27303f', accent: '#9a824e' },
       // The chair, the lamp, the wet.
