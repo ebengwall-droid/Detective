@@ -121,7 +121,7 @@ is in the page.
 ### Developing
 
 ```bash
-npm test            # every ending, saves, view leaks, the server
+npm test            # every ending, saves, view leaks, the server, the Claude calls
 npm run playtest    # plays the best path through the core and prints the route
 npm run dev         # server with reload
 ```
@@ -131,6 +131,12 @@ the fastest way to read the case, and it spoils everything.
 
 `scripts/ui.mjs` drives the real game in headless Chromium for screenshots and
 flow checks. It needs Playwright.
+
+`node scripts/prompt-lab.mjs dump all out/` writes the exact requests the game
+sends to Claude at a dozen points in the story, as readable text.
+`... apply <situation> <answer-file>` feeds an answer back through the game
+and prints what it did with it. Useful for tuning a character without
+spending a token.
 
 `/dev.html?loc=precinct` is a viewer for single rooms; `?loc=stage` lines up
 the cast.
