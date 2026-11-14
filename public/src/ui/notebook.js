@@ -62,7 +62,7 @@ export function createNotebook(panels, game) {
       el('h3', { style: { fontFamily: 'var(--display)', fontWeight: '400', fontSize: '26px', margin: '2px 0 16px' }, text: v.act.title }),
       el('div', { class: 'section-label', text: 'To do' }),
       open.length ? open.map((o) => el('div', { class: 'objective', text: o.text })) : el('p', { class: 'muted', text: 'Nothing pressing. Look around; something will turn up.' }),
-      el('p', { class: 'muted', style: { margin: '14px 0 22px', fontSize: '13.5px' } }, 'Stuck? The lamp button at the top of the screen lets you stop and think it over.'),
+      el('p', { class: 'muted', style: { margin: '14px 0 22px', fontSize: '13.5px' } }, 'Stuck? Think, at the top of the screen, gives you a nudge.'),
       done.length ? el('div', { class: 'section-label', text: 'Done' }) : null,
       done.map((o) => el('div', { class: 'objective done', text: o.text })),
     );

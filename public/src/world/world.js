@@ -17,8 +17,8 @@ const REACH = 2.3;
 const REACH_NPC = 2.7;
 
 const QUALITY = {
-  high: { shadows: true, shadowSize: 2048, pixelRatio: 2, maxLights: 9, antialias: true },
-  medium: { shadows: true, shadowSize: 1024, pixelRatio: 1.5, maxLights: 7, antialias: true },
+  high: { shadows: true, shadowSize: 2048, pixelRatio: 1.75, maxLights: 9, antialias: true },
+  medium: { shadows: true, shadowSize: 1024, pixelRatio: 1.35, maxLights: 7, antialias: true },
   low: { shadows: false, shadowSize: 512, pixelRatio: 1, maxLights: 5, antialias: false },
 };
 
@@ -656,7 +656,7 @@ export class World {
     this.frameCount++;
 
     // If the frame rate is poor for a while, step the quality down once.
-    if (dt > 0.05) this.slowFrames++;
+    if (dt > 0.042) this.slowFrames++;
     else this.slowFrames = Math.max(0, this.slowFrames - 1);
     if (this.slowFrames > 90 && this.quality !== 'low' && !this.noAutoQuality) {
       this.slowFrames = 0;

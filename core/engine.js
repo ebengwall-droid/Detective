@@ -102,6 +102,27 @@ export class GameSession {
     this.state = state && state.v === SAVE_VERSION && state.caseId === caseData.meta.id ? state : null;
     /** @type {any[]} events produced by the action in progress */
     this.events = [];
+
+    // Every player action is all-or-nothing. If one is interrupted part-way
+    // (the player walks off while a character is still answering) the case
+    // goes back to exactly how it was, so a question is never spent unanswered.
+    for (const name of RPC_METHODS) {
+      const run = this[name].bind(this);
+      this[name] = async (args, hooks) => {
+        if (this.inAction) return run(args, hooks);
+        const before = this.state ? JSON.stringify(this.state) : null;
+        this.inAction = true;
+        try {
+          return await run(args, hooks);
+        } catch (err) {
+          if (before) this.state = JSON.parse(before);
+          this.events = [];
+          throw err;
+        } finally {
+          this.inAction = false;
+        }
+      };
+    }
   }
 
   // ------------------------------------------------------------ plumbing

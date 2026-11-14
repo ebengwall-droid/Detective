@@ -147,7 +147,11 @@ export function createLaptop(panels, game) {
         body = el('div', { class: 'panel-body' });
         chips = el('div', { class: 'chips' });
         input = el('input', { class: 'field', id: 'harbornet-query', type: 'text', placeholder: 'Ask HARBORNET…', autocomplete: 'off', enterkeyhint: 'search', maxlength: '200' });
-        input.addEventListener('keydown', (e) => e.stopPropagation());
+        input.addEventListener('keydown', (e) => {
+          // Keep typing from reaching the game's hotkeys, but let Escape close the lid.
+          e.stopPropagation();
+          if (e.key === 'Escape') api.close();
+        });
         form = el('form', { class: 'term-form' }, input, el('button', { class: 'btn', type: 'submit', text: 'RUN' }));
         form.addEventListener('submit', (e) => {
           e.preventDefault();

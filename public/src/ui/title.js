@@ -62,13 +62,13 @@ export function showHelp(cards, game) {
     const items = [
       ['Move', touch ? 'Left thumb is a joystick. Or just tap the floor, or a thing, and you will walk to it.' : 'W A S D or the arrow keys. Or click the floor, or a thing, and you will walk to it.'],
       ['Look', touch ? 'Drag anywhere on the right of the screen.' : 'Hold the mouse button and drag. Press F for full mouse-look.'],
-      ['Examine', 'Glowing diamonds mark what can be examined. Tap one. What matters is bagged as evidence. The eye button lights up everything in the room.'],
-      ['Talk', 'Speech bubbles are people. Ask them anything, in your own words, or tap a suggested question. They remember. Some of them lie.'],
-      ['Break a lie', 'While talking, use the bag button to put a piece of evidence in front of someone. That is how liars come apart.'],
+      ['Examine', `Glowing diamonds mark what can be examined. ${touch ? 'Tap' : 'Click'} one. What matters is bagged as evidence. Look lights up everything in the room.`],
+      ['Talk', `Speech bubbles are people. Ask them anything, in your own words, or ${touch ? 'tap' : 'click'} a suggested question. They remember. Some of them lie.`],
+      ['Break a lie', 'While talking, Show puts a piece of evidence in front of someone. That is how liars come apart. Observe tells you what you notice about them.'],
       ['Notebook', 'Everything you establish is written down for you: objectives, evidence, people, leads. The Board tab is where you reason and, in the end, name the killer.'],
       ['Laptop', 'HARBORNET answers plain questions from police records: names, places, number plates, objects. It is also where you send evidence to the lab.'],
       ['Map', 'Travel between places. When a day has given you all it will, call it a night.'],
-      ['Stuck?', 'The lamp button lets you stop and think. It costs a little off your final rating and is worth it.'],
+      ['Stuck?', 'Think gives you a nudge toward the nearest loose end. It costs a little off your final rating and is worth it.'],
     ];
     const close = () => {
       window.removeEventListener('keydown', onKey, true);

@@ -221,6 +221,58 @@ test('the finale can be lost', async () => {
   assert.equal(out.ending.haleAlive, false);
 });
 
+test('walking away mid-answer costs nothing', async () => {
+  // An AI that never answers until it is told to stop.
+  const ai = {
+    describe: () => ({ live: true, label: 'test', model: 'test' }),
+    complete: (req) => new Promise((_, reject) => req.signal.addEventListener('abort', () => reject(new Error('aborted')))),
+  };
+  const session = new GameSession({ ai });
+  await session.newGame({ name: 'Test' });
+  await session.talk({ id: 'vance' });
+  const before = JSON.stringify(session.state);
+  const ctl = new AbortController();
+  const pending = session.say({ id: 'vance', text: 'Where do I start?' }, { signal: ctl.signal });
+  ctl.abort();
+  await assert.rejects(pending);
+  assert.equal(JSON.stringify(session.state), before, 'an interrupted question leaves the case untouched');
+  // The same for a hint: no penalty for one you never got to read.
+  const ctl2 = new AbortController();
+  const hint = session.think({}, { signal: ctl2.signal });
+  ctl2.abort();
+  await assert.rejects(hint);
+  assert.equal(session.state.stats.hints, 0);
+  // And the game still works afterwards.
+  const ok = await new GameSession({ ai: null, state: JSON.parse(before) }).say({ id: 'vance', text: 'Where do I start?' });
+  assert.ok(ok.reply.say.length > 10);
+});
+
+test('a model that fails is covered by the script, and says so', async () => {
+  const ai = { describe: () => ({ live: true, label: 'test', model: 'test' }), complete: async () => { throw new Error('upstream'); } };
+  const session = new GameSession({ ai });
+  await session.newGame({ name: 'Test' });
+  await session.talk({ id: 'vance' });
+  const warn = console.warn;
+  console.warn = () => {};
+  const out = await session.say({ id: 'vance', text: 'Where do I start?' });
+  console.warn = warn;
+  assert.equal(out.reply.degraded, true);
+  assert.ok(out.reply.say.length > 10);
+});
+
+test('a model reply that breaks the rules cannot move the story', async () => {
+  // The model claims the housekeeper confessed and that Vance walks out, with no proof shown.
+  const lie = JSON.stringify({ say: 'I came back at half past nine, sir.', mood: 'shaken', told: ['d_truth', 'd_cape', 'd_car', 'not_an_item'], acts: ['leave', 'explode'] });
+  const ai = { describe: () => ({ live: true, label: 'test', model: 'test' }), complete: async () => ({ text: lie }) };
+  const session = new GameSession({ ai });
+  await session.newGame({ name: 'Test' });
+  await session.travel({ to: 'brook_house' });
+  await session.talk({ id: 'dray' });
+  await session.say({ id: 'dray', text: 'What time did you leave?' });
+  for (const f of ['harbour_police_voice', 'cape_can', 'plate_7k4']) assert.ok(!(f in session.state.facts), `${f} must not be credited without proof`);
+  assert.equal(session.state.act, 1);
+});
+
 test('the server keeps the case file to itself', async (t) => {
   const port = 4900 + Math.floor(Math.random() * 90);
   const child = spawn(process.execPath, ['server/index.js'], {

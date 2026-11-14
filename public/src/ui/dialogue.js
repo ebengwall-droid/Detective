@@ -227,8 +227,8 @@ export function createDialogue(panels, game) {
         { class: 'dlg-head' },
         portrait,
         el('div', { class: 'dlg-who' }, el('div', { class: 'dlg-name' }, talk.name, moodEl), el('div', { class: 'dlg-role', text: talk.phone ? 'On the telephone' : talk.short })),
-        talk.finale || talk.phone ? null : el('button', { class: 'ibtn', type: 'button', 'aria-label': 'Size them up', title: 'Size them up', onClick: observe }, icon('eye')),
-        talk.finale ? null : el('button', { class: 'ibtn', type: 'button', 'aria-label': 'Show evidence', title: 'Show evidence', onClick: openPicker }, icon('bag')),
+        talk.finale || talk.phone ? null : el('button', { class: 'ibtn tool', type: 'button', 'aria-label': 'Size them up', title: 'Size them up', onClick: observe }, icon('eye'), el('span', { class: 'tool-cap', text: 'Observe' })),
+        talk.finale ? null : el('button', { class: 'ibtn tool', type: 'button', 'aria-label': 'Show evidence', title: 'Show evidence', onClick: openPicker }, icon('bag'), el('span', { class: 'tool-cap', text: 'Show' })),
         el('button', { class: 'xbtn', type: 'button', 'aria-label': 'End conversation', onClick: () => api.close() }, icon('close')),
       );
       panel = el('section', { class: 'panel dialogue', role: 'dialog', 'aria-label': `Talking to ${talk.name}` }, head, log, turnsEl, chips, el('div', { class: 'dlg-input' }, input, sendBtn));
@@ -242,6 +242,11 @@ export function createDialogue(panels, game) {
         log.append(g);
         game.world.setTalking(talk.id, true);
         typeOut(g, talk.greeting).then(() => game.world.setTalking(talk.id, false));
+      }
+      // Say it once: showing evidence is how lies come apart, and the button is easy to miss.
+      if (!talk.finale && game.view.presentables.length && !game.settings.tipShow) {
+        log.append(lineNode({ who: 'note', text: 'You are holding evidence. Show puts a piece of it in front of them; people who are lying tend to stop.' }));
+        game.setSetting('tipShow', true);
       }
       setMood(talk.mood);
       setChips(talk.suggestions);
