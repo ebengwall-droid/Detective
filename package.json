@@ -1,0 +1,26 @@
+{
+  "name": "greyhaven-detective",
+  "version": "0.1.0",
+  "description": "Greyhaven — a 3D noir detective game where every character is played by Claude and the case reacts to how you investigate.",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "typecheck": "tsc -p jsconfig.json --noEmit",
+    "playtest": "node scripts/playtest.mjs",
+    "test": "node --test test/",
+    "build:artifact": "node scripts/build-artifact.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/three": "^0.187.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}
