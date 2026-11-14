@@ -157,13 +157,18 @@ async function buildTexture(name, spec) {
     return entry ? download(entry.url, path.join(dir, path.basename(entry.url))) : null;
   };
   fs.mkdirSync(path.join(outDir, 'textures'), { recursive: true });
-  const out = {};
+  const out = { lite: {} };
   const write = async (suffix, file, options) => {
     if (!file) return;
     const dest = path.join(outDir, 'textures', `${name}_${suffix}.webp`);
     await sharp(file).resize({ width: size, height: size, fit: 'fill', kernel: 'lanczos3' }).webp(options).toFile(dest);
     out[suffix] = `textures/${name}_${suffix}.webp`;
     out.bytes = (out.bytes ?? 0) + fs.statSync(dest).size;
+    // Half size for phones.
+    const small = path.join(outDir, 'textures', `${name}_${suffix}.m.webp`);
+    await sharp(file).resize({ width: size / 2, height: size / 2, fit: 'fill', kernel: 'lanczos3' }).webp(options).toFile(small);
+    out.lite[suffix] = `textures/${name}_${suffix}.m.webp`;
+    out.lite.bytes = (out.lite.bytes ?? 0) + fs.statSync(small).size;
   };
   await write('d', get('Diffuse'), { quality: spec.quality ?? 78, effort: 5 });
   await write('n', get('nor_gl'), { quality: 84, smartSubsample: true, effort: 5 });

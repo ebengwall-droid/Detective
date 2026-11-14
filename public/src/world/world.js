@@ -153,6 +153,8 @@ export class World {
     const q = QUALITY[this.quality];
     // The stylesheet drops its frosted-glass blur on the lowest setting.
     document.documentElement.dataset.quality = this.quality;
+    // Decided once, before anything is fetched: smaller pictures on anything but the highest setting.
+    assets.lite = this.quality !== 'high';
     // No canvas antialiasing: with the finishing pass the room is smoothed in
     // its own off-screen picture, and without it speed matters more.
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false, powerPreference: 'high-performance' });
@@ -293,6 +295,7 @@ export class World {
       const keep = sameRoom ? { ...this.player } : null;
       const keepFocus = sameRoom ? this.focus : null;
       this.clearLocation();
+      if (this.locKey?.split(':')[0] !== loc.id) assets.release();
       const q = QUALITY[this.quality];
       this.built = buildScene(loc.scene, { shadows: q.shadows, shadowSize: q.shadowSize, maxLights: q.maxLights, detail: q.detail, post: !!(this.post && q.post) });
       this.scene.add(this.built.root);
@@ -949,6 +952,10 @@ export class World {
     this.renderer.setRenderTarget(prevTarget);
     rt.dispose();
     ch.dispose();
+    if (real && ![...this.npcs.values()].some((n) => n.data?.look?.model === look.model)) {
+      const file = assets.personFile(look.model)?.file;
+      assets.release((f) => f !== file);
+    }
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = size;
     const ctx = canvas.getContext('2d');

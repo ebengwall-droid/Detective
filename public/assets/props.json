@@ -788,6 +788,12 @@
  },
  "textures": {
   "planks_dark": {
+   "lite": {
+    "d": "textures/planks_dark_d.m.webp",
+    "bytes": 59918,
+    "n": "textures/planks_dark_n.m.webp",
+    "r": "textures/planks_dark_r.m.webp"
+   },
    "d": "textures/planks_dark_d.webp",
    "bytes": 259060,
    "n": "textures/planks_dark_n.webp",
@@ -796,6 +802,12 @@
    "source": "old_wood_floor"
   },
   "parquet": {
+   "lite": {
+    "d": "textures/parquet_d.m.webp",
+    "bytes": 31890,
+    "n": "textures/parquet_n.m.webp",
+    "r": "textures/parquet_r.m.webp"
+   },
    "d": "textures/parquet_d.webp",
    "bytes": 140834,
    "n": "textures/parquet_n.webp",
@@ -804,6 +816,12 @@
    "source": "herringbone_parquet"
   },
   "planks": {
+   "lite": {
+    "d": "textures/planks_d.m.webp",
+    "bytes": 31862,
+    "n": "textures/planks_n.m.webp",
+    "r": "textures/planks_r.m.webp"
+   },
    "d": "textures/planks_d.webp",
    "bytes": 138376,
    "n": "textures/planks_n.webp",
@@ -812,6 +830,12 @@
    "source": "wood_floor_worn"
   },
   "deck": {
+   "lite": {
+    "d": "textures/deck_d.m.webp",
+    "bytes": 63444,
+    "n": "textures/deck_n.m.webp",
+    "r": "textures/deck_r.m.webp"
+   },
    "d": "textures/deck_d.webp",
    "bytes": 270476,
    "n": "textures/deck_n.webp",
@@ -820,6 +844,12 @@
    "source": "wood_floor_deck"
   },
   "tiles_floor": {
+   "lite": {
+    "d": "textures/tiles_floor_d.m.webp",
+    "bytes": 22998,
+    "n": "textures/tiles_floor_n.m.webp",
+    "r": "textures/tiles_floor_r.m.webp"
+   },
    "d": "textures/tiles_floor_d.webp",
    "bytes": 75150,
    "n": "textures/tiles_floor_n.webp",
@@ -828,6 +858,12 @@
    "source": "floor_tiles_06"
   },
   "tiles_wall": {
+   "lite": {
+    "d": "textures/tiles_wall_d.m.webp",
+    "bytes": 58078,
+    "n": "textures/tiles_wall_n.m.webp",
+    "r": "textures/tiles_wall_r.m.webp"
+   },
    "d": "textures/tiles_wall_d.webp",
    "bytes": 187622,
    "n": "textures/tiles_wall_n.webp",
@@ -836,6 +872,12 @@
    "source": "long_white_tiles"
   },
   "plaster": {
+   "lite": {
+    "d": "textures/plaster_d.m.webp",
+    "bytes": 25526,
+    "n": "textures/plaster_n.m.webp",
+    "r": "textures/plaster_r.m.webp"
+   },
    "d": "textures/plaster_d.webp",
    "bytes": 317542,
    "n": "textures/plaster_n.webp",
@@ -844,6 +886,12 @@
    "source": "painted_plaster_wall"
   },
   "brick": {
+   "lite": {
+    "d": "textures/brick_d.m.webp",
+    "bytes": 102012,
+    "n": "textures/brick_n.m.webp",
+    "r": "textures/brick_r.m.webp"
+   },
    "d": "textures/brick_d.webp",
    "bytes": 344536,
    "n": "textures/brick_n.webp",
@@ -852,6 +900,12 @@
    "source": "brick_wall_10"
   },
   "stone": {
+   "lite": {
+    "d": "textures/stone_d.m.webp",
+    "bytes": 157424,
+    "n": "textures/stone_n.m.webp",
+    "r": "textures/stone_r.m.webp"
+   },
    "d": "textures/stone_d.webp",
    "bytes": 578948,
    "n": "textures/stone_n.webp",
@@ -860,6 +914,12 @@
    "source": "old_stone_wall"
   },
   "oak": {
+   "lite": {
+    "d": "textures/oak_d.m.webp",
+    "bytes": 14460,
+    "n": "textures/oak_n.m.webp",
+    "r": "textures/oak_r.m.webp"
+   },
    "d": "textures/oak_d.webp",
    "bytes": 56704,
    "n": "textures/oak_n.webp",
@@ -868,6 +928,12 @@
    "source": "oak_veneer_01"
   },
   "mahogany": {
+   "lite": {
+    "d": "textures/mahogany_d.m.webp",
+    "bytes": 8240,
+    "n": "textures/mahogany_n.m.webp",
+    "r": "textures/mahogany_r.m.webp"
+   },
    "d": "textures/mahogany_d.webp",
    "bytes": 33450,
    "n": "textures/mahogany_n.webp",
@@ -876,6 +942,12 @@
    "source": "dark_wood"
   },
   "boards": {
+   "lite": {
+    "d": "textures/boards_d.m.webp",
+    "bytes": 79668,
+    "n": "textures/boards_n.m.webp",
+    "r": "textures/boards_r.m.webp"
+   },
    "d": "textures/boards_d.webp",
    "bytes": 234948,
    "n": "textures/boards_n.webp",

@@ -1,19 +1,23 @@
-// Build the single-file version of the game: three.js, the game core, the
-// case and the styles in one HTML page that needs no server.
+// Build the game as a page that needs no server of its own: three.js, the
+// effects libraries, the game core, the case and the styles in one HTML file,
+// with the models, textures and motion clips in an assets/ folder beside it.
 //
 //   node scripts/build-artifact.mjs [--out dist]
 //
 // Writes:
-//   greyhaven.html  a complete document. Put it on any static host, or just
-//                   open it. Characters follow their script there.
-//   app/            the same page as an installable web app: index.html plus
+//   app/            the game as an installable web app: index.html, assets/,
 //                   the manifest, icons and service worker. Host the folder
 //                   anywhere and "Add to Home Screen" gives a full-screen app
-//                   that also opens offline.
+//                   that also opens offline. Characters follow their script.
 //   artifact.html   the same page as a claude.ai artifact body (no <html>,
-//                   <head> or <body>; the host supplies those). Opened on
-//                   claude.ai, the page asks Claude to play the cast on the
-//                   viewer's own account, so no API key is involved.
+//                   <head> or <body>; the host supplies those), to be
+//                   published with the files listed in artifact-files.json.
+//                   Opened on claude.ai, the page asks Claude to play the
+//                   cast on the viewer's own account, so no API key is
+//                   involved.
+//   greyhaven.html  the page alone. Without assets/ beside it the game draws
+//                   its people and furniture in code instead: plainer, but it
+//                   runs from a single file opened off a disk.
 
 import { build, transform } from 'esbuild';
 import fs from 'node:fs';
@@ -93,8 +97,27 @@ fs.mkdirSync(path.join(appDir, 'icons'), { recursive: true });
 fs.writeFileSync(path.join(appDir, 'index.html'), standalone);
 for (const file of ['manifest.webmanifest', 'sw.js']) fs.copyFileSync(path.join(root, 'public', file), path.join(appDir, file));
 for (const file of fs.readdirSync(path.join(root, 'public/icons'))) fs.copyFileSync(path.join(root, 'public/icons', file), path.join(appDir, 'icons', file));
+
+// Models, textures and motion clips: copied beside the app, and listed for publishing beside the artifact.
+const assetsDir = path.join(root, 'public/assets');
+const TYPES = { '.glb': 'model/gltf-binary', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.json': 'application/json' };
+const published = {};
+let assetBytes = 0;
+if (fs.existsSync(assetsDir)) {
+  for (const entry of fs.readdirSync(assetsDir, { recursive: true, withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    const from = path.join(entry.parentPath ?? entry.path, entry.name);
+    const rel = path.relative(assetsDir, from).split(path.sep).join('/');
+    fs.mkdirSync(path.dirname(path.join(appDir, 'assets', rel)), { recursive: true });
+    fs.copyFileSync(from, path.join(appDir, 'assets', rel));
+    published[`assets/${rel}`] = { from: path.relative(root, from).split(path.sep).join('/'), contentType: TYPES[path.extname(rel)] ?? 'application/octet-stream' };
+    assetBytes += fs.statSync(from).size;
+  }
+}
+fs.writeFileSync(path.join(outDir, 'artifact-files.json'), `${JSON.stringify(published, null, 1)}\n`);
 const kb = (s) => `${(Buffer.byteLength(s) / 1024).toFixed(0)} KB`;
 console.log(`script ${kb(js)}, styles ${kb(css)}`);
 console.log(`wrote ${path.join(outDir, 'artifact.html')} (${kb(artifact)})`);
 console.log(`wrote ${path.join(outDir, 'greyhaven.html')} (${kb(standalone)})`);
-console.log(`wrote ${appDir}/ (installable app: index.html, manifest, icons, service worker)`);
+console.log(`wrote ${appDir}/ (installable app: index.html, manifest, icons, service worker, assets)`);
+console.log(`assets: ${Object.keys(published).length} files, ${(assetBytes / 1048576).toFixed(1)} MB (listed in artifact-files.json for publishing beside the artifact)`);

@@ -2,6 +2,7 @@
 // game core, and turns what comes back into things on screen.
 
 import { World } from './world/world.js';
+import { assets } from './world/assets.js';
 import { Audio } from './audio.js';
 import { el } from './ui/dom.js';
 import { createHud, showHere, showInspect, showThink, showCard, confirmCard } from './ui/hud.js';
@@ -128,6 +129,8 @@ export class Game {
     } catch (err) {
       console.warn('Could not look for a saved case:', err?.message);
     }
+    // Hold the opening card until the room behind the title is dressed.
+    await this.world.whenReady(15000);
     document.getElementById('boot')?.remove();
     await this.titleLoop(resumed);
   }
@@ -332,9 +335,27 @@ export class Game {
   async fade(on) {
     if (this.fadeEl.classList.contains('on') === on) return;
     // Never lift the dark on a room that is still arriving.
-    if (!on) await this.world.whenReady();
+    if (!on) await this.arrive();
     this.fadeEl.classList.toggle('on', on);
     await new Promise((r) => setTimeout(r, FADE_MS));
+  }
+
+  /** Wait for the room on screen to have its furniture and people, saying so if it takes a moment. */
+  async arrive(limit = 20000) {
+    const had = this.fadeEl.textContent;
+    let done = false;
+    const say = () => {
+      if (done) return;
+      const part = Math.round(assets.fraction() * 100);
+      this.fadeEl.textContent = part < 100 ? `Setting the scene · ${part}%` : 'Setting the scene';
+      setTimeout(say, 200);
+    };
+    // Only mention it when it is slow enough to wonder about.
+    const note = setTimeout(say, 700);
+    await this.world.whenReady(limit);
+    done = true;
+    clearTimeout(note);
+    this.fadeEl.textContent = had;
   }
 
   block(name) {

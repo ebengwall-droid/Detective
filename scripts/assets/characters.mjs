@@ -5,7 +5,7 @@
 // For each character in cast.json this converts the avatar's FBX to glTF,
 // keeps the facial blendshapes the game uses (speech, blinks, brows, mouth),
 // resizes and recompresses its textures, and writes a compact, compressed
-//   public/assets/characters/<id>.glb
+//   public/assets/characters/<id>.glb     (and <id>.m.glb, with smaller pictures, for phones)
 // The motion-capture clips are gathered into one file per skeleton family:
 //   public/assets/anims/f.glb and m.glb
 // and a manifest of what was built goes to public/assets/characters.json.
@@ -247,9 +247,27 @@ async function buildCharacter(id, spec) {
   fs.mkdirSync(path.join(outDir, 'characters'), { recursive: true });
   const file = path.join(outDir, 'characters', `${id}.glb`);
   await io.write(file, doc);
+  // The same person with every picture at half size, for phones: a quarter of the memory.
+  for (const texture of r.listTextures()) {
+    const img = sharp(Buffer.from(texture.getImage()));
+    const meta = await img.metadata();
+    const isNormal = texture.getName().endsWith('_n');
+    texture.setImage(await img.resize({ width: Math.max(128, Math.round(meta.width / 2)) }).webp(isNormal ? { quality: 88, smartSubsample: true, effort: 5 } : { quality: 84, alphaQuality: 90, effort: 5 }).toBuffer());
+  }
+  const liteFile = path.join(outDir, 'characters', `${id}.m.glb`);
+  await io.write(liteFile, doc);
   // Rest measurements the game wants without loading the file.
   const hip = r.listNodes().find((n) => n.getName() === 'Bip01');
-  return { file: `characters/${id}.glb`, sex: spec.sex, source: spec.src, bytes: fs.statSync(file).size, tris: report.tris, shapes: report.shapes, hip: +hip.getTranslation()[1].toFixed(4) };
+  return {
+    file: `characters/${id}.glb`,
+    bytes: fs.statSync(file).size,
+    lite: { file: `characters/${id}.m.glb`, bytes: fs.statSync(liteFile).size },
+    sex: spec.sex,
+    source: spec.src,
+    tris: report.tris,
+    shapes: report.shapes,
+    hip: +hip.getTranslation()[1].toFixed(4),
+  };
 }
 
 /** Bones whose motion we keep. Faces are driven by blendshapes, not by the clips. */
@@ -329,7 +347,7 @@ for (const [id, spec] of Object.entries(cast.characters)) {
   if (flag('anims-only') || (only && !only.includes(id))) continue;
   const built = await buildCharacter(id, spec);
   manifest.characters[id] = built;
-  console.log(`${id.padEnd(8)} ${(built.bytes / 1024).toFixed(0).padStart(5)} KB  ${built.tris} triangles, ${built.shapes} face shapes  (${spec.src})`);
+  console.log(`${id.padEnd(8)} ${(built.bytes / 1024).toFixed(0).padStart(5)} KB (${(built.lite.bytes / 1024).toFixed(0)} KB light)  ${built.tris} triangles, ${built.shapes} face shapes  (${spec.src})`);
 }
 if (!flag('no-anims')) {
   for (const [sex, set] of Object.entries(cast.animations)) {
