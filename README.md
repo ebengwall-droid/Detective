@@ -72,9 +72,13 @@ nothing needs careful steering.
 - The phone's **Back** button or swipe closes whatever is open instead of
   leaving the game.
 - Works upright or on its side. The screen stays awake while you read.
-- If movement feels choppy, **Menu, Graphics, Low** turns off the finishing
-  effects (bloom, depth of field, frosted glass). The game also steps down by
-  itself when it sees the frame rate struggling.
+- If movement feels choppy, **Menu, Graphics, Low** turns off shadows and the
+  finishing effects (ambient occlusion, bloom, depth of field, frosted
+  glass). The game also steps down by itself when it sees the frame rate
+  struggling.
+- Getting to the first room is about a 7 MB download on a phone, so it takes
+  a few seconds on a mobile connection; each new place after that is around
+  a megabyte.
 
 ### Install it as an app
 
@@ -106,17 +110,21 @@ or host the `dist/app` folder from `npm run build` (below) on any static host.
 npm run build
 ```
 
-writes three things to `dist/`:
+writes to `dist/`:
 
-- `greyhaven.html`: the whole game in one file. Open it directly or put it on
-  any static host.
-- `app/`: the same page as an installable web app (manifest, icons, service
-  worker). Host the folder and add it to a home screen; it then opens offline.
-- `artifact.html`: the same page packaged as a claude.ai artifact.
+- `app/`: the game as an installable web app: the page, an `assets/` folder
+  with the models, textures and animation (about 25 MB), a manifest, icons
+  and a service worker. Host the folder anywhere and add it to a home screen;
+  it then opens offline.
+- `artifact.html`: the same page packaged as a claude.ai artifact, with
+  `artifact-files.json` listing the assets to publish beside it.
+- `greyhaven.html`: the page alone. Opened straight off a disk it cannot
+  fetch the assets, so it draws its people and furniture in code instead:
+  plainer, but it is one file.
 
-The first two have no server behind them, so the characters keep to their
-script. As a claude.ai artifact the page asks Claude to play the cast on the
-viewer's own account, and no API key is needed.
+`app/` and `greyhaven.html` have no server behind them, so the characters
+keep to their script. As a claude.ai artifact the page asks Claude to play
+the cast on the viewer's own account, and no API key is needed.
 
 ## Settings
 
@@ -142,24 +150,62 @@ core/                 The game itself. Runs unchanged in Node and in the browser
   cases/lamplighter/  The case: scenes, people, facts, evidence, records, story
 server/               Node server: hosts the core, keeps the API key and the saves
 public/               The browser client
-  src/world/          3D: rooms, props, characters, movement, finishing pass (three.js)
+  assets/             Models, textures and animation, ready to load (built by scripts/assets)
+  src/world/          3D: rooms, people, furniture, movement, finishing pass
   src/ui/             HUD, conversation, notebook, laptop, map, title, ending
   src/game.js         Ties the world and the UI to the game core
-scripts/              Playtest, browser test driver, single-file build
+scripts/              Playtest, browser test driver, builds
+  assets/             Fetches and prepares the models, textures and animation
 test/                 Tests
 ```
 
-Everything in the game is made in code. There are no model, texture or sound
-files: rooms are built from primitives, textures are painted on canvases and
-the rain, foghorn and piano are synthesised. People are made the same way:
-their faces are painted, and repainted as they blink, speak and react. (The
-only image files are the app icons, drawn by `scripts/make-icons.py`.)
+### What draws the picture
 
-The picture is finished the way a film is: lamps bloom, moonlight comes
-through the blinds in shafts, the room falls out of focus behind whoever you
-are talking to, and the whole frame is graded. That pass is
-`public/src/world/post.js`; it is written for this game and needs nothing
-beyond three.js.
+- **[three.js](https://threejs.org)** is the engine: rendering, skinned
+  animation, glTF loading.
+- **The people** are rigged human models from Microsoft's Rocketbox avatar
+  library, moved by its motion-capture clips. `world/people.js` chooses a
+  clip from what someone is doing and how they feel, turns head and eyes to
+  whoever they are talking to, blinks, shapes the mouth as they speak, holds
+  an expression for each mood (42 face shapes are kept per person), and keeps
+  a hand on a cane with two-bone IK.
+- **Furniture, lamps and props** are models from Poly Haven; **floors, walls
+  and ceilings** are its photographed PBR materials; a photographed interior
+  lights everything that reflects. Rooms are still laid out as data
+  (`core/cases/lamplighter/scenes.js`); `world/dress.js` puts the model for
+  each prop where the layout says, fitted to the space.
+- **The finish** is [postprocessing](https://github.com/pmndrs/postprocessing)
+  and [N8AO](https://github.com/N8python/n8ao): ambient occlusion, depth of
+  field behind whoever you are talking to, bloom on lamps, filmic tone
+  mapping, a light grade, vignette and grain.
+- Rain, foghorn, piano and the rest of the sound are synthesised.
+
+If the assets cannot be fetched the game still runs: people and furniture
+are drawn in code instead (`world/characters.js`, `world/props.js`).
+
+### Rebuilding the assets
+
+What is in `public/assets` is checked in, so none of this is needed to play.
+To change the cast or the furniture:
+
+```bash
+# People: which avatar plays whom, and which captures, is in scripts/assets/cast.json
+git clone --filter=blob:none --no-checkout https://github.com/microsoft/Microsoft-Rocketbox rocketbox
+node scripts/assets/characters.mjs --list | git -C rocketbox sparse-checkout set --no-cone --stdin
+git -C rocketbox checkout
+node scripts/assets/characters.mjs --src rocketbox
+
+# Furniture, surfaces and the lighting environment: listed in scripts/assets/props.json
+node scripts/assets/polyhaven.mjs
+```
+
+The first converts each avatar's FBX to glTF, keeps the face shapes the game
+drives, shrinks textures to WebP and compresses the result (about half a
+megabyte a person, with a lighter copy for phones). The second downloads
+from Poly Haven, simplifies models that are heavier than a room needs and
+does the same to their textures. `node scripts/assets/inspect.mjs file.glb`
+prints what is inside a model. Sources and licences are in
+[CREDITS.md](CREDITS.md).
 
 When you run the server, the game runs on the server and the browser is a
 thin client. The server never sends the browser anything the detective has
@@ -188,6 +234,7 @@ and prints what it did with it. Useful for tuning a character without
 spending a token.
 
 `/dev.html?loc=precinct` is a viewer for single rooms; `?loc=stage` lines up
-the cast.
+the cast (`&mood=angry`, `&talk=1`, `&pose=sit`), and `?loc=models` every
+piece of furniture.
 
 **Spoilers:** `core/cases/lamplighter/` is the solution. Play first.

@@ -113,70 +113,6 @@
     0.3981
    ]
   },
-  "filing": {
-   "file": "props/filing.glb",
-   "source": "vintage_wooden_drawer_01",
-   "bytes": 340848,
-   "tris": 5184,
-   "min": [
-    -0.8576,
-    -0.0007,
-    -0.4404
-   ],
-   "max": [
-    0.8576,
-    1.0902,
-    0.5666
-   ]
-  },
-  "commode": {
-   "file": "props/commode.glb",
-   "source": "GothicCommode_01",
-   "bytes": 250576,
-   "tris": 3897,
-   "min": [
-    -0.6018,
-    0,
-    -0.2891
-   ],
-   "max": [
-    0.5996,
-    1.212,
-    0.2915
-   ]
-  },
-  "bookshelf": {
-   "file": "props/bookshelf.glb",
-   "source": "wooden_bookshelf_worn",
-   "bytes": 636980,
-   "tris": 6000,
-   "min": [
-    -0.687,
-    0,
-    -0.2907
-   ],
-   "max": [
-    0.687,
-    2.0634,
-    0.2907
-   ]
-  },
-  "metal_rack": {
-   "file": "props/metal_rack.glb",
-   "source": "worn_metal_rack",
-   "bytes": 129084,
-   "tris": 5000,
-   "min": [
-    -0.4599,
-    0,
-    -0.3
-   ],
-   "max": [
-    0.4554,
-    1.9,
-    0.3
-   ]
-  },
   "bar_stool": {
    "file": "props/bar_stool.glb",
    "source": "bar_chair_round_01",
@@ -271,22 +207,6 @@
     0.2748,
     0.0153,
     0.2748
-   ]
-  },
-  "desk_lamp": {
-   "file": "props/desk_lamp.glb",
-   "source": "desk_lamp_arm_01",
-   "bytes": 195236,
-   "tris": 4998,
-   "min": [
-    -0.1185,
-    -0.088,
-    -0.2961
-   ],
-   "max": [
-    0.0832,
-    0.8046,
-    0.3172
    ]
   },
   "sconce": {
@@ -433,38 +353,6 @@
     0.1138
    ]
   },
-  "clipboard": {
-   "file": "props/clipboard.glb",
-   "source": "clipboard",
-   "bytes": 75960,
-   "tris": 1500,
-   "min": [
-    -0.114,
-    -0.0025,
-    -0.1778
-   ],
-   "max": [
-    0.1142,
-    0.0394,
-    0.1586
-   ]
-  },
-  "camera": {
-   "file": "props/camera.glb",
-   "source": "Camera_01",
-   "bytes": 329812,
-   "tris": 3647,
-   "min": [
-    -0.1356,
-    0.0003,
-    -0.0605
-   ],
-   "max": [
-    0.0784,
-    0.0781,
-    0.2023
-   ]
-  },
   "books": {
    "file": "props/books.glb",
    "source": "book_encyclopedia_set_01",
@@ -479,38 +367,6 @@
     0.532,
     0.2374,
     0.101
-   ]
-  },
-  "barrels": {
-   "file": "props/barrels.glb",
-   "source": "wooden_barrels_01",
-   "bytes": 1128588,
-   "tris": 12132,
-   "min": [
-    -2.3322,
-    -0.0386,
-    -1.9308
-   ],
-   "max": [
-    2.1079,
-    0.9146,
-    1.4119
-   ]
-  },
-  "bottles": {
-   "file": "props/bottles.glb",
-   "source": "wine_bottles_01",
-   "bytes": 212524,
-   "tris": 4027,
-   "min": [
-    -0.036,
-    0,
-    -0.0399
-   ],
-   "max": [
-    0.6403,
-    0.3314,
-    0.0403
    ]
   },
   "kettle": {
@@ -609,22 +465,6 @@
     0.1779
    ]
   },
-  "oil_lamp": {
-   "file": "props/oil_lamp.glb",
-   "source": "vintage_oil_lamp",
-   "bytes": 134796,
-   "tris": 3503,
-   "min": [
-    -0.11,
-    0,
-    -0.11
-   ],
-   "max": [
-    0.11,
-    0.8016,
-    0.11
-   ]
-  },
   "mantel_clock": {
    "file": "props/mantel_clock.glb",
    "source": "mantel_clock_01",
@@ -673,38 +513,6 @@
     0.4507
    ]
   },
-  "stool_low": {
-   "file": "props/stool_low.glb",
-   "source": "wooden_stool_01",
-   "bytes": 154716,
-   "tris": 3000,
-   "min": [
-    -0.2123,
-    0.0009,
-    -0.2209
-   ],
-   "max": [
-    0.2119,
-    0.4374,
-    0.2209
-   ]
-  },
-  "side_table": {
-   "file": "props/side_table.glb",
-   "source": "side_table_tall_01",
-   "bytes": 89104,
-   "tris": 2999,
-   "min": [
-    -0.192,
-    0,
-    -0.192
-   ],
-   "max": [
-    0.192,
-    0.7611,
-    0.192
-   ]
-  },
   "console": {
    "file": "props/console.glb",
    "source": "ClassicConsole_01",
@@ -719,54 +527,6 @@
     0.7722,
     0.9491,
     0.2475
-   ]
-  },
-  "nightstand": {
-   "file": "props/nightstand.glb",
-   "source": "ClassicNightstand_01",
-   "bytes": 85028,
-   "tris": 2002,
-   "min": [
-    -0.2839,
-    0,
-    -0.2121
-   ],
-   "max": [
-    0.2839,
-    0.7,
-    0.2121
-   ]
-  },
-  "goblets": {
-   "file": "props/goblets.glb",
-   "source": "brass_goblets",
-   "bytes": 236028,
-   "tris": 3000,
-   "min": [
-    -0.2198,
-    0.0049,
-    -0.1018
-   ],
-   "max": [
-    0.2326,
-    0.2783,
-    0.1951
-   ]
-  },
-  "tea_set": {
-   "file": "props/tea_set.glb",
-   "source": "tea_set_01",
-   "bytes": 121268,
-   "tris": 5988,
-   "min": [
-    -0.4406,
-    -0.0008,
-    -0.2836
-   ],
-   "max": [
-    0.4777,
-    0.1638,
-    0.2003
    ]
   },
   "lantern_lo": {

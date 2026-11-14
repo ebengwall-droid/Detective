@@ -854,7 +854,8 @@ export class World {
         // In a conversation, focus on the speaker and let the room behind them go soft.
         const talking = this.focus && this.mode !== 'explore' ? this.npcs.get(this.focus.id) : null;
         const want = talking ? 1 : this.mode === 'title' ? 0.7 : 0;
-        this.dof = (this.dof ?? 0) + (want - (this.dof ?? 0)) * 0.08;
+        // By the clock, not by the frame: a slow device should not leave the room blurred for seconds after a conversation.
+        this.dof = (this.dof ?? 0) + (want - (this.dof ?? 0)) * (1 - Math.exp(-(this.lastDt ?? 0.016) * 6));
         const focus = talking ? Math.hypot(talking.pos.x - this.player.x, talking.pos.z - this.player.z) : 2.4;
         this.post.render(this.scene, this.camera, { exposure, dof: this.dof < 0.01 ? 0 : this.dof, focus, time: t, dt: this.lastDt, bloom: 0.55 });
       } catch (err) {

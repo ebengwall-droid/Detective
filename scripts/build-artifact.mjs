@@ -11,7 +11,9 @@
 //                   that also opens offline. Characters follow their script.
 //   artifact.html   the same page as a claude.ai artifact body (no <html>,
 //                   <head> or <body>; the host supplies those), to be
-//                   published with the files listed in artifact-files.json.
+//                   published with the files in artifact-files/ (listed in
+//                   artifact-files.json; models are wrapped in JSON there,
+//                   because that host serves only ordinary web file types).
 //                   Opened on claude.ai, the page asks Claude to play the
 //                   cast on the viewer's own account, so no API key is
 //                   involved.
@@ -48,17 +50,19 @@ if (js.includes('<!--')) throw new Error('bundle contains "<!--", which is not s
 
 const css = (await transform(fs.readFileSync(path.join(root, 'public/styles.css'), 'utf8'), { loader: 'css', minify: true })).code;
 
-const body = `<div id="app"><div id="boot"><div class="lamp"></div>Greyhaven</div></div>
-<script>window.GREYHAVEN_MODE = 'local';</script>
+const page = (flags) => `<div id="app"><div id="boot"><div class="lamp"></div>Greyhaven</div></div>
+<script>${flags}</script>
 <script type="module">${js}</script>`;
+const body = page("window.GREYHAVEN_MODE = 'local';");
 
+// claude.ai serves only ordinary web file types beside a page, so there the models travel as JSON (see below).
 const artifact = `<title>${TITLE}</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="${FONTS}">
 <style>${css}
 /* The artifact frame already keeps the page clear of the notch and the home bar, top and bottom. */
 :root{--safe-t:0px;--safe-b:0px}</style>
-${body}
+${page("window.GREYHAVEN_MODE = 'local'; window.GREYHAVEN_PACKED = true;")}
 `;
 
 const standalone = `<!doctype html>
@@ -98,11 +102,15 @@ fs.writeFileSync(path.join(appDir, 'index.html'), standalone);
 for (const file of ['manifest.webmanifest', 'sw.js']) fs.copyFileSync(path.join(root, 'public', file), path.join(appDir, file));
 for (const file of fs.readdirSync(path.join(root, 'public/icons'))) fs.copyFileSync(path.join(root, 'public/icons', file), path.join(appDir, 'icons', file));
 
-// Models, textures and motion clips: copied beside the app, and listed for publishing beside the artifact.
+// Models, textures and motion clips. Beside the app they are copied as they are.
+// Beside the artifact a model cannot be: only ordinary web types are served there, and .glb is not
+// one. So each model is wrapped in a JSON file holding it in base64, which the game unpacks.
 const assetsDir = path.join(root, 'public/assets');
-const TYPES = { '.glb': 'model/gltf-binary', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.json': 'application/json' };
-const published = {};
+const hostedDir = path.join(outDir, 'artifact-files');
+fs.rmSync(hostedDir, { recursive: true, force: true });
+const published = [];
 let assetBytes = 0;
+let hostedBytes = 0;
 if (fs.existsSync(assetsDir)) {
   for (const entry of fs.readdirSync(assetsDir, { recursive: true, withFileTypes: true })) {
     if (!entry.isFile()) continue;
@@ -110,14 +118,21 @@ if (fs.existsSync(assetsDir)) {
     const rel = path.relative(assetsDir, from).split(path.sep).join('/');
     fs.mkdirSync(path.dirname(path.join(appDir, 'assets', rel)), { recursive: true });
     fs.copyFileSync(from, path.join(appDir, 'assets', rel));
-    published[`assets/${rel}`] = { from: path.relative(root, from).split(path.sep).join('/'), contentType: TYPES[path.extname(rel)] ?? 'application/octet-stream' };
     assetBytes += fs.statSync(from).size;
+
+    const packed = rel.endsWith('.glb');
+    const hosted = path.join(hostedDir, 'assets', packed ? `${rel}.json` : rel);
+    fs.mkdirSync(path.dirname(hosted), { recursive: true });
+    if (packed) fs.writeFileSync(hosted, JSON.stringify({ type: 'model/gltf-binary', base64: fs.readFileSync(from).toString('base64') }));
+    else fs.copyFileSync(from, hosted);
+    hostedBytes += fs.statSync(hosted).size;
+    published.push(`assets/${packed ? `${rel}.json` : rel}`);
   }
 }
-fs.writeFileSync(path.join(outDir, 'artifact-files.json'), `${JSON.stringify(published, null, 1)}\n`);
+fs.writeFileSync(path.join(outDir, 'artifact-files.json'), `${JSON.stringify(published.sort(), null, 1)}\n`);
 const kb = (s) => `${(Buffer.byteLength(s) / 1024).toFixed(0)} KB`;
 console.log(`script ${kb(js)}, styles ${kb(css)}`);
 console.log(`wrote ${path.join(outDir, 'artifact.html')} (${kb(artifact)})`);
 console.log(`wrote ${path.join(outDir, 'greyhaven.html')} (${kb(standalone)})`);
 console.log(`wrote ${appDir}/ (installable app: index.html, manifest, icons, service worker, assets)`);
-console.log(`assets: ${Object.keys(published).length} files, ${(assetBytes / 1048576).toFixed(1)} MB (listed in artifact-files.json for publishing beside the artifact)`);
+console.log(`assets: ${published.length} files, ${(assetBytes / 1048576).toFixed(1)} MB beside the app; ${(hostedBytes / 1048576).toFixed(1)} MB in ${hostedDir}/ to publish beside the artifact (listed in artifact-files.json)`);

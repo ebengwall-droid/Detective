@@ -36,26 +36,6 @@
       "tris": 4300,
       "tex": 512
     },
-    "filing": {
-      "src": "vintage_wooden_drawer_01",
-      "tris": 5200,
-      "tex": 1024
-    },
-    "commode": {
-      "src": "GothicCommode_01",
-      "tris": 4000,
-      "tex": 1024
-    },
-    "bookshelf": {
-      "src": "wooden_bookshelf_worn",
-      "tris": 6000,
-      "tex": 1024
-    },
-    "metal_rack": {
-      "src": "worn_metal_rack",
-      "tris": 5000,
-      "tex": 512
-    },
     "bar_stool": {
       "src": "bar_chair_round_01",
       "tris": 2500,
@@ -86,11 +66,6 @@
     "pendant": {
       "src": "hanging_industrial_lamp",
       "tris": 4000,
-      "tex": 512
-    },
-    "desk_lamp": {
-      "src": "desk_lamp_arm_01",
-      "tris": 5000,
       "tex": 512
     },
     "sconce": {
@@ -138,32 +113,12 @@
       "tris": 4000,
       "tex": 512
     },
-    "clipboard": {
-      "src": "clipboard",
-      "tris": 1500,
-      "tex": 512
-    },
-    "camera": {
-      "src": "Camera_01",
-      "tris": 3500,
-      "tex": 512
-    },
     "books": {
       "src": "book_encyclopedia_set_01",
       "tris": 2500,
       "tex": 512,
       "error": 0.1,
       "smooth": true
-    },
-    "barrels": {
-      "src": "wooden_barrels_01",
-      "tris": 12000,
-      "tex": 1024
-    },
-    "bottles": {
-      "src": "wine_bottles_01",
-      "tris": 4000,
-      "tex": 512
     },
     "kettle": {
       "src": "vintage_electric_kettle",
@@ -195,11 +150,6 @@
       "tris": 2500,
       "tex": 512
     },
-    "oil_lamp": {
-      "src": "vintage_oil_lamp",
-      "tris": 3500,
-      "tex": 512
-    },
     "mantel_clock": {
       "src": "mantel_clock_01",
       "tris": 4000,
@@ -217,35 +167,10 @@
       "tris": 5000,
       "tex": 512
     },
-    "stool_low": {
-      "src": "wooden_stool_01",
-      "tris": 3000,
-      "tex": 512
-    },
-    "side_table": {
-      "src": "side_table_tall_01",
-      "tris": 3000,
-      "tex": 512
-    },
     "console": {
       "src": "ClassicConsole_01",
       "tris": 5000,
       "tex": 1024
-    },
-    "nightstand": {
-      "src": "ClassicNightstand_01",
-      "tris": 2000,
-      "tex": 512
-    },
-    "goblets": {
-      "src": "brass_goblets",
-      "tris": 3000,
-      "tex": 512
-    },
-    "tea_set": {
-      "src": "tea_set_01",
-      "tris": 6000,
-      "tex": 512
     },
     "lantern_lo": {
       "src": "Lantern_01",

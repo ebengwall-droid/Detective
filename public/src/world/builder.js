@@ -432,7 +432,7 @@ export function buildScene(spec, quality = {}) {
         varying float vAlpha;
         void main() {
           float d = length(gl_PointCoord - 0.5);
-          gl_FragColor = vec4(vec3(1.0, 0.9, 0.74) * smoothstep(0.5, 0.0, d) * vAlpha * 0.32, 1.0);
+          gl_FragColor = vec4(vec3(1.0, 0.9, 0.74) * smoothstep(0.5, 0.0, d) * vAlpha * 0.2, 1.0);
         }`,
       transparent: true,
       depthWrite: false,

@@ -154,7 +154,12 @@ async function main() {
   let failed = false;
   try {
     await page.goto(`${url ?? `${server.base}/`}?${query}`, { waitUntil: 'load' });
-    await page.waitForFunction('!!window.__game && !document.getElementById("boot")', null, { timeout: 90000 });
+    // Polled by hand rather than with waitForFunction, which evaluates a string and so fails under a strict content policy.
+    for (let i = 0; i < 300; i++) {
+      if (await page.evaluate(() => !!window.__game && !document.getElementById('boot')).catch(() => false)) break;
+      if (i === 299) throw new Error('the game did not start within 90 s');
+      await sleep(300);
+    }
     await scenario({ page, shot, sleep, game, tapWorld, log, mobile, base: server?.base });
   } catch (err) {
     failed = true;

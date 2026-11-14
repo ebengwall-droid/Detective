@@ -39,8 +39,54 @@ const decoder = {
   },
 };
 
+/**
+ * The pictures inside a model arrive as blob: addresses. Decoding them off the
+ * main thread means reading the blob back with fetch, which some hosts' content
+ * policies refuse; an ordinary image element is allowed everywhere, so fall
+ * back to that rather than lose the model.
+ */
+let blobsReadable = null;
+/** Ask once, with a blob of our own, rather than find out on every picture. */
+function canReadBlobs() {
+  blobsReadable ??= (async () => {
+    if (typeof createImageBitmap !== 'function') return false;
+    const url = URL.createObjectURL(new Blob(['.']));
+    try {
+      await fetch(url);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  })();
+  return blobsReadable;
+}
+const pictureLoader = {
+  isImageBitmapLoader: true,
+  load(url, onLoad, onProgress, onError) {
+    const asImage = () => {
+      const img = new Image();
+      img.onload = () => onLoad(img);
+      img.onerror = () => onError?.(new Error(`could not decode a picture in ${url}`));
+      img.src = url;
+    };
+    canReadBlobs().then((yes) => {
+      if (!yes) return asImage();
+      fetch(url)
+        .then((res) => res.blob())
+        .then((blob) => createImageBitmap(blob, { premultiplyAlpha: 'none', colorSpaceConversion: 'none' }))
+        .then(onLoad, asImage);
+    });
+  },
+};
+
 const loader = new GLTFLoader();
 loader.setMeshoptDecoder(decoder);
+loader.register((parser) => {
+  parser.textureLoader = pictureLoader;
+  return { name: 'GREYHAVEN_pictures' };
+});
 const pictures = new THREE.TextureLoader();
 /** @type {Map<string, {d: THREE.Texture, n: THREE.Texture|null, r: THREE.Texture|null, metres: number}>} */
 const surfaces = new Map();
@@ -56,6 +102,12 @@ const pick = (entry, lite) => (lite && entry.lite ? entry.lite : entry);
 
 export const assets = {
   base: 'assets/',
+  /**
+   * Some hosts serve only ordinary web file types, and a .glb is not one. There the
+   * models are published as JSON, each carrying its file in base64 (see
+   * scripts/build-artifact.mjs), and unpacked here.
+   */
+  packed: false,
   /** Prefer the lighter copies of things (smaller pictures): set for phones before anything is fetched. */
   lite: false,
   /** @type {{characters: Record<string, any>, anims: Record<string, any>}|null} */
@@ -86,6 +138,17 @@ export const assets = {
     return this.progress.total ? Math.min(1, this.progress.done / this.progress.total) : 1;
   },
 
+  async fetchModel(file) {
+    if (!this.packed) return loader.loadAsync(this.base + file);
+    const res = await fetch(`${this.base}${file}.json`);
+    if (!res.ok) throw new Error(`${res.status} for ${file}.json`);
+    const { base64 } = await res.json();
+    const text = atob(base64);
+    const bytes = new Uint8Array(text.length);
+    for (let i = 0; i < text.length; i++) bytes[i] = text.charCodeAt(i);
+    return loader.parseAsync(bytes.buffer, this.base);
+  },
+
   /** Fetch and parse one glTF file; resolves to the parsed file, or null if it could not be had. */
   gltf(file, bytes = 0) {
     if (ready.has(file)) return Promise.resolve(ready.get(file));
@@ -94,8 +157,7 @@ export const assets = {
       this.progress.total += bytes;
       pending.set(
         file,
-        loader
-          .loadAsync(this.base + file)
+        this.fetchModel(file)
           .then((gltf) => {
             ready.set(file, gltf);
             return gltf;
