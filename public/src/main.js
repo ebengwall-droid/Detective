@@ -24,6 +24,44 @@ function webglWorks() {
   }
 }
 
+const topLevel = (() => {
+  try {
+    return window.top === window.self;
+  } catch {
+    return false;
+  }
+})();
+const installed = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches;
+const apple = /iphone|ipad|ipod/i.test(navigator.userAgent) || (/macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+
+/** Putting the game on the home screen. Android offers a prompt; iPhone does it from the Share sheet. */
+const install = {
+  event: null,
+  installed,
+  iosHint: topLevel && !installed && apple,
+  canPrompt() {
+    return !!this.event;
+  },
+  async prompt() {
+    const e = this.event;
+    if (!e) return false;
+    this.event = null;
+    e.prompt();
+    const choice = await e.userChoice.catch(() => null);
+    return choice?.outcome === 'accepted';
+  },
+};
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  install.event = e;
+});
+
+// The service worker is what lets the installed app start without a signal.
+// Not inside another page (the claude.ai build), and not from a file.
+if (topLevel && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
 async function main() {
   if (!webglWorks()) {
     fail('Greyhaven is a 3D game and needs WebGL, which this browser has turned off or does not support. Try a current version of Chrome, Safari, Edge or Firefox.');
@@ -35,6 +73,9 @@ async function main() {
   const game = new Game(root, client, {
     quality: params.get('quality') ?? undefined,
     noAutoQuality: params.has('quality'),
+    install,
+    // Only when the game is the whole page: inside another page the history belongs to the host.
+    backButton: topLevel,
   });
   host.__game = game;
   await game.boot();

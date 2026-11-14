@@ -129,6 +129,13 @@ export class Audio {
     this.schedule();
   }
 
+  /** Go quiet when the game is put away (another app, a call, the screen off) and pick up again after. */
+  setAway(away) {
+    if (!this.ctx) return;
+    if (away) this.ctx.suspend().catch(() => {});
+    else this.ctx.resume().catch(() => {});
+  }
+
   setEnabled(on) {
     this.enabled = on;
     if (this.master) this.master.gain.setTargetAtTime(on ? 0.9 : 0, this.ctx.currentTime, 0.08);

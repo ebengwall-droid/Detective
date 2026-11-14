@@ -45,37 +45,73 @@ export ANTHROPIC_API_KEY=sk-ant-...   # your key from console.anthropic.com
 npm start
 ```
 
-Open <http://localhost:3000>. On a phone, open the same address on your
-computer's network IP.
+Open <http://localhost:3000>.
 
 Without a key the game still runs from start to finish in **scripted mode**:
 characters answer the suggested questions from their script and give a stock
 reply to anything else. It is a good way to check everything works. It is not
 the game.
 
+## On a phone
+
+The phone is the main way to play. Everything is within reach of a thumb, and
+nothing needs careful steering.
+
+- **Tap to go.** Tap the floor, a glowing marker or a person and you walk
+  there. Drag to look around. The ring at the bottom left steers by thumb if
+  you would rather.
+- **Look** lists everyone and everything in the room. Tap a name and you walk
+  straight to it. With Look and the Map you can play the whole case without
+  steering at all.
+- **Tools sit along the bottom**: Look, Think, Notes, Laptop, Map. Panels open
+  as sheets from the bottom and close from the bottom.
+- **Suggested questions** are one tap. Type or dictate your own whenever you
+  like.
+- The phone's **Back** button or swipe closes whatever is open instead of
+  leaving the game.
+- Works upright or on its side. The screen stays awake while you read.
+
+### Install it as an app
+
+Served over HTTPS, the game is an installable web app: it gets its own icon,
+opens full screen and starts without a signal.
+
+- **iPhone or iPad:** open it in Safari, tap Share, then *Add to Home Screen*.
+- **Android:** open it in Chrome, then *Install app* (or Menu, *Put it on your
+  home screen*, in the game).
+
+To get an address a phone can install from, run the server somewhere public,
+or host the `dist/app` folder from `npm run build` (below) on any static host.
+
 ### Controls
 
 | | Phone or tablet | Keyboard and mouse |
 |---|---|---|
-| Walk | Left thumb is a joystick, or tap where you want to go | `W A S D`, or click where you want to go |
-| Look | Drag | Drag, or press `F` for mouse-look |
+| Walk | Tap where you want to go, or steer with the ring | Click where you want to go, or `W A S D` |
+| Turn | Drag | Drag, or press `F` for mouse-look |
 | Examine or talk | Tap the glowing marker | Click it, or look at it and press `E` |
-| Light up everything | **Look** | `Q` |
+| Everything in the room | **Look** | `Q` |
 | Catch a lie | In a conversation, **Show** puts evidence in front of them | The same |
-| Notebook, laptop, map | Buttons along the top | `N`, `L`, `M` |
+| Notebook, laptop, map | Bar along the bottom | `N`, `L`, `M` |
 | Hint | **Think** | `T` |
 
-### Single-file build
+### Builds without a server
 
 ```bash
 npm run build
 ```
 
-writes `dist/greyhaven.html`, the whole game in one file with no server. Put
-it on any static host or open it directly; there it runs in scripted mode.
-`dist/artifact.html` is the same page packaged as a claude.ai artifact, where
-the page asks Claude to play the cast on the viewer's own account and no API
-key is needed.
+writes three things to `dist/`:
+
+- `greyhaven.html`: the whole game in one file. Open it directly or put it on
+  any static host.
+- `app/`: the same page as an installable web app (manifest, icons, service
+  worker). Host the folder and add it to a home screen; it then opens offline.
+- `artifact.html`: the same page packaged as a claude.ai artifact.
+
+The first two have no server behind them, so the characters keep to their
+script. As a claude.ai artifact the page asks Claude to play the cast on the
+viewer's own account, and no API key is needed.
 
 ## Settings
 
@@ -108,9 +144,10 @@ scripts/              Playtest, browser test driver, single-file build
 test/                 Tests
 ```
 
-Everything on screen is made in code. There are no model, texture or sound
+Everything in the game is made in code. There are no model, texture or sound
 files: rooms are built from primitives, textures are painted on canvases and
-the rain, foghorn and piano are synthesised.
+the rain, foghorn and piano are synthesised. (The only image files are the app
+icons, drawn by `scripts/make-icons.py`.)
 
 When you run the server, the game runs on the server and the browser is a
 thin client. The server never sends the browser anything the detective has

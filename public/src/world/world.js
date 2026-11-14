@@ -127,7 +127,6 @@ export class World {
       if (key === 'interact') {
         if (this.target) this.interact(this.target);
       } else if (key === 'lock') this.controls.toggleLock();
-      else if (key === 'scan') this.pulse();
       else this.emit('key', key);
     };
     this.controls.onLockChange = (locked) => this.emit('lock', locked);
@@ -352,24 +351,45 @@ export class World {
     }
   }
 
-  /** Turn the camera to a character for conversation. side: where the dialogue panel sits. */
-  focusNpc(id, side = 'bottom') {
+  /**
+   * Turn the camera to a character for conversation and put their face in the
+   * middle of whatever the panel leaves free.
+   * @param {string} id
+   * @param {'bottom'|'right'} side where the conversation panel sits
+   * @param {number} [frac] how much of the height (bottom) or width (right) it covers
+   */
+  focusNpc(id, side = 'bottom', frac = side === 'bottom' ? 0.6 : 0.42) {
     const n = this.npcs.get(id);
     if (!n) {
       this.focus = null;
       return;
     }
-    const dx = n.pos.x - this.player.x;
-    const dz = n.pos.z - this.player.z;
-    const dist = Math.max(0.6, Math.hypot(dx, dz));
+    let dx = n.pos.x - this.player.x;
+    let dz = n.pos.z - this.player.z;
+    let dist = Math.max(0.6, Math.hypot(dx, dz));
+    // Nose to nose is no way to hold a conversation: take a step back if there is room.
+    let stand = null;
+    const COMFORT = 1.7;
+    if (dist < COMFORT - 0.15 && this.nav) {
+      const back = { x: n.pos.x - (dx / dist) * COMFORT, z: n.pos.z - (dz / dist) * COMFORT };
+      if (this.nav.isFree(back.x, back.z) && this.nav.lineFree(this.player.x, this.player.z, back.x, back.z)) {
+        stand = back;
+        dx = n.pos.x - back.x;
+        dz = n.pos.z - back.z;
+        dist = COMFORT;
+      }
+    }
+    const fov = side === 'bottom' ? this.baseFov - 8 : this.baseFov - 12;
+    const half = Math.tan((fov * Math.PI) / 360);
+    const f = THREE.MathUtils.clamp(frac, 0, 0.8);
     let yaw = Math.atan2(-dx, -dz);
     let pitch = Math.atan2(n.head - 0.12 - EYE, dist);
-    // Leave room for the panel: push the face toward the free part of the screen.
-    if (side === 'bottom') pitch -= 0.33;
-    else yaw -= 0.24;
+    // Looking past someone by this much lands them at the centre of the free part of the screen.
+    if (side === 'bottom') pitch -= Math.atan(f * half);
+    else yaw -= Math.atan(f * half * this.camera.aspect);
     this.turnTo = null;
-    this.focus = { id, yaw, pitch, fov: side === 'bottom' ? this.baseFov - 8 : this.baseFov - 12 };
-    for (const [nid, e] of this.npcs) e.talking = false;
+    this.focus = { id, yaw, pitch: Math.max(-1.1, pitch), fov, stand };
+    for (const e of this.npcs.values()) e.talking = false;
   }
 
   unfocus() {
@@ -544,11 +564,16 @@ export class World {
     this.last = performance.now();
     const loop = () => {
       if (!this.running) return;
+      this.raf = requestAnimationFrame(loop);
       const now = performance.now();
+      // Sixty frames a second is plenty. On a 120 Hz phone drawing every
+      // refresh would double the heat and halve the battery for nothing.
+      if (now - this.last < 14.5) return;
       const dt = Math.min(0.06, (now - this.last) / 1000);
       this.last = now;
+      // Nothing to draw while a full-screen panel hides the room.
+      if (this.covered) return;
       this.frame(dt, now);
-      this.raf = requestAnimationFrame(loop);
     };
     this.raf = requestAnimationFrame(loop);
   }
@@ -585,6 +610,10 @@ export class World {
       const k = 1 - Math.exp(-dt * 5);
       p.yaw = lerpAngle(p.yaw, this.focus.yaw, k);
       p.pitch += (this.focus.pitch - p.pitch) * k;
+      if (this.focus.stand) {
+        p.x += (this.focus.stand.x - p.x) * k;
+        p.z += (this.focus.stand.z - p.z) * k;
+      }
     } else if (this.mode === 'title') {
       p.yaw = this.titleYaw + Math.sin(t * 0.09) * 0.22;
       p.pitch = -0.04 + Math.sin(t * 0.13) * 0.02;

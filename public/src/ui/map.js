@@ -124,9 +124,9 @@ export function createMap(panels, game) {
       panel = el(
         'section',
         { class: 'panel full', role: 'dialog', 'aria-label': 'Map' },
-        el('div', { class: 'panel-head' }, icon('map'), el('div', { class: 'panel-title', text: 'Greyhaven' }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close map', onClick: () => api.close() }, icon('close'))),
+        el('div', { class: 'panel-head' }, icon('map'), el('div', { class: 'panel-title', text: 'Greyhaven' }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close map', 'data-back': '', onClick: () => api.close() }, icon('close'))),
         el('div', { class: 'map-body' }, el('div', { class: 'map-wrap' }, root), list),
-        el('div', { class: 'map-foot' }, el('div', { class: 'muted', text: `${v.act.date}. Choose a place to go there.` }), restBtn),
+        el('div', { class: 'map-foot' }, el('div', { class: 'muted', text: `${v.act.date}. Choose a place to go there.` }), restBtn, el('button', { class: 'btn quiet phone-only', type: 'button', onClick: () => api.close() }, icon('back', 18), 'Back to the room')),
       );
       panels.append(scrim, panel);
     },

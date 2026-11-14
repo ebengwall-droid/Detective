@@ -301,6 +301,19 @@ test('the server keeps the case file to itself', async (t) => {
     assert.equal((await fetch(`${base}/core/cases/lamplighter/${secret}`)).status, 404, `${secret} must not be served`);
   }
   assert.equal((await fetch(`${base}/core/engine.js`)).status, 404);
+  // What a phone needs to install it as an app.
+  const manifest = await fetch(`${base}/manifest.webmanifest`);
+  assert.equal(manifest.status, 200);
+  assert.match(manifest.headers.get('content-type'), /manifest\+json/);
+  const m = await manifest.json();
+  assert.equal(m.display, 'fullscreen');
+  assert.ok(m.icons.some((i) => i.sizes === '512x512' && i.purpose === 'maskable'));
+  for (const icon of m.icons) assert.equal((await fetch(`${base}/${icon.src}`)).status, 200, icon.src);
+  assert.equal((await fetch(`${base}/icons/apple-touch-icon.png`)).status, 200);
+  const sw = await fetch(`${base}/sw.js`);
+  assert.equal(sw.status, 200);
+  assert.match(sw.headers.get('content-type'), /javascript/);
+  assert.match(await (await fetch(`${base}/`)).text(), /rel="manifest"/);
   assert.equal((await fetch(`${base}/../package.json`)).status, 404);
   const rpc = (body) => fetch(`${base}/api/rpc`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
   const sid = 'testsession0001';

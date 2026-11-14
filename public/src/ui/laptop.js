@@ -161,11 +161,12 @@ export function createLaptop(panels, game) {
         panel = el(
           'section',
           { class: 'panel full laptop', role: 'dialog', 'aria-label': 'Laptop' },
-          el('div', { class: 'panel-head' }, icon('laptop'), el('div', { class: 'panel-title', text: 'HARBORNET' }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close laptop', onClick: () => api.close() }, icon('close'))),
+          el('div', { class: 'panel-head' }, icon('laptop'), el('div', { class: 'panel-title', text: 'HARBORNET' }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close laptop', 'data-back': '', onClick: () => api.close() }, icon('close'))),
           tabBar,
           body,
           chips,
           form,
+          el('div', { class: 'panel-foot phone-only term-foot' }, el('button', { class: 'btn quiet', type: 'button', onClick: () => api.close() }, icon('back', 18), 'Back to the room')),
         );
         panels.append(scrim, panel);
         if (!game.isTouch) setTimeout(() => input.focus({ preventScroll: true }), 200);

@@ -4,7 +4,7 @@
 import { World } from './world/world.js';
 import { Audio } from './audio.js';
 import { el } from './ui/dom.js';
-import { createHud, showInspect, showThink, showCard, confirmCard } from './ui/hud.js';
+import { createHud, showHere, showInspect, showThink, showCard, confirmCard } from './ui/hud.js';
 import { createDialogue } from './ui/dialogue.js';
 import { createNotebook } from './ui/notebook.js';
 import { createLaptop } from './ui/laptop.js';
@@ -35,19 +35,23 @@ export class Game {
   /**
    * @param {HTMLElement} root
    * @param {Awaited<ReturnType<typeof import('./api.js').connect>>} client
-   * @param {{quality?: string, noAutoQuality?: boolean}} [opts]
+   * @param {{quality?: string, noAutoQuality?: boolean, install?: any, backButton?: boolean}} [opts]
    */
   constructor(root, client, opts = {}) {
     this.root = root;
     this.client = client;
     this.opts = opts;
     this.caseInfo = client.caseInfo ?? { title: 'The Lamplighter', series: 'Greyhaven', tagline: '' };
+    /** Home-screen install, where the browser offers it (see main.js). */
+    this.install = opts.install ?? null;
     this.settings = loadSettings();
     this.view = null;
     this.unseen = { notebook: false, laptop: false, map: false };
     /** Reasons the player cannot move right now. Empty means exploring. */
     this.blockers = new Set();
     this.started = false;
+    /** Whether a history entry is standing by for the phone's Back button to consume. */
+    this.backArmed = false;
     this.queue = [];
     this.flushing = false;
     this.isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
@@ -81,8 +85,11 @@ export class Game {
     return window.innerWidth >= 860;
   }
 
+  /** Where the conversation panel sits: beside the character on anything wide (a phone on its side included), under them on an upright phone. Mirrors the stylesheet. */
   dialogueSide() {
-    return window.innerWidth >= 900 && window.innerHeight >= 520 ? 'right' : 'bottom';
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    return (w >= 900 && h >= 520) || (w > h && w >= 560 && h <= 520) ? 'right' : 'bottom';
   }
 
   // ----------------------------------------------------------------- boot
@@ -98,6 +105,7 @@ export class Game {
     this.world.init({ quality, brightness: this.settings.bright });
     this.world.noAutoQuality = !!this.opts.noAutoQuality || this.settings.quality !== 'auto';
     this.world.controls.sensitivity = this.settings.sens;
+    this.world.controls.setTouchUi(this.isTouch);
     this.hud.setTouch(this.isTouch);
     this.wire();
 
@@ -170,6 +178,7 @@ export class Game {
 
   beginPlay() {
     this.started = true;
+    this.armBack();
     if (this.blockers.size) this.world.setMode('ui');
     else this.enterExplore();
   }
@@ -187,6 +196,7 @@ export class Game {
     w.on('key', (key) => {
       if (key === 'notebook' || key === 'map' || key === 'laptop') this.open(key);
       else if (key === 'think') this.think();
+      else if (key === 'scan') this.scan();
       else if (key === 'help') showHelp(this.cards, this);
       else if (key === 'escape') this.open('menu');
     });
@@ -199,9 +209,14 @@ export class Game {
       this.world.setQuality(next);
       this.hud.toast({ iconName: 'gear', title: 'Graphics lowered', text: 'To keep things smooth. You can change this in the menu.' });
     });
-    const unlock = () => this.audio.unlock();
+    const unlock = () => {
+      this.audio.unlock();
+      this.keepAwake();
+    };
     window.addEventListener('pointerdown', unlock, { passive: true });
     window.addEventListener('keydown', unlock);
+    // Phones nudge the page up to show the keyboard and do not always put it back.
+    document.addEventListener('focusout', () => setTimeout(() => window.scrollTo(0, 0), 60));
     window.addEventListener('keydown', (e) => {
       if (e.code !== 'Escape' || isField(e.target)) return;
       // Cards handle their own keys. Otherwise close whichever panel is on top.
@@ -223,9 +238,87 @@ export class Game {
       vv.addEventListener('scroll', onViewport);
     }
     document.addEventListener('visibilitychange', () => {
+      this.audio.setAway(document.hidden);
       if (document.hidden) this.world.stop();
-      else this.world.start();
+      else {
+        this.world.start();
+        this.keepAwake();
+      }
     });
+    // The phone's Back button (or the back swipe) closes whatever is open, and
+    // with nothing open it pauses, as in any phone game: it never drops the
+    // player out of the case by accident. One history entry is kept standing
+    // by for it and replaced each time it is used; nothing here ever navigates.
+    if (this.opts.backButton) {
+      window.addEventListener('popstate', () => {
+        this.backArmed = false;
+        if (!this.started) return;
+        if (this.blockers.size) this.closeTop();
+        else this.open('menu');
+        this.armBack();
+      });
+    }
+    window.addEventListener('resize', () => {
+      this.updateCover();
+      // Turning the phone moves the conversation panel; keep the speaker in view.
+      setTimeout(() => {
+        if (this.dialogue.isOpen && this.world.focus) this.frameTalk(this.world.focus.id);
+      }, 80);
+    });
+  }
+
+  armBack() {
+    if (!this.opts.backButton || this.backArmed || !this.started) return;
+    try {
+      history.pushState({ greyhaven: 'layer' }, '');
+      this.backArmed = true;
+    } catch {
+      /* history is not ours to use here */
+    }
+  }
+
+  /** Dismiss whatever is on top, the way its own close button would. */
+  closeTop() {
+    const scope = this.cards.childElementCount ? this.cards.lastElementChild : this.panels;
+    const backs = scope.querySelectorAll('[data-back]');
+    const top = /** @type {HTMLButtonElement|undefined} */ (backs[backs.length - 1]);
+    if (!top || top.disabled) return false;
+    top.click();
+    return true;
+  }
+
+  /** Reading a letter or waiting on an answer should not let the phone go dark. */
+  async keepAwake() {
+    try {
+      if (!this.wakeLock || this.wakeLock.released) this.wakeLock = await navigator.wakeLock?.request('screen');
+    } catch {
+      /* not allowed in this view; the phone's own timeout applies */
+    }
+  }
+
+  /** A short tick in the hand, on phones that have one. */
+  buzz(ms) {
+    try {
+      navigator.vibrate?.(ms);
+    } catch {
+      /* no vibration here */
+    }
+  }
+
+  /** While a full-screen panel or card hides the room there is no point drawing it. */
+  updateCover() {
+    const panel = !this.isWide() && (this.notebook.isOpen || this.laptop.isOpen || this.map.isOpen);
+    const card = [...this.cards.children].some((c) => !c.classList.contains('veil') && !c.classList.contains('title'));
+    this.world.covered = this.started && (panel || card);
+  }
+
+  async setFullscreen(on) {
+    try {
+      if (on && !document.fullscreenElement) await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+      else if (!on && document.fullscreenElement) await document.exitFullscreen();
+    } catch {
+      this.hud.toast({ kind: 'alert', iconName: 'gear', title: 'Full screen', text: 'This browser will not go full screen here.' });
+    }
   }
 
   // ------------------------------------------------------------ plumbing
@@ -238,7 +331,9 @@ export class Game {
 
   block(name) {
     this.blockers.add(name);
+    this.updateCover();
     if (!this.started) return;
+    this.armBack();
     this.world.setMode('ui');
     this.hud.setTarget(null);
     this.hud.hideCoach();
@@ -246,6 +341,7 @@ export class Game {
 
   unblock(name) {
     if (!this.blockers.delete(name)) return;
+    this.updateCover();
     if (this.started && !this.blockers.size) this.enterExplore();
   }
 
@@ -330,6 +426,7 @@ export class Game {
         break;
       case 'evidence':
         this.audio.sting();
+        this.buzz(18);
         hud.toast({ iconName: e.icon ?? 'bag', title: 'Evidence bagged', text: e.hasLab ? `${e.name}. The lab could look at this.` : e.name, onClick: () => this.openEvidence(e.id) });
         if (!this.notebook.isOpen) this.unseen.notebook = true;
         break;
@@ -404,6 +501,7 @@ export class Game {
     } else if (panel === 'map') {
       this.map.open();
     }
+    this.updateCover();
     this.hud.setView(this.view);
   }
 
@@ -454,10 +552,15 @@ export class Game {
     this.client.setAiPreference?.(pref);
   }
 
-  scan() {
+  /** Look around: light up every marker and offer the room as a list to walk to. */
+  async scan() {
     if (this.blockers.size) return;
     this.world.pulse();
     this.audio.blip();
+    this.block('here');
+    const pick = await showHere(this.panels, this);
+    this.unblock('here');
+    if (pick) this.world.interact(pick);
   }
 
   useTarget() {
@@ -484,7 +587,9 @@ export class Game {
         if (res.text) {
           this.audio.click();
           const taken = res.taken.map((tid) => this.view.evidence.find((e) => e.id === tid)).filter(Boolean);
-          await showInspect(this.panels, { title: res.title, text: res.text, taken });
+          const more = this.view.location.hotspots.some((h) => !h.done && h.kind !== 'exit');
+          const choice = await showInspect(this.panels, { title: res.title, text: res.text, taken, actions: more ? [{ id: 'look', label: 'What else is here?' }] : [] });
+          if (choice === 'look') next = 'look';
         }
         if (res.letter) {
           await showLetter(this.cards, this, (onText) => this.call('readLetter', {}, { onText }, { deferEvents: true }).then((r) => r.letter));
@@ -498,7 +603,8 @@ export class Game {
       this.hud.setVisible(true);
     }
     this.unblock('inspect');
-    if (next) this.open(next === 'board' ? 'notebook' : next, next === 'board' ? 'board' : undefined);
+    if (next === 'look') this.scan();
+    else if (next) this.open(next === 'board' ? 'notebook' : next, next === 'board' ? 'board' : undefined);
     this.flushEvents();
   }
 
@@ -509,15 +615,23 @@ export class Game {
       const res = await this.call('talk', { id, phone }, {}, { deferEvents: true });
       const here = this.view.location.npcs.find((n) => n.id === id);
       const look = here?.look ?? this.view.people.find((p) => p.id === id)?.look;
-      if (here) this.world.focusNpc(id, this.dialogueSide());
       this.hud.setVisible(false);
       this.audio.click();
       this.dialogue.show(res.talk, look);
+      if (here) this.frameTalk(id);
       this.flushEvents();
     } catch (err) {
       this.unblock('dialogue');
       this.hud.toast({ kind: 'alert', iconName: 'speech', title: 'No answer', text: err.message });
     }
+  }
+
+  /** Point the camera so the speaker sits in the part of the screen the conversation panel leaves free. */
+  frameTalk(id) {
+    const side = this.dialogueSide();
+    const r = this.dialogue.rect();
+    const frac = r ? (side === 'right' ? r.width / window.innerWidth : r.height / window.innerHeight) : undefined;
+    this.world.focusNpc(id, side, frac);
   }
 
   dialogueClosed(was) {
@@ -587,13 +701,19 @@ export class Game {
   /** First-minute guidance, shown once per browser. */
   coachStart() {
     if (this.settings.coached) return;
-    const move = this.isTouch
-      ? '<b>Drag</b> to look around. Use your <b>left thumb</b> to walk, or just <b>tap</b> where you want to go.'
-      : '<b>Drag</b> to look around. Walk with <b>W A S D</b>, or just <b>click</b> where you want to go.';
-    this.hud.coach(move, 8000);
-    setTimeout(() => {
-      if (!this.blockers.size) this.hud.coach(`<b>Glowing diamonds</b> can be examined. <b>Speech bubbles</b> are people. ${this.isTouch ? 'Tap' : 'Click'} one. Your partner is by the window.`, 9000);
-    }, 9500);
+    const tap = this.isTouch ? 'Tap' : 'Click';
+    const steps = [
+      this.isTouch
+        ? '<b>Tap</b> where you want to go and you will walk there. <b>Drag</b> to look around. The ring on the left steers by thumb.'
+        : '<b>Click</b> where you want to go, or walk with <b>W A S D</b>. <b>Drag</b> to look around.',
+      `<b>Glowing diamonds</b> can be examined. <b>Speech bubbles</b> are people. ${tap} one. Your partner is by the window.`,
+      `Lost? <b>Look</b> lists everyone and everything in the room. ${tap} a name and you walk straight to it.`,
+    ];
+    steps.forEach((html, i) => {
+      setTimeout(() => {
+        if (i === 0 || !this.blockers.size) this.hud.coach(html, 8500);
+      }, i * 9500);
+    });
     this.setSetting('coached', true);
   }
 }

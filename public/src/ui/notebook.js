@@ -341,9 +341,10 @@ export function createNotebook(panels, game) {
         panel = el(
           'section',
           { class: 'panel full', role: 'dialog', 'aria-label': 'Notebook' },
-          el('div', { class: 'panel-head' }, icon('notebook'), el('div', { class: 'panel-title', text: 'Notebook' }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close notebook', onClick: () => api.close() }, icon('close'))),
+          el('div', { class: 'panel-head' }, icon('notebook'), el('div', { class: 'panel-title', text: 'Notebook' }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close notebook', 'data-back': '', onClick: () => api.close() }, icon('close'))),
           tabBar,
           body,
+          el('div', { class: 'panel-foot phone-only' }, el('button', { class: 'btn quiet', type: 'button', onClick: () => api.close() }, icon('back', 18), 'Back to the room')),
         );
         panels.append(scrim, panel);
       }

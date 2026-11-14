@@ -11,13 +11,15 @@ export function createHud(root, game) {
   // Every tool carries its name: nobody should have to guess what an icon does.
   const tool = (iconName, caption, label, onClick) => el('button', { class: 'ibtn tool', type: 'button', 'aria-label': label, title: label, onClick }, icon(iconName), el('span', { class: 'tool-cap', text: caption }));
   const tools = {
-    scan: tool('eye', 'Look', 'Look around: light up everything you can examine (Q)', () => game.scan()),
+    scan: tool('eye', 'Look', 'Look around: everything in the room, and a way to walk straight to it (Q)', () => game.scan()),
     think: tool('bulb', 'Think', 'Think: a nudge when you are stuck (T)', () => game.think()),
     notebook: tool('notebook', 'Notes', 'Notebook (N)', () => game.open('notebook')),
     laptop: tool('laptop', 'Laptop', 'Laptop (L)', () => game.open('laptop')),
     map: tool('map', 'Map', 'Map (M)', () => game.open('map')),
-    menu: tool('gear', 'Menu', 'Menu', () => game.open('menu')),
   };
+  // On a phone the five tools sit along the bottom, under the thumbs; the menu keeps to a corner.
+  const menu = tool('gear', 'Menu', 'Menu', () => game.open('menu'));
+  menu.classList.add('hud-menu');
   const objective = el('button', { class: 'hud-objective', type: 'button', onClick: () => game.open('notebook', 'case') }, el('span'));
   const reticle = el('div', { class: 'reticle' });
   const prompt = el('button', { class: 'hud-prompt', type: 'button', hidden: true, onClick: () => game.useTarget() }, el('span', { class: 'verb' }), el('span', { class: 'what' }), el('kbd', { text: 'E' }));
@@ -27,7 +29,9 @@ export function createHud(root, game) {
   const hud = el(
     'div',
     { id: 'hud', class: 'off' },
-    el('header', { class: 'hud-top' }, el('div', { class: 'hud-bar' }, el('div', { class: 'hud-place' }, name, sub), el('nav', { class: 'hud-tools', 'aria-label': 'Tools' }, Object.values(tools))), objective),
+    el('header', { class: 'hud-top' }, el('div', { class: 'hud-place' }, name, sub), objective),
+    menu,
+    el('nav', { class: 'hud-tools', 'aria-label': 'Tools' }, Object.values(tools)),
     reticle,
     subtitle,
     coach,
@@ -58,7 +62,8 @@ export function createHud(root, game) {
 
     setView(view) {
       name.textContent = view.location.name;
-      sub.textContent = `${view.location.sub} · ${view.act.date}`;
+      // Date first: on a narrow screen the end of the line is what gets cut.
+      sub.textContent = `${view.act.date} · ${view.location.sub}`;
       const current = view.objectives.find((o) => !o.done);
       objective.hidden = !current;
       if (current && objective.firstElementChild.textContent !== current.text) {
@@ -130,6 +135,70 @@ export function createHud(root, game) {
   return api;
 }
 
+/**
+ * Everything in the room as a plain list. Tap one and the detective walks
+ * over and gets on with it: the whole game can be played from here and the
+ * map, without steering. Resolves to what was picked, or null.
+ */
+export function showHere(panels, game) {
+  return new Promise((resolve) => {
+    const v = game.view;
+    const w = game.world;
+    const far = (t) => {
+      const p = w.targetPos(t);
+      return p ? Math.hypot(p.x - w.player.x, p.z - w.player.z) : 99;
+    };
+    const people = v.location.npcs.map((n) => ({ type: 'npc', id: n.id, label: n.name, sub: n.met ? n.short : 'Someone to talk to', iconName: 'speech', verb: 'Talk', fresh: true }));
+    const things = v.location.hotspots.map((h) => ({
+      type: 'hotspot',
+      id: h.id,
+      label: h.label,
+      sub: h.kind === 'exit' ? 'The way out' : h.done ? 'Looked at' : 'Not looked at yet',
+      iconName: h.kind === 'exit' ? 'door' : h.kind === 'use' ? 'hand' : 'eye',
+      verb: h.kind === 'exit' ? 'Go' : h.kind === 'use' ? 'Use' : 'Look',
+      fresh: !h.done,
+      exit: h.kind === 'exit',
+    }));
+    people.sort((a, b) => far(a) - far(b));
+    things.sort((a, b) => Number(a.exit) - Number(b.exit) || Number(b.fresh) - Number(a.fresh) || far(a) - far(b));
+
+    const close = (pick) => {
+      window.removeEventListener('keydown', onKey);
+      panel.remove();
+      scrim.remove();
+      resolve(pick);
+    };
+    const onKey = (e) => {
+      if (e.code === 'Escape' || e.code === 'KeyQ') close(null);
+    };
+    const row = (t) =>
+      el(
+        'button',
+        { class: `row around-row ${t.fresh ? 'fresh' : 'done'}`, type: 'button', onClick: () => close({ type: t.type, id: t.id }) },
+        icon(t.iconName, 20),
+        el('div', { class: 'row-main' }, el('div', { class: 'row-title', text: t.label }), el('div', { class: 'row-sub', text: t.sub })),
+        el('span', { class: `pill ${t.fresh ? 'go' : ''}`, text: t.verb }),
+      );
+    const body = el(
+      'div',
+      { class: 'panel-body' },
+      people.length ? el('div', { class: 'section-label', text: 'People' }) : null,
+      people.map(row),
+      el('div', { class: 'section-label', style: { marginTop: people.length ? '10px' : '0' }, text: 'Things' }),
+      things.map(row),
+    );
+    const scrim = el('div', { class: 'scrim clear', onClick: () => close(null) });
+    const panel = el(
+      'section',
+      { class: 'panel around', role: 'dialog', 'aria-label': 'Around you' },
+      el('div', { class: 'panel-head' }, icon('eye'), el('div', { class: 'around-head' }, el('div', { class: 'panel-title', text: v.location.name }), el('div', { class: 'panel-kicker', text: 'Choose one and you will walk to it' })), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close', 'data-back': '', onClick: () => close(null) }, icon('close'))),
+      body,
+    );
+    panels.append(scrim, panel);
+    setTimeout(() => window.addEventListener('keydown', onKey), 150);
+  });
+}
+
 /** The panel shown after examining something. Resolves when dismissed. */
 export function showInspect(panels, { title, text, taken = [], actions = [] }) {
   return new Promise((resolve) => {
@@ -151,7 +220,7 @@ export function showInspect(panels, { title, text, taken = [], actions = [] }) {
       taken.map((t) => el('span', { class: 'tagline' }, icon(t.icon ?? 'bag', 16), `Bagged: ${t.name}`)),
       el('span', { class: 'spacer' }),
       actions.map((a) => el('button', { class: 'btn small', type: 'button', text: a.label, onClick: () => close(a.id) })),
-      el('button', { class: 'btn small solid', type: 'button', text: 'Continue', onClick: () => close(null) }),
+      el('button', { class: 'btn small solid', type: 'button', text: 'Continue', 'data-back': '', onClick: () => close(null) }),
     );
     const panel = el('section', { class: 'panel inspect', role: 'dialog', 'aria-label': title }, el('div', { class: 'panel-head' }, el('div', { class: 'panel-title', text: title })), body, foot);
     panels.append(panel);
@@ -178,7 +247,7 @@ export function showThink(panels, run) {
     const panel = el(
       'section',
       { class: 'panel think', role: 'dialog', 'aria-label': 'Thinking' },
-      el('div', { class: 'panel-head' }, el('div', { style: { flex: '1' } }, kicker), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close', onClick: close }, icon('close'))),
+      el('div', { class: 'panel-head' }, el('div', { style: { flex: '1' } }, kicker), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close', 'data-back': '', onClick: close }, icon('close'))),
       body,
     );
     panels.append(scrim, panel);
@@ -246,7 +315,7 @@ export function confirmCard(cards, { title, text, yes = 'Yes', no = 'Not yet' })
     const card = el(
       'section',
       { class: 'card veil', role: 'alertdialog', 'aria-label': title },
-      el('div', { class: 'card-inner' }, el('h2', { class: 'card-title', style: { fontSize: 'clamp(24px, 5vw, 32px)' }, text: title }), el('div', { class: 'rule' }), el('p', { class: 'epilogue', style: { textAlign: 'center' }, text }), el('div', { class: 'card-actions' }, el('button', { class: 'btn quiet', type: 'button', text: no, onClick: () => close(false) }), el('button', { class: 'btn solid', type: 'button', text: yes, onClick: () => close(true) }))),
+      el('div', { class: 'card-inner' }, el('h2', { class: 'card-title', style: { fontSize: 'clamp(24px, 5vw, 32px)' }, text: title }), el('div', { class: 'rule' }), el('p', { class: 'epilogue', style: { textAlign: 'center' }, text }), el('div', { class: 'card-actions' }, el('button', { class: 'btn quiet', type: 'button', text: no, 'data-back': '', onClick: () => close(false) }), el('button', { class: 'btn solid', type: 'button', text: yes, onClick: () => close(true) }))),
     );
     cards.append(card);
   });

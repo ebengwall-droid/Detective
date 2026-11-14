@@ -3,9 +3,13 @@
 //
 //   node scripts/build-artifact.mjs [--out dist]
 //
-// Writes two files:
+// Writes:
 //   greyhaven.html  a complete document. Put it on any static host, or just
 //                   open it. Characters follow their script there.
+//   app/            the same page as an installable web app: index.html plus
+//                   the manifest, icons and service worker. Host the folder
+//                   anywhere and "Add to Home Screen" gives a full-screen app
+//                   that also opens offline.
 //   artifact.html   the same page as a claude.ai artifact body (no <html>,
 //                   <head> or <body>; the host supplies those). Opened on
 //                   claude.ai, the page asks Claude to play the cast on the
@@ -57,6 +61,13 @@ const standalone = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#0a1216">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Greyhaven">
 <title>Greyhaven: ${TITLE}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,7 +83,16 @@ ${body}
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, 'artifact.html'), artifact);
 fs.writeFileSync(path.join(outDir, 'greyhaven.html'), standalone);
+
+// The installable app: the page plus what a phone needs to treat it as one.
+const appDir = path.join(outDir, 'app');
+fs.rmSync(appDir, { recursive: true, force: true });
+fs.mkdirSync(path.join(appDir, 'icons'), { recursive: true });
+fs.writeFileSync(path.join(appDir, 'index.html'), standalone);
+for (const file of ['manifest.webmanifest', 'sw.js']) fs.copyFileSync(path.join(root, 'public', file), path.join(appDir, file));
+for (const file of fs.readdirSync(path.join(root, 'public/icons'))) fs.copyFileSync(path.join(root, 'public/icons', file), path.join(appDir, 'icons', file));
 const kb = (s) => `${(Buffer.byteLength(s) / 1024).toFixed(0)} KB`;
 console.log(`script ${kb(js)}, styles ${kb(css)}`);
 console.log(`wrote ${path.join(outDir, 'artifact.html')} (${kb(artifact)})`);
 console.log(`wrote ${path.join(outDir, 'greyhaven.html')} (${kb(standalone)})`);
+console.log(`wrote ${appDir}/ (installable app: index.html, manifest, icons, service worker)`);

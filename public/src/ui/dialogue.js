@@ -182,7 +182,7 @@ export function createDialogue(panels, game) {
     picker = el(
       'div',
       { class: 'picker' },
-      el('div', { class: 'panel-head' }, el('div', { class: 'panel-title', text: `Show ${current.name.split(' ').slice(-1)[0]} something` }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Back', onClick: closePicker }, icon('close'))),
+      el('div', { class: 'panel-head' }, el('div', { class: 'panel-title', text: `Show ${current.name.split(' ').slice(-1)[0]} something` }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Back', 'data-back': '', onClick: closePicker }, icon('close'))),
       list,
     );
     panel.append(picker);
@@ -244,7 +244,7 @@ export function createDialogue(panels, game) {
         el('div', { class: 'dlg-who' }, el('div', { class: 'dlg-name' }, talk.name, moodEl), el('div', { class: 'dlg-role', text: talk.phone ? 'On the telephone' : talk.short })),
         talk.finale || talk.phone ? null : el('button', { class: 'ibtn tool', type: 'button', 'aria-label': 'Size them up', title: 'Size them up', onClick: observe }, icon('eye'), el('span', { class: 'tool-cap', text: 'Observe' })),
         talk.finale ? null : el('button', { class: 'ibtn tool', type: 'button', 'aria-label': 'Show evidence', title: 'Show evidence', onClick: openPicker }, icon('bag'), el('span', { class: 'tool-cap', text: 'Show' })),
-        el('button', { class: 'xbtn', type: 'button', 'aria-label': 'End conversation', onClick: () => api.close() }, icon('close')),
+        el('button', { class: 'xbtn', type: 'button', 'aria-label': 'End conversation', 'data-back': '', onClick: () => api.close() }, icon('close')),
       );
       panel = el('section', { class: 'panel dialogue', role: 'dialog', 'aria-label': `Talking to ${talk.name}` }, head, log, turnsEl, chips, el('div', { class: 'dlg-input' }, input, sendBtn));
       panels.append(panel);
@@ -279,6 +279,11 @@ export function createDialogue(panels, game) {
       current = null;
       busy = false;
       if (!silent) game.dialogueClosed(was);
+    },
+
+    /** Where the panel is on screen, so the camera can frame the speaker in what is left. */
+    rect() {
+      return panel?.getBoundingClientRect() ?? null;
     },
 
     /** The on-screen keyboard is up: give the panel the whole visible area. */

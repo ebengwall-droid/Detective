@@ -50,6 +50,7 @@ export function showTitle(cards, game, { hasSave, savedName }) {
           el('button', { class: 'btn quiet small', type: 'button', text: 'How to play', onClick: () => showHelp(cards, game) }),
         ),
         aiLine(game.client.ai),
+        game.install?.iosHint ? el('div', { class: 'ai-line', style: { marginTop: '8px' }, text: 'To play full screen: Share, then Add to Home Screen.' }) : null,
       ),
     );
     cards.append(card);
@@ -60,8 +61,9 @@ export function showHelp(cards, game) {
   return new Promise((resolve) => {
     const touch = game.isTouch;
     const items = [
-      ['Move', touch ? 'Left thumb is a joystick. Or just tap the floor, or a thing, and you will walk to it.' : 'W A S D or the arrow keys. Or click the floor, or a thing, and you will walk to it.'],
-      ['Look', touch ? 'Drag anywhere on the right of the screen.' : 'Hold the mouse button and drag. Press F for full mouse-look.'],
+      ['Move', touch ? 'Tap the floor, a marker or a person and you walk there. The ring at the bottom left steers by thumb if you prefer.' : 'Click the floor, a marker or a person and you walk there. Or use W A S D or the arrow keys.'],
+      ['Turn', touch ? 'Drag anywhere on the picture.' : 'Hold the mouse button and drag. Press F for full mouse-look.'],
+      ['Get around', `Look lists everyone and everything in the room: ${touch ? 'tap' : 'click'} a name and you walk straight to it. Map takes you between places.`],
       ['Examine', `Glowing diamonds mark what can be examined. ${touch ? 'Tap' : 'Click'} one. What matters is bagged as evidence. Look lights up everything in the room.`],
       ['Talk', `Speech bubbles are people. Ask them anything, in your own words, or ${touch ? 'tap' : 'click'} a suggested question. They remember. Some of them lie.`],
       ['Break a lie', 'While talking, Show puts a piece of evidence in front of someone. That is how liars come apart. Observe tells you what you notice about them.'],
@@ -84,7 +86,7 @@ export function showHelp(cards, game) {
     const card = el(
       'section',
       { class: 'card', role: 'dialog', 'aria-label': 'How to play' },
-      el('div', { class: 'card-inner', style: { width: 'min(100%, 760px)' } }, el('div', { class: 'card-kicker', text: 'How to play' }), el('div', { class: 'rule' }), el('div', { class: 'help-grid' }, items.map(([h, p]) => el('div', { class: 'help-item' }, el('h4', { text: h }), el('p', { text: p })))), el('div', { class: 'card-actions' }, el('button', { class: 'btn solid', type: 'button', text: 'Understood', onClick: close }))),
+      el('div', { class: 'card-inner', style: { width: 'min(100%, 760px)' } }, el('div', { class: 'card-kicker', text: 'How to play' }), el('div', { class: 'rule' }), el('div', { class: 'help-grid' }, items.map(([h, p]) => el('div', { class: 'help-item' }, el('h4', { text: h }), el('p', { text: p })))), el('div', { class: 'card-actions' }, el('button', { class: 'btn solid', type: 'button', text: 'Understood', 'data-back': '', onClick: close }))),
     );
     cards.append(card);
   });
@@ -132,6 +134,21 @@ export function showMenu(cards, game) {
     if (ai?.hosted && ai.live) {
       rows.push(el('div', { class: 'setting' }, el('label', {}, 'Characters played by', el('small', { text: 'Opus acts best. Fast answers sooner.' })), seg([['opus', 'Opus'], ['quick', 'Fast']], ai.pref ?? 'opus', (v) => game.setAiPreference(v))));
     }
+    const install = game.install;
+    if (document.fullscreenEnabled && !install?.installed) {
+      rows.push(el('div', { class: 'setting' }, el('label', { text: 'Full screen' }), seg([[true, 'On'], [false, 'Off']], !!document.fullscreenElement, (v) => game.setFullscreen(v))));
+    }
+    if (install?.canPrompt()) {
+      const btn = el('button', { class: 'btn small', type: 'button', text: 'Install' });
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        if (await install.prompt()) btn.textContent = 'Installed';
+        else btn.disabled = false;
+      });
+      rows.push(el('div', { class: 'setting' }, el('label', {}, 'Put it on your home screen', el('small', { text: 'Opens full screen, like any other app.' })), btn));
+    } else if (install?.iosHint) {
+      rows.push(el('div', { class: 'setting' }, el('label', {}, 'Put it on your home screen', el('small', { text: 'Tap Share in Safari, then Add to Home Screen. It opens full screen, like any other app.' }))));
+    }
     const card = el(
       'section',
       { class: 'card veil', role: 'dialog', 'aria-label': 'Menu' },
@@ -146,7 +163,7 @@ export function showMenu(cards, game) {
         el(
           'div',
           { class: 'card-actions' },
-          el('button', { class: 'btn solid', type: 'button', text: 'Back to the case', onClick: () => close(null) }),
+          el('button', { class: 'btn solid', type: 'button', text: 'Back to the case', 'data-back': '', onClick: () => close(null) }),
           el('button', { class: 'btn', type: 'button', text: 'How to play', onClick: () => showHelp(cards, game) }),
           game.view?.ending?.text ? el('button', { class: 'btn', type: 'button', text: 'Case report', onClick: () => close('report') }) : null,
           el('button', { class: 'btn danger', type: 'button', text: 'Start over', onClick: () => close('new') }),

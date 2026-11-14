@@ -6,8 +6,9 @@
 // Touch:   left thumb is a floating joystick, anywhere else drags the view,
 //          a quick tap interacts with (or walks to) whatever is under it.
 
-const TAP_MS = 320;
-const TAP_PX = 12;
+// A touch that stays this close to where it landed, for no longer than this,
+// is a tap. Fingers wobble more than a mouse and are slower to lift.
+const TAP = { touch: { px: 16, ms: 420 }, mouse: { px: 6, ms: 320 } };
 
 export class Controls {
   /**
@@ -35,7 +36,7 @@ export class Controls {
     this.onLockChange = () => {};
 
     this.keys = new Set();
-    /** @type {Map<number, {kind: 'stick'|'look', x0: number, y0: number, x: number, y: number, t0: number, moved: number}>} */
+    /** @type {Map<number, {kind: 'stick'|'look', x0: number, y0: number, x: number, y: number, t0: number, far: number, lim: {px: number, ms: number}}>} */
     this.pointers = new Map();
 
     this.stick = document.createElement('div');
@@ -44,6 +45,15 @@ export class Controls {
     this.stick.hidden = true;
     overlay.appendChild(this.stick);
     this.knob = /** @type {HTMLElement} */ (this.stick.firstElementChild);
+
+    // A resting joystick so a phone player can see where their thumb goes.
+    // The real one appears wherever the thumb actually lands.
+    this.touchUi = false;
+    this.ghost = document.createElement('div');
+    this.ghost.className = 'stick-ghost';
+    this.ghost.innerHTML = '<div class="stick-knob"></div><span>Move</span>';
+    this.ghost.hidden = true;
+    overlay.appendChild(this.ghost);
 
     this.bind();
   }
@@ -76,6 +86,18 @@ export class Controls {
       this.reset();
       if (this.locked) document.exitPointerLock?.();
     }
+    this.showGhost();
+  }
+
+  /** Tell the controls this is a touch screen before the first touch arrives. */
+  setTouchUi(on) {
+    this.touchUi = on;
+    this.showGhost();
+  }
+
+  showGhost() {
+    const steering = [...this.pointers.values()].some((p) => p.kind === 'stick');
+    this.ghost.hidden = !(this.enabled && this.touchUi && !steering);
   }
 
   reset() {
@@ -125,15 +147,18 @@ export class Controls {
 
   down(e) {
     if (!this.enabled) return;
-    if (e.pointerType === 'touch') this.isTouch = true;
+    if (e.pointerType === 'touch' && !this.isTouch) {
+      this.isTouch = true;
+      this.touchUi = true;
+    }
     if (this.locked) return;
     const rect = this.surface.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const stickFree = ![...this.pointers.values()].some((p) => p.kind === 'stick');
-    const inStickZone = e.pointerType === 'touch' && x < rect.width * 0.45 && y > rect.height * 0.4;
+    const inStickZone = e.pointerType === 'touch' && this.inStickZone(x, y, rect);
     const kind = inStickZone && stickFree ? 'stick' : 'look';
-    this.pointers.set(e.pointerId, { kind, x0: x, y0: y, x, y, t0: performance.now(), moved: 0 });
+    this.pointers.set(e.pointerId, { kind, x0: x, y0: y, x, y, t0: performance.now(), far: 0, lim: e.pointerType === 'mouse' ? TAP.mouse : TAP.touch });
     try {
       this.surface.setPointerCapture(e.pointerId);
     } catch {
@@ -145,6 +170,18 @@ export class Controls {
       this.stick.style.top = `${y}px`;
       this.knob.style.transform = 'translate(-50%, -50%)';
     }
+    this.showGhost();
+  }
+
+  /** The thumb steers from the ring and a little around it; anywhere else turns the view. */
+  inStickZone(x, y, rect) {
+    this.ghost.hidden = false;
+    const g = this.ghost.getBoundingClientRect();
+    this.showGhost();
+    if (!g.width) return x < rect.width * 0.45 && y > rect.height * 0.4;
+    const cx = g.left + g.width / 2 - rect.left;
+    const cy = g.top + g.height / 2 - rect.top;
+    return Math.hypot(x - cx, y - cy) <= Math.max(100, g.width * 1.1);
   }
 
   moveEvent(e) {
@@ -161,7 +198,7 @@ export class Controls {
     const dy = y - p.y;
     p.x = x;
     p.y = y;
-    p.moved += Math.abs(dx) + Math.abs(dy);
+    p.far = Math.max(p.far, Math.hypot(x - p.x0, y - p.y0));
     if (p.kind === 'stick') {
       const max = 46;
       let ox = x - p.x0;
@@ -184,7 +221,7 @@ export class Controls {
         this.move.x = nx * k;
         this.move.z = -ny * k;
       }
-    } else if (p.moved > TAP_PX) {
+    } else if (p.far > p.lim.px) {
       const scale = e.pointerType === 'touch' ? 1.7 : 1.15;
       this.lookX += dx * scale;
       this.lookY += dy * scale;
@@ -205,7 +242,8 @@ export class Controls {
       this.move.x = 0;
       this.move.z = 0;
     }
-    if (!cancelled && this.enabled && p.moved <= TAP_PX && performance.now() - p.t0 < TAP_MS) {
+    this.showGhost();
+    if (!cancelled && this.enabled && p.far <= p.lim.px && performance.now() - p.t0 < p.lim.ms) {
       this.onTap(p.x, p.y);
     }
   }
