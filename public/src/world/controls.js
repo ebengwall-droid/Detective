@@ -155,9 +155,11 @@ export class Controls {
     const rect = this.surface.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const stickFree = ![...this.pointers.values()].some((p) => p.kind === 'stick');
+    const active = [...this.pointers.values()];
+    const stickFree = !active.some((p) => p.kind === 'stick');
     const inStickZone = e.pointerType === 'touch' && this.inStickZone(x, y, rect);
-    const kind = inStickZone && stickFree ? 'stick' : 'look';
+    // One finger steers and one turns. A third (or a pinch) does nothing rather than fight them.
+    const kind = inStickZone && stickFree ? 'stick' : active.some((p) => p.kind === 'look') ? 'idle' : 'look';
     this.pointers.set(e.pointerId, { kind, x0: x, y0: y, x, y, t0: performance.now(), far: 0, lim: e.pointerType === 'mouse' ? TAP.mouse : TAP.touch });
     try {
       this.surface.setPointerCapture(e.pointerId);
@@ -221,7 +223,7 @@ export class Controls {
         this.move.x = nx * k;
         this.move.z = -ny * k;
       }
-    } else if (p.far > p.lim.px) {
+    } else if (p.kind === 'look' && p.far > p.lim.px) {
       const scale = e.pointerType === 'touch' ? 1.7 : 1.15;
       this.lookX += dx * scale;
       this.lookY += dy * scale;
@@ -243,7 +245,7 @@ export class Controls {
       this.move.z = 0;
     }
     this.showGhost();
-    if (!cancelled && this.enabled && p.far <= p.lim.px && performance.now() - p.t0 < p.lim.ms) {
+    if (!cancelled && this.enabled && p.kind !== 'idle' && p.far <= p.lim.px && performance.now() - p.t0 < p.lim.ms) {
       this.onTap(p.x, p.y);
     }
   }

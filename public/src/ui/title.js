@@ -5,12 +5,11 @@ import { el, add, icon, prose } from './dom.js';
 
 const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
-function aiLine(ai) {
-  const text = ai?.live
-    ? `Every character is played live by ${ai.label}.`
-    : ai?.hosted
-      ? 'Claude is not available in this view. Characters follow the script.'
-      : 'Scripted mode. Add an Anthropic API key to bring the characters to life.';
+function aiLine(game) {
+  const ai = game.client.ai;
+  // With a server there is a key to add. Without one (the single-file and hosted builds) there is not.
+  const offline = game.client.mode === 'local' ? 'Claude cannot be reached from here, so the characters keep to their script.' : 'Scripted mode. Add an Anthropic API key to bring the characters to life.';
+  const text = ai?.live ? `Every character is played live by ${ai.label}.` : ai?.hosted ? 'Claude is not available in this view. Characters follow the script.' : offline;
   return el('div', { class: 'ai-line' }, el('span', { class: `ai-dot ${ai?.live ? 'live' : ''}` }), text);
 }
 
@@ -49,7 +48,7 @@ export function showTitle(cards, game, { hasSave, savedName }) {
           el('button', { class: hasSave ? 'btn' : 'btn solid', type: 'button', text: hasSave ? 'Start over' : 'Begin', onClick: begin }),
           el('button', { class: 'btn quiet small', type: 'button', text: 'How to play', onClick: () => showHelp(cards, game) }),
         ),
-        aiLine(game.client.ai),
+        aiLine(game),
         game.install?.iosHint ? el('div', { class: 'ai-line', style: { marginTop: '8px' }, text: 'To play full screen: Share, then Add to Home Screen.' }) : null,
       ),
     );
@@ -159,7 +158,7 @@ export function showMenu(cards, game) {
         el('h2', { class: 'card-title', style: { fontSize: 'clamp(26px, 6vw, 36px)' }, text: game.caseInfo.title }),
         el('div', { class: 'rule' }),
         rows,
-        aiLine(ai),
+        aiLine(game),
         el(
           'div',
           { class: 'card-actions' },

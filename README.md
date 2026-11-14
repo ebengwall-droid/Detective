@@ -57,6 +57,8 @@ the game.
 The phone is the main way to play. Everything is within reach of a thumb, and
 nothing needs careful steering.
 
+![A crime scene, the Look list and a conversation on a phone](docs/phone.jpg)
+
 - **Tap to go.** Tap the floor, a glowing marker or a person and you walk
   there. Drag to look around. The ring at the bottom left steers by thumb if
   you would rather.

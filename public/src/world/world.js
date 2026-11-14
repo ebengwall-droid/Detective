@@ -155,6 +155,19 @@ export class World {
     this.scene.environmentIntensity = 0.3;
     this.camera = new THREE.PerspectiveCamera(68, 1, 0.06, 90);
     this.resize();
+    // Phones take the graphics context away when the game is put in the
+    // background for a while. When it comes back, lay the room out again.
+    this.canvas.addEventListener('webglcontextrestored', () => {
+      this.scene.environment = buildEnvironment(this.renderer);
+      this.portraitCache?.clear();
+      if (this.lastLoc) {
+        const pose = { ...this.player };
+        const focus = this.focus;
+        this.locKey = null;
+        this.loadLocation(this.lastLoc, { pose });
+        this.focus = focus;
+      }
+    });
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(this.canvas.parentElement ?? this.canvas);
     window.addEventListener('resize', () => this.resize());
