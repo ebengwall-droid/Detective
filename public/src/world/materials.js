@@ -528,6 +528,42 @@ export function blobShadowMaterial() {
 }
 
 /** Radial glow sprite texture for lamp halos. */
+/**
+ * Lit air: bright where the light enters, fading along its length, with faint
+ * streaks. `edges` fades the sides too, for flat sheets of light.
+ */
+export function shaftTexture(edges = false) {
+  return canvasTexture(
+    edges ? 'shaft-flat' : 'shaft',
+    128,
+    (ctx, s) => {
+      const g = ctx.createLinearGradient(0, 0, 0, s);
+      g.addColorStop(0, 'rgba(255,255,255,0.95)');
+      g.addColorStop(0.3, 'rgba(255,255,255,0.42)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, s, s);
+      ctx.globalCompositeOperation = 'destination-out';
+      const rnd = mulberry32(edges ? 7 : 11);
+      for (let i = 0; i < 22; i++) {
+        ctx.fillStyle = `rgba(0,0,0,${0.06 + rnd() * 0.2})`;
+        ctx.fillRect(rnd() * s, 0, 1 + rnd() * 6, s);
+      }
+      if (edges) {
+        const e = ctx.createLinearGradient(0, 0, s, 0);
+        e.addColorStop(0, 'rgba(0,0,0,1)');
+        e.addColorStop(0.22, 'rgba(0,0,0,0)');
+        e.addColorStop(0.78, 'rgba(0,0,0,0)');
+        e.addColorStop(1, 'rgba(0,0,0,1)');
+        ctx.fillStyle = e;
+        ctx.fillRect(0, 0, s, s);
+      }
+      ctx.globalCompositeOperation = 'source-over';
+    },
+    { repeat: false },
+  );
+}
+
 export function haloTexture() {
   return canvasTexture(
     'halo',

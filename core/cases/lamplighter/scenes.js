@@ -156,7 +156,7 @@ export const SCENES = {
       { t: 'door', id: 'garden_door', wall: 'w', at: -2.6, mat: 'woodPaintGreen' },
       { t: 'tapeLine', p: [-4.12, -2.6], r: 90, len: 1.05, hgt: 1.25, if: 'act>=2' },
       // Scene-of-crime kit.
-      { t: 'floodlight', p: [0.2, 1.5], r: 150, intensity: 9, tilt: 14 },
+      { t: 'floodlight', p: [0.2, 1.5], r: 150, intensity: 7, tilt: 14 },
       { t: 'tripodCamera', p: [2.9, 1.6], r: -150 },
       { t: 'caseKit', p: [-0.4, 2.3], r: 30 },
       { t: 'token', id: 'tunic_button', p: [1.72, -0.12], if: ['act>=2', '!ev:tunic_button'] },

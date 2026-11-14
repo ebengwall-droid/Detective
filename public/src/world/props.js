@@ -563,6 +563,7 @@ def('pendant', (g, o, ctx) => {
   if (on) {
     sph(g, 0.045, glow(o.color ?? 0xfff0c8, 2), 0, y + 0.03, 0, 8, { dyn: true });
     ctx.halo(g, o.color ?? WARM, 0.9, 0, y, 0, 0.5);
+    ctx.beam(g, { y: y - 0.01, top: 0.17, bottom: 0.95, h: Math.max(0.6, y - 0.08), color: o.color ?? WARM, opacity: 0.05 });
     if (o.light !== false) {
       ctx.light(g, { color: o.color ?? WARM, intensity: o.intensity ?? 9, distance: o.distance ?? 9, x: 0, y: y - 0.08, z: 0, flicker: o.flicker, shadow: o.shadow });
     }

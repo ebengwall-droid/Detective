@@ -24,7 +24,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outArg = process.argv.indexOf('--out');
 const outDir = path.resolve(outArg > 0 ? process.argv[outArg + 1] : path.join(root, 'dist'));
 
-const FONTS = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Marcellus&family=Special+Elite&display=swap';
+const FONTS = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400..600&family=Marcellus&family=Special+Elite&display=swap';
 const TITLE = 'The Lamplighter';
 
 const bundle = await build({
@@ -51,7 +51,9 @@ const body = `<div id="app"><div id="boot"><div class="lamp"></div>Greyhaven</di
 const artifact = `<title>${TITLE}</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="${FONTS}">
-<style>${css}</style>
+<style>${css}
+/* The artifact frame already keeps the page clear of the notch and the home bar, top and bottom. */
+:root{--safe-t:0px;--safe-b:0px}</style>
 ${body}
 `;
 
@@ -60,7 +62,7 @@ const standalone = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#0a1216">
+<meta name="theme-color" content="#05080d">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">

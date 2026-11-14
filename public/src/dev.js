@@ -36,7 +36,8 @@ async function main() {
     return;
   }
   try {
-    await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 2500))]);
+    const faces = ['16px "Marcellus"', '16px "Special Elite"', '16px "Instrument Sans"', '700 16px "Instrument Sans"', '16px "JetBrains Mono"'];
+    await Promise.race([Promise.all(faces.map((face) => document.fonts.load(face))), new Promise((r) => setTimeout(r, 2500))]);
   } catch {}
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Number(params.get('dpr') ?? 1));
@@ -48,7 +49,7 @@ async function main() {
   const scene = new THREE.Scene();
   scene.environment = buildEnvironment(renderer);
   scene.environmentIntensity = 0.35;
-  const built = buildScene(spec, { shadows: params.get('shadows') !== '0', maxLights: Number(params.get('lights') ?? 8) });
+  const built = buildScene(spec, { shadows: params.get('shadows') !== '0', maxLights: Number(params.get('lights') ?? 8), detail: Number(params.get('detail') ?? 1) });
   scene.add(built.root);
   scene.background = new THREE.Color(built.fog.color);
   scene.fog = new THREE.FogExp2(built.fog.color, built.fog.density);
@@ -114,7 +115,7 @@ async function main() {
     camera.position.set(pos.x, pos.y, pos.z);
     camera.rotation.set(pitch, yaw, 0, 'YXZ');
     for (const fn of built.anims) fn(t, dt);
-    for (const ch of people) ch.update(t, dt, { lookAt: camera.position, talking: false });
+    for (const ch of people) ch.update(t, dt, { lookAt: camera.position, talking: params.get('talk') === '1', mood: params.get('mood') ?? 'calm' });
     renderer.render(scene, camera);
     const ri = renderer.info.render;
     info.textContent = `${locId}  x=${pos.x.toFixed(2)} z=${pos.z.toFixed(2)} yaw=${((yaw * 180) / Math.PI).toFixed(0)} pitch=${((pitch * 180) / Math.PI).toFixed(0)}\ncalls=${ri.calls} tris=${ri.triangles}`;

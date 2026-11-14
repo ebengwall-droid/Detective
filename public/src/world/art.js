@@ -3,8 +3,8 @@
 
 const SERIF = '"Marcellus SC", "Marcellus", Georgia, "Times New Roman", serif';
 const TYPE = '"Special Elite", "Courier New", Courier, monospace';
-const SANS = '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif';
-const MONO = '"IBM Plex Mono", "Courier New", monospace';
+const SANS = '"Instrument Sans", "Helvetica Neue", Arial, sans-serif';
+const MONO = '"JetBrains Mono", "Courier New", monospace';
 
 function paperGround(ctx, w, h, rnd, base = '#d9cfb4') {
   ctx.fillStyle = base;

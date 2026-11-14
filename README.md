@@ -65,13 +65,16 @@ nothing needs careful steering.
 - **Look** lists everyone and everything in the room. Tap a name and you walk
   straight to it. With Look and the Map you can play the whole case without
   steering at all.
-- **Tools sit along the bottom**: Look, Think, Notes, Laptop, Map. Panels open
-  as sheets from the bottom and close from the bottom.
+- **Tools sit in a dock along the bottom**: Look, Think, Notes, Laptop, Map.
+  Panels open as sheets from the bottom and close from the bottom.
 - **Suggested questions** are one tap. Type or dictate your own whenever you
   like.
 - The phone's **Back** button or swipe closes whatever is open instead of
   leaving the game.
 - Works upright or on its side. The screen stays awake while you read.
+- If movement feels choppy, **Menu, Graphics, Low** turns off the finishing
+  effects (bloom, depth of field, frosted glass). The game also steps down by
+  itself when it sees the frame rate struggling.
 
 ### Install it as an app
 
@@ -94,7 +97,7 @@ or host the `dist/app` folder from `npm run build` (below) on any static host.
 | Examine or talk | Tap the glowing marker | Click it, or look at it and press `E` |
 | Everything in the room | **Look** | `Q` |
 | Catch a lie | In a conversation, **Show** puts evidence in front of them | The same |
-| Notebook, laptop, map | Bar along the bottom | `N`, `L`, `M` |
+| Notebook, laptop, map | Dock along the bottom | `N`, `L`, `M` |
 | Hint | **Think** | `T` |
 
 ### Builds without a server
@@ -139,7 +142,7 @@ core/                 The game itself. Runs unchanged in Node and in the browser
   cases/lamplighter/  The case: scenes, people, facts, evidence, records, story
 server/               Node server: hosts the core, keeps the API key and the saves
 public/               The browser client
-  src/world/          3D: rooms, props, characters, movement (three.js)
+  src/world/          3D: rooms, props, characters, movement, finishing pass (three.js)
   src/ui/             HUD, conversation, notebook, laptop, map, title, ending
   src/game.js         Ties the world and the UI to the game core
 scripts/              Playtest, browser test driver, single-file build
@@ -148,8 +151,15 @@ test/                 Tests
 
 Everything in the game is made in code. There are no model, texture or sound
 files: rooms are built from primitives, textures are painted on canvases and
-the rain, foghorn and piano are synthesised. (The only image files are the app
-icons, drawn by `scripts/make-icons.py`.)
+the rain, foghorn and piano are synthesised. People are made the same way:
+their faces are painted, and repainted as they blink, speak and react. (The
+only image files are the app icons, drawn by `scripts/make-icons.py`.)
+
+The picture is finished the way a film is: lamps bloom, moonlight comes
+through the blinds in shafts, the room falls out of focus behind whoever you
+are talking to, and the whole frame is graded. That pass is
+`public/src/world/post.js`; it is written for this game and needs nothing
+beyond three.js.
 
 When you run the server, the game runs on the server and the browser is a
 thin client. The server never sends the browser anything the detective has

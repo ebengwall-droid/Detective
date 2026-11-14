@@ -2,11 +2,14 @@
 //
 //   node scripts/ui.mjs <scenario.mjs> [--mobile] [--out <dir>] [--local] [--quality low|medium|high]
 //                                      [--url <page>] [--fake-claude [deny]] [--server-log]
+//                                      [--still] [--dpr N] [--w N --h N]
 //
 //   --local        run the game core in the page (?mode=local) instead of on the server
 //   --url          open this page instead of the dev server, e.g. file:///.../dist/greyhaven.html
 //   --fake-claude  pretend to be the claude.ai host: the page finds a `claude.use('sample')`
 //                  that streams canned replies ("deny" makes it refuse, as a viewer might)
+//   --still        ask for reduced motion, so panels are in place when a screenshot is taken
+//                  (software rendering is slow enough to catch them halfway in)
 //
 // A scenario is a module whose default export is
 //   async ({ page, shot, sleep, game, tapWorld, log }) => { ... }
@@ -107,9 +110,10 @@ async function main() {
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const context = await browser.newContext({
     viewport: { width: Number(arg('w', mobile ? 390 : 1100)), height: Number(arg('h', mobile ? 780 : 620)) },
-    deviceScaleFactor: 1,
+    deviceScaleFactor: Number(arg('dpr', 1)),
     isMobile: mobile,
     hasTouch: mobile,
+    reducedMotion: flag('still') ? 'reduce' : 'no-preference',
   });
   const page = await context.newPage();
   page.setDefaultTimeout(60000);

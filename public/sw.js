@@ -5,7 +5,7 @@
 // whatever was fetched last is kept as the fallback. The game's own calls to
 // the server (/api/) are never touched.
 
-const CACHE = 'greyhaven-v1';
+const CACHE = 'greyhaven-v2';
 
 self.addEventListener('install', () => self.skipWaiting());
 

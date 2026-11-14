@@ -76,7 +76,10 @@ export class Game {
 
     // Any card on screen (scene break, question, menu, letter) pauses the world.
     new MutationObserver(() => {
-      if (this.cards.childElementCount) this.block('cards');
+      const any = this.cards.childElementCount > 0;
+      // A card has the screen to itself: nothing from the room's interface should show through it.
+      root.classList.toggle('carded', any);
+      if (any) this.block('cards');
       else this.unblock('cards');
     }).observe(this.cards, { childList: true });
   }
@@ -96,7 +99,10 @@ export class Game {
 
   async boot() {
     try {
-      await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 2500))]);
+      // Signs and papers in the rooms are painted with type the page itself may never show, so ask for each face by name.
+      const faces = ['16px "Marcellus"', '16px "Special Elite"', '16px "Instrument Sans"', '700 16px "Instrument Sans"', '16px "JetBrains Mono"', '700 16px "Bricolage Grotesque"'];
+      const loaded = Promise.all(faces.map((face) => document.fonts.load(face))).then(() => document.fonts.ready);
+      await Promise.race([loaded, new Promise((r) => setTimeout(r, 2500))]);
     } catch {
       /* fonts are a nicety */
     }

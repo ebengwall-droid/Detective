@@ -7,19 +7,22 @@
 import * as THREE from 'three';
 import { buildScene } from './builder.js';
 import { buildEnvironment, canvasTexture } from './materials.js';
-import { createCharacter } from './characters.js';
+import { createCharacter, figureLight } from './characters.js';
 import { Nav } from './nav.js';
 import { Controls } from './controls.js';
+import { Post } from './post.js';
 
 const EYE = 1.62;
 const WALK_SPEED = 2.35;
 const REACH = 2.3;
 const REACH_NPC = 2.7;
 
+// post: the finishing pass (bloom, focus, grade). samples: edge smoothing for
+// the room itself. detail: how much geometry the room is given (bevels, dust).
 const QUALITY = {
-  high: { shadows: true, shadowSize: 2048, pixelRatio: 1.75, maxLights: 9, antialias: true },
-  medium: { shadows: true, shadowSize: 1024, pixelRatio: 1.35, maxLights: 7, antialias: true },
-  low: { shadows: false, shadowSize: 512, pixelRatio: 1, maxLights: 5, antialias: false },
+  high: { shadows: true, shadowSize: 2048, pixelRatio: 1.75, maxLights: 9, post: true, samples: 4, detail: 2 },
+  medium: { shadows: true, shadowSize: 1024, pixelRatio: 1.3, maxLights: 7, post: true, samples: 4, detail: 1 },
+  low: { shadows: false, shadowSize: 512, pixelRatio: 1, maxLights: 5, post: false, samples: 0, detail: 0 },
 };
 
 /** Screen markers are drawn white (with a dark edge) and tinted per use. */
@@ -146,11 +149,23 @@ export class World {
     if (quality) this.quality = quality;
     if (brightness) this.brightness = brightness;
     const q = QUALITY[this.quality];
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: q.antialias, powerPreference: 'high-performance' });
+    // The stylesheet drops its frosted-glass blur on the lowest setting.
+    document.documentElement.dataset.quality = this.quality;
+    // No canvas antialiasing: with the finishing pass the room is smoothed in
+    // its own off-screen picture, and without it speed matters more.
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false, powerPreference: 'high-performance' });
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.shadowMap.enabled = q.shadows;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
+    try {
+      this.post = new Post(this.renderer);
+    } catch (err) {
+      console.warn('No finishing pass on this device:', err?.message);
+      this.post = null;
+    }
     this.scene = new THREE.Scene();
+    /** Markers are drawn after everything else, crisp and unblurred. */
+    this.overlay = new THREE.Scene();
     this.scene.environment = buildEnvironment(this.renderer);
     this.scene.environmentIntensity = 0.3;
     this.camera = new THREE.PerspectiveCamera(68, 1, 0.06, 90);
@@ -179,8 +194,10 @@ export class World {
     const w = Math.max(1, parent.clientWidth);
     const h = Math.max(1, parent.clientHeight);
     const q = QUALITY[this.quality];
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, q.pixelRatio));
+    const ratio = Math.min(window.devicePixelRatio || 1, q.pixelRatio);
+    this.renderer.setPixelRatio(ratio);
     this.renderer.setSize(w, h, false);
+    if (this.post && q.post) this.post.setSize(w, h, ratio, q.samples);
     this.camera.aspect = w / h;
     // A tall phone screen needs a wider vertical field of view to feel right.
     this.baseFov = w / h < 0.8 ? 84 : w / h < 1.2 ? 76 : 66;
@@ -192,6 +209,7 @@ export class World {
   setQuality(name) {
     if (!QUALITY[name] || name === this.quality) return;
     this.quality = name;
+    document.documentElement.dataset.quality = name;
     this.renderer.shadowMap.enabled = QUALITY[name].shadows;
     this.resize();
     if (this.lastLoc) {
@@ -224,7 +242,7 @@ export class World {
       const keepFocus = sameRoom ? this.focus : null;
       this.clearLocation();
       const q = QUALITY[this.quality];
-      this.built = buildScene(loc.scene, { shadows: q.shadows, shadowSize: q.shadowSize, maxLights: q.maxLights });
+      this.built = buildScene(loc.scene, { shadows: q.shadows, shadowSize: q.shadowSize, maxLights: q.maxLights, detail: q.detail, post: !!(this.post && q.post) });
       this.scene.add(this.built.root);
       this.built.hooks.lightning = () => this.emit('lightning');
       this.scene.background = new THREE.Color(this.built.fog.color);
@@ -254,9 +272,16 @@ export class World {
       this.built.dispose();
       this.built = null;
     }
-    for (const n of this.npcs.values()) this.scene.remove(n.ch.root, n.marker, n.proxy);
+    for (const n of this.npcs.values()) {
+      this.scene.remove(n.ch.root, n.proxy);
+      this.overlay.remove(n.marker);
+      n.ch.dispose();
+    }
     this.npcs.clear();
-    for (const h of this.hotspots.values()) this.scene.remove(h.marker, h.proxy);
+    for (const h of this.hotspots.values()) {
+      this.scene.remove(h.proxy);
+      this.overlay.remove(h.marker);
+    }
     this.hotspots.clear();
     this.pickables = [];
     this.target = null;
@@ -284,7 +309,8 @@ export class World {
         const top = Math.min(centre.y + size.y / 2 + 0.16, 2.05);
         marker.position.set(centre.x, Math.max(top, 0.35), centre.z);
         marker.renderOrder = 10;
-        this.scene.add(proxy, marker);
+        this.scene.add(proxy);
+        this.overlay.add(marker);
         entry = { proxy, marker, centre, size, phase: Math.random() * 6 };
         this.hotspots.set(h.id, entry);
       }
@@ -292,7 +318,8 @@ export class World {
     }
     for (const [id, entry] of this.hotspots) {
       if (seen.has(id)) continue;
-      this.scene.remove(entry.marker, entry.proxy);
+      this.scene.remove(entry.proxy);
+      this.overlay.remove(entry.marker);
       this.hotspots.delete(id);
     }
   }
@@ -304,7 +331,9 @@ export class World {
       const sig = JSON.stringify([n.look, n.p, n.r]);
       let entry = this.npcs.get(n.id);
       if (entry && entry.sig !== sig) {
-        this.scene.remove(entry.ch.root, entry.marker, entry.proxy);
+        this.scene.remove(entry.ch.root, entry.proxy);
+        this.overlay.remove(entry.marker);
+        entry.ch.dispose();
         this.npcs.delete(n.id);
         entry = null;
       }
@@ -322,7 +351,8 @@ export class World {
         marker.position.set(n.p[0], ch.headHeight + 0.42, n.p[1]);
         marker.scale.setScalar(0.3);
         marker.renderOrder = 10;
-        this.scene.add(ch.root, proxy, marker);
+        this.scene.add(ch.root, proxy);
+        this.overlay.add(marker);
         entry = { ch, proxy, marker, baseYaw, yaw: baseYaw, sig, talking: false, pos: new THREE.Vector3(n.p[0], 0, n.p[1]), head: ch.headHeight };
         this.npcs.set(n.id, entry);
       }
@@ -331,7 +361,9 @@ export class World {
     }
     for (const [id, entry] of this.npcs) {
       if (seen.has(id)) continue;
-      this.scene.remove(entry.ch.root, entry.marker, entry.proxy);
+      this.scene.remove(entry.ch.root, entry.proxy);
+      this.overlay.remove(entry.marker);
+      entry.ch.dispose();
       this.npcs.delete(id);
     }
   }
@@ -710,7 +742,7 @@ export class World {
       }
     }
 
-    this.renderer.render(this.scene, this.camera);
+    this.draw(t);
     this.frameCount++;
 
     // If the frame rate is poor for a while, step the quality down once.
@@ -720,6 +752,36 @@ export class World {
       this.slowFrames = 0;
       this.emit('slow', this.quality);
     }
+  }
+
+  /** Put the frame on screen: the room through the finishing pass where there is one, then the markers. */
+  draw(t) {
+    const r = this.renderer;
+    const q = QUALITY[this.quality];
+    const exposure = this.built.exposure * this.brightness;
+    // Keep faces within what the picture can hold (see figureLight).
+    figureLight.value = this.post && q.post ? 0.9 / Post.gain(exposure) : 100;
+    if (this.post && q.post) {
+      try {
+        // In a conversation, focus on the speaker and let the room behind them go soft.
+        const talking = this.focus && this.mode !== 'explore' ? this.npcs.get(this.focus.id) : null;
+        const want = talking ? 1 : this.mode === 'title' ? 0.7 : 0;
+        this.dof = (this.dof ?? 0) + (want - (this.dof ?? 0)) * 0.08;
+        const focus = talking ? Math.hypot(talking.pos.x - this.player.x, talking.pos.z - this.player.z) : 2.4;
+        this.post.render(this.scene, this.camera, { exposure, dof: this.dof < 0.01 ? 0 : this.dof, focus, time: t, bloom: 0.55 });
+      } catch (err) {
+        console.warn('Finishing pass failed; drawing plainly from here on:', err?.message);
+        this.post = null;
+      }
+    }
+    if (!this.post || !q.post) {
+      r.toneMappingExposure = exposure;
+      r.setRenderTarget(null);
+      r.render(this.scene, this.camera);
+    }
+    r.autoClear = false;
+    r.render(this.overlay, this.camera);
+    r.autoClear = true;
   }
 
   followPath(dt) {
@@ -766,34 +828,39 @@ export class World {
   // ----------------------------------------------------------- portraits
 
   /** Render a head-and-shoulders picture of a character; returns a data URL. */
-  portrait(look, size = 160) {
+  portrait(look, size = 208) {
     this.portraitCache ??= new Map();
     const key = JSON.stringify(look) + size;
     if (this.portraitCache.has(key)) return this.portraitCache.get(key);
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x16232a);
+    scene.background = new THREE.Color(0x1b2736);
     const ch = createCharacter({ ...look, pose: 'stand' });
     ch.update(0, 0.016, {});
     scene.add(ch.root);
-    scene.add(new THREE.HemisphereLight(0x9fb8c8, 0x3a2a1c, 1.4));
-    const key1 = new THREE.DirectionalLight(0xffd8a8, 2.6);
-    key1.position.set(1.2, 2.4, 2);
+    scene.add(new THREE.HemisphereLight(0xa9c0d4, 0x7a6858, 1.5));
+    const key1 = new THREE.DirectionalLight(0xffdcb0, 2.7);
+    key1.position.set(1.2, 2.2, 2.2);
     scene.add(key1);
-    const rim = new THREE.DirectionalLight(0x86b8d0, 1.6);
+    const rim = new THREE.DirectionalLight(0x7fc6dc, 1.8);
     rim.position.set(-2, 2, -1.5);
     scene.add(rim);
-    const cam = new THREE.PerspectiveCamera(26, 1, 0.1, 10);
+    // Close enough to be a face at the size of a thumbnail.
+    const cam = new THREE.PerspectiveCamera(17.5, 1, 0.1, 10);
     const h = ch.headHeight;
-    cam.position.set(0.28, h + 0.02, 1.55);
-    cam.lookAt(0, h - 0.06, 0);
+    cam.position.set(0.24, h + 0.03, 1.42);
+    cam.lookAt(0, h - 0.002, 0);
     const rt = new THREE.WebGLRenderTarget(size, size);
     const prevTarget = this.renderer.getRenderTarget();
+    const prevLimit = figureLight.value;
+    figureLight.value = 100; // a studio picture, lit on purpose
     this.renderer.setRenderTarget(rt);
     this.renderer.render(scene, cam);
+    figureLight.value = prevLimit;
     const pixels = new Uint8Array(size * size * 4);
     this.renderer.readRenderTargetPixels(rt, 0, 0, size, size, pixels);
     this.renderer.setRenderTarget(prevTarget);
     rt.dispose();
+    ch.dispose();
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = size;
     const ctx = canvas.getContext('2d');

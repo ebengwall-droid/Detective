@@ -3,7 +3,7 @@
 
 import * as THREE from 'three';
 import { box, cyl, plane, group, mergeStatic, DEG } from './geo.js';
-import { mat, glow, artMaterial, haloTexture, mulberry32 } from './materials.js';
+import { mat, glow, artMaterial, haloTexture, shaftTexture, mulberry32 } from './materials.js';
 import { ART } from './art.js';
 import { PROPS } from './props.js';
 import './props2.js';
@@ -104,7 +104,8 @@ export function buildScene(spec, quality = {}) {
         map: haloTexture(),
         color,
         transparent: true,
-        opacity,
+        // With the finishing pass the lamp itself blooms; the painted halo only adds a little air.
+        opacity: quality.post ? opacity * 0.3 : opacity,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
       });
@@ -115,6 +116,50 @@ export function buildScene(spec, quality = {}) {
       sprite.userData.dyn = true;
       parent.add(sprite);
       return sprite;
+    },
+    /** A cone of lit air under a lamp. Cheap, and it is most of what makes a room feel like it has atmosphere. */
+    beam(parent, { x = 0, y = 0, z = 0, top = 0.08, bottom = 0.9, h = 1.6, color = 0xffb45e, opacity = 0.11 } = {}) {
+      if (!quality.detail) return null;
+      const geometry = new THREE.CylinderGeometry(top, bottom, h, 28, 1, true);
+      // Lit air has no skin: brightest where you look through the most of it, gone at the edges.
+      const material = new THREE.ShaderMaterial({
+        uniforms: { tint: { value: new THREE.Color(color) }, strength: { value: opacity * 1.7 } },
+        vertexShader: /* glsl */ `
+          varying vec3 vNormal;
+          varying vec3 vView;
+          varying float vDown;
+          void main() {
+            vec4 mv = modelViewMatrix * vec4(position, 1.0);
+            vNormal = normalMatrix * normal;
+            vView = -mv.xyz;
+            vDown = 1.0 - uv.y;
+            gl_Position = projectionMatrix * mv;
+          }`,
+        fragmentShader: /* glsl */ `
+          uniform vec3 tint;
+          uniform float strength;
+          varying vec3 vNormal;
+          varying vec3 vView;
+          varying float vDown;
+          void main() {
+            float facing = abs(dot(normalize(vNormal), normalize(vView)));
+            float body = pow(facing, 1.7);
+            float fall = pow(1.0 - vDown, 1.5) * smoothstep(0.0, 0.06, vDown);
+            gl_FragColor = vec4(tint * strength * body * fall, 1.0);
+          }`,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+      });
+      disposables.push(geometry, material);
+      const cone = new THREE.Mesh(geometry, material);
+      cone.position.set(x, y - h / 2, z);
+      cone.userData.dyn = true;
+      cone.userData.noShadow = true;
+      cone.renderOrder = 3;
+      parent.add(cone);
+      return cone;
     },
     light(parent, o) {
       let light;
@@ -300,6 +345,106 @@ export function buildScene(spec, quality = {}) {
       moon.shadow.bias = -0.0006;
       moon.shadow.normalBias = 0.03;
     }
+  }
+
+  // ------------------------------------------------------------ atmosphere
+  if (quality.detail) {
+    // Moonlight through the windows as visible shafts of lit air.
+    if (moon && !isRound) {
+      const side = amb.moon.from ?? 'n';
+      const dir = moon.position.clone().normalize().negate();
+      const material = new THREE.MeshBasicMaterial({ map: shaftTexture(true), color: amb.moon.color ?? 0x9fc4dc, transparent: true, opacity: 0.085, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false });
+      disposables.push(material);
+      const sheet = (a, b) => {
+        // A flat sheet of light from the segment a-b at the glass, carried along the light until it reaches the floor.
+        const len = Math.min(6, Math.max(a.y, b.y) / Math.max(0.15, -dir.y));
+        const c = a.clone().addScaledVector(dir, len);
+        const d = b.clone().addScaledVector(dir, len);
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute([a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z, d.x, d.y, d.z], 3));
+        geometry.setAttribute('uv', new THREE.Float32BufferAttribute([0, 1, 1, 1, 0, 0, 1, 0], 2));
+        geometry.setIndex([0, 2, 1, 1, 2, 3]);
+        disposables.push(geometry);
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.userData.dyn = true;
+        mesh.renderOrder = 3;
+        mesh.frustumCulled = false;
+        root.add(mesh);
+      };
+      for (const w of (spec.windows ?? []).filter((x) => x.wall === side)) {
+        const sill = w.sill ?? 0.9;
+        const h = w.h ?? 1.2;
+        const hw = (w.w ?? 1.2) / 2;
+        const inset = 0.06;
+        const at = (u, y) => {
+          switch (side) {
+            case 'n': return new THREE.Vector3(w.at + u, y, -D / 2 + inset);
+            case 's': return new THREE.Vector3(w.at + u, y, D / 2 - inset);
+            case 'e': return new THREE.Vector3(W / 2 - inset, y, w.at + u);
+            default: return new THREE.Vector3(-W / 2 + inset, y, w.at + u);
+          }
+        };
+        sheet(at(-hw, sill + h * 0.82), at(hw, sill + h * 0.82));
+        sheet(at(-hw, sill + h * 0.35), at(hw, sill + h * 0.35));
+        sheet(at(0, sill + h * 0.05), at(0, sill + h * 0.95));
+      }
+      anims.push((t) => {
+        material.opacity = 0.085 * (0.86 + 0.14 * Math.sin(t * 0.5));
+      });
+    }
+
+    // Dust hanging in the air, catching whatever light there is.
+    const count = quality.detail > 1 ? 260 : 130;
+    const positions = new Float32Array(count * 3);
+    const seeds = new Float32Array(count * 3);
+    const reach = isRound ? (spec.radius ?? 3) * 0.62 : 0;
+    for (let i = 0; i < count; i++) {
+      positions[i * 3] = isRound ? (rnd() * 2 - 1) * reach : (rnd() - 0.5) * (W - 0.6);
+      positions[i * 3 + 1] = 0.35 + rnd() * (H - 0.7);
+      positions[i * 3 + 2] = isRound ? (rnd() * 2 - 1) * reach : (rnd() - 0.5) * (D - 0.6);
+      seeds[i * 3] = rnd();
+      seeds[i * 3 + 1] = rnd();
+      seeds[i * 3 + 2] = rnd();
+    }
+    const dustGeometry = new THREE.BufferGeometry();
+    dustGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    dustGeometry.setAttribute('seed', new THREE.BufferAttribute(seeds, 3));
+    const dustMaterial = new THREE.ShaderMaterial({
+      uniforms: { time: { value: 0 }, scale: { value: 1 } },
+      vertexShader: /* glsl */ `
+        uniform float time;
+        uniform float scale;
+        attribute vec3 seed;
+        varying float vAlpha;
+        void main() {
+          vec3 p = position;
+          p.x += sin(time * 0.11 + seed.x * 6.283) * 0.28;
+          p.y += sin(time * 0.07 + seed.y * 6.283) * 0.2;
+          p.z += cos(time * 0.09 + seed.z * 6.283) * 0.28;
+          vec4 mv = modelViewMatrix * vec4(p, 1.0);
+          gl_PointSize = clamp((3.5 + seed.y * 5.0) * scale / max(0.3, -mv.z), 1.0, 6.0);
+          // Twinkle, and thin out right in front of the lens.
+          vAlpha = (0.25 + 0.75 * seed.x) * (0.6 + 0.4 * sin(time * 0.8 + seed.z * 40.0)) * smoothstep(0.35, 1.3, -mv.z);
+          gl_Position = projectionMatrix * mv;
+        }`,
+      fragmentShader: /* glsl */ `
+        varying float vAlpha;
+        void main() {
+          float d = length(gl_PointCoord - 0.5);
+          gl_FragColor = vec4(vec3(1.0, 0.9, 0.74) * smoothstep(0.5, 0.0, d) * vAlpha * 0.32, 1.0);
+        }`,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    disposables.push(dustGeometry, dustMaterial);
+    const dust = new THREE.Points(dustGeometry, dustMaterial);
+    dust.frustumCulled = false;
+    dust.userData.dyn = true;
+    root.add(dust);
+    anims.push((t) => {
+      dustMaterial.uniforms.time.value = t;
+    });
   }
 
   // Keep only the strongest lights; each extra point light costs every pixel.

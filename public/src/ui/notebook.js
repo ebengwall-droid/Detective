@@ -59,10 +59,10 @@ export function createNotebook(panels, game) {
     const done = v.objectives.filter((o) => o.done);
     add(body, 
       el('div', { class: 'panel-kicker', text: `${v.case.series} · ${v.act.date}` }),
-      el('h3', { style: { fontFamily: 'var(--display)', fontWeight: '400', fontSize: '26px', margin: '2px 0 16px' }, text: v.act.title }),
+      el('h3', { style: { fontFamily: 'var(--display)', fontWeight: '800', fontSize: '30px', letterSpacing: '-0.03em', lineHeight: '1.05', margin: '6px 0 18px' }, text: v.act.title }),
       el('div', { class: 'section-label', text: 'To do' }),
       open.length ? open.map((o) => el('div', { class: 'objective', text: o.text })) : el('p', { class: 'muted', text: 'Nothing pressing. Look around; something will turn up.' }),
-      el('p', { class: 'muted', style: { margin: '14px 0 22px', fontSize: '13.5px' } }, 'Stuck? Think, at the top of the screen, gives you a nudge.'),
+      el('p', { class: 'muted', style: { margin: '14px 0 22px', fontSize: '13.5px' } }, 'Stuck? Think, in the tool bar, gives you a nudge.'),
       done.length ? el('div', { class: 'section-label', text: 'Done' }) : null,
       done.map((o) => el('div', { class: 'objective done', text: o.text })),
     );
@@ -124,7 +124,7 @@ export function createNotebook(panels, game) {
   }
 
   function renderAccuse(v) {
-    const box = el('div', { class: 'question', style: { borderColor: 'rgba(180,81,63,0.6)' } }, el('h4', { text: 'Make an arrest' }), el('p', { class: 'muted', style: { marginTop: '-4px' }, text: 'Name the Lamplighter to the Captain. You get one arrest. Whoever you name, the fourteenth still comes.' }));
+    const box = el('div', { class: 'question', style: { borderColor: 'rgba(255,117,102,0.5)' } }, el('h4', { text: 'Make an arrest' }), el('p', { class: 'muted', style: { marginTop: '-4px' }, text: 'Name the Lamplighter to the Captain. You get one arrest. Whoever you name, the fourteenth still comes.' }));
     const grid = el('div', { class: 'accuse-grid' });
     for (const s of v.accuse.suspects) {
       const person = v.people.find((p) => p.id === s.id);
