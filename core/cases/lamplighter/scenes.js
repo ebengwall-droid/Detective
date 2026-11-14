@@ -78,7 +78,7 @@ export const SCENES = {
       // The captain's office, north-east corner.
       { t: 'glassWall', p: [5.35, -1.2], len: 3.3, text: 'CAPT. D. HALE', sub: 'HARBOUR DIVISION', textX: 0.2, blinds: true },
       { t: 'glassWall', p: [2.7, -3.1], r: 90, len: 3.8, blinds: true },
-      { t: 'desk', id: 'hale_desk', p: [5.2, -3.3], r: 0, w: 1.7, mat: 'woodDark' },
+      { t: 'desk', id: 'hale_desk', carved: true, p: [5.2, -3.3], r: 0, w: 1.7, mat: 'woodDark' },
       { t: 'officeChair', p: [6.15, -4.2], r: -35, mat: 'leatherOxblood' },
       { t: 'chair', p: [4.5, -2.2], r: 170 },
       { t: 'deskLamp', p: [5.85, -3.4], y: 0.765, r: -20, intensity: 2.6 },
@@ -133,7 +133,7 @@ export const SCENES = {
       { t: 'clock', wall: 'e', at: -0.2, y: 2.1, time: '09:20' },
       { t: 'frame', wall: 'e', at: 1.9, art: 'seascape', w: 0.9, h: 0.6, y: 1.7 },
       // The harbour master's desk, west side.
-      { t: 'desk', id: 'desk_brook', p: [-2.9, -1.2], r: 90, w: 1.6, mat: 'woodDark' },
+      { t: 'desk', id: 'desk_brook', carved: true, p: [-2.9, -1.2], r: 90, w: 1.6, mat: 'woodDark' },
       { t: 'chair', p: [-3.65, -1.2], r: 90 },
       { t: 'deskLamp', p: [-2.9, -1.85], y: 0.765, r: 60 },
       { t: 'phone', id: 'phone_brook', p: [-2.95, -0.6], y: 0.765, r: 80 },

@@ -1,0 +1,310 @@
+{
+  "source": "https://polyhaven.com (CC0)",
+  "models": {
+    "chair": {
+      "src": "painted_wooden_chair_01",
+      "tris": 1500,
+      "tex": 512
+    },
+    "chair_green": {
+      "src": "GreenChair_01",
+      "tris": 4500,
+      "tex": 512
+    },
+    "armchair": {
+      "src": "ArmChair_01",
+      "tris": 5600,
+      "tex": 1024
+    },
+    "sofa": {
+      "src": "sofa_02",
+      "tris": 3000,
+      "tex": 1024
+    },
+    "desk_metal": {
+      "src": "metal_office_desk",
+      "tris": 7000,
+      "tex": 1024
+    },
+    "table": {
+      "src": "wooden_table_02",
+      "tris": 1000,
+      "tex": 1024
+    },
+    "round_table": {
+      "src": "round_wooden_table_02",
+      "tris": 4300,
+      "tex": 512
+    },
+    "filing": {
+      "src": "vintage_wooden_drawer_01",
+      "tris": 5200,
+      "tex": 1024
+    },
+    "commode": {
+      "src": "GothicCommode_01",
+      "tris": 4000,
+      "tex": 1024
+    },
+    "bookshelf": {
+      "src": "wooden_bookshelf_worn",
+      "tris": 6000,
+      "tex": 1024
+    },
+    "metal_rack": {
+      "src": "worn_metal_rack",
+      "tris": 5000,
+      "tex": 512
+    },
+    "bar_stool": {
+      "src": "bar_chair_round_01",
+      "tris": 2500,
+      "tex": 512,
+      "error": 0.1,
+      "smooth": true
+    },
+    "bench": {
+      "src": "painted_wooden_bench",
+      "tris": 1000,
+      "tex": 512
+    },
+    "day_bed": {
+      "src": "vintage_day_bed",
+      "tris": 3000,
+      "tex": 1024
+    },
+    "trunk": {
+      "src": "wooden_crate_02",
+      "tris": 3500,
+      "tex": 512
+    },
+    "crate": {
+      "src": "wooden_crate_01",
+      "tris": 3500,
+      "tex": 512
+    },
+    "pendant": {
+      "src": "hanging_industrial_lamp",
+      "tris": 4000,
+      "tex": 512
+    },
+    "desk_lamp": {
+      "src": "desk_lamp_arm_01",
+      "tris": 5000,
+      "tex": 512
+    },
+    "sconce": {
+      "src": "industrial_wall_sconce",
+      "tris": 3000,
+      "tex": 512
+    },
+    "lantern": {
+      "src": "Lantern_01",
+      "tris": 4500,
+      "tex": 512
+    },
+    "ceiling_fan": {
+      "src": "ceiling_fan",
+      "tris": 5000,
+      "tex": 512
+    },
+    "wall_clock": {
+      "src": "wall_clock",
+      "tris": 2500,
+      "tex": 512
+    },
+    "laptop": {
+      "src": "classic_laptop",
+      "tris": 5000,
+      "tex": 512
+    },
+    "jerrycan": {
+      "src": "metal_jerrycan",
+      "tris": 3500,
+      "tex": 512
+    },
+    "lifebuoy": {
+      "src": "lifebuoy",
+      "tris": 3500,
+      "tex": 512
+    },
+    "dartboard": {
+      "src": "dartboard",
+      "tris": 2500,
+      "tex": 512
+    },
+    "toolbox": {
+      "src": "metal_toolbox",
+      "tris": 4000,
+      "tex": 512
+    },
+    "clipboard": {
+      "src": "clipboard",
+      "tris": 1500,
+      "tex": 512
+    },
+    "camera": {
+      "src": "Camera_01",
+      "tris": 3500,
+      "tex": 512
+    },
+    "books": {
+      "src": "book_encyclopedia_set_01",
+      "tris": 2500,
+      "tex": 512,
+      "error": 0.1,
+      "smooth": true
+    },
+    "barrels": {
+      "src": "wooden_barrels_01",
+      "tris": 12000,
+      "tex": 1024
+    },
+    "bottles": {
+      "src": "wine_bottles_01",
+      "tris": 4000,
+      "tex": 512
+    },
+    "kettle": {
+      "src": "vintage_electric_kettle",
+      "tris": 3000,
+      "tex": 512
+    },
+    "boots": {
+      "src": "rubber_boots",
+      "tris": 3500,
+      "tex": 512
+    },
+    "compass": {
+      "src": "seadogs_compass",
+      "tris": 2500,
+      "tex": 512
+    },
+    "binoculars": {
+      "src": "binoculars",
+      "tris": 3000,
+      "tex": 512
+    },
+    "microscope": {
+      "src": "vintage_microscope",
+      "tris": 4000,
+      "tex": 512
+    },
+    "medical_box": {
+      "src": "medical_box",
+      "tris": 2500,
+      "tex": 512
+    },
+    "oil_lamp": {
+      "src": "vintage_oil_lamp",
+      "tris": 3500,
+      "tex": 512
+    },
+    "mantel_clock": {
+      "src": "mantel_clock_01",
+      "tris": 4000,
+      "tex": 512
+    },
+    "radio": {
+      "src": "vintage_radio_transceiver",
+      "tris": 5000,
+      "tex": 512,
+      "error": 0.08,
+      "smooth": true
+    },
+    "cash_register": {
+      "src": "CashRegister_01",
+      "tris": 5000,
+      "tex": 512
+    },
+    "stool_low": {
+      "src": "wooden_stool_01",
+      "tris": 3000,
+      "tex": 512
+    },
+    "side_table": {
+      "src": "side_table_tall_01",
+      "tris": 3000,
+      "tex": 512
+    },
+    "console": {
+      "src": "ClassicConsole_01",
+      "tris": 5000,
+      "tex": 1024
+    },
+    "nightstand": {
+      "src": "ClassicNightstand_01",
+      "tris": 2000,
+      "tex": 512
+    },
+    "goblets": {
+      "src": "brass_goblets",
+      "tris": 3000,
+      "tex": 512
+    },
+    "tea_set": {
+      "src": "tea_set_01",
+      "tris": 6000,
+      "tex": 512
+    },
+    "lantern_lo": {
+      "src": "Lantern_01",
+      "tris": 900,
+      "tex": 256,
+      "error": 0.08
+    }
+  },
+  "textures": {
+    "planks_dark": {
+      "src": "old_wood_floor",
+      "size": 1024
+    },
+    "parquet": {
+      "src": "herringbone_parquet",
+      "size": 1024
+    },
+    "planks": {
+      "src": "wood_floor_worn",
+      "size": 1024
+    },
+    "deck": {
+      "src": "wood_floor_deck",
+      "size": 1024
+    },
+    "tiles_floor": {
+      "src": "floor_tiles_06",
+      "size": 1024
+    },
+    "tiles_wall": {
+      "src": "long_white_tiles",
+      "size": 1024
+    },
+    "plaster": {
+      "src": "painted_plaster_wall",
+      "size": 1024
+    },
+    "brick": {
+      "src": "brick_wall_10",
+      "size": 1024
+    },
+    "stone": {
+      "src": "old_stone_wall",
+      "size": 1024
+    },
+    "oak": {
+      "src": "oak_veneer_01",
+      "size": 512
+    },
+    "mahogany": {
+      "src": "dark_wood",
+      "size": 512
+    },
+    "boards": {
+      "src": "wood_cabinet_worn_long",
+      "size": 1024
+    }
+  },
+  "env": {
+    "src": "old_room"
+  }
+}

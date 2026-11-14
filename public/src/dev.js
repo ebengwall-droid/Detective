@@ -4,11 +4,12 @@
 import * as THREE from 'three';
 import { SCENES } from '/core/cases/lamplighter/scenes.js';
 import { buildScene } from './world/builder.js';
-import { buildEnvironment } from './world/materials.js';
+import { buildEnvironment, useSurfaces } from './world/materials.js';
 import { createCharacter } from './world/characters.js';
 import { LOOKS } from '/core/cases/lamplighter/looks.js';
 import { check } from '/core/conditions.js';
 import { assets } from './world/assets.js';
+import { modelsFor } from './world/dress.js';
 
 const params = new URLSearchParams(location.search);
 const locId = params.get('loc') ?? 'precinct';
@@ -24,7 +25,7 @@ const STAGE = {
   ],
   spawn: { p: [0, 2.6], yaw: 0 },
 };
-const rawSpec = locId === 'stage' ? STAGE : SCENES[locId];
+const rawSpec = locId === 'stage' || locId === 'models' ? STAGE : SCENES[locId];
 // Evaluate conditional props against a stand-in game state (?act=2).
 const fakeState = { act: Number(params.get('act') ?? 2), facts: {}, evidence: {}, flags: {}, deductions: {}, records: {}, beats: {}, visited: {}, examined: {}, npcs: {}, marks: {}, jobsDone: {}, steps: 0 };
 const spec = rawSpec && { ...rawSpec, props: (rawSpec.props ?? []).filter((p) => check(p.if, fakeState)) };
@@ -41,7 +42,11 @@ async function main() {
     await Promise.race([Promise.all(faces.map((face) => document.fonts.load(face))), new Promise((r) => setTimeout(r, 2500))]);
   } catch {}
   // Modelled people, unless ?real=0 asks for the code-drawn ones.
-  if (params.get('real') !== '0' && (await assets.init('/assets/'))) await assets.loadPeople(Object.keys(LOOKS));
+  if (params.get('real') !== '0' && (await assets.init('/assets/'))) {
+    await assets.loadPeople(Object.keys(LOOKS));
+    await assets.loadProps(modelsFor(spec.props));
+    if (await assets.loadSurfaces()) useSurfaces((name) => assets.surface(name));
+  }
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Number(params.get('dpr') ?? 1));
   renderer.setSize(innerWidth, innerHeight, false);
@@ -52,6 +57,11 @@ async function main() {
   const scene = new THREE.Scene();
   scene.environment = buildEnvironment(renderer);
   scene.environmentIntensity = 0.35;
+  const photo = await assets.loadEnvironment();
+  if (photo) {
+    scene.environment = new THREE.PMREMGenerator(renderer).fromEquirectangular(photo).texture;
+    scene.environmentIntensity = 0.42;
+  }
   const built = buildScene(spec, { shadows: params.get('shadows') !== '0', maxLights: Number(params.get('lights') ?? 8), detail: Number(params.get('detail') ?? 1) });
   scene.add(built.root);
   scene.background = new THREE.Color(built.fog.color);
@@ -65,7 +75,24 @@ async function main() {
 
   // Optional test characters: ?people=1
   const people = [];
-  if (locId === 'stage') {
+  if (locId === 'models') {
+    // Every furniture and prop model in a row, front toward the camera, a red block marking the front.
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x998877, 1.6));
+    const names = params.get('only')?.split(',') ?? Object.keys(assets.things?.models ?? {});
+    await assets.loadProps(names);
+    const gap = Number(params.get('gap') ?? 1.6);
+    names.forEach((name, i) => {
+      const prop = assets.prop(name);
+      if (!prop) return;
+      const obj = prop.scene.clone();
+      obj.position.set((i - (names.length - 1) / 2) * gap, Number(params.get('lift') ?? 0), -0.6);
+      scene.add(obj);
+      const mark = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.02, 0.06), new THREE.MeshBasicMaterial({ color: 0xff3020 }));
+      mark.position.set(obj.position.x, 0.01, obj.position.z + Math.max(0.3, prop.info.max[2] + 0.12));
+      scene.add(mark);
+    });
+    window.__names = names;
+  } else if (locId === 'stage') {
     // Line the whole cast up twice: front row facing the camera, back row turned away.
     // ?only=hale,vance shows just those, front row only.
     const only = params.get('only')?.split(',');

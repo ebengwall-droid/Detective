@@ -6,9 +6,10 @@
 
 import * as THREE from 'three';
 import { buildScene } from './builder.js';
-import { buildEnvironment, canvasTexture } from './materials.js';
+import { buildEnvironment, canvasTexture, useSurfaces } from './materials.js';
 import { createCharacter, figureLight } from './characters.js';
 import { assets } from './assets.js';
+import { modelsFor } from './dress.js';
 import { Nav } from './nav.js';
 import { Controls } from './controls.js';
 import { Post } from './post.js';
@@ -171,10 +172,11 @@ export class World {
     this.scene.environmentIntensity = 0.3;
     this.camera = new THREE.PerspectiveCamera(68, 1, 0.06, 90);
     this.resize();
+    this.fetchSurroundings();
     // Phones take the graphics context away when the game is put in the
     // background for a while. When it comes back, lay the room out again.
     this.canvas.addEventListener('webglcontextrestored', () => {
-      this.scene.environment = buildEnvironment(this.renderer);
+      this.scene.environment = this.photoEnvironment ?? buildEnvironment(this.renderer);
       this.portraitCache?.clear();
       if (this.lastLoc) {
         const pose = { ...this.player };
@@ -233,10 +235,56 @@ export class World {
    * @param {{ pose?: {x:number,z:number,yaw:number,pitch?:number}, respawn?: boolean }} [opts]
    *   respawn: rebuild even if nothing changed and put the player back at the door
    */
+  /**
+   * Photographed floors and walls, and a photographed room for everything shiny to reflect.
+   * Fetched once; until they land the painted surfaces and a painted sky stand in.
+   */
+  fetchSurroundings() {
+    if (!assets.things || this.surroundings) return;
+    this.surroundings = Promise.all([
+      assets.loadSurfaces().then((ok) => {
+        if (ok) useSurfaces((name) => assets.surface(name));
+      }),
+      assets.loadEnvironment().then((picture) => {
+        if (!picture) return;
+        const pmrem = new THREE.PMREMGenerator(this.renderer);
+        this.photoEnvironment = pmrem.fromEquirectangular(picture).texture;
+        this.scene.environment = this.photoEnvironment;
+        this.scene.environmentIntensity = 0.42;
+        picture.dispose();
+        pmrem.dispose();
+      }),
+    ]).then(() => {
+      this.surroundings = true;
+    });
+  }
+
+  /**
+   * Fetch the furniture and prop models this room wants and are not in memory yet.
+   * The room is built with what there is, and built again once the rest has landed.
+   */
+  fetchModels(loc) {
+    if (!assets.things) return;
+    const missing = modelsFor(loc.scene.props).filter((name) => assets.things.models[name] && !assets.prop(name));
+    if (!missing.length) return;
+    const waitingFor = loc;
+    const job = assets.loadProps(missing).then(() => {
+      if (this.modelJob === job) this.modelJob = null;
+      if (this.lastLoc !== waitingFor && this.lastLoc?.id !== waitingFor.id) return;
+      const pose = { ...this.player };
+      const focus = this.focus;
+      this.locKey = null;
+      this.loadLocation(this.lastLoc, { pose });
+      this.focus = focus;
+    });
+    this.modelJob = job;
+  }
+
   loadLocation(loc, opts = {}) {
     const key = `${loc.id}:${loc.sceneVersion}`;
     const rebuilt = key !== this.locKey || !!opts.respawn;
     this.lastLoc = loc;
+    if (rebuilt) this.fetchModels(loc);
     if (rebuilt) {
       const sameRoom = !opts.respawn && this.locKey?.split(':')[0] === loc.id;
       const keep = sameRoom ? { ...this.player } : null;
@@ -349,8 +397,11 @@ export class World {
 
   /** Resolves once the place on screen has everything it was waiting for (or has waited long enough). */
   whenReady(limit = 15000) {
-    if (!this.loading) return Promise.resolve();
-    return Promise.race([this.loading, new Promise((r) => setTimeout(r, limit))]);
+    const jobs = [this.loading, this.modelJob, this.surroundings === true ? null : this.surroundings].filter(Boolean);
+    if (!jobs.length) return Promise.resolve();
+    // One thing landing can start another (a room rebuilt for its furniture asks again for its people).
+    const settle = Promise.all(jobs).then(() => (this.loading || this.modelJob ? this.whenReady(limit) : undefined));
+    return Promise.race([settle, new Promise((r) => setTimeout(r, limit))]);
   }
 
   syncNpcs(list) {

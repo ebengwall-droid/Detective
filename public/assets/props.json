@@ -1,0 +1,892 @@
+{
+ "licence": "Models, textures and environment from Poly Haven (polyhaven.com), CC0",
+ "models": {
+  "chair": {
+   "file": "props/chair.glb",
+   "source": "painted_wooden_chair_01",
+   "bytes": 87384,
+   "tris": 724,
+   "min": [
+    -0.2174,
+    -0.0007,
+    -0.3006
+   ],
+   "max": [
+    0.2143,
+    0.9557,
+    0.2392
+   ]
+  },
+  "chair_green": {
+   "file": "props/chair_green.glb",
+   "source": "GreenChair_01",
+   "bytes": 142664,
+   "tris": 4213,
+   "min": [
+    -0.3371,
+    -0.0005,
+    -0.378
+   ],
+   "max": [
+    0.336,
+    1.058,
+    0.2863
+   ]
+  },
+  "armchair": {
+   "file": "props/armchair.glb",
+   "source": "ArmChair_01",
+   "bytes": 504848,
+   "tris": 5626,
+   "min": [
+    -0.4242,
+    -0.0004,
+    -0.4173
+   ],
+   "max": [
+    0.4242,
+    1.0647,
+    0.3484
+   ]
+  },
+  "sofa": {
+   "file": "props/sofa.glb",
+   "source": "sofa_02",
+   "bytes": 201828,
+   "tris": 2728,
+   "min": [
+    -0.9033,
+    0.0002,
+    -0.4776
+   ],
+   "max": [
+    0.9039,
+    0.7097,
+    0.34
+   ]
+  },
+  "desk_metal": {
+   "file": "props/desk_metal.glb",
+   "source": "metal_office_desk",
+   "bytes": 204932,
+   "tris": 6898,
+   "min": [
+    -1,
+    0,
+    -0.4691
+   ],
+   "max": [
+    1,
+    0.7875,
+    0.4781
+   ]
+  },
+  "table": {
+   "file": "props/table.glb",
+   "source": "wooden_table_02",
+   "bytes": 225728,
+   "tris": 196,
+   "min": [
+    -0.5672,
+    -0.0001,
+    -0.353
+   ],
+   "max": [
+    0.5672,
+    0.7994,
+    0.353
+   ]
+  },
+  "round_table": {
+   "file": "props/round_table.glb",
+   "source": "round_wooden_table_02",
+   "bytes": 126292,
+   "tris": 4254,
+   "min": [
+    -0.3981,
+    0,
+    -0.3981
+   ],
+   "max": [
+    0.3981,
+    0.746,
+    0.3981
+   ]
+  },
+  "filing": {
+   "file": "props/filing.glb",
+   "source": "vintage_wooden_drawer_01",
+   "bytes": 340848,
+   "tris": 5184,
+   "min": [
+    -0.8576,
+    -0.0007,
+    -0.4404
+   ],
+   "max": [
+    0.8576,
+    1.0902,
+    0.5666
+   ]
+  },
+  "commode": {
+   "file": "props/commode.glb",
+   "source": "GothicCommode_01",
+   "bytes": 250576,
+   "tris": 3897,
+   "min": [
+    -0.6018,
+    0,
+    -0.2891
+   ],
+   "max": [
+    0.5996,
+    1.212,
+    0.2915
+   ]
+  },
+  "bookshelf": {
+   "file": "props/bookshelf.glb",
+   "source": "wooden_bookshelf_worn",
+   "bytes": 636980,
+   "tris": 6000,
+   "min": [
+    -0.687,
+    0,
+    -0.2907
+   ],
+   "max": [
+    0.687,
+    2.0634,
+    0.2907
+   ]
+  },
+  "metal_rack": {
+   "file": "props/metal_rack.glb",
+   "source": "worn_metal_rack",
+   "bytes": 129084,
+   "tris": 5000,
+   "min": [
+    -0.4599,
+    0,
+    -0.3
+   ],
+   "max": [
+    0.4554,
+    1.9,
+    0.3
+   ]
+  },
+  "bar_stool": {
+   "file": "props/bar_stool.glb",
+   "source": "bar_chair_round_01",
+   "bytes": 184012,
+   "tris": 2499,
+   "min": [
+    -0.2275,
+    0,
+    -0.2416
+   ],
+   "max": [
+    0.2532,
+    0.7506,
+    0.2404
+   ]
+  },
+  "bench": {
+   "file": "props/bench.glb",
+   "source": "painted_wooden_bench",
+   "bytes": 79956,
+   "tris": 630,
+   "min": [
+    -0.5761,
+    -0.0005,
+    -0.2537
+   ],
+   "max": [
+    0.5889,
+    0.8888,
+    0.2428
+   ]
+  },
+  "day_bed": {
+   "file": "props/day_bed.glb",
+   "source": "vintage_day_bed",
+   "bytes": 516420,
+   "tris": 2715,
+   "min": [
+    -0.9863,
+    0,
+    -0.4694
+   ],
+   "max": [
+    0.9863,
+    1.1273,
+    0.3853
+   ]
+  },
+  "trunk": {
+   "file": "props/trunk.glb",
+   "source": "wooden_crate_02",
+   "bytes": 138196,
+   "tris": 3499,
+   "min": [
+    -0.2646,
+    -0.0098,
+    -0.5833
+   ],
+   "max": [
+    0.2646,
+    0.4541,
+    0.583
+   ]
+  },
+  "crate": {
+   "file": "props/crate.glb",
+   "source": "wooden_crate_01",
+   "bytes": 133600,
+   "tris": 3499,
+   "min": [
+    -0.4126,
+    -0.0079,
+    -0.1956
+   ],
+   "max": [
+    0.4126,
+    0.3416,
+    0.2128
+   ]
+  },
+  "pendant": {
+   "file": "props/pendant.glb",
+   "source": "hanging_industrial_lamp",
+   "bytes": 203872,
+   "tris": 4080,
+   "min": [
+    -0.2748,
+    -1.34,
+    -0.2748
+   ],
+   "max": [
+    0.2748,
+    0.0153,
+    0.2748
+   ]
+  },
+  "desk_lamp": {
+   "file": "props/desk_lamp.glb",
+   "source": "desk_lamp_arm_01",
+   "bytes": 195236,
+   "tris": 4998,
+   "min": [
+    -0.1185,
+    -0.088,
+    -0.2961
+   ],
+   "max": [
+    0.0832,
+    0.8046,
+    0.3172
+   ]
+  },
+  "sconce": {
+   "file": "props/sconce.glb",
+   "source": "industrial_wall_sconce",
+   "bytes": 95884,
+   "tris": 2997,
+   "min": [
+    -0.0737,
+    -0.0193,
+    0.007
+   ],
+   "max": [
+    0.0762,
+    0.322,
+    0.2586
+   ]
+  },
+  "lantern": {
+   "file": "props/lantern.glb",
+   "source": "Lantern_01",
+   "bytes": 153492,
+   "tris": 4495,
+   "min": [
+    -0.0608,
+    0.0002,
+    -0.0482
+   ],
+   "max": [
+    0.0611,
+    0.2942,
+    0.0478
+   ]
+  },
+  "ceiling_fan": {
+   "file": "props/ceiling_fan.glb",
+   "source": "ceiling_fan",
+   "bytes": 131872,
+   "tris": 4998,
+   "min": [
+    -0.7324,
+    -0.5163,
+    -0.7307
+   ],
+   "max": [
+    0.7306,
+    0,
+    0.7323
+   ]
+  },
+  "wall_clock": {
+   "file": "props/wall_clock.glb",
+   "source": "wall_clock",
+   "bytes": 94304,
+   "tris": 2504,
+   "min": [
+    -0.1602,
+    -0.1602,
+    0
+   ],
+   "max": [
+    0.1602,
+    0.1602,
+    0.0471
+   ]
+  },
+  "laptop": {
+   "file": "props/laptop.glb",
+   "source": "classic_laptop",
+   "bytes": 189328,
+   "tris": 4995,
+   "min": [
+    -0.3258,
+    -0.0008,
+    -0.2419
+   ],
+   "max": [
+    0.3261,
+    0.542,
+    0.244
+   ]
+  },
+  "jerrycan": {
+   "file": "props/jerrycan.glb",
+   "source": "metal_jerrycan",
+   "bytes": 170236,
+   "tris": 3499,
+   "min": [
+    -0.17,
+    0.0001,
+    -0.0886
+   ],
+   "max": [
+    0.18,
+    0.4549,
+    0.0831
+   ]
+  },
+  "lifebuoy": {
+   "file": "props/lifebuoy.glb",
+   "source": "lifebuoy",
+   "bytes": 169908,
+   "tris": 3500,
+   "min": [
+    -0.3903,
+    -0.4622,
+    -0.0704
+   ],
+   "max": [
+    0.3927,
+    0.379,
+    0.0844
+   ]
+  },
+  "dartboard": {
+   "file": "props/dartboard.glb",
+   "source": "dartboard",
+   "bytes": 199488,
+   "tris": 2499,
+   "min": [
+    -0.2253,
+    -0.2253,
+    0
+   ],
+   "max": [
+    0.2253,
+    0.2253,
+    0.0398
+   ]
+  },
+  "toolbox": {
+   "file": "props/toolbox.glb",
+   "source": "metal_toolbox",
+   "bytes": 158068,
+   "tris": 4051,
+   "min": [
+    -0.2,
+    0,
+    -0.1567
+   ],
+   "max": [
+    0.2,
+    0.3047,
+    0.1138
+   ]
+  },
+  "clipboard": {
+   "file": "props/clipboard.glb",
+   "source": "clipboard",
+   "bytes": 75960,
+   "tris": 1500,
+   "min": [
+    -0.114,
+    -0.0025,
+    -0.1778
+   ],
+   "max": [
+    0.1142,
+    0.0394,
+    0.1586
+   ]
+  },
+  "camera": {
+   "file": "props/camera.glb",
+   "source": "Camera_01",
+   "bytes": 329812,
+   "tris": 3647,
+   "min": [
+    -0.1356,
+    0.0003,
+    -0.0605
+   ],
+   "max": [
+    0.0784,
+    0.0781,
+    0.2023
+   ]
+  },
+  "books": {
+   "file": "props/books.glb",
+   "source": "book_encyclopedia_set_01",
+   "bytes": 150856,
+   "tris": 2451,
+   "min": [
+    -0.0193,
+    0,
+    -0.0621
+   ],
+   "max": [
+    0.532,
+    0.2374,
+    0.101
+   ]
+  },
+  "barrels": {
+   "file": "props/barrels.glb",
+   "source": "wooden_barrels_01",
+   "bytes": 1128588,
+   "tris": 12132,
+   "min": [
+    -2.3322,
+    -0.0386,
+    -1.9308
+   ],
+   "max": [
+    2.1079,
+    0.9146,
+    1.4119
+   ]
+  },
+  "bottles": {
+   "file": "props/bottles.glb",
+   "source": "wine_bottles_01",
+   "bytes": 212524,
+   "tris": 4027,
+   "min": [
+    -0.036,
+    0,
+    -0.0399
+   ],
+   "max": [
+    0.6403,
+    0.3314,
+    0.0403
+   ]
+  },
+  "kettle": {
+   "file": "props/kettle.glb",
+   "source": "vintage_electric_kettle",
+   "bytes": 154788,
+   "tris": 3027,
+   "min": [
+    -0.1649,
+    0,
+    -0.1239
+   ],
+   "max": [
+    0.1552,
+    0.3035,
+    0.1239
+   ]
+  },
+  "boots": {
+   "file": "props/boots.glb",
+   "source": "rubber_boots",
+   "bytes": 89592,
+   "tris": 3496,
+   "min": [
+    -0.4449,
+    0.0001,
+    -0.1335
+   ],
+   "max": [
+    0.4447,
+    0.3723,
+    0.1323
+   ]
+  },
+  "compass": {
+   "file": "props/compass.glb",
+   "source": "seadogs_compass",
+   "bytes": 180296,
+   "tris": 2501,
+   "min": [
+    -0.0375,
+    0.0002,
+    -0.0811
+   ],
+   "max": [
+    0.0435,
+    0.0866,
+    0.063
+   ]
+  },
+  "binoculars": {
+   "file": "props/binoculars.glb",
+   "source": "binoculars",
+   "bytes": 119796,
+   "tris": 3190,
+   "min": [
+    -0.0762,
+    -0.002,
+    -0.229
+   ],
+   "max": [
+    0.0906,
+    0.0635,
+    0.0583
+   ]
+  },
+  "microscope": {
+   "file": "props/microscope.glb",
+   "source": "vintage_microscope",
+   "bytes": 162932,
+   "tris": 4592,
+   "min": [
+    -0.0542,
+    0,
+    -0.0836
+   ],
+   "max": [
+    0.0514,
+    0.3996,
+    0.0982
+   ]
+  },
+  "medical_box": {
+   "file": "props/medical_box.glb",
+   "source": "medical_box",
+   "bytes": 121684,
+   "tris": 2495,
+   "min": [
+    -0.2627,
+    0,
+    -0.1722
+   ],
+   "max": [
+    0.2627,
+    0.0975,
+    0.1779
+   ]
+  },
+  "oil_lamp": {
+   "file": "props/oil_lamp.glb",
+   "source": "vintage_oil_lamp",
+   "bytes": 134796,
+   "tris": 3503,
+   "min": [
+    -0.11,
+    0,
+    -0.11
+   ],
+   "max": [
+    0.11,
+    0.8016,
+    0.11
+   ]
+  },
+  "mantel_clock": {
+   "file": "props/mantel_clock.glb",
+   "source": "mantel_clock_01",
+   "bytes": 136044,
+   "tris": 3999,
+   "min": [
+    -0.1711,
+    0.0005,
+    -0.063
+   ],
+   "max": [
+    0.1711,
+    0.1609,
+    0.063
+   ]
+  },
+  "radio": {
+   "file": "props/radio.glb",
+   "source": "vintage_radio_transceiver",
+   "bytes": 551440,
+   "tris": 10040,
+   "min": [
+    -0.3287,
+    -0.0015,
+    -0.1382
+   ],
+   "max": [
+    0.2452,
+    0.3317,
+    0.2746
+   ]
+  },
+  "cash_register": {
+   "file": "props/cash_register.glb",
+   "source": "CashRegister_01",
+   "bytes": 204132,
+   "tris": 5001,
+   "min": [
+    -0.2252,
+    0.0022,
+    -0.1735
+   ],
+   "max": [
+    0.3753,
+    0.6233,
+    0.4507
+   ]
+  },
+  "stool_low": {
+   "file": "props/stool_low.glb",
+   "source": "wooden_stool_01",
+   "bytes": 154716,
+   "tris": 3000,
+   "min": [
+    -0.2123,
+    0.0009,
+    -0.2209
+   ],
+   "max": [
+    0.2119,
+    0.4374,
+    0.2209
+   ]
+  },
+  "side_table": {
+   "file": "props/side_table.glb",
+   "source": "side_table_tall_01",
+   "bytes": 89104,
+   "tris": 2999,
+   "min": [
+    -0.192,
+    0,
+    -0.192
+   ],
+   "max": [
+    0.192,
+    0.7611,
+    0.192
+   ]
+  },
+  "console": {
+   "file": "props/console.glb",
+   "source": "ClassicConsole_01",
+   "bytes": 378672,
+   "tris": 4999,
+   "min": [
+    -0.7708,
+    0,
+    -0.3384
+   ],
+   "max": [
+    0.7722,
+    0.9491,
+    0.2475
+   ]
+  },
+  "nightstand": {
+   "file": "props/nightstand.glb",
+   "source": "ClassicNightstand_01",
+   "bytes": 85028,
+   "tris": 2002,
+   "min": [
+    -0.2839,
+    0,
+    -0.2121
+   ],
+   "max": [
+    0.2839,
+    0.7,
+    0.2121
+   ]
+  },
+  "goblets": {
+   "file": "props/goblets.glb",
+   "source": "brass_goblets",
+   "bytes": 236028,
+   "tris": 3000,
+   "min": [
+    -0.2198,
+    0.0049,
+    -0.1018
+   ],
+   "max": [
+    0.2326,
+    0.2783,
+    0.1951
+   ]
+  },
+  "tea_set": {
+   "file": "props/tea_set.glb",
+   "source": "tea_set_01",
+   "bytes": 121268,
+   "tris": 5988,
+   "min": [
+    -0.4406,
+    -0.0008,
+    -0.2836
+   ],
+   "max": [
+    0.4777,
+    0.1638,
+    0.2003
+   ]
+  },
+  "lantern_lo": {
+   "file": "props/lantern_lo.glb",
+   "source": "Lantern_01",
+   "bytes": 46840,
+   "tris": 924,
+   "min": [
+    -0.054,
+    0.0022,
+    -0.0478
+   ],
+   "max": [
+    0.0557,
+    0.2362,
+    0.0455
+   ]
+  }
+ },
+ "textures": {
+  "planks_dark": {
+   "d": "textures/planks_dark_d.webp",
+   "bytes": 259060,
+   "n": "textures/planks_dark_n.webp",
+   "r": "textures/planks_dark_r.webp",
+   "metres": 3,
+   "source": "old_wood_floor"
+  },
+  "parquet": {
+   "d": "textures/parquet_d.webp",
+   "bytes": 140834,
+   "n": "textures/parquet_n.webp",
+   "r": "textures/parquet_r.webp",
+   "metres": 3.4,
+   "source": "herringbone_parquet"
+  },
+  "planks": {
+   "d": "textures/planks_d.webp",
+   "bytes": 138376,
+   "n": "textures/planks_n.webp",
+   "r": "textures/planks_r.webp",
+   "metres": 2,
+   "source": "wood_floor_worn"
+  },
+  "deck": {
+   "d": "textures/deck_d.webp",
+   "bytes": 270476,
+   "n": "textures/deck_n.webp",
+   "r": "textures/deck_r.webp",
+   "metres": 1.8,
+   "source": "wood_floor_deck"
+  },
+  "tiles_floor": {
+   "d": "textures/tiles_floor_d.webp",
+   "bytes": 75150,
+   "n": "textures/tiles_floor_n.webp",
+   "r": "textures/tiles_floor_r.webp",
+   "metres": 3,
+   "source": "floor_tiles_06"
+  },
+  "tiles_wall": {
+   "d": "textures/tiles_wall_d.webp",
+   "bytes": 187622,
+   "n": "textures/tiles_wall_n.webp",
+   "r": "textures/tiles_wall_r.webp",
+   "metres": 1.27,
+   "source": "long_white_tiles"
+  },
+  "plaster": {
+   "d": "textures/plaster_d.webp",
+   "bytes": 317542,
+   "n": "textures/plaster_n.webp",
+   "r": "textures/plaster_r.webp",
+   "metres": 2,
+   "source": "painted_plaster_wall"
+  },
+  "brick": {
+   "d": "textures/brick_d.webp",
+   "bytes": 344536,
+   "n": "textures/brick_n.webp",
+   "r": "textures/brick_r.webp",
+   "metres": 1.9,
+   "source": "brick_wall_10"
+  },
+  "stone": {
+   "d": "textures/stone_d.webp",
+   "bytes": 578948,
+   "n": "textures/stone_n.webp",
+   "r": "textures/stone_r.webp",
+   "metres": 2,
+   "source": "old_stone_wall"
+  },
+  "oak": {
+   "d": "textures/oak_d.webp",
+   "bytes": 56704,
+   "n": "textures/oak_n.webp",
+   "r": "textures/oak_r.webp",
+   "metres": 1.83,
+   "source": "oak_veneer_01"
+  },
+  "mahogany": {
+   "d": "textures/mahogany_d.webp",
+   "bytes": 33450,
+   "n": "textures/mahogany_n.webp",
+   "r": "textures/mahogany_r.webp",
+   "metres": 2,
+   "source": "dark_wood"
+  },
+  "boards": {
+   "d": "textures/boards_d.webp",
+   "bytes": 234948,
+   "n": "textures/boards_n.webp",
+   "r": "textures/boards_r.webp",
+   "metres": 1,
+   "source": "wood_cabinet_worn_long"
+  }
+ },
+ "env": {
+  "file": "env.jpg",
+  "source": "old_room",
+  "bytes": 74060
+ }
+}

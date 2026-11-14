@@ -641,8 +641,9 @@ def('lantern', (g, o, ctx) => {
   const bail = torus(L, 0.1, 0.005, brass, 0, 0.33, 0, { arc: Math.PI, seg: 12 });
   bail.rotation.z = 0;
   if (o.tag) {
-    cyl(L, 0.001, 0.001, 0.07, 'dark', 0.1, 0.295, 0.01, 3);
-    cyl(L, 0.022, 0.022, 0.004, 'brass', 0.1, 0.245, 0.012, 12, { rx: 90 });
+    // The brass token tied to it. Kept as its own piece: it is evidence, whatever the lantern is drawn as.
+    cyl(L, 0.001, 0.001, 0.07, 'dark', 0.068, 0.265, 0.01, 3, { dyn: true });
+    cyl(L, 0.022, 0.022, 0.004, 'brass', 0.068, 0.215, 0.012, 12, { rx: 90, dyn: true });
   }
   if (lit) {
     const flame = sph(L, 0.018, glow(0xffd27a, 2.4), 0, 0.15, 0, 8, { dyn: true });

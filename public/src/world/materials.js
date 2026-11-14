@@ -423,6 +423,71 @@ const DEFS = {
 };
 
 /**
+ * Photographed surfaces for the painted ones above, used when they have been
+ * fetched (see assets.loadSurfaces). `color` then tints the photograph; `keep`
+ * leaves the painted colour picture and takes only the photograph's relief.
+ */
+const SURFACES = {
+  floorWood: { set: 'parquet', color: 0xe6dccf, rough: 0.8 },
+  floorWoodDark: { set: 'planks_dark', color: 0xd9cfc6, rough: 0.9 },
+  floorPlanks: { set: 'planks', color: 0xc9b9a6, rough: 1 },
+  floorTile: { set: 'tiles_floor', color: 0xe8eeee, rough: 0.55 },
+  floorDeck: { set: 'deck', color: 0xe8d8c8, rough: 0.75 },
+  floorStone: { set: 'stone', color: 0x9aa0a6, rough: 1 },
+  wallTeal: { set: 'plaster', color: 0x3f5a60, rough: 1 },
+  wallGreen: { set: 'plaster', color: 0x4d5e4c, rough: 1 },
+  wallCream: { set: 'plaster', color: 0xb3a98e, rough: 1 },
+  wallAttic: { set: 'plaster', color: 0x70675f, rough: 1 },
+  ceiling: { set: 'plaster', color: 0x2e3438, rough: 1 },
+  wallOxblood: { set: 'plaster', keep: true, rough: 1 },
+  wallNavy: { set: 'plaster', keep: true, rough: 1 },
+  wallMoss: { set: 'plaster', keep: true, rough: 1 },
+  wallTile: { set: 'tiles_wall', color: 0xc3d6d2, rough: 0.5 },
+  wallBrick: { set: 'brick', color: 0xffffff, rough: 1 },
+  wallStone: { set: 'stone', color: 0xb9b9b4, rough: 1 },
+  wallPanel: { set: 'mahogany', color: 0xa39284, rough: 0.8 },
+  wallTeak: { set: 'mahogany', color: 0xc4b3a2, rough: 0.8 },
+  ceilingWood: { set: 'boards', color: 0x8f7d6c, rough: 1 },
+  wood: { set: 'oak', color: 0xb58d68, rough: 0.8 },
+  woodDark: { set: 'mahogany', color: 0xb8a696, rough: 0.75 },
+  woodLight: { set: 'oak', color: 0xf2e6d4, rough: 0.85 },
+  woodBlack: { set: 'mahogany', color: 0x625852, rough: 0.7 },
+};
+
+/** Where to find a fetched surface by name; set by the world once they are in memory. */
+let surfaceSource = null;
+
+function photograph(material) {
+  const spec = SURFACES[material.name];
+  const set = spec && surfaceSource?.(spec.set);
+  if (!set || material.userData.photographed) return;
+  material.userData.photographed = true;
+  if (!spec.keep) {
+    material.map = set.d;
+    material.color.setHex(spec.color ?? 0xffffff);
+  }
+  if (set.n) {
+    material.normalMap = set.n;
+    material.normalScale.set(spec.keep ? 0.5 : 0.9, spec.keep ? 0.5 : 0.9);
+  }
+  if (set.r) {
+    material.roughnessMap = set.r;
+    material.roughness = spec.rough ?? 1;
+    if (!spec.keep) {
+      material.aoMap = set.r;
+      material.aoMapIntensity = 0.7;
+    }
+  }
+  material.needsUpdate = true;
+}
+
+/** Start using photographed surfaces: for materials already made, and any made from now on. */
+export function useSurfaces(source) {
+  surfaceSource = source;
+  for (const material of materials.values()) if (material.isMeshStandardMaterial) photograph(material);
+}
+
+/**
  * Get a shared material by name. Unknown names of the form `#rrggbb` produce a
  * plain coloured material, which keeps scene data terse.
  * @param {string} name
@@ -454,6 +519,7 @@ export function mat(name) {
   }
   material.name = name;
   materials.set(name, material);
+  photograph(material);
   return material;
 }
 

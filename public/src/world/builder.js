@@ -7,6 +7,7 @@ import { mat, glow, artMaterial, haloTexture, shaftTexture, mulberry32 } from '.
 import { ART } from './art.js';
 import { PROPS } from './props.js';
 import './props2.js';
+import './dress.js';
 
 const WALL_T = 0.16;
 /** Props that read `y` themselves (a height on the wall), so the builder must not also lift them. */
@@ -475,7 +476,7 @@ export function buildScene(spec, quality = {}) {
     exposure: amb.exposure ?? 1.15,
     dispose() {
       root.traverse((obj) => {
-        if (obj.isMesh) obj.geometry.dispose();
+        if (obj.isMesh && !obj.geometry.userData.shared) obj.geometry.dispose();
         if (obj.isLight && obj.shadow?.map) obj.shadow.map.dispose();
       });
       for (const d of disposables) d.dispose();
