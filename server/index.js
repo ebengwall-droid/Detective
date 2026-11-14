@@ -28,6 +28,8 @@ const HOST = process.env.HOST || '0.0.0.0';
 
 const STATIC_ROOTS = [
   { prefix: '/vendor/three/', dir: path.join(root, 'node_modules', 'three') },
+  { prefix: '/vendor/postprocessing/', dir: path.join(root, 'node_modules', 'postprocessing') },
+  { prefix: '/vendor/n8ao/', dir: path.join(root, 'node_modules', 'n8ao') },
   { prefix: '/core/', dir: path.join(root, 'core') },
   { prefix: '/', dir: path.join(root, 'public') },
 ];
@@ -46,6 +48,9 @@ const MIME = {
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.glb': 'model/gltf-binary',
+  '.hdr': 'application/octet-stream',
   '.ico': 'image/x-icon',
   '.woff2': 'font/woff2',
   '.map': 'application/json',
@@ -193,7 +198,8 @@ function serveStatic(req, res, pathname) {
         'content-type': MIME[path.extname(file).toLowerCase()] ?? 'application/octet-stream',
         'content-length': stat.size,
         // Development-friendly: always revalidate so edits show up on reload.
-        'cache-control': prefix === '/vendor/three/' ? 'public, max-age=86400' : 'no-cache',
+        // Models and textures are large and do not change between reloads.
+        'cache-control': prefix.startsWith('/vendor/') ? 'public, max-age=86400' : decoded.startsWith('/assets/') ? 'public, max-age=3600' : 'no-cache',
       });
       if (req.method === 'HEAD') return res.end();
       fs.createReadStream(file).pipe(res);

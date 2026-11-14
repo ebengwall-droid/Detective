@@ -19,9 +19,11 @@ function arg(name, fallback) {
 }
 const flag = (name) => process.argv.includes(`--${name}`);
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png' };
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.glb': 'model/gltf-binary', '.hdr': 'application/octet-stream' };
 const ROOTS = [
   ['/vendor/three/', path.join(root, 'node_modules', 'three')],
+  ['/vendor/postprocessing/', path.join(root, 'node_modules', 'postprocessing')],
+  ['/vendor/n8ao/', path.join(root, 'node_modules', 'n8ao')],
   ['/core/', path.join(root, 'core')],
   ['/', path.join(root, 'public')],
 ];

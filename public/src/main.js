@@ -3,6 +3,7 @@
 
 import { connect } from './api.js';
 import { Game } from './game.js';
+import { assets } from './world/assets.js';
 
 const root = /** @type {HTMLElement} */ (document.getElementById('app'));
 const params = new URLSearchParams(location.search);
@@ -70,6 +71,9 @@ async function main() {
   // The hosted single-file build sets GREYHAVEN_MODE = 'local'; ?mode= is for testing.
   const mode = host.GREYHAVEN_MODE ?? params.get('mode') ?? 'auto';
   const client = await connect({ mode });
+  // Modelled people, furniture and materials live beside the page. Without them (a single
+  // file opened from disk, say) the game draws everything in code instead. ?real=0 forces that.
+  if (params.get('real') !== '0') await assets.init(host.GREYHAVEN_ASSETS ?? 'assets/');
   const game = new Game(root, client, {
     quality: params.get('quality') ?? undefined,
     noAutoQuality: params.has('quality'),

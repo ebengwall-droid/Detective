@@ -9,41 +9,12 @@
 
 import * as THREE from 'three';
 import { blobShadowMaterial } from './materials.js';
+import { figureLight, rimLit } from './figure-light.js';
+import { createPerson } from './people.js';
+
+export { figureLight };
 
 // ------------------------------------------------------------------ materials
-
-/**
- * How bright a person may get before the light on them is reined in. Someone
- * standing next to a work lamp should look well lit, not burn out to a white
- * shape. The world sets this each frame to suit the room's exposure.
- */
-export const figureLight = { value: 100 };
-
-/**
- * A soft edge light, so a figure reads against a dark room the way it would
- * with a lamp somewhere behind it.
- */
-function rimLit(material, strength = 0.17, tint = 0x9fc4dc) {
-  material.onBeforeCompile = (shader) => {
-    shader.uniforms.rimTint = { value: new THREE.Color(tint) };
-    shader.uniforms.rimStrength = { value: strength };
-    shader.uniforms.figureLight = figureLight;
-    shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform vec3 rimTint;\nuniform float rimStrength;\nuniform float figureLight;')
-      .replace(
-        '#include <opaque_fragment>',
-        [
-          'float rimTerm = pow(1.0 - saturate(dot(normalize(vViewPosition), normal)), 3.2);',
-          'outgoingLight += rimTint * rimTerm * rimStrength * (0.3 + diffuseColor.rgb);',
-          'float figurePeak = max(outgoingLight.r, max(outgoingLight.g, outgoingLight.b));',
-          'if (figurePeak > figureLight) outgoingLight *= (figureLight + (figurePeak - figureLight) * 0.2) / figurePeak;',
-          '#include <opaque_fragment>',
-        ].join('\n'),
-      );
-  };
-  material.customProgramCacheKey = () => `rim:${strength}:${tint}`;
-  return material;
-}
 
 const matCache = new Map();
 function color(hex, rough = 0.85, metal = 0, side = THREE.FrontSide) {
@@ -837,6 +808,13 @@ function paintTorso(c, a, at, kind) {
  * @returns {{ root: THREE.Group, update: (t: number, dt: number, s: {lookAt?: THREE.Vector3|null, talking?: boolean, mood?: string}) => void, headHeight: number, setAccessories: (list: string[]) => void, dispose: () => void }}
  */
 export function createCharacter(a = {}) {
+  const person = a.model ? createPerson(a) : null;
+  if (person) return person;
+  return createFigure(a);
+}
+
+/** A person drawn in code: the stand-in for when the modelled one is not available. */
+function createFigure(a = {}) {
   const root = new THREE.Group();
   const scale = a.height ?? 1;
   const build = BUILD[a.build ?? 'medium'];

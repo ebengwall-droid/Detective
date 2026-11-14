@@ -1,0 +1,246 @@
+{
+  "characters": {
+    "vance": {
+      "file": "characters/vance.glb",
+      "sex": "f",
+      "source": "Professions/Business_Female_04",
+      "bytes": 541904,
+      "tris": 8270,
+      "shapes": 42,
+      "hip": 0.9233
+    },
+    "hale": {
+      "file": "characters/hale.glb",
+      "sex": "m",
+      "source": "Professions/Business_Male_04",
+      "bytes": 523792,
+      "tris": 7326,
+      "shapes": 42,
+      "hip": 0.8952
+    },
+    "okoro": {
+      "file": "characters/okoro.glb",
+      "sex": "m",
+      "source": "Professions/Business_Male_05",
+      "bytes": 426424,
+      "tris": 7164,
+      "shapes": 42,
+      "hip": 0.8952
+    },
+    "brandt": {
+      "file": "characters/brandt.glb",
+      "sex": "m",
+      "source": "Professions/Police_Male_03",
+      "bytes": 659512,
+      "tris": 12445,
+      "shapes": 42,
+      "hip": 0.8952
+    },
+    "dray": {
+      "file": "characters/dray.glb",
+      "sex": "f",
+      "source": "Adults/Female_Adult_02",
+      "bytes": 885436,
+      "tris": 8940,
+      "shapes": 42,
+      "hip": 0.9233
+    },
+    "carrow": {
+      "file": "characters/carrow.glb",
+      "sex": "f",
+      "source": "Professions/Business_Female_02",
+      "bytes": 1267532,
+      "tris": 8640,
+      "shapes": 42,
+      "hip": 0.9233
+    },
+    "strand": {
+      "file": "characters/strand.glb",
+      "sex": "m",
+      "source": "Adults/Male_Adult_07",
+      "bytes": 708492,
+      "tris": 7588,
+      "shapes": 42,
+      "hip": 0.8952
+    },
+    "fenn": {
+      "file": "characters/fenn.glb",
+      "sex": "m",
+      "source": "Adults/Male_Adult_03",
+      "bytes": 1014072,
+      "tris": 7200,
+      "shapes": 42,
+      "hip": 0.8952
+    },
+    "ivale": {
+      "file": "characters/ivale.glb",
+      "sex": "f",
+      "source": "Professions/Business_Female_03",
+      "bytes": 708464,
+      "tris": 8438,
+      "shapes": 42,
+      "hip": 0.9233
+    }
+  },
+  "anims": {
+    "f": {
+      "file": "anims/f.glb",
+      "bytes": 1236808,
+      "hip": 0.9194,
+      "clips": {
+        "idle": {
+          "source": "f_idle_neutral_01",
+          "seconds": 15.5
+        },
+        "idle2": {
+          "source": "f_idle_neutral_03",
+          "seconds": 16.67
+        },
+        "idle_breathe": {
+          "source": "f_idle_breathe_01",
+          "seconds": 2.67
+        },
+        "idle_nervous": {
+          "source": "f_idle_nervous_01",
+          "seconds": 46.17
+        },
+        "idle_angry": {
+          "source": "f_idle_angry_01",
+          "seconds": 23.83
+        },
+        "talk": {
+          "source": "f_gestic_talk_neutral_01",
+          "seconds": 27.33
+        },
+        "talk2": {
+          "source": "f_gestic_talk_neutral_02",
+          "seconds": 27.67
+        },
+        "talk_angry": {
+          "source": "f_gestic_talk_angry_01",
+          "seconds": 32.75
+        },
+        "talk_nervous": {
+          "source": "f_gestic_talk_nervous_01",
+          "seconds": 28.96
+        },
+        "talk_sad": {
+          "source": "f_gestic_talk_sad_01",
+          "seconds": 29.33
+        },
+        "talk_relaxed": {
+          "source": "f_gestic_talk_relaxed_01",
+          "seconds": 27.5
+        },
+        "talk_assured": {
+          "source": "f_gestic_talk_self-assured_01",
+          "seconds": 32.58
+        },
+        "listen": {
+          "source": "f_gestic_listen_neutral_01",
+          "seconds": 21.42
+        },
+        "listen_nervous": {
+          "source": "f_gestic_listen_nervous_01",
+          "seconds": 27
+        },
+        "listen_sad": {
+          "source": "f_gestic_listen_sad_01",
+          "seconds": 21.42
+        },
+        "sit": {
+          "source": "f_sit_chair_idle_neutral_01",
+          "seconds": 33.21
+        }
+      }
+    },
+    "m": {
+      "file": "anims/m.glb",
+      "bytes": 1483788,
+      "hip": 0.8952,
+      "clips": {
+        "idle": {
+          "source": "m_idle_neutral_01",
+          "seconds": 11.67
+        },
+        "idle2": {
+          "source": "m_idle_neutral_03",
+          "seconds": 33.33
+        },
+        "idle_breathe": {
+          "source": "m_idle_breathe_01",
+          "seconds": 2.71
+        },
+        "idle_nervous": {
+          "source": "m_idle_nervous_01",
+          "seconds": 30.88
+        },
+        "idle_angry": {
+          "source": "m_idle_angry_01",
+          "seconds": 28.33
+        },
+        "talk": {
+          "source": "m_gestic_talk_neutral_01",
+          "seconds": 35.54
+        },
+        "talk2": {
+          "source": "m_gestic_talk_neutral_02",
+          "seconds": 44.38
+        },
+        "talk_angry": {
+          "source": "m_gestic_talk_excited_01",
+          "seconds": 26.5
+        },
+        "talk_nervous": {
+          "source": "m_gestic_talk_nervous_01",
+          "seconds": 25.88
+        },
+        "talk_sad": {
+          "source": "m_gestic_talk_sad_01",
+          "seconds": 32.33
+        },
+        "talk_relaxed": {
+          "source": "m_gestic_talk_relaxed_01",
+          "seconds": 32.33
+        },
+        "talk_assured": {
+          "source": "m_gestic_talk_cool",
+          "seconds": 45.67
+        },
+        "listen": {
+          "source": "m_gestic_listen_neutral_01",
+          "seconds": 32.5
+        },
+        "listen_nervous": {
+          "source": "m_gestic_listen_nervous_01",
+          "seconds": 31.63
+        },
+        "listen_sad": {
+          "source": "m_gestic_listen_sad_01",
+          "seconds": 32.5
+        },
+        "listen_angry": {
+          "source": "m_gestic_listen_angry_01",
+          "seconds": 30.67
+        },
+        "sit": {
+          "source": "m_sit_chair_idle_neutral_01",
+          "seconds": 36.08
+        },
+        "sit_nervous": {
+          "source": "m_sit_chair_idle_nervous_01",
+          "seconds": 44.46
+        },
+        "sit_talk": {
+          "source": "m_sit_chair_gestic_shrug_01",
+          "seconds": 3
+        },
+        "note": {
+          "source": "m_documents_note",
+          "seconds": 10.04
+        }
+      }
+    }
+  },
+  "licence": "Microsoft Rocketbox Avatar Library, MIT License, Copyright (c) 2020 Microsoft"
+}

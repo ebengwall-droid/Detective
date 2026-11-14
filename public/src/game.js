@@ -329,10 +329,12 @@ export class Game {
 
   // ------------------------------------------------------------ plumbing
 
-  fade(on) {
-    if (this.fadeEl.classList.contains('on') === on) return Promise.resolve();
+  async fade(on) {
+    if (this.fadeEl.classList.contains('on') === on) return;
+    // Never lift the dark on a room that is still arriving.
+    if (!on) await this.world.whenReady();
     this.fadeEl.classList.toggle('on', on);
-    return new Promise((r) => setTimeout(r, FADE_MS));
+    await new Promise((r) => setTimeout(r, FADE_MS));
   }
 
   block(name) {

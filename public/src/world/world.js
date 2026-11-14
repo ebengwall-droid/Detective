@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { buildScene } from './builder.js';
 import { buildEnvironment, canvasTexture } from './materials.js';
 import { createCharacter, figureLight } from './characters.js';
+import { assets } from './assets.js';
 import { Nav } from './nav.js';
 import { Controls } from './controls.js';
 import { Post } from './post.js';
@@ -324,11 +325,40 @@ export class World {
     }
   }
 
+  /**
+   * Fetch the modelled people this place needs and are not in memory yet.
+   * Until they arrive anyone missing is drawn in code; they are swapped the moment the files land.
+   */
+  fetchPeople(list) {
+    const missing = [...new Set(list.map((n) => n.look?.model).filter((id) => id && assets.people?.characters[id] && !assets.person(id)))];
+    if (!missing.length || !assets.people) return;
+    const job = assets.loadPeople(missing).then(() => {
+      if (this.loading === job) this.loading = null;
+      if (this.lastLoc) {
+        this.syncNpcs(this.lastLoc.npcs);
+        this.rebuildPickables();
+      }
+      // Everyone else, quietly, so that nobody is ever a stand-in again.
+      if (!this.castFetched) {
+        this.castFetched = true;
+        assets.loadPeople(Object.keys(assets.people.characters)).then(() => this.portraitCache?.clear());
+      }
+    });
+    this.loading = job;
+  }
+
+  /** Resolves once the place on screen has everything it was waiting for (or has waited long enough). */
+  whenReady(limit = 15000) {
+    if (!this.loading) return Promise.resolve();
+    return Promise.race([this.loading, new Promise((r) => setTimeout(r, limit))]);
+  }
+
   syncNpcs(list) {
     const seen = new Set();
+    this.fetchPeople(list);
     for (const n of list) {
       seen.add(n.id);
-      const sig = JSON.stringify([n.look, n.p, n.r]);
+      const sig = JSON.stringify([n.look, n.p, n.r, !!assets.person(n.look?.model)]);
       let entry = this.npcs.get(n.id);
       if (entry && entry.sig !== sig) {
         this.scene.remove(entry.ch.root, entry.proxy);
@@ -698,7 +728,7 @@ export class World {
       const want = facing && pose !== 'sit' && pose !== 'bound' ? Math.atan2(p.x - n.pos.x, p.z - n.pos.z) : n.baseYaw;
       n.yaw = lerpAngle(n.yaw, want, 1 - Math.exp(-dt * 4));
       n.ch.root.rotation.y = n.yaw;
-      n.ch.update(t, dt, { lookAt: this.camera.position, talking: n.talking, mood: n.mood });
+      n.ch.update(t, dt, { lookAt: this.camera.position, talking: n.talking, mood: n.mood, engaged: this.focus?.id === n.data?.id });
       const dist = Math.hypot(p.x - n.pos.x, p.z - n.pos.z);
       const pulsing = t < this.pulseUntil;
       n.marker.material.opacity = this.mode === 'explore' ? (pulsing ? 1 : THREE.MathUtils.clamp(1.4 - dist / 9, 0.6, 1)) : 0;
@@ -830,14 +860,17 @@ export class World {
   /** Render a head-and-shoulders picture of a character; returns a data URL. */
   portrait(look, size = 208) {
     this.portraitCache ??= new Map();
-    const key = JSON.stringify(look) + size;
+    const real = !!assets.person(look.model);
+    const key = JSON.stringify(look) + size + real;
     if (this.portraitCache.has(key)) return this.portraitCache.get(key);
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x1b2736);
-    const ch = createCharacter({ ...look, pose: 'stand' });
-    ch.update(0, 0.016, {});
+    const ch = createCharacter({ ...look, pose: 'stand', accessories: (look.accessories ?? []).filter((a) => a !== 'cane') });
+    ch.update(0, 0.016, { clip: 'idle_breathe' });
     scene.add(ch.root);
-    scene.add(new THREE.HemisphereLight(0xa9c0d4, 0x7a6858, 1.5));
+    scene.environment = this.scene.environment;
+    scene.environmentIntensity = 0.5;
+    scene.add(new THREE.HemisphereLight(0xa9c0d4, 0x7a6858, real ? 1.1 : 1.5));
     const key1 = new THREE.DirectionalLight(0xffdcb0, 2.7);
     key1.position.set(1.2, 2.2, 2.2);
     scene.add(key1);

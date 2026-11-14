@@ -1,10 +1,15 @@
 // How each character looks in the 3D world. Kept apart from the script so the
 // art can be tuned without touching who knows what.
+//
+// `model` names the modelled, animated person to use (public/assets/characters).
+// The rest describes a figure the game can draw in code if that model is not
+// available, and says what they carry.
 
 export const LOOKS = {
   // Detective Sergeant Nora Vance, your partner. Note the bosun's whistle:
   // it hangs on a brass chain until the night Conrad Vale dies.
   vance: {
+    model: 'vance',
     build: 'slim',
     height: 0.98,
     skin: '#d2a184',
@@ -16,6 +21,7 @@ export const LOOKS = {
   },
   // Captain Desmond Hale. Big, slow, leans on a cane.
   hale: {
+    model: 'hale',
     build: 'heavy',
     height: 1.05,
     skin: '#c9977a',
@@ -29,6 +35,7 @@ export const LOOKS = {
   },
   // Dr. Ansel Okoro, medical examiner.
   okoro: {
+    model: 'okoro',
     build: 'medium',
     height: 1.0,
     skin: '#7a5240',
@@ -42,6 +49,7 @@ export const LOOKS = {
   },
   // Officer Teodor Brandt, scene-of-crime technician.
   brandt: {
+    model: 'brandt',
     build: 'medium',
     height: 1.02,
     skin: '#e0b79a',
@@ -55,6 +63,7 @@ export const LOOKS = {
   },
   // Agnes Dray, Leland Brook's housekeeper.
   dray: {
+    model: 'dray',
     build: 'heavy',
     height: 0.93,
     skin: '#d9ad92',
@@ -66,6 +75,7 @@ export const LOOKS = {
   },
   // Bess Carrow, landlady of the Anchor & Lamp.
   carrow: {
+    model: 'carrow',
     build: 'heavy',
     height: 0.95,
     skin: '#d6a88c',
@@ -77,6 +87,7 @@ export const LOOKS = {
   },
   // Milo Strand, crime reporter for the Greyhaven Ledger.
   strand: {
+    model: 'strand',
     build: 'slim',
     height: 1.0,
     skin: '#b8866a',
@@ -92,6 +103,7 @@ export const LOOKS = {
   },
   // Tobias Fenn, lamp-maker.
   fenn: {
+    model: 'fenn',
     build: 'slim',
     height: 1.03,
     skin: '#cfa58a',
@@ -105,6 +117,7 @@ export const LOOKS = {
   },
   // Isolde Vale, Conrad Vale's wife.
   ivale: {
+    model: 'ivale',
     build: 'slim',
     height: 1.0,
     skin: '#e3bfa6',

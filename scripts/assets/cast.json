@@ -1,0 +1,56 @@
+{
+  "source": "https://github.com/microsoft/Microsoft-Rocketbox (MIT)",
+  "characters": {
+    "vance": { "src": "Professions/Business_Female_04", "sex": "f" },
+    "hale": { "src": "Professions/Business_Male_04", "sex": "m" },
+    "okoro": { "src": "Professions/Business_Male_05", "sex": "m" },
+    "brandt": { "src": "Professions/Police_Male_03", "sex": "m" },
+    "dray": { "src": "Adults/Female_Adult_02", "sex": "f" },
+    "carrow": { "src": "Professions/Business_Female_02", "sex": "f" },
+    "strand": { "src": "Adults/Male_Adult_07", "sex": "m" },
+    "fenn": { "src": "Adults/Male_Adult_03", "sex": "m" },
+    "ivale": { "src": "Professions/Business_Female_03", "sex": "f" }
+  },
+  "animations": {
+    "f": {
+      "idle": "f_idle_neutral_01",
+      "idle2": "f_idle_neutral_03",
+      "idle_breathe": "f_idle_breathe_01",
+      "idle_nervous": "f_idle_nervous_01",
+      "idle_angry": "f_idle_angry_01",
+      "talk": "f_gestic_talk_neutral_01",
+      "talk2": "f_gestic_talk_neutral_02",
+      "talk_angry": "f_gestic_talk_angry_01",
+      "talk_nervous": "f_gestic_talk_nervous_01",
+      "talk_sad": "f_gestic_talk_sad_01",
+      "talk_relaxed": "f_gestic_talk_relaxed_01",
+      "talk_assured": "f_gestic_talk_self-assured_01",
+      "listen": "f_gestic_listen_neutral_01",
+      "listen_nervous": "f_gestic_listen_nervous_01",
+      "listen_sad": "f_gestic_listen_sad_01",
+      "sit": "f_sit_chair_idle_neutral_01"
+    },
+    "m": {
+      "idle": "m_idle_neutral_01",
+      "idle2": "m_idle_neutral_03",
+      "idle_breathe": "m_idle_breathe_01",
+      "idle_nervous": "m_idle_nervous_01",
+      "idle_angry": "m_idle_angry_01",
+      "talk": "m_gestic_talk_neutral_01",
+      "talk2": "m_gestic_talk_neutral_02",
+      "talk_angry": "m_gestic_talk_excited_01",
+      "talk_nervous": "m_gestic_talk_nervous_01",
+      "talk_sad": "m_gestic_talk_sad_01",
+      "talk_relaxed": "m_gestic_talk_relaxed_01",
+      "talk_assured": "m_gestic_talk_cool",
+      "listen": "m_gestic_listen_neutral_01",
+      "listen_nervous": "m_gestic_listen_nervous_01",
+      "listen_sad": "m_gestic_listen_sad_01",
+      "listen_angry": "m_gestic_listen_angry_01",
+      "sit": "m_sit_chair_idle_neutral_01",
+      "sit_nervous": "m_sit_chair_idle_nervous_01",
+      "sit_talk": "m_sit_chair_gestic_shrug_01",
+      "note": "m_documents_note"
+    }
+  }
+}

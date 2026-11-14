@@ -8,6 +8,7 @@ import { buildEnvironment } from './world/materials.js';
 import { createCharacter } from './world/characters.js';
 import { LOOKS } from '/core/cases/lamplighter/looks.js';
 import { check } from '/core/conditions.js';
+import { assets } from './world/assets.js';
 
 const params = new URLSearchParams(location.search);
 const locId = params.get('loc') ?? 'precinct';
@@ -39,6 +40,8 @@ async function main() {
     const faces = ['16px "Marcellus"', '16px "Special Elite"', '16px "Instrument Sans"', '700 16px "Instrument Sans"', '16px "JetBrains Mono"'];
     await Promise.race([Promise.all(faces.map((face) => document.fonts.load(face))), new Promise((r) => setTimeout(r, 2500))]);
   } catch {}
+  // Modelled people, unless ?real=0 asks for the code-drawn ones.
+  if (params.get('real') !== '0' && (await assets.init('/assets/'))) await assets.loadPeople(Object.keys(LOOKS));
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Number(params.get('dpr') ?? 1));
   renderer.setSize(innerWidth, innerHeight, false);
@@ -64,10 +67,12 @@ async function main() {
   const people = [];
   if (locId === 'stage') {
     // Line the whole cast up twice: front row facing the camera, back row turned away.
-    const ids = Object.keys(LOOKS);
+    // ?only=hale,vance shows just those, front row only.
+    const only = params.get('only')?.split(',');
+    const ids = only ?? Object.keys(LOOKS);
     ids.forEach((id, i) => {
-      for (const row of [0, 1]) {
-        const ch = createCharacter(LOOKS[id]);
+      for (const row of only ? [0] : [0, 1]) {
+        const ch = createCharacter({ ...LOOKS[id], pose: params.get('pose') ?? undefined });
         ch.root.position.set((i - (ids.length - 1) / 2) * 1.05, 0, row ? -2.2 : -0.4);
         ch.root.rotation.y = row ? Math.PI : 0;
         scene.add(ch.root);
@@ -115,7 +120,7 @@ async function main() {
     camera.position.set(pos.x, pos.y, pos.z);
     camera.rotation.set(pitch, yaw, 0, 'YXZ');
     for (const fn of built.anims) fn(t, dt);
-    for (const ch of people) ch.update(t, dt, { lookAt: camera.position, talking: params.get('talk') === '1', mood: params.get('mood') ?? 'calm' });
+    for (const ch of people) ch.update(t, dt, { lookAt: params.get('look') === '0' ? null : camera.position, talking: params.get('talk') === '1', engaged: params.get('engaged') === '1', mood: params.get('mood') ?? 'calm', clip: window.__clip ?? params.get('clip') });
     renderer.render(scene, camera);
     const ri = renderer.info.render;
     info.textContent = `${locId}  x=${pos.x.toFixed(2)} z=${pos.z.toFixed(2)} yaw=${((yaw * 180) / Math.PI).toFixed(0)} pitch=${((pitch * 180) / Math.PI).toFixed(0)}\ncalls=${ri.calls} tris=${ri.triangles}`;
@@ -139,7 +144,9 @@ async function main() {
     // ?freeze=1 stops the loop after a few frames so screenshots are cheap.
     if (!freeze || frames < 4) requestAnimationFrame(frame);
   }
+  window.__people = people;
   window.__dev = {
+    step,
     setCam(x, z, yawDeg, pitchDeg = 0, y = 1.62) {
       pos.x = x; pos.z = z; pos.y = y;
       yaw = (yawDeg * Math.PI) / 180;
