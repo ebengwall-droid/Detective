@@ -62,9 +62,7 @@ export const LOOKS = {
     coat: { color: '#5a3848', length: 'cardigan' },
     shirt: '#b9b2a2',
     trousers: '#3a3436',
-    scarf: null,
     accessories: [],
-    apron: true,
   },
   // Bess Carrow, landlady of the Anchor & Lamp.
   carrow: {
@@ -106,7 +104,7 @@ export const LOOKS = {
     accessories: [],
   },
   // Isolde Vale, Conrad Vale's wife.
-  vale: {
+  ivale: {
     build: 'slim',
     height: 1.0,
     skin: '#e3bfa6',

@@ -561,7 +561,7 @@ def('companionway', (g, o, ctx) => {
 
 def('beam', (g, o, ctx) => {
   const ceil = ctx.ceil ?? 2.4;
-  box(g, o.len ?? 4, o.h ?? 0.14, o.t ?? 0.12, o.mat ?? 'woodDark', 0, ceil - (o.h ?? 0.14) / 2, 0);
+  box(g, o.len ?? 4, o.h ?? 0.14, o.thick ?? 0.12, o.mat ?? 'woodDark', 0, ceil - (o.h ?? 0.14) / 2, 0);
   return { c: null, h: 0 };
 });
 

@@ -8,7 +8,7 @@ import http from 'node:http';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { GameSession, RPC_METHODS, STREAMING_METHODS } from '../core/engine.js';
+import { GameSession, RPC_METHODS, STREAMING_METHODS, assertCaseValid } from '../core/engine.js';
 import { createAnthropicProvider } from './anthropic-provider.js';
 import { SaveStore } from './store.js';
 
@@ -37,6 +37,7 @@ const MIME = {
   '.map': 'application/json',
 };
 
+assertCaseValid();
 const ai = createAnthropicProvider();
 const store = new SaveStore(path.join(root, 'data', 'saves'));
 
@@ -122,7 +123,7 @@ async function handleRpc(req, res) {
       const hooks = streaming
         ? { onText: (text) => write({ t: 'text', text }), signal: abort.signal }
         : { signal: abort.signal };
-      const out = await session[method](...params, hooks);
+      const out = await session[method](params[0] && typeof params[0] === 'object' ? params[0] : {}, hooks);
       await store.save(sid, session.state);
       return out;
     });

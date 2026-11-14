@@ -7,6 +7,7 @@ import { buildScene } from './world/builder.js';
 import { buildEnvironment } from './world/materials.js';
 import { createCharacter } from './world/characters.js';
 import { LOOKS } from '/core/cases/lamplighter/looks.js';
+import { check } from '/core/conditions.js';
 
 const params = new URLSearchParams(location.search);
 const locId = params.get('loc') ?? 'precinct';
@@ -22,7 +23,10 @@ const STAGE = {
   ],
   spawn: { p: [0, 2.6], yaw: 0 },
 };
-const spec = locId === 'stage' ? STAGE : SCENES[locId];
+const rawSpec = locId === 'stage' ? STAGE : SCENES[locId];
+// Evaluate conditional props against a stand-in game state (?act=2).
+const fakeState = { act: Number(params.get('act') ?? 2), facts: {}, evidence: {}, flags: {}, deductions: {}, records: {}, beats: {}, visited: {}, examined: {}, npcs: {}, marks: {}, jobsDone: {}, steps: 0 };
+const spec = rawSpec && { ...rawSpec, props: (rawSpec.props ?? []).filter((p) => check(p.if, fakeState)) };
 const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('c'));
 const info = document.getElementById('info');
 
