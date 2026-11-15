@@ -271,6 +271,9 @@ export function validateCase(c = CASE) {
     checkEffects(p.effects, where);
     if (p.lesson && !c.records[`l_${p.lesson}`]) problems.push(`${where}: no lecture "l_${p.lesson}"`);
     if (p.leadsTo && !c.locations[p.leadsTo]) problems.push(`${where}: leads to an unknown place "${p.leadsTo}"`);
+    // A lock answered with rings needs as many rings as its word has letters.
+    if (p.lock && p.answers.some((ans) => ans.replace(/[^A-Za-z]/g, '').length !== p.lock.rings)) problems.push(`${where}: a ${p.lock.rings}-ring lock with an answer of another length`);
+    if (p.lock?.start && p.lock.start.length !== p.lock.rings) problems.push(`${where}: the lock starts with ${p.lock.start.length} letters on ${p.lock.rings} rings`);
   }
   c.feeds.forEach((pid, i) => {
     if (c.puzzles[pid]?.feed !== i + 1) problems.push(`feeds: "${pid}" is not question ${i + 1}`);

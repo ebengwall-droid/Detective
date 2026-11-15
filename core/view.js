@@ -170,6 +170,8 @@ export function buildView(state, caseData, ai) {
         feed: def.feed ?? null,
         blocks: def.blocks.map((b) => (b.feeds ? { feeds } : b)),
         ask: def.ask,
+        // A letter-lock is answered by turning its rings: how many, and what they read to begin with.
+        lock: def.lock ?? null,
         solved,
         answer: solved ? def.answers[0] : null,
         note: solved ? def.solved : null,

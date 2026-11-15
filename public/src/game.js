@@ -775,7 +775,7 @@ export class Game {
           const taken = res.taken.map((tid) => this.view.evidence.find((e) => e.id === tid)).filter(Boolean);
           const more = this.view.location.hotspots.some((h) => !h.done && h.kind !== 'exit');
           const actions = [];
-          if (paper && !paper.solved) actions.push({ id: 'paper', label: 'Work on it' });
+          if (paper && !paper.solved) actions.push({ id: 'paper', label: paper.lock ? 'Try the lock' : 'Work on it' });
           if (more) actions.push({ id: 'look', label: 'What else is here?' });
           const choice = await showInspect(this.panels, { title: res.title, text: res.text, figure: res.figure, taken, actions });
           if (choice === 'look') next = 'look';

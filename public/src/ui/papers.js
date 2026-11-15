@@ -5,6 +5,7 @@
 // is solved and what a hint says; nothing here knows an answer.
 
 import { el, add, icon } from './dom.js';
+import { letterLock } from './lock.js';
 import { showCard, confirmCard } from './hud.js';
 import { caesar, frequencies, unRailFence, vigenere, playfair, playfairSquare, lettersOf } from '../../../core/ciphers.js';
 
@@ -304,36 +305,56 @@ function puzzleView(p, game, sel, api) {
   if (p.solved) {
     add(root, el('div', { class: 'question solved' }, el('div', { class: 'answer' }, icon('check', 16), p.answer), el('div', { class: 'verdict yes', text: p.note })));
   } else {
-    const input = el('input', { class: 'field', type: 'text', placeholder: 'Your answer', autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', enterkeyhint: 'done', maxlength: '60', 'aria-label': p.ask });
-    const verdict = el('div', { class: 'verdict no', hidden: true, role: 'status' });
-    const go = el('button', { class: 'btn solid', type: 'submit' }, 'Answer');
-    const form = el('form', { class: 'answer-form' }, el('label', { class: 'ask', text: p.ask }), el('div', { class: 'answer-row' }, input, go), verdict);
-    form.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      if (!input.value.trim()) return;
-      go.disabled = true;
-      try {
-        const res = await game.call('solve', { id: p.id, answer: input.value }, {}, { deferEvents: true });
-        if (res.ok) {
-          game.audio.sting();
-          game.buzz?.(24);
-          // A puzzle that is a way in (the gate) has already taken you through: the new place is behind the card.
-          await showCard(game.cards, { kicker: p.title, title: res.answer, lines: res.text.split('\n\n'), veil: true, button: res.travelled ? 'Go through' : 'Continue' });
-          if (res.travelled) api.close();
-          else api.refresh();
-          game.flushEvents();
-          return;
-        }
-        verdict.hidden = false;
-        verdict.textContent = res.text;
+    /** Offer an answer. Right: the card, and on (through the gate, for a way in). Wrong: what to show. */
+    const offer = async (answer) => {
+      const res = await game.call('solve', { id: p.id, answer }, {}, { deferEvents: true });
+      if (res.ok) {
+        game.audio.sting();
+        game.buzz?.(24);
+        // A puzzle that is a way in (the gate) has already taken you through: the new place is behind the card.
+        await showCard(game.cards, { kicker: p.title, title: res.answer, lines: res.text.split('\n\n'), veil: true, button: res.travelled ? 'Go through' : 'Continue' });
+        if (res.travelled) api.close();
+        else api.refresh();
         game.flushEvents();
-      } catch (err) {
-        verdict.hidden = false;
-        verdict.textContent = err.message;
+        return res;
       }
-      go.disabled = false;
-    });
-    add(root, form);
+      game.flushEvents();
+      return res;
+    };
+    if (p.lock) {
+      // A lock is answered with its own rings, not a box to type in.
+      const lock = letterLock({
+        rings: p.lock.rings,
+        start: p.lock.start ?? '',
+        onTry: async (word) => {
+          const res = await offer(word);
+          if (res.ok) await new Promise((r) => setTimeout(r, 650));
+          return res;
+        },
+      });
+      add(root, el('div', { class: 'answer-form lock-form' }, el('div', { class: 'ask', text: p.ask }), lock.node));
+    } else {
+      const input = el('input', { class: 'field', type: 'text', placeholder: 'Your answer', autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', enterkeyhint: 'done', maxlength: '60', 'aria-label': p.ask });
+      const verdict = el('div', { class: 'verdict no', hidden: true, role: 'status' });
+      const go = el('button', { class: 'btn solid', type: 'submit' }, 'Answer');
+      const form = el('form', { class: 'answer-form' }, el('label', { class: 'ask', text: p.ask }), el('div', { class: 'answer-row' }, input, go), verdict);
+      form.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        if (!input.value.trim()) return;
+        go.disabled = true;
+        try {
+          const res = await offer(input.value);
+          if (res.ok) return;
+          verdict.hidden = false;
+          verdict.textContent = res.text;
+        } catch (err) {
+          verdict.hidden = false;
+          verdict.textContent = err.message;
+        }
+        go.disabled = false;
+      });
+      add(root, form);
+    }
 
     // Hints already taken stay on the page.
     const hints = el('div', { class: 'hints' });
