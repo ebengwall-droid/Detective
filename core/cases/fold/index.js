@@ -17,6 +17,9 @@ import { conditionRefs } from '../../conditions.js';
 for (const [id, npc] of Object.entries(NPCS)) npc.small = SMALL[id] ?? {};
 NPCS.kit.guide = true;
 
+/** The kinds of written thing the page can draw for a view's `figure`. */
+const FIGURE_KINDS = ['blotter', 'slate', 'stone', 'board', 'card', 'certificate', 'ledger', 'plate', 'newsprint', 'typed', 'label', 'plan'];
+
 // A lecture should always be found by its own title.
 for (const r of Object.values(RECORDS)) if (r.kind === 'lecture') r.keys.push(r.title.replace(/^Lecture · /, ''));
 
@@ -179,6 +182,8 @@ export function validateCase(c = CASE) {
         checkEffects(v.effects, where);
         const travel = v.action?.travel;
         if (travel && !c.locations[travel]) problems.push(`${where}: travels to unknown location "${travel}"`);
+        // A close-up of a written thing (drawn by the page: public/src/ui/writing.js).
+        if (v.figure && !FIGURE_KINDS.includes(v.figure.kind)) problems.push(`${where}: a picture of an unknown kind "${v.figure.kind}"`);
       }
     }
   }

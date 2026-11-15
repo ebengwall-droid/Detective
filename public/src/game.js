@@ -121,7 +121,7 @@ export class Game {
   async boot() {
     try {
       // Signs and papers in the rooms are painted with type the page itself may never show, so ask for each face by name.
-      const faces = ['16px "Marcellus"', '16px "Special Elite"', '16px "Instrument Sans"', '700 16px "Instrument Sans"', '16px "JetBrains Mono"', '700 16px "Cinzel"'];
+      const faces = ['16px "Marcellus"', '16px "Special Elite"', '16px "Instrument Sans"', '700 16px "Instrument Sans"', '16px "JetBrains Mono"', '700 16px "Cinzel"', '500 16px "Caveat"'];
       const loaded = Promise.all(faces.map((face) => document.fonts.load(face))).then(() => document.fonts.ready);
       await Promise.race([loaded, new Promise((r) => setTimeout(r, 2500))]);
     } catch {
@@ -763,7 +763,7 @@ export class Game {
           const actions = [];
           if (paper && !paper.solved) actions.push({ id: 'paper', label: 'Work on it' });
           if (more) actions.push({ id: 'look', label: 'What else is here?' });
-          const choice = await showInspect(this.panels, { title: res.title, text: res.text, taken, actions });
+          const choice = await showInspect(this.panels, { title: res.title, text: res.text, figure: res.figure, taken, actions });
           if (choice === 'look') next = 'look';
           else if (choice === 'paper') next = `puzzle:${pid}`;
         } else if (paper && !paper.solved) {

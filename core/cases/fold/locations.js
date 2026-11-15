@@ -27,16 +27,16 @@ export const LOCATIONS = {
       },
       {
         id: 'slate', at: 'slate', label: 'Chalk slate', kind: 'look',
-        views: [{ text: "A child's school slate hangs on a nail. Someone chalked five capital letters on it this morning: FDWFK. Below them, smaller, in different handwriting: 'yesterday's was better'." }],
+        views: [{ figure: {kind: "slate", main: "FDWFK", note: "yesterday's was better", alt: "A chalk slate: FDWFK. Under it, smaller: yesterday's was better."}, text: "A child's school slate hangs on a nail. Someone chalked five capital letters on it this morning: FDWFK. Below them, smaller, in different handwriting: 'yesterday's was better'." }],
       },
       {
         id: 'stone', at: 'stone', label: 'Carved stone', kind: 'look',
-        views: [{ text: 'Words are carved into the wall above the gate: THREE BACK, AS CAESAR WROTE. The carving is about two hundred years old, and has been re-cut at least once. Under it, someone has scratched with a key: every. single. day.' }],
+        views: [{ figure: {kind: "stone", lines: ["THREE BACK,", "AS CAESAR WROTE"], scratch: "every. single. day.", alt: "Carved in the stone: THREE BACK, AS CAESAR WROTE. Scratched under it: every. single. day."}, text: 'Words are carved into the wall above the gate: THREE BACK, AS CAESAR WROTE. The carving is about two hundred years old, and has been re-cut at least once. Under it, someone has scratched with a key: every. single. day.' }],
       },
       {
         id: 'notice', at: 'notice', label: 'Painted board', kind: 'look',
         views: [{
-          text: "THE FOLD. NO MAPS SOLD HERE. MIND THE TIME.\n\nKit nods through the bars. 'Every map of Ravel since 1741 was drawn by people in there. They always put our streets in the fold of the page, where nobody can see them. So you can't find the Fold on a map. Someone has to tell you, or you work it out. And our clocks are eleven minutes behind yours. You'll see.'",
+          figure: {kind: "board", lines: ["THE FOLD.", "NO MAPS SOLD HERE.", "MIND THE TIME."], alt: "A painted board: THE FOLD. NO MAPS SOLD HERE. MIND THE TIME."}, text: "THE FOLD. NO MAPS SOLD HERE. MIND THE TIME.\n\nKit nods through the bars. 'Every map of Ravel since 1741 was drawn by people in there. They always put our streets in the fold of the page, where nobody can see them. So you can't find the Fold on a map. Someone has to tell you, or you work it out. And our clocks are eleven minutes behind yours. You'll see.'",
           facts: ['fold_hidden'],
         }],
       },
@@ -67,14 +67,14 @@ export const LOCATIONS = {
       },
       {
         id: 'my_desk', at: 'my_desk', label: 'Your desk', kind: 'look',
-        views: [{ text: "The Scrutineers' desk. The Company has lent it to the police until the case is over. Someone has set out a blotter, a pen, a clean cup and saucer, and a small card: MIND THE TIME. You did not see who did it." }],
+        views: [{ figure: {kind: "card", hand: "type", text: "MIND THE TIME.", alt: "A small card on the desk: MIND THE TIME."}, text: "The Scrutineers' desk. The Company has lent it to the police until the case is over. Someone has set out a blotter, a pen, a clean cup and saucer, and a small card: MIND THE TIME. You did not see who did it." }],
       },
       {
         id: 'lodge', at: 'lodge', label: "The Porter's Lodge", kind: 'look',
         views: [
           {
             if: { any: ['fact:pendry_paper', 'fact:locked_inside'] },
-            text: "The Porter's Lodge: a counter, a kettle, a stool the Porter never seems to use, and his daybook, open at this week.\n\n'Sat. Letter-locks, annual oil and re-pin before the Proving: 4 Nonesuch Row (Mr Pendry); the Meridian (Mrs Sallow); the Crux (Mr Voss); Warden's Parlour; the Lantern grille.\nSun. Wound the sixty-one. Syndics' tea at four.\nMon. Mr Pendry not down. Constables sent for, 7.40. Hold-rack wound.'\n\nThe daybook is written in small, upright handwriting. He has kept it for forty-six years without a single ink blot.",
+            figure: {kind: "ledger", size: 3.3, rule: 6.4, entries: ["Sat. Letter-locks, annual oil and re-pin before the Proving:", {t: "4 Nonesuch Row (Mr Pendry); the Meridian (Mrs Sallow);", indent: true}, {t: "the Crux (Mr Voss); Warden's Parlour; the Lantern grille.", indent: true}, "Sun. Wound the sixty-one. Syndics' tea at four.", "Mon. Mr Pendry not down. Constables sent for, 7.40.", {t: "Hold-rack wound.", indent: true}], alt: "The Porter's daybook, open at this week."}, text: "The Porter's Lodge: a counter, a kettle, a stool the Porter never seems to use, and his daybook, open at this week.\n\n'Sat. Letter-locks, annual oil and re-pin before the Proving: 4 Nonesuch Row (Mr Pendry); the Meridian (Mrs Sallow); the Crux (Mr Voss); Warden's Parlour; the Lantern grille.\nSun. Wound the sixty-one. Syndics' tea at four.\nMon. Mr Pendry not down. Constables sent for, 7.40. Hold-rack wound.'\n\nThe daybook is written in small, upright handwriting. He has kept it for forty-six years without a single ink blot.",
             facts: ['locks_oiled'],
           },
           { text: "The Porter's Lodge: a counter, a kettle, a stool the Porter never seems to use, and a daybook in small, upright handwriting. It records deliveries, visitors and the clocks he has wound. It is very neatly kept." },
@@ -113,7 +113,7 @@ export const LOCATIONS = {
         views: [
           {
             if: { any: ['act>=3', 'fact:invigilator_chair'] },
-            text: "The Proving register lists candidates, marks and examiners' signatures. The last column is headed INVIG. It is filled with ditto marks, meaning 'same as above', page after page.\n\nYou turn back thirty-five years to find the name the ditto marks repeat.\n\n1990. INVIG.: R. Fettle (Porter).",
+            figure: {kind: "ledger", title: "1990.", faint: 8, col: {head: "INVIG.", first: "R. Fettle (Porter)", fill: "\"", x: 60}, alt: "The Proving register at 1990. The last column, headed INVIG., reads R. Fettle (Porter), then ditto marks down the page."}, text: "The Proving register lists candidates, marks and examiners' signatures. The last column is headed INVIG. It is filled with ditto marks, meaning 'same as above', page after page.\n\nYou turn back thirty-five years to find the name the ditto marks repeat.\n\n1990. INVIG.: R. Fettle (Porter).",
             facts: ['hob_invigilates'],
           },
           { text: "The Proving register, open on its stand at this Thursday's blank page. It records candidates, marks and examiners. Nine candidates are entered this week. The Company takes the Proving very seriously." },
@@ -122,10 +122,10 @@ export const LOCATIONS = {
       {
         id: 'exchange', at: 'exchange', label: 'The Bellows exchange', kind: 'use', action: 'puzzle:bellows',
         views: [
-          { if: 'puz:bellows', text: "The collar said HELD SINCE NOON. Anyone can put a carrier in the hold-rack and set the dial. The clockwork sends it on later. A small brass plate on the clockwork reads: WOUND MONDAYS. R.F.", facts: ['rack_wound'] },
+          { if: 'puz:bellows', figure: {kind: "plate", lines: ["WOUND MONDAYS.", "R.F."], alt: "A small brass plate on the clockwork: WOUND MONDAYS. R.F."}, text: "The collar said HELD SINCE NOON. Anyone can put a carrier in the hold-rack and set the dial. The clockwork sends it on later. A small brass plate on the clockwork reads: WOUND MONDAYS. R.F.", facts: ['rack_wound'] },
           {
             if: 'ev:paper_1',
-            text: "The exchange is the brass hub where every Bellows tube in the Fold begins and ends. Beside it is the hold-rack, a row of cradles, each with a small dial. You put a carrier in a cradle and set the dial. The clockwork sends it on at the hour you chose.\n\nThe carrier that brought your Paper is still in the returns tray. Its brass collar is punched with pairs of numbers.\n\nA small brass plate on the clockwork reads: WOUND MONDAYS. R.F.",
+            figure: {kind: "plate", lines: ["WOUND MONDAYS.", "R.F."], alt: "A small brass plate on the clockwork: WOUND MONDAYS. R.F."}, text: "The exchange is the brass hub where every Bellows tube in the Fold begins and ends. Beside it is the hold-rack, a row of cradles, each with a small dial. You put a carrier in a cradle and set the dial. The clockwork sends it on at the hour you chose.\n\nThe carrier that brought your Paper is still in the returns tray. Its brass collar is punched with pairs of numbers.\n\nA small brass plate on the clockwork reads: WOUND MONDAYS. R.F.",
             facts: ['rack_wound'],
           },
           { text: "The exchange is the brass hub where every Bellows tube in the Fold begins and ends. Beside it is a rack of cradles with small dials. You can hear a carrier rattle past inside the wall." },
@@ -144,11 +144,11 @@ export const LOCATIONS = {
           { if: 'ev:codicil', text: 'You have hung the portrait straight again. She still seems to look just past your shoulder.' },
           {
             if: 'puz:cryptic',
-            text: "Left, characteristic, likeness: PORTRAIT. Whatever she hid is behind her portrait.\n\nYou lift the frame an inch from the wall. Tucked behind the canvas is a folded sheet of the Company's paper. It is sealed, and addressed in shaky handwriting: 'To whoever looks.'",
+            figure: {kind: "card", text: "To whoever looks.", seal: true, shaky: true, alt: "A folded, sealed sheet, addressed in shaky handwriting: To whoever looks."}, text: "Left, characteristic, likeness: PORTRAIT. Whatever she hid is behind her portrait.\n\nYou lift the frame an inch from the wall. Tucked behind the canvas is a folded sheet of the Company's paper. It is sealed, and addressed in shaky handwriting: 'To whoever looks.'",
             ev: ['codicil'],
           },
           {
-            text: "DAME HESPER LORIMER ('VESPER'). Warden 1994 to 2011. Painted in 2009.\n\nA thin woman of about sixty in a dark red jacket, with a pencil behind her ear. VESPER was the pen-name she set puzzles under. She is looking just past your shoulder. Her face says she knows the answer and is waiting to see if you will find it.",
+            figure: {kind: "plate", lines: ["DAME HESPER LORIMER", "'VESPER'", "WARDEN 1994 TO 2011"], alt: "The portrait's brass plate: Dame Hesper Lorimer, 'Vesper', Warden 1994 to 2011."}, text: "DAME HESPER LORIMER ('VESPER'). Warden 1994 to 2011. Painted in 2009.\n\nA thin woman of about sixty in a dark red jacket, with a pencil behind her ear. VESPER was the pen-name she set puzzles under. She is looking just past your shoulder. Her face says she knows the answer and is waiting to see if you will find it.",
             facts: ['vesper_name'],
           },
         ],
@@ -160,7 +160,7 @@ export const LOCATIONS = {
       {
         id: 'clay_desk', at: 'clay_desk', label: "The Warden's desk", kind: 'look',
         views: [{
-          text: "The Warden's Parlour. A huge desk with almost nothing on it: a telephone, a silver pen, and one sheet under a glass paperweight. The sheet is a draft agreement for a sale, headed GREYWETHER PLC: HEADS OF TERMS. 'The Lorimer Legacy, together with the freehold of Setters' Hall and the properties scheduled.' Completion: 31 October.\n\nThere are no puzzles anywhere in this room.",
+          figure: {kind: "typed", title: "GREYWETHER PLC: HEADS OF TERMS", body: ["The Lorimer Legacy, together with the freehold of Setters' Hall and the properties scheduled.", "Completion: 31 October."], weight: true, alt: "A draft agreement under a glass paperweight: GREYWETHER PLC: HEADS OF TERMS."}, text: "The Warden's Parlour. A huge desk with almost nothing on it: a telephone, a silver pen, and one sheet under a glass paperweight. The sheet is a draft agreement for a sale, headed GREYWETHER PLC: HEADS OF TERMS. 'The Lorimer Legacy, together with the freehold of Setters' Hall and the properties scheduled.' Completion: 31 October.\n\nThere are no puzzles anywhere in this room.",
           facts: ['completion_31'],
         }],
       },
@@ -225,7 +225,7 @@ export const LOCATIONS = {
       {
         id: 'notepad', at: 'notepad', label: 'His blotter', kind: 'look',
         views: [{
-          text: "A list of seven-letter words in tiny capital letters, each one crossed out.\n\nPENDRYS. HOROLOG. HESPERL. LORIMER. VESPERS. Then LORIMER again, pressed so hard that the pen went through the paper.\n\nNext to the words are tally marks in groups of five. He counted every word he tried on the lock. He stopped counting at 190.",
+          figure: {kind: "blotter", words: ["PENDRYS", "HOROLOG", "HESPERL", "LORIMER", "VESPERS", "LORIMER"], heavy: [5], tear: true, tally: 190, alt: "The blotter: six seven-letter words, each crossed out, the last pressed through the paper, and tally marks in fives counting to 190."}, text: "A list of seven-letter words in tiny capital letters, each one crossed out.\n\nPENDRYS. HOROLOG. HESPERL. LORIMER. VESPERS. Then LORIMER again, pressed so hard that the pen went through the paper.\n\nNext to the words are tally marks in groups of five. He counted every word he tried on the lock. He stopped counting at 190.",
           facts: ['pendry_tries'],
         }],
       },
@@ -246,14 +246,14 @@ export const LOCATIONS = {
       {
         id: 'certificate', at: 'certificate', label: 'Framed certificate', kind: 'look',
         views: [{
-          text: "CERTIFICATE OF PROVENANCE\nTHE LORIMER LEGACY\n\n'I, Ignatius Pendry, Grand Setter and Syndic, having examined the manuscripts, working papers and fair copies of Dame Hesper Lorimer for the years 1972 to 2023, do certify the whole to be her sole and original work. The fair copies of the later years are in a copyist's hand and are of no consequence.'\n\nPrepared for Greywether plc. Fee: forty thousand pounds.\n\nSo Pendry swore that all of the work was Dame Hesper's own. He was paid forty thousand pounds to say so, and he had the certificate framed.",
+          figure: {kind: "certificate", head: ["CERTIFICATE OF PROVENANCE", "THE LORIMER LEGACY"], body: "I, Ignatius Pendry, Grand Setter and Syndic, having examined the manuscripts, working papers and fair copies of Dame Hesper Lorimer for the years 1972 to 2023, do certify the whole to be her sole and original work. The fair copies of the later years are in a copyist's hand and are of no consequence.", foot: "Prepared for Greywether plc. Fee: forty thousand pounds.", sign: "I. Pendry", alt: "A framed certificate of provenance for the Lorimer Legacy, signed by Pendry."}, text: "CERTIFICATE OF PROVENANCE\nTHE LORIMER LEGACY\n\n'I, Ignatius Pendry, Grand Setter and Syndic, having examined the manuscripts, working papers and fair copies of Dame Hesper Lorimer for the years 1972 to 2023, do certify the whole to be her sole and original work. The fair copies of the later years are in a copyist's hand and are of no consequence.'\n\nPrepared for Greywether plc. Fee: forty thousand pounds.\n\nSo Pendry swore that all of the work was Dame Hesper's own. He was paid forty thousand pounds to say so, and he had the certificate framed.",
           facts: ['certificate_sole'],
         }],
       },
       {
         id: 'ledger_pendry', at: 'ledger_pendry', label: 'Shop ledger', kind: 'look',
         views: [{
-          text: "Pendry & Sons has not sold a clock since August. The last entry is in pencil, not ink:\n\n'Greywether. On completion 31 Oct. My quarter: £2,750,000.'\n\nThe money was to go to Pendry himself, not to the Company.",
+          figure: {kind: "ledger", money: true, faint: 6, gap: 1, entries: [{t: "Greywether. On completion 31 Oct.", pencil: true}, {t: "My quarter: £2,750,000.", pencil: true}], alt: "The shop's ledger: old entries in ink, then one in pencil: Greywether. On completion 31 Oct. My quarter: £2,750,000."}, text: "Pendry & Sons has not sold a clock since August. The last entry is in pencil, not ink:\n\n'Greywether. On completion 31 Oct. My quarter: £2,750,000.'\n\nThe money was to go to Pendry himself, not to the Company.",
           facts: ['pendry_quarter'],
         }],
       },
@@ -280,14 +280,14 @@ export const LOCATIONS = {
       },
       {
         id: 'wheels', at: 'wheels', label: 'Racks of wheels', kind: 'look',
-        views: [{ text: "Wheels of boxwood, bone and brass. Some have a third ring, and some have numbers. One has the Greek alphabet, and a very high price. A card says: 'A wheel does not make you clever. It makes you quick. The clever is your own lookout. T.Q.'" }],
+        views: [{ figure: {kind: "card", text: "A wheel does not make you clever. It makes you quick. The clever is your own lookout.", sign: "T.Q.", alt: "A handwritten card: A wheel does not make you clever. It makes you quick. The clever is your own lookout. T.Q."}, text: "Wheels of boxwood, bone and brass. Some have a third ring, and some have numbers. One has the Greek alphabet, and a very high price. A card says: 'A wheel does not make you clever. It makes you quick. The clever is your own lookout. T.Q.'" }],
       },
       {
         id: 'quoin_ledger', at: 'quoin_ledger', label: 'Fitting ledger', kind: 'look',
         views: [
           {
             if: { any: ['fact:nina_ariadne', 'fact:word_ariadne', 'fact:epigraph_ariadne'] },
-            text: "Every fitting since 1961, by date, with the child's name, age, and the wheel they were given. You look for an Ariadne.\n\n'1996. Ariadne Fettle, 7. Boxwood. Quickest I ever timed. No charge; I told her father so and he paid anyway.'\n\nFettle is the Porter's surname.",
+            figure: {kind: "ledger", faint: 4, entries: ["1996. Ariadne Fettle, 7. Boxwood.", {t: "Quickest I ever timed. No charge;", indent: true}, {t: "I told her father so and he paid anyway.", indent: true}], alt: "The fittings ledger, open at 1996."}, text: "Every fitting since 1961, by date, with the child's name, age, and the wheel they were given. You look for an Ariadne.\n\n'1996. Ariadne Fettle, 7. Boxwood. Quickest I ever timed. No charge; I told her father so and he paid anyway.'\n\nFettle is the Porter's surname.",
             facts: ['ariadne_fettle'],
           },
           { text: "A thick ledger listing every fitting since 1961: the child's name, their age, and the wheel they were given. Most children got boxwood, and a few got bone. Brass is rare. The last brass wheel before yours was nine years ago." },
@@ -331,7 +331,7 @@ export const LOCATIONS = {
       {
         id: 'samples', at: 'samples', label: 'Specimen fridge', kind: 'look',
         views: [{
-          text: "Racks of labelled tubes. On the top shelf is a white box with a red band: DIGOXIN-SPECIFIC ANTIBODY. 'That's the antidote,' says Dr Marsh. 'It's very expensive, and it works. If someone had brought him over the bridge by ten o'clock, I could have saved him with it.'",
+          figure: {kind: "label", box: true, band: "#b8322a", lines: ["DIGOXIN-SPECIFIC", "ANTIBODY"], alt: "A white box with a red band: DIGOXIN-SPECIFIC ANTIBODY."}, text: "Racks of labelled tubes. On the top shelf is a white box with a red band: DIGOXIN-SPECIFIC ANTIBODY. 'That's the antidote,' says Dr Marsh. 'It's very expensive, and it works. If someone had brought him over the bridge by ten o'clock, I could have saved him with it.'",
           facts: ['could_be_saved'],
         }],
       },
@@ -340,7 +340,7 @@ export const LOCATIONS = {
         views: [
           {
             if: 'act>=3',
-            text: "Yesterday's Crux, folded open at the crossword, with a ring from a mug on it. Dr Marsh has solved every clue but one. In the margin she has written, underlined twice: '14 across is CHEAP.'\n\n14 across: 'Carrier with ideas above his station? Stout fellow! (6)'. By CENSOR.",
+            figure: {kind: "newsprint", headline: "Crossword", crossword: true, clue: "14 across: Carrier with ideas above his station? Stout fellow! (6)", by: "By CENSOR", ring: true, note: {t: "14 across is CHEAP.", under: 2, x: 50, y: 46, size: 3.6, rotate: -3}, alt: "Yesterday's crossword, with a mug ring and a note in the margin, underlined twice: 14 across is CHEAP."}, text: "Yesterday's Crux, folded open at the crossword, with a ring from a mug on it. Dr Marsh has solved every clue but one. In the margin she has written, underlined twice: '14 across is CHEAP.'\n\n14 across: 'Carrier with ideas above his station? Stout fellow! (6)'. By CENSOR.",
             facts: ['porter_clue'],
           },
           { text: "Yesterday's Crux, folded open at the crossword. Dr Marsh disapproves of the Fold, but she does its crossword every lunchtime, in ink." },
@@ -384,7 +384,7 @@ export const LOCATIONS = {
       {
         id: 'chart_table', at: 'chart_table', label: 'Her last drawing', kind: 'look',
         views: [{
-          text: "GREYWETHER FOLD: MASTERPLAN. This is her last drawing, inked right to the edge.\n\nFor once, the Fold is drawn correctly, and every place has a new name. The Stalemate: 'Unit 3, food and beverage.' Quoin & Daughter: 'Unit 4.' The Almshouses: 'Serviced apartments, phase two.' Nell's ferry stage: 'Footbridge.' The Porter's Lodge is crossed out in red: 'Reception pod.' The Hall itself: 'Greywether Campus.'\n\nSo the sale includes much more than Dame Hesper's work. It takes the Hall and most of the Fold.",
+          figure: {kind: "plan", title: "GREYWETHER FOLD: MASTERPLAN", labels: [{at: [42.6, 41.6], t: "Unit 3, food and beverage", anchor: "end", dx: -2}, {at: [24.4, 28.2], t: "Unit 4", anchor: "end", dx: -2}, {at: [21, 56], t: "Serviced apartments, phase two", dx: 2}, {at: [68.5, 64.6], t: "Footbridge", dx: 2}, {at: [55.5, 31.5], t: "Reception pod", struck: true, dx: 4, dy: -1.5}, {at: [50, 36], t: "Greywether Campus", dx: 7, dy: 3.5}], alt: "Her last drawing: the Fold drawn correctly, every place given a new name, the Porter's Lodge crossed out in red."}, text: "GREYWETHER FOLD: MASTERPLAN. This is her last drawing, inked right to the edge.\n\nFor once, the Fold is drawn correctly, and every place has a new name. The Stalemate: 'Unit 3, food and beverage.' Quoin & Daughter: 'Unit 4.' The Almshouses: 'Serviced apartments, phase two.' Nell's ferry stage: 'Footbridge.' The Porter's Lodge is crossed out in red: 'Reception pod.' The Hall itself: 'Greywether Campus.'\n\nSo the sale includes much more than Dame Hesper's work. It takes the Hall and most of the Fold.",
           facts: ['masterplan'],
         }],
       },
@@ -413,7 +413,7 @@ export const LOCATIONS = {
       {
         id: 'log_sallow', at: 'log_sallow', label: "The boat's log", kind: 'look',
         views: [{
-          text: "Sallow kept a daily log of her boat, as a ship's captain does.\n\n'Sat. Fettle aboard a.m., hatch lock, annual.\nMon. Hall 3.50 to 4.15, flask. Aboard 4.40. News of I.P. A heart, they say. Locked in at 7 to finish the Greywether sheets.'\n\nThere is nothing after that.",
+          figure: {kind: "ledger", size: 3.8, entries: ["Sat. Fettle aboard a.m., hatch lock, annual.", "Mon. Hall 3.50 to 4.15, flask. Aboard 4.40.", {t: "News of I.P. A heart, they say.", indent: true}, {t: "Locked in at 7 to finish the Greywether sheets.", indent: true}], alt: "The Meridian's log."}, text: "Sallow kept a daily log of her boat, as a ship's captain does.\n\n'Sat. Fettle aboard a.m., hatch lock, annual.\nMon. Hall 3.50 to 4.15, flask. Aboard 4.40. News of I.P. A heart, they say. Locked in at 7 to finish the Greywether sheets.'\n\nThere is nothing after that.",
           facts: ['sallow_log'],
         }],
       },
@@ -422,7 +422,7 @@ export const LOCATIONS = {
         views: [
           {
             if: { any: ['fact:nina_ariadne', 'fact:word_ariadne', 'fact:epigraph_ariadne'] },
-            text: "Every crossing since 1988: the date, the passenger, the riddle asked and the answer given. You ask Nell to find an Ariadne. She finds one quickly.\n\n'3 May 1997. Fettle, R., and child (Ariadne, 8). Asked: what has a ring but no finger? The child, at once: a telephone. And a bell. And a tree, if you cut it. Do I pay three times? Toll waived.'\n\nFurther down, in the same handwriting: 'Jan. 1998. Fettle, R. Alone. Did not ask him.'",
+            figure: {kind: "ledger", size: 3.4, rule: 5.6, entries: ["3 May 1997. Fettle, R., and child (Ariadne, 8).", {t: "Asked: what has a ring but no finger?", indent: true}, {t: "The child, at once: a telephone. And a bell.", indent: true}, {t: "And a tree, if you cut it. Do I pay three times?", indent: true}, {t: "Toll waived.", indent: true}, "", "Jan. 1998. Fettle, R. Alone. Did not ask him."], alt: "Nell's book of crossings."}, text: "Every crossing since 1988: the date, the passenger, the riddle asked and the answer given. You ask Nell to find an Ariadne. She finds one quickly.\n\n'3 May 1997. Fettle, R., and child (Ariadne, 8). Asked: what has a ring but no finger? The child, at once: a telephone. And a bell. And a tree, if you cut it. Do I pay three times? Toll waived.'\n\nFurther down, in the same handwriting: 'Jan. 1998. Fettle, R. Alone. Did not ask him.'",
             facts: ['ariadne_fettle'],
           },
           {
@@ -444,7 +444,7 @@ export const LOCATIONS = {
       {
         id: 'slate_board', at: 'slate_board', label: 'The slate', kind: 'use', action: 'puzzle:slate',
         views: [
-          { if: 'puz:slate', text: 'CANDIDATE THREE SETS AS CENSOR. Ottilie has not wiped it off. She says she wants to study the handwriting a while longer.' },
+          { if: 'puz:slate', figure: {kind: "slate", chess: true, lines: ["CANDIDATE THREE", "SETS AS CENSOR."], alt: "The Stalemate slate: CANDIDATE THREE SETS AS CENSOR."}, text: 'CANDIDATE THREE SETS AS CENSOR. Ottilie has not wiped it off. She says she wants to study the handwriting a while longer.' },
           { if: 'puz:paper3', text: "Tonight's problem is not a chess problem. A letter is chalked on every square of the board. Under it is one line of chess notation, in a small, upright hand." },
           { text: "The Stalemate's slate is a chessboard painted on a school blackboard. Every evening, whoever arrives first chalks up a new problem. Tonight's is mate in three. Three people are arguing about it in whispers." },
         ],
@@ -455,12 +455,12 @@ export const LOCATIONS = {
       },
       {
         id: 'piano', at: 'piano', label: 'Piano', kind: 'look',
-        views: [{ text: "An upright piano. The sheet on the stand looks like music, but it is really a puzzle. A sign on the lid says: 'IF YOU CAN SOLVE IT YOU CAN PLAY IT.'" }],
+        views: [{ figure: {kind: "card", text: "IF YOU CAN SOLVE IT YOU CAN PLAY IT.", alt: "A sign on the piano lid: IF YOU CAN SOLVE IT YOU CAN PLAY IT."}, text: "An upright piano. The sheet on the stand looks like music, but it is really a puzzle. A sign on the lid says: 'IF YOU CAN SOLVE IT YOU CAN PLAY IT.'" }],
       },
       {
         id: 'score_book', at: 'score_book', label: "Ottilie's score-book", kind: 'look',
         views: [{
-          text: "Ottilie records every game played in the Stalemate: who played, when, and who won.\n\nMonday night: 'Dominoes. Mr Fettle v. Mr Tibbs, 7 to 10, as every Monday. Fettle by three games. Go: J. Okafor-Reed v. P. Quoin, 8 till closing. Lost. Chess: nine boards.'\n\nHalf the Fold was in this room on Monday night, and Ottilie wrote down who.",
+          figure: {kind: "ledger", title: "Monday night", entries: ["Dominoes. Mr Fettle v. Mr Tibbs, 7 to 10,", {t: "as every Monday. Fettle by three games.", indent: true}, "Go: J. Okafor-Reed v. P. Quoin,", {t: "8 till closing. Lost.", indent: true}, "Chess: nine boards."], alt: "Ottilie's score-book, Monday night."}, text: "Ottilie records every game played in the Stalemate: who played, when, and who won.\n\nMonday night: 'Dominoes. Mr Fettle v. Mr Tibbs, 7 to 10, as every Monday. Fettle by three games. Go: J. Okafor-Reed v. P. Quoin, 8 till closing. Lost. Chess: nine boards.'\n\nHalf the Fold was in this room on Monday night, and Ottilie wrote down who.",
           facts: ['monday_alibis'],
         }],
       },
@@ -471,19 +471,19 @@ export const LOCATIONS = {
       {
         id: 'noticeboard', at: 'noticeboard', label: 'The Crux, pinned up', kind: 'look',
         views: [{
-          text: "This week's Crux, the Fold's newspaper, is pinned up by the door.\n\n'GREYWETHER TO SECURE THE FOLD'S FUTURE. A partnership of tradition and tomorrow. By Lucan Voss, Editor.' Someone has written across it in pencil: SOLD.\n\nAt the bottom of the back page: 'Crossword No. 1,041, by CENSOR.' Under it, in very small print: 'CENSOR is L. Voss.'",
+          figure: {kind: "newsprint", headline: "GREYWETHER TO SECURE THE FOLD'S FUTURE", sub: "A partnership of tradition and tomorrow. By Lucan Voss, Editor.", scrawl: "SOLD", foot: ["Crossword No. 1,041, by CENSOR.", "CENSOR is L. Voss."], alt: "This week's Crux: GREYWETHER TO SECURE THE FOLD'S FUTURE, with SOLD written across it in pencil."}, text: "This week's Crux, the Fold's newspaper, is pinned up by the door.\n\n'GREYWETHER TO SECURE THE FOLD'S FUTURE. A partnership of tradition and tomorrow. By Lucan Voss, Editor.' Someone has written across it in pencil: SOLD.\n\nAt the bottom of the back page: 'Crossword No. 1,041, by CENSOR.' Under it, in very small print: 'CENSOR is L. Voss.'",
           facts: ['crux_puff', 'censor_is_voss'],
         }],
       },
       {
         id: 'domino_table', at: 'domino_table', label: 'Domino table', kind: 'look',
-        views: [{ text: "A table by the stove with a box of dominoes on it. The lid is painted in neat white letters: R. FETTLE. PLEASE RETURN. 'That's the Porter's,' says Ottilie. 'He plays here every Monday, seven till ten, and has for thirty years. He's never once been late, and he never stays past ten.'" }],
+        views: [{ figure: {kind: "board", color: "#3b2a1c", lines: ["R. FETTLE.", "PLEASE RETURN."], alt: "A box lid painted in neat white letters: R. FETTLE. PLEASE RETURN."}, text: "A table by the stove with a box of dominoes on it. The lid is painted in neat white letters: R. FETTLE. PLEASE RETURN. 'That's the Porter's,' says Ottilie. 'He plays here every Monday, seven till ten, and has for thirty years. He's never once been late, and he never stays past ten.'" }],
       },
       {
         id: 'stairs_crux', at: 'stairs_crux', label: 'Stairs to the Crux', kind: 'exit',
         views: [
-          { if: { any: ['puz:slate', 'flag:voss_dead'] }, text: 'Up one flight of stairs: THE CRUX. EDITORIAL.', action: { travel: 'crux' } },
-          { text: "A narrow staircase, with a painted hand pointing up: THE CRUX. EDITORIAL. NO SOLVERS. You have no reason to go up there yet." },
+          { if: { any: ['puz:slate', 'flag:voss_dead'] }, figure: {kind: "board", lines: ["THE CRUX.", "EDITORIAL."], alt: "A painted sign: THE CRUX. EDITORIAL."}, text: 'Up one flight of stairs: THE CRUX. EDITORIAL.', action: { travel: 'crux' } },
+          { figure: {kind: "board", lines: ["THE CRUX.", "EDITORIAL.", "NO SOLVERS."], alt: "A painted sign: THE CRUX. EDITORIAL. NO SOLVERS."}, text: "A narrow staircase, with a painted hand pointing up: THE CRUX. EDITORIAL. NO SOLVERS. You have no reason to go up there yet." },
         ],
       },
     ],
@@ -529,7 +529,7 @@ export const LOCATIONS = {
       {
         id: 'voss_desk', at: 'voss_desk', label: "Voss's desk", kind: 'look',
         views: [{
-          text: "Proofs for Friday's paper, and the fair copy of crossword No. 1,042, by CENSOR, with the answers pencilled in.\n\n14 across: 'Carrier with ideas above his station? Stout fellow! (6)'. PORTER.\n\nIn the margin, in Voss's blue pencil: 'One for the Lodge. He won't miss it.'",
+          figure: {kind: "newsprint", masthead: "THE CRUX: PROOF", headline: "Crossword No. 1,042, by CENSOR", crossword: true, clue: "14 across: Carrier with ideas above his station? Stout fellow! (6)", answer: "PORTER", note: {t: "One for the Lodge. He won't miss it.", x: 14, y: 57, size: 3.2, rotate: -2, ink: "#2456a6"}, alt: "The proof of crossword No. 1,042, with the answer pencilled in and a note in blue pencil."}, text: "Proofs for Friday's paper, and the fair copy of crossword No. 1,042, by CENSOR, with the answers pencilled in.\n\n14 across: 'Carrier with ideas above his station? Stout fellow! (6)'. PORTER.\n\nIn the margin, in Voss's blue pencil: 'One for the Lodge. He won't miss it.'",
           facts: ['porter_clue'],
         }],
       },
@@ -542,7 +542,7 @@ export const LOCATIONS = {
       },
       {
         id: 'typewriter_voss', at: 'typewriter_voss', label: 'Typewriter', kind: 'look',
-        views: [{ text: "A typewriter with a half-finished editorial in it. It reads: 'Those who cling to the Fold as it was forget that it has always been a business.' It stops there. Something interrupted him at about eight o'clock." }],
+        views: [{ figure: {kind: "typed", roller: true, body: ["Those who cling to the Fold as it was forget that it has always been a business."], alt: "A half-finished editorial, still in the typewriter."}, text: "A typewriter with a half-finished editorial in it. It reads: 'Those who cling to the Fold as it was forget that it has always been a business.' It stops there. Something interrupted him at about eight o'clock." }],
       },
     ],
   },
@@ -575,7 +575,7 @@ export const LOCATIONS = {
       {
         id: 'visitors_book', at: 'visitors_book', label: "Visitors' book", kind: 'look',
         views: [{
-          text: "A visitors' book. A notice is pasted inside the cover: 'By order of the Deputy (the Warden): family only.'\n\nDame Hesper Lorimer has no family. Nobody has signed the book since March.",
+          figure: {kind: "card", hand: "type", text: "By order of the Deputy (the Warden): family only.", alt: "A notice pasted inside the visitors' book: By order of the Deputy (the Warden): family only."}, text: "A visitors' book. A notice is pasted inside the cover: 'By order of the Deputy (the Warden): family only.'\n\nDame Hesper Lorimer has no family. Nobody has signed the book since March.",
           facts: ['no_visitors'],
         }],
       },
@@ -615,12 +615,12 @@ export const LOCATIONS = {
         id: 'vitrines', at: 'vitrines', label: 'The Late Tithes', kind: 'use', action: 'puzzle:nina',
         views: [
           { if: 'puz:nina', text: 'A, R, I, A, D, N, E runs corner to corner through every one of them. Now you cannot stop seeing it. In twelve years, nobody else seems to have noticed.' },
-          { text: "A row of brightly lit glass cases. THE LATE TITHES OF DAME HESPER LORIMER, 2012 to 2023. 'The crown of the Lorimer Legacy.' Each Tithe is a square of seven answers, filled in by the winner of that year's Proving. Beside each is a fair copy of the clues, a clean handwritten copy in a small, upright hand." },
+          { figure: {kind: "label", lines: ["THE LATE TITHES OF", "DAME HESPER LORIMER", "2012 to 2023", "'The crown of the Lorimer Legacy.'"], alt: "The label on the glass cases."}, text: "A row of brightly lit glass cases. THE LATE TITHES OF DAME HESPER LORIMER, 2012 to 2023. 'The crown of the Lorimer Legacy.' Each Tithe is a square of seven answers, filled in by the winner of that year's Proving. Beside each is a fair copy of the clues, a clean handwritten copy in a small, upright hand." },
         ],
       },
       {
         id: 'early_case', at: 'early_case', label: 'An early Tithe', kind: 'look',
-        views: [{ text: "By the door, for comparison, is a Tithe from 1998. It is the same kind of square, with her own notes in the margins. Her handwriting is strong and impatient, and presses hard into the paper: 'No. Too easy. Again.'" }],
+        views: [{ figure: {kind: "card", text: "No. Too easy. Again.", heavy: true, alt: "Her note in the margin, pressed hard into the paper: No. Too easy. Again."}, text: "By the door, for comparison, is a Tithe from 1998. It is the same kind of square, with her own notes in the margins. Her handwriting is strong and impatient, and presses hard into the paper: 'No. Too easy. Again.'" }],
       },
       {
         id: 'jonah_desk', at: 'jonah_desk', label: "Jonah's desk", kind: 'look',
@@ -650,7 +650,7 @@ export const LOCATIONS = {
       {
         id: 'waste_basket', at: 'waste_basket', label: 'A waste-paper basket', kind: 'look',
         views: [{
-          text: "A wicker waste-paper basket, on display under glass.\n\n'The waste-paper basket of Dame Hesper Lorimer, 1972 to 2011, from which, it is said, more good clues were rescued than most setters ever write.'\n\nThe label does not say who rescued them.",
+          figure: {kind: "label", quote: true, lines: ["'The waste-paper basket of Dame Hesper Lorimer,", "1972 to 2011, from which, it is said,", "more good clues were rescued", "than most setters ever write.'"], alt: "The label by the waste-paper basket."}, text: "A wicker waste-paper basket, on display under glass.\n\n'The waste-paper basket of Dame Hesper Lorimer, 1972 to 2011, from which, it is said, more good clues were rescued than most setters ever write.'\n\nThe label does not say who rescued them.",
           facts: ['basket'],
         }],
       },
@@ -677,7 +677,7 @@ export const LOCATIONS = {
       },
       {
         id: 'proving_desk', at: 'proving_desk', label: 'A desk and a paper', kind: 'look',
-        views: [{ text: "A candidate's desk, carried up from the Hall. On it is a sheet in green ink: 'PAPER FOR THE WARDEN. One question. The gate opens to one name. It is in everything you sold.' The Warden has written nothing on it." }],
+        views: [{ figure: {kind: "card", ink: "#1f6b3a", text: "PAPER FOR THE WARDEN. One question. The gate opens to one name. It is in everything you sold.", alt: "A sheet written in green ink."}, text: "A candidate's desk, carried up from the Hall. On it is a sheet in green ink: 'PAPER FOR THE WARDEN. One question. The gate opens to one name. It is in everything you sold.' The Warden has written nothing on it." }],
       },
       {
         id: 'hob_clock', at: 'hob_clock', label: 'The clock', kind: 'look',

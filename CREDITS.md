@@ -66,6 +66,6 @@ glTF-Transform (MIT), sharp (Apache-2.0), esbuild (MIT).
 
 ## Type
 
-Cinzel (titles, chapter cards and place names), Instrument Sans, JetBrains
-Mono, Marcellus and Special Elite, all under the SIL Open Font License, served
-by Google Fonts.
+Cinzel (titles, chapter cards and place names), Caveat (handwriting in the
+close-ups of written things), Instrument Sans, JetBrains Mono, Marcellus and
+Special Elite, all under the SIL Open Font License, served by Google Fonts.

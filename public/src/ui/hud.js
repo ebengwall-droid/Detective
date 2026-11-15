@@ -4,6 +4,7 @@
 import { el, clear, icon, prose, typeInto, leave, watchOverflow } from './dom.js';
 import { announce, revealCard } from './titlefx.js';
 import { PICTURES, enlargePicture } from './guide.js';
+import { drawWriting } from './writing.js';
 
 const TOAST_MS = 5200;
 
@@ -195,9 +196,12 @@ export function showHere(panels, game) {
 }
 
 /** The panel shown after examining something. Resolves when dismissed. */
-export function showInspect(panels, { title, text, taken = [], actions = [] }) {
+export function showInspect(panels, { title, text, figure = null, taken = [], actions = [] }) {
   return new Promise((resolve) => {
     const body = el('div', { class: 'panel-body' });
+    // A written thing is shown as well as described: tap the picture to see it larger.
+    const svg = figure ? drawWriting(figure) : null;
+    const pic = svg ? el('button', { class: 'guide-pic inspect-pic', type: 'button', 'aria-label': `${title}. Tap to see it larger.`, onClick: () => enlargePicture(svg, title, panels.parentElement?.querySelector('#cards') ?? panels) }, svg) : null;
     const close = (value) => {
       leave(panel);
       window.removeEventListener('keydown', onKey);
@@ -221,7 +225,7 @@ export function showInspect(panels, { title, text, taken = [], actions = [] }) {
         el('button', { class: 'btn small solid', type: 'button', text: 'Continue', 'data-back': '', onClick: () => close(null) }),
       ),
     );
-    const panel = el('section', { class: 'panel inspect', role: 'dialog', 'aria-label': title }, el('div', { class: 'panel-head' }, el('div', { class: 'panel-title', text: title })), body, foot);
+    const panel = el('section', { class: `panel inspect ${pic ? 'with-pic' : ''}`, role: 'dialog', 'aria-label': title }, el('div', { class: 'panel-head' }, el('div', { class: 'panel-title', text: title })), pic, body, foot);
     panels.append(panel);
     typeInto(body, text, { cps: 140 });
     setTimeout(() => window.addEventListener('keydown', onKey), 150);

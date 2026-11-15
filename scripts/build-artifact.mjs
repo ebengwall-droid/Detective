@@ -41,7 +41,7 @@ const argOf = (name) => {
 const URLS = { mobile: argOf('mobile-url'), web: argOf('web-url') };
 for (const u of Object.values(URLS)) if (u && !/^https:\/\/[\w.-]+\/[\w/.-]*$/.test(u)) throw new Error(`not a plain https address: ${u}`);
 
-const FONTS = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@500..900&family=Instrument+Sans:ital,wdth,wght@0,75..100,400..700;1,75..100,400..700&family=JetBrains+Mono:wght@400..600&family=Marcellus&family=Special+Elite&display=swap';
+const FONTS = 'https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Cinzel:wght@500..900&family=Instrument+Sans:ital,wdth,wght@0,75..100,400..700;1,75..100,400..700&family=JetBrains+Mono:wght@400..600&family=Marcellus&family=Special+Elite&display=swap';
 const TITLE = 'The Invigilator';
 
 const bundle = await build({

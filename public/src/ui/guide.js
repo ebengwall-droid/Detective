@@ -330,7 +330,7 @@ const within = (x, y, b, pad = 0) => x > b.x - pad && x < b.x + b.w + pad && y >
  *   places: numbered markers (the guide lists them under the picture); names: lane and water names;
  *   callouts: a red dot on a place with its name written beside it, large enough to read at a glance
  */
-export function drawFold({ places = [], names = true, callouts = [] } = {}) {
+export function drawFold({ places = [], names = true, callouts = [], cartouche = true } = {}) {
   const r = rng(23);
   const svg = s('svg', { viewBox: '0 0 100 70', role: 'img', 'aria-label': 'Map of the Fold: an island with six crooked lanes and a square, the river to the north and west, and the Cut, a canal, to the south and east.' });
   svg.append(...paper(100, 70));
@@ -412,13 +412,13 @@ export function drawFold({ places = [], names = true, callouts = [] } = {}) {
       label(80, 4.6, 'THE FLAT', { size: 2.6, font: CAPS, weight: 700, spacing: 0.6, opacity: 0.75 }),
     );
   }
-  svg.append(
+  if (cartouche) svg.append(
     s('rect', { x: 2.4, y: 2.4, width: 25, height: 8.4, fill: PAPER, stroke: INK, 'stroke-width': 0.28 }),
     s('rect', { x: 3.1, y: 3.1, width: 23.6, height: 7, fill: 'none', stroke: INK, 'stroke-width': 0.1 }),
     label(14.9, 7.2, 'THE FOLD', { size: 3, font: CAPS, weight: 700, spacing: 0.7, anchor: 'middle', halo: false }),
     label(14.9, 9.4, 'as told, not as printed', { size: 1.35, italic: true, anchor: 'middle', halo: false }),
-    compass(93.5, 61.5, 3.4),
   );
+  svg.append(compass(93.5, 61.5, 3.4));
   for (const p of places) svg.append(marker(p.at[0], p.at[1], p.n));
   for (const c of callouts) {
     svg.append(

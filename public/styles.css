@@ -1175,3 +1175,6 @@ button.row:active, .map-row:active { background: var(--glass-fill-2); transform:
 .arrival-name { margin-top: 6px; font-family: var(--epic); font-weight: 700; font-size: 24px; line-height: 1.15; letter-spacing: 0.03em; color: #f6e3bb; text-wrap: balance; }
 /* The place's name at the top of the screen can be tapped to read its description again. */
 .hud-top > .hud-place { pointer-events: auto; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+/* An examine card with a close-up of a written thing: the picture, then the words, with room for both. */
+.inspect.with-pic { max-height: min(84%, 720px); }
+.inspect-pic { flex: none; width: auto; margin: 4px 16px 6px; border-radius: 12px; }

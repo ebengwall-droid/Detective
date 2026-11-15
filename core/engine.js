@@ -378,7 +378,7 @@ export class GameSession {
     const v = h.views[index];
     const key = `${id}#${index}`;
     const first = s.examined[key] === undefined;
-    const out = { title: h.label, text: v.text, kind: h.kind, action: v.action ?? h.action ?? null, taken: [], letter: false };
+    const out = { title: h.label, text: v.text, figure: v.figure ?? null, kind: h.kind, action: v.action ?? h.action ?? null, taken: [], letter: false };
     if (first || v.repeat) {
       if (first) {
         s.examined[key] = s.steps;
