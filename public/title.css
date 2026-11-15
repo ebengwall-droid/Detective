@@ -151,3 +151,8 @@
 .card.overflowing .card-actions.sticky { background: linear-gradient(to top, rgba(4, 6, 10, 0.96) 0%, rgba(4, 6, 10, 0.88) 58%, rgba(4, 6, 10, 0)); }
 .card .card-actions + .card-actions.sticky { margin-top: 6px; }
 .card .card-actions.sticky .btn { width: min(100%, 360px); }
+/* Two buttons on a card share the row, so the pinned strip stays short. */
+.card .card-actions.sticky.pair { flex-direction: row; justify-content: center; gap: 10px; }
+.card .card-actions.sticky.pair .btn { flex: 1 1 0; width: auto; max-width: 260px; min-width: 0; padding-left: 10px; padding-right: 10px; }
+/* A glass button pinned over text is given a solid backing, so the words behind it do not show through. */
+.card .card-actions.sticky .btn:not(.solid) { background: rgba(22, 26, 34, 0.96); }

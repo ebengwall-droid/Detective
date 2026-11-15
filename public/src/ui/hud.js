@@ -278,15 +278,17 @@ export function showThink(panels, run) {
 /**
  * A full-screen title card: act openings and other scene breaks.
  * Lines fade in one after another. Resolves when the player continues.
+ * `extra` adds a second, quieter button that does something without closing the card.
  */
-export function showCard(cards, { kicker, title, date, lines = [], button = 'Continue', veil = false }) {
+export function showCard(cards, { kicker, title, date, lines = [], button = 'Continue', veil = false, extra = null }) {
   return new Promise((resolve) => {
     const go = el('button', { class: 'btn solid', type: 'button', text: button });
+    const aside = extra ? el('button', { class: 'btn', type: 'button', text: extra.label, onClick: extra.onClick }) : null;
     const linesEl = el('div', { class: 'card-lines' }, lines.map((line, i) => el('p', { text: line, style: { animationDelay: `${0.5 + i * 1.15}s` } })));
     const card = el(
       'section',
       { class: `card ${veil ? 'veil' : ''}`, role: 'dialog', 'aria-label': title ?? 'Scene' },
-      el('div', { class: 'card-inner' }, kicker ? el('div', { class: 'card-kicker', text: kicker }) : null, title ? el('h1', { class: 'card-title', text: title }) : null, date ? el('div', { class: 'card-date', text: date }) : null, linesEl, el('div', { class: 'card-actions sticky' }, go)),
+      el('div', { class: 'card-inner' }, kicker ? el('div', { class: 'card-kicker', text: kicker }) : null, title ? el('h1', { class: 'card-title', text: title }) : null, date ? el('div', { class: 'card-date', text: date }) : null, linesEl, el('div', { class: `card-actions sticky ${aside ? 'pair' : ''}` }, go, aside)),
     );
     const done = () => {
       window.removeEventListener('keydown', onKey);
@@ -298,6 +300,8 @@ export function showCard(cards, { kicker, title, date, lines = [], button = 'Con
       }, 380);
     };
     const onKey = (e) => {
+      // Only while nothing has been opened on top of it.
+      if (cards.lastElementChild !== card) return;
       if (e.code === 'Enter' || e.code === 'Space') {
         e.preventDefault();
         done();

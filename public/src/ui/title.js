@@ -4,6 +4,7 @@
 import { copyDiagnostics } from './diag.js';
 import { el, add, icon, prose, setThumb, watchOverflow } from './dom.js';
 import { gsap, leaveTitle, lockWord, playTitle, still } from './titlefx.js';
+import { showGuide } from './guide.js';
 
 const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
@@ -156,7 +157,7 @@ export function showHelp(cards, game) {
     const card = el(
       'section',
       { class: 'card', role: 'dialog', 'aria-label': 'How to play' },
-      el('div', { class: 'card-inner help' }, el('div', { class: 'card-kicker', text: 'How to play' }), el('div', { class: 'rule' }), el('div', { class: 'help-grid' }, items.map(([h, p]) => el('div', { class: 'help-item' }, el('h4', { text: h }), el('p', { text: p })))), el('div', { class: 'card-actions' }, el('button', { class: 'btn solid', type: 'button', text: 'Understood', 'data-back': '', onClick: close }))),
+      el('div', { class: 'card-inner help' }, el('div', { class: 'card-kicker', text: 'How to play' }), el('div', { class: 'rule' }), el('div', { class: 'help-grid' }, items.map(([h, p]) => el('div', { class: 'help-item' }, el('h4', { text: h }), el('p', { text: p })))), el('div', { class: 'card-actions' }, el('button', { class: 'btn solid', type: 'button', text: 'Understood', 'data-back': '', onClick: close }), el('button', { class: 'btn', type: 'button', text: 'Where am I? Ravel and the Fold', onClick: () => showGuide(cards) }))),
     );
     cards.append(card);
   });

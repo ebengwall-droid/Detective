@@ -267,7 +267,7 @@ export const LOCATIONS = {
   wheelshop: {
     name: 'Quoin & Daughter',
     sub: 'Wheelwrights · 5 Nonesuch Row',
-    map: [24, 41],
+    map: [24.4, 28.2, 'left'],
     arrive: "Quoin & Daughter, wheelwrights, at 5 Nonesuch Row. They make cipher wheels here, not cartwheels. Brass and boxwood discs the size of saucers hang on the walls. Each has two rings of letters, and they turn slightly in the draught.",
     hotspots: [
       {
@@ -437,7 +437,7 @@ export const LOCATIONS = {
   stalemate: {
     name: 'The Stalemate',
     sub: 'Coffee house · Proving Square',
-    map: [40, 50],
+    map: [42.6, 41.6, 'left'],
     arrive: "The Stalemate, a coffee house for puzzlers. It smells of coffee and chalk dust, and you can hear chess pieces clicking. There is a piano, but nobody is playing it. Every table has a game board set into it. Nobody looks up when you come in.",
     hotspots: [
       {
