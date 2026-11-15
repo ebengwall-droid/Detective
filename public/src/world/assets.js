@@ -98,7 +98,63 @@ const surfaces = new Map();
 const pending = new Map();
 /** @type {Map<string, any>} */
 const ready = new Map();
-const failed = new Set();
+/** Files that could not be had, and when that was decided: asked for again later, never written off. */
+const failed = new Map();
+
+// ---------------------------------------------------------------- fetching
+// A phone on a train drops requests, and a host that is sent forty at once
+// starts refusing them. Either way the cure is the same: a few at a time,
+// and another try before a thing is called missing. Without this a single
+// lost request left a chair, a person or the whole cast drawn in code for
+// the rest of the session.
+
+/** At most this many requests at once. */
+const AT_ONCE = 4;
+/** Each file gets this many tries before it is called missing (for now). */
+const TRIES = 3;
+let active = 0;
+const urgent = [];
+const quiet = [];
+const clock = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
+function pump() {
+  // Quiet work (fetching ahead for rooms not yet visited) only ever takes two of the lines.
+  while (active < AT_ONCE && (urgent.length || (quiet.length && active < 2))) {
+    const next = urgent.shift() ?? quiet.shift();
+    active += 1;
+    next();
+  }
+}
+
+/** Run a job when there is a free line; quiet jobs wait for urgent ones. */
+function queued(job, isQuiet) {
+  return new Promise((resolve, reject) => {
+    (isQuiet ? quiet : urgent).push(() => {
+      Promise.resolve()
+        .then(job)
+        .then(resolve, reject)
+        .finally(() => {
+          active -= 1;
+          pump();
+        });
+    });
+    pump();
+  });
+}
+
+/** Fetch with patience: a dropped connection or a busy host gets another try or two. */
+async function patient(job, isQuiet = false, tries = TRIES) {
+  let last;
+  for (let attempt = 0; attempt < tries; attempt++) {
+    if (attempt) await new Promise((r) => setTimeout(r, assets.backoff * 2 ** (attempt - 1) * (1 + Math.random() * 0.5)));
+    try {
+      return await queued(job, isQuiet);
+    } catch (err) {
+      last = err;
+    }
+  }
+  throw last;
+}
 
 /** The file to fetch for a manifest entry: the lighter copy on a phone, where there is one. */
 const pick = (entry, lite) => (lite && entry.lite ? entry.lite : entry);
@@ -111,6 +167,24 @@ export const assets = {
    * scripts/build-artifact.mjs), and unpacked here.
    */
   packed: false,
+
+  /** The first wait before a second try, in milliseconds (doubled for the third). */
+  backoff: 450,
+  /** A missing file is asked for again once this long has passed and something wants it. */
+  retryAfter: 12000,
+
+  /** How the fetching has gone, for the diagnostics a player can copy. */
+  status() {
+    return { manifests: !!(this.people || this.things), loaded: ready.size, failed: [...failed.keys()] };
+  },
+
+  /** Whether models are published beside this page at all (false for the one-file build opened from a disk). */
+  expected: true,
+
+  /** Whether anything that should be here is, for now, missing: its place is being held by a stand-in. */
+  get missing() {
+    return this.expected && (failed.size > 0 || !(this.people && this.things));
+  },
   /** Prefer the lighter copies of things (smaller pictures): set for phones before anything is fetched. */
   lite: false,
   /** @type {{characters: Record<string, any>, anims: Record<string, any>}|null} */
@@ -120,19 +194,32 @@ export const assets = {
   /** Bytes fetched so far and expected, for a progress line. */
   progress: { done: 0, total: 0 },
 
-  /** Read the manifests. Safe to call more than once. */
+  /** Read the manifests (whichever are not in hand yet). Safe to call again: a later call retries what failed. */
   async init(base) {
     if (base) this.base = base.endsWith('/') ? base : `${base}/`;
-    if (this.people || this.things) return true;
+    if (this.people && this.things) return true;
+    let absent = 0;
     const read = async (file) => {
       try {
-        const res = await fetch(this.base + file);
-        return res.ok ? await res.json() : null;
+        return await patient(async () => {
+          const res = await fetch(this.base + file);
+          // A file that is simply not there (the game opened from a single file) is not worth asking for twice.
+          if (res.status === 404) {
+            absent += 1;
+            return null;
+          }
+          if (!res.ok) throw new Error(`${res.status} for ${file}`);
+          return res.json();
+        });
       } catch {
         return null;
       }
     };
-    [this.people, this.things] = await Promise.all([read('characters.json'), read('props.json')]);
+    const [people, things] = await Promise.all([this.people ?? read('characters.json'), this.things ?? read('props.json')]);
+    this.people = people;
+    this.things = things;
+    // Published without models at all (one file on a disk): then drawing in code is the plan, not a failure.
+    this.expected = absent < 2 && (typeof location === 'undefined' || location.protocol !== 'file:');
     return !!(this.people || this.things);
   },
 
@@ -152,22 +239,32 @@ export const assets = {
     return loader.parseAsync(bytes.buffer, this.base);
   },
 
-  /** Fetch and parse one glTF file; resolves to the parsed file, or null if it could not be had. */
-  gltf(file, bytes = 0) {
+  /**
+   * Fetch and parse one glTF file; resolves to the parsed file, or null if it could not be had
+   * (after a few tries; it is asked for again the next time something wants it).
+   * @param {string} file
+   * @param {number} [bytes] its size, for the progress line
+   * @param {boolean} [isQuiet] fetching ahead: wait behind anything the room on screen needs
+   */
+  gltf(file, bytes = 0, isQuiet = false) {
     if (ready.has(file)) return Promise.resolve(ready.get(file));
-    if (failed.has(file)) return Promise.resolve(null);
+    const gaveUp = failed.get(file);
+    if (gaveUp !== undefined && clock() - gaveUp < this.retryAfter) return Promise.resolve(null);
     if (!pending.has(file)) {
-      this.progress.total += bytes;
+      // Count a file once, however many times it is tried.
+      if (gaveUp === undefined) this.progress.total += bytes;
+      else this.progress.done -= bytes;
+      failed.delete(file);
       pending.set(
         file,
-        this.fetchModel(file)
+        patient(() => this.fetchModel(file), isQuiet)
           .then((gltf) => {
             ready.set(file, gltf);
             return gltf;
           })
           .catch((err) => {
             console.warn(`asset ${file} could not be loaded`, err?.message ?? err);
-            failed.add(file);
+            failed.set(file, clock());
             return null;
           })
           .finally(() => {
@@ -188,7 +285,7 @@ export const assets = {
   },
 
   /** Make sure these characters (and the motion clips their skeletons use) are loaded. */
-  async loadPeople(ids) {
+  async loadPeople(ids, isQuiet = false) {
     if (!this.people) return false;
     const files = new Map();
     for (const id of ids) {
@@ -199,7 +296,7 @@ export const assets = {
       const a = this.people.anims[c.sex];
       if (a) files.set(a.file, a.bytes);
     }
-    await Promise.all([...files].map(([file, bytes]) => this.gltf(file, bytes)));
+    await Promise.all([...files].map(([file, bytes]) => this.gltf(file, bytes, isQuiet)));
     return true;
   },
 
@@ -216,10 +313,10 @@ export const assets = {
   // -------------------------------------------------------------- furniture
 
   /** Make sure these furniture and prop models are loaded. */
-  async loadProps(names) {
+  async loadProps(names, isQuiet = false) {
     if (!this.things) return false;
     const todo = [...new Set(names)].map((n) => this.things.models[n]).filter(Boolean);
-    await Promise.all(todo.map((m) => this.gltf(m.file, m.bytes)));
+    await Promise.all(todo.map((m) => this.gltf(m.file, m.bytes, isQuiet)));
     return true;
   },
 
@@ -241,8 +338,7 @@ export const assets = {
     const one = (file, bytes, colour) => {
       if (!file) return Promise.resolve(null);
       this.progress.total += bytes;
-      return pictures
-        .loadAsync(this.base + file)
+      return patient(() => pictures.loadAsync(this.base + file))
         .then((t) => {
           t.wrapS = t.wrapT = THREE.RepeatWrapping;
           t.colorSpace = colour ? THREE.SRGBColorSpace : THREE.NoColorSpace;
@@ -277,7 +373,7 @@ export const assets = {
   async loadEnvironment() {
     if (!this.things?.env) return null;
     try {
-      const t = await pictures.loadAsync(this.base + this.things.env.file);
+      const t = await patient(() => pictures.loadAsync(this.base + this.things.env.file));
       t.mapping = THREE.EquirectangularReflectionMapping;
       t.colorSpace = THREE.SRGBColorSpace;
       return t;
@@ -291,7 +387,7 @@ export const assets = {
     const info = this.things?.night;
     if (!info) return null;
     try {
-      const t = await pictures.loadAsync(this.base + pick(info, this.lite).file);
+      const t = await patient(() => pictures.loadAsync(this.base + pick(info, this.lite).file));
       t.colorSpace = THREE.SRGBColorSpace;
       return t;
     } catch {

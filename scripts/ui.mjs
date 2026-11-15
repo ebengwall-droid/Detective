@@ -2,14 +2,17 @@
 //
 //   node scripts/ui.mjs <scenario.mjs> [--mobile] [--out <dir>] [--local] [--quality low|medium|high]
 //                                      [--url <page>] [--fake-claude [deny]] [--server-log]
-//                                      [--still] [--dpr N] [--w N --h N]
+//                                      [--still] [--dpr N] [--w N --h N] [--flaky N]
 //
 //   --local        run the game core in the page (?mode=local) instead of on the server
 //   --url          open this page instead of the dev server, e.g. file:///.../dist/the-fold.html
 //   --fake-claude  pretend to be the claude.ai host: the page finds a `claude.use('sample')`
-//                  that streams canned replies ("deny" makes it refuse, as a viewer might)
+//                  that streams canned replies ("deny" makes it refuse, as a viewer might;
+//                  "slow" makes a model asked for by name think for seven seconds first)
 //   --still        ask for reduced motion, so panels are in place when a screenshot is taken
 //                  (software rendering is slow enough to catch them halfway in)
+//   --flaky N      a bad connection: the first N requests for every model, picture and manifest
+//                  are dropped (N of 1 or 2 should cost nothing but time; 9 means they never arrive)
 //
 // A scenario is a module whose default export is
 //   async ({ page, shot, sleep, game, tapWorld, log }) => { ... }
@@ -77,7 +80,7 @@ function fakeClaude(mode) {
       let text;
       if (/single word: ready/.test(last)) text = 'ready';
       else if (brief.includes('"stance"')) text = JSON.stringify({ say: `*She does not turn round.* [live] You came all this way to say "${said}"?`, stance: 'wavering', landed: [], end: null });
-      else if (brief.includes('"told"')) text = JSON.stringify({ say: `*A pause, the rain filling it.* [live] You want to know about "${said}". Ask me something I can answer, Detective.`, mood: 'guarded', told: [], acts: [] });
+      else if (brief.includes('"told"')) text = JSON.stringify({ say: `*A pause, the rain filling it.* [live] You want to know about "${said}". Ask me something I can answer, Detective.`, mood: 'guarded', told: [], acts: [], threads: [{ on: 'something I can answer', ask: 'What can you answer?' }, { on: 'not in the line', ask: 'This one must be dropped' }] });
       else if (brief.includes('"open"')) text = JSON.stringify({ answer: 'LIVE // NO MATCHING RECORD.\nTry a surname or a plate.', open: [] });
       else text = '[live] The rain has not stopped since Tuesday, and neither have you. Something on that desk has not been read.';
       let i = 0;
@@ -88,7 +91,7 @@ function fakeClaude(mode) {
         if (i < text.length) setTimeout(tick, 70);
         else resolve({ text, truncated: false, modelTierApplied: options.modelTier ?? 'default', modelApplied: options.model });
       };
-      setTimeout(tick, 400);
+      setTimeout(tick, mode === 'slow' && options.model ? 7000 : 400);
     });
   window.claude = { use: (name) => new Promise((r) => setTimeout(() => r(name === 'sample' ? sample : null), 50)) };
 }
@@ -114,6 +117,8 @@ async function main() {
     isMobile: mobile,
     hasTouch: mobile,
     reducedMotion: flag('still') ? 'reduce' : 'no-preference',
+    // The offline cache would fetch on the page's behalf, out of reach of --flaky.
+    serviceWorkers: Number(arg('flaky', 0)) > 0 ? 'block' : 'allow',
   });
   const page = await context.newPage();
   page.setDefaultTimeout(60000);
@@ -124,12 +129,26 @@ async function main() {
   page.on('pageerror', (e) => problems.push(`[pageerror] ${e.message}\n${e.stack ?? ''}`));
   page.on('requestfailed', (r) => {
     if (/fonts\.(googleapis|gstatic)/.test(r.url())) return;
+    // Dropped on purpose (--flaky).
+    if (r.failure()?.errorText === 'net::ERR_CONNECTION_RESET' && r.url().includes('/assets/')) return;
     // Chromium's devtools layer reports some fully delivered streamed replies as
     // "aborted". The page gets every byte and the server never sees a
     // disconnect (it logs one if it does), so these are noise.
     if (r.url().includes('/api/rpc') && r.failure()?.errorText === 'net::ERR_ABORTED') return;
     problems.push(`[requestfailed] ${r.url()} ${r.failure()?.errorText ?? ''} ${(r.postData() ?? '').slice(0, 90)}`);
   });
+
+  // A bad connection, on demand.
+  const flaky = Number(arg('flaky', 0));
+  const dropped = new Map();
+  if (flaky > 0) {
+    await page.route('**/assets/**', (route) => {
+      const key = route.request().url();
+      const n = (dropped.get(key) ?? 0) + 1;
+      dropped.set(key, n);
+      return n <= flaky ? route.abort('connectionreset') : route.continue();
+    });
+  }
 
   const sleep = (ms) => page.waitForTimeout(ms);
   const log = (...a) => console.log(...a);
@@ -160,7 +179,7 @@ async function main() {
       if (i === 299) throw new Error('the game did not start within 90 s');
       await sleep(300);
     }
-    await scenario({ page, shot, sleep, game, tapWorld, log, mobile, base: server?.base });
+    await scenario({ page, shot, sleep, game, tapWorld, log, mobile, base: server?.base, dropped });
   } catch (err) {
     failed = true;
     console.error(`SCENARIO FAILED: ${err?.stack ?? err}`);

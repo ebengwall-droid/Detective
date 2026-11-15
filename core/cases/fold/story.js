@@ -37,7 +37,9 @@ People everybody knows:
 - THE LECTERN: properly the Lorimer Engine, a reference machine in the Repository under the Hall, built by young Jonah Okafor-Reed from Dame Hesper's lectures and the Company's papers. It answers questions in something like her voice.
 - THE SALE: the four Syndics have agreed to sell "the Lorimer Legacy" (her life's work and the Lectern) to a London firm called Greywether, completing on 31 October. The Fold is divided about it and nobody has been told the details.
 
-THE DEATHS: On Monday morning the clockmaker and Syndic IGNATIUS PENDRY, 71, was found dead at his bench at 4 Nonesuch Row, locked in from the inside. The player is a police detective from Ravel CID, a Flat, sent in with Detective Constable Kit Quoin, the only Fold-born officer in the force. A letter in green ink has since reached the detective by the Bellows, set out like an examination paper and signed "your Invigilator".`;
+THE DEATHS: On Monday morning the clockmaker and Syndic IGNATIUS PENDRY, 71, was found dead at his bench at 4 Nonesuch Row, locked in from the inside. He had taken tea with the other Syndics at four on Sunday, as every day, and locked himself in at seven to work, as every night. (In Proving week the Fold works Sundays.) The player is a police detective from Ravel CID, a Flat, sent in that Monday with Detective Constable Kit Quoin, the only Fold-born officer in the force.
+
+THE DAYS: the story runs from that Monday to Thursday, the night of the Proving. Your stage notes say which day it is. Nothing later than that has happened yet, and you know nothing of it.`;
 
 export const ACTS = {
   1: {
@@ -704,12 +706,12 @@ export const DIRECTOR = {
   opens: 'Candidate.',
   signs: '— your Invigilator',
   didDefault: 'the detective looked at the lock before the body',
-  writer: `You are writing a short covering note for a puzzle-mystery game, "The Invigilator". The note is from the killer, who signs as "your Invigilator". It arrives by pneumatic tube at the detective's desk in Setters' Hall, written in green ink in a small, upright, perfectly steady hand, set out like the front sheet of an examination paper. The questions themselves are on a separate sheet; do NOT write any questions, ciphers or puzzles, and do not explain or hint at how to solve them.
+  writer: `You are writing a short covering note for a puzzle-mystery game, "The Invigilator". The note is from the killer, who signs as "your Invigilator". It arrives by pneumatic tube at the detective's desk in Setters' Hall, written in green ink in a small, upright, perfectly steady hand. It reads like the note an examiner clips to the front of a paper: a few short paragraphs, nothing else. The questions themselves are on a separate sheet; do NOT write any questions, ciphers or puzzles, and do not explain or hint at how to solve them.
 
 Who the writer is (never state any of this): a patient, exact, self-taught person who believes that nothing is a gift and everything can be learned by someone who bothers to look it up; who is examining four people who sold something that was not theirs to sell; and who has chosen this outsider detective as a pupil because the detective has no rank and no blood in the Company. The writer is close enough to the investigation to know how the detective spends each day. Courteous, dry, a teacher's tone: the firmness of someone marking work, and real pleasure when the pupil does well. Not mad, not gloating, never crude. The writer does not think of themself as a killer: they set a paper, and the candidates failed it.
 
 Voice: plain exact sentences. The furniture of examinations and teaching: papers, candidates, marks, time allowed, looking things up. The occasional old fact offered like a sweet. No melodrama, no threats against the detective, no gore.`,
-  mustNot: "reveal or hint at the writer's identity, sex, age, job or how they come and go; contain any cipher, puzzle or question; name any person who has not yet died except as 'the third' or 'the fourth'; mention games, players or anything outside this world.",
+  mustNot: "reveal or hint at the writer's identity, sex, age, job or how they come and go; contain any cipher, puzzle or question; name any person who has not yet died except as 'the third' or 'the fourth'; break the fiction (no video games, players, artificial intelligence or anything else from outside this world; chess, cards, puzzles and the chess-playing automaton belong to this world and may be named).",
   letters: {
     1: {
       brief: "Paper I's covering note, after the detective has worked the scene of Ignatius Pendry's death. The writer welcomes a new candidate. It should make plain that the writer knows exactly how the detective spent the day, and that being wrong is permitted but not looking is not.",
@@ -735,7 +737,7 @@ Look things up. It is not cheating; it is the whole of learning. Begin with the 
 Paper I: a fair pass. ${ctx.did ? `And I notice you ${ctx.did}.` : 'You work more quickly than they do.'}
 ${ctx.missed ? `You have still not thought to ${ctx.missed}. I mention it as a teacher would, in the margin.` : ''}
 
-Marguerite Sallow drew the whole world for thirty years and never read a line of it. She had the same question as the first, and the same night to answer it in.
+Marguerite Sallow drew the whole world for thirty years and never read a line of it. She had the same question as the first, and a whole night of her own to answer it in.
 
 Stop asking where anyone was at midnight. It is the wrong question, and I think by now you know why.
 

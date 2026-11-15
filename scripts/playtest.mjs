@@ -128,7 +128,7 @@ async function main() {
   await talk('kit', 'Where do I start?', 'Who are the Syndics?');
 
   await go('wheelshop');
-  await talk('quoin', 'Did you hear anything on Monday night?', "How do you change a letter-lock's word?");
+  await talk('quoin', 'Did you hear anything on Sunday night?', "How do you change a letter-lock's word?");
   await look('fitting', 'wall_party', 'kit_photo', 'wheels', 'quoin_ledger');
   await solve('fitting', 'Patience');
   expect(has.flag('tool_wheel'), 'the fitting earns the Wheel');

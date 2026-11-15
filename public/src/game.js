@@ -1,7 +1,7 @@
 // The game controller: owns the latest view, sends player actions to the
 // game core, and turns what comes back into things on screen.
 
-import { World } from './world/world.js';
+import { World, STEP_DOWN } from './world/world.js';
 import { assets } from './world/assets.js';
 import { Audio } from './audio.js';
 import { el } from './ui/dom.js';
@@ -50,6 +50,14 @@ export class Game {
     this.unseen = { notebook: false, laptop: false, map: false };
     /** Reasons the player cannot move right now. Empty means exploring. */
     this.blockers = new Set();
+    /** Errors the page has thrown, kept short, for the diagnostics. */
+    this.faults = [];
+    const fault = (text) => {
+      this.faults.push(String(text).slice(0, 180));
+      if (this.faults.length > 8) this.faults.shift();
+    };
+    window.addEventListener('error', (e) => fault(e.message ?? e.error ?? 'error'));
+    window.addEventListener('unhandledrejection', (e) => fault(e.reason?.message ?? e.reason ?? 'rejected promise'));
     this.started = false;
     /** Whether a history entry is standing by for the phone's Back button to consume. */
     this.backArmed = false;
@@ -185,8 +193,16 @@ export class Game {
     }
   }
 
+  /** Say once that part of what is on screen is a stand-in, and that it will be swapped. */
+  noteMissing() {
+    if (this.toldMissing || !this.started || !assets.missing) return;
+    this.toldMissing = true;
+    this.hud.toast({ kind: 'alert', iconName: 'gear', title: 'Still fetching', text: 'The connection dropped part of this room, so some of it is a plain stand-in. It will be swapped as it arrives.' });
+  }
+
   beginPlay() {
     this.started = true;
+
     this.armBack();
     if (this.blockers.size) this.world.setMode('ui');
     else this.enterExplore();
@@ -213,10 +229,20 @@ export class Game {
     // Light first, sound after: the storm is a little way out over the water.
     w.on('lightning', () => setTimeout(() => this.audio.thunder(), 600 + Math.random() * 1600));
     w.on('lock', (locked) => this.hud.setLocked(locked));
+    // A model that would not download leaves a plainer stand-in in its place. Say so once, rather
+    // than leave the player wondering why the room looks unfinished; it is swapped the moment it lands.
+    // Set where the glass tokens are declared (the page root), so every sheet that uses them follows.
+    w.on('tilt', (deg) => document.documentElement.style.setProperty('--tilt', `${deg}deg`));
+    w.on('missing', () => {
+      if (!this.fadeEl.classList.contains('on')) this.noteMissing();
+    });
     w.on('slow', (from) => {
-      const next = from === 'high' ? 'medium' : 'low';
+      const next = STEP_DOWN[from];
+      if (!next) return;
       this.world.setQuality(next);
-      this.hud.toast({ iconName: 'gear', title: 'Graphics lowered', text: 'To keep things smooth. You can change this in the menu.' });
+      // Say so once; after that it just gets on with it.
+      if (!this.toldSlow) this.hud.toast({ iconName: 'gear', title: 'Graphics eased', text: 'To keep things smooth. You can change this in the menu.' });
+      this.toldSlow = true;
     });
     const unlock = () => {
       this.audio.unlock();
@@ -338,10 +364,12 @@ export class Game {
     if (!on) await this.arrive();
     this.fadeEl.classList.toggle('on', on);
     await new Promise((r) => setTimeout(r, FADE_MS));
+    // If the room had to be shown unfinished, say so now that it can be seen.
+    if (!on) setTimeout(() => this.noteMissing(), 900);
   }
 
   /** Wait for the room on screen to have its furniture and people, saying so if it takes a moment. */
-  async arrive(limit = 20000) {
+  async arrive(limit = 40000) {
     const had = this.fadeEl.textContent;
     let done = false;
     const say = () => {
@@ -410,7 +438,10 @@ export class Game {
     const prev = this.view;
     this.view = view;
     const moved = fresh || !prev || prev.location.id !== view.location.id;
-    this.world.loadLocation(view.location, { respawn: fresh });
+    // A new day starts from the room's own first view, not wherever you were last standing
+    // (unless it dawns in the middle of a conversation, which keeps its close-up).
+    const newDay = !!prev && prev.act?.n !== view.act?.n && !this.dialogue?.isOpen;
+    this.world.loadLocation(view.location, { respawn: fresh || newDay });
     if (moved) this.audio.setAmbience(view.location.id);
     this.hud.setView(view);
   }
@@ -422,14 +453,23 @@ export class Game {
     try {
       const facts = [];
       const held = [];
+      /** New places on the map, said once together rather than one notice each. */
+      const places = [];
       while (this.queue.length) {
         const e = this.queue.shift();
         if (e.type === 'act') {
           if (this.dialogue.isOpen) held.push(e);
           else await this.showAct(e);
+        } else if (e.type === 'unlock') {
+          places.push(e.name);
         } else {
           this.present(e, facts);
         }
+      }
+      if (places.length) {
+        this.unseen.map = true;
+        const list = places.length === 1 ? places[0] : `${places.slice(0, -1).join(', ')} and ${places.at(-1)}`;
+        this.hud.toast({ kind: 'alert', iconName: 'pin', title: places.length === 1 ? 'New place on the map' : `${places.length} new places on the map`, text: list, onClick: () => this.open('map') });
       }
       if (facts.length) {
         this.audio.lead();
@@ -597,6 +637,57 @@ export class Game {
 
   setAiPreference(pref) {
     this.client.setAiPreference?.(pref);
+    this.toldEased = false;
+  }
+
+  /**
+   * Who is playing the cast can change while you talk: if the best model
+   * keeps people waiting, everyday conversation moves to the fast one. Returns
+   * the sentence that says so, once, for the conversation to show; otherwise null.
+   */
+  aiChanged() {
+    const ai = this.client?.ai;
+    if (!ai?.eased || this.toldEased) return null;
+    this.toldEased = true;
+    return ai.easedWhy === 'limit'
+      ? 'Claude Opus is at its limit for now, so everyday talk has moved to Claude\u2019s fast model. You can change that in the menu.'
+      : 'Answers were slow to start, so everyday talk now uses Claude\u2019s fast model. You can change that in the menu.';
+  }
+
+  /**
+   * A plain-text account of what this device is doing with the game: for a
+   * player to copy and send when something looks wrong. Nothing personal is
+   * in it, and nothing leaves the page unless they paste it somewhere.
+   */
+  diagnostics() {
+    const w = this.world;
+    const r = w.renderer;
+    const gl = r?.getContext?.();
+    let gpu = 'unknown';
+    try {
+      const ext = gl?.getExtension('WEBGL_debug_renderer_info');
+      gpu = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl?.getParameter(gl.RENDERER) ?? 'unknown';
+    } catch {
+      /* some browsers refuse this */
+    }
+    const ai = this.client?.ai ?? {};
+    const info = r?.info ?? {};
+    const got = assets.status();
+    const lines = [
+      `${document.title}`,
+      `screen ${window.innerWidth}x${window.innerHeight} @${window.devicePixelRatio ?? 1}, ${this.isTouch ? 'touch' : 'pointer'}, drawing at ${r ? r.getPixelRatio().toFixed(2) : '?'}x`,
+      `graphics ${w.quality}${this.settings.quality === 'auto' ? ' (auto)' : ' (chosen)'}, finishing pass ${w.post ? 'on' : 'OFF'}, about ${Math.round(1 / Math.max(0.004, w.lastDt ?? 0.016))} fps`,
+      `gpu ${String(gpu).slice(0, 90)} (WebGL${gl && typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext ? '2' : '1'})`,
+      `scene ${this.view?.location?.id ?? '-'}: ${info.memory?.geometries ?? '?'} geometries, ${info.memory?.textures ?? '?'} textures, ${info.programs?.length ?? '?'} programs`,
+      `models ${got.manifests ? `${got.loaded} loaded${assets.packed ? ' (packed)' : ''}` : 'NOT LOADED (people and furniture drawn in code)'}${got.failed.length ? `, failed: ${got.failed.slice(0, 6).join(' ')}` : ''}`,
+      `characters ${ai.live ? `live (${ai.label ?? ai.model ?? 'Claude'}${ai.hosted ? `, hosted, set to ${ai.pref ?? '-'}` : ''})` : `script (${ai.reason ?? 'no model'})`}${ai.resting ? ', resting after failures' : ''}`,
+      ...(ai.pace && (ai.pace.opus !== null || ai.pace.quick !== null) ? [`  first words after: ${ai.pace.opus !== null ? `Opus ${(ai.pace.opus / 1000).toFixed(1)} s` : ''}${ai.pace.opus !== null && ai.pace.quick !== null ? ', ' : ''}${ai.pace.quick !== null ? `fast ${(ai.pace.quick / 1000).toFixed(1)} s` : ''}`] : []),
+      ...(ai.trouble ?? []).map((t) => `  model call failed: ${t.tag} ${t.code ?? ''} ${t.message}`),
+      `case day ${this.view?.act?.n ?? '-'}, ${this.view?.facts?.length ?? 0} leads, mode ${this.client?.mode ?? '-'}`,
+      ...this.faults.slice(-5).map((f) => `  error: ${f}`),
+      `agent ${navigator.userAgent}`,
+    ];
+    return lines.join('\n');
   }
 
   /** Look around: light up every marker and offer the room as a list to walk to. */
@@ -688,7 +779,7 @@ export class Game {
     const side = this.dialogueSide();
     const r = this.dialogue.rect();
     const frac = r ? (side === 'right' ? r.width / window.innerWidth : r.height / window.innerHeight) : undefined;
-    this.world.focusNpc(id, side, frac);
+    this.world.focusNpc(id, side, frac, r?.rail ?? 0);
   }
 
   dialogueClosed(was) {
@@ -763,7 +854,7 @@ export class Game {
       this.isTouch
         ? '<b>Tap</b> where you want to go and you will walk there. <b>Drag</b> to look around. The ring on the left steers by thumb.'
         : '<b>Click</b> where you want to go, or walk with <b>W A S D</b>. <b>Drag</b> to look around.',
-      `<b>Glowing diamonds</b> can be examined. <b>Speech bubbles</b> are people. ${tap} one. Your partner is by the window.`,
+      `<b>Rings of light</b> mark what you can examine; a ring with <b>three dots</b> is someone to talk to. ${tap} one. Your partner is waiting by the gate.`,
       `Lost? <b>Look</b> lists everyone and everything in the room. ${tap} a name and you walk straight to it.`,
     ];
     steps.forEach((html, i) => {

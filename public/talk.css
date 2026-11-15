@@ -1,0 +1,446 @@
+/* A conversation, staged rather than boxed.
+   The person fills the screen; what they say is one caption on a sheet of
+   glass; words you can press them on are threads. Everything here floats:
+   there is no panel, no title bar and no chat log. Uses the glass tokens from
+   styles.css, with fallbacks so it stands on its own. */
+
+.dialogue.talk {
+  --t-bg: var(--glass-bg, rgba(20, 25, 35, 0.4));
+  --t-dense: var(--glass-bg-dense, rgba(11, 15, 23, 0.58));
+  --t-edge: var(--glass-edge, linear-gradient(calc(140deg + var(--tilt, 0deg)), rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.07) 38%, rgba(255, 255, 255, 0.04) 62%, rgba(255, 255, 255, 0.2)));
+  --t-blur: var(--glass-blur, blur(26px) saturate(1.7));
+  --t-blur-lite: var(--glass-blur-lite, blur(14px) saturate(1.5));
+  --t-shadow: var(--glass-shadow, 0 22px 60px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3));
+  --t-1: var(--text-1, rgba(255, 255, 255, 0.94));
+  --t-2: var(--text-2, rgba(255, 255, 255, 0.66));
+  --t-3: var(--text-3, rgba(255, 255, 255, 0.42));
+  --mood: #8fe0c8;
+
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  overflow: hidden;
+  animation: none;
+  pointer-events: none;
+  color: var(--t-1);
+}
+.dialogue.talk::before { display: none; }
+.dialogue.talk > * { pointer-events: auto; }
+.dialogue.talk[data-mood='warm'], .dialogue.talk[data-mood='amused'] { --mood: #ffc46b; }
+.dialogue.talk[data-mood='guarded'], .dialogue.talk[data-mood='cold'] { --mood: #9db9ff; }
+.dialogue.talk[data-mood='nervous'], .dialogue.talk[data-mood='shaken'], .dialogue.talk[data-mood='wavering'] { --mood: #ffe27a; }
+.dialogue.talk[data-mood='angry'] { --mood: #ff7d6e; }
+.dialogue.talk[data-mood='sad'], .dialogue.talk[data-mood='breaking'] { --mood: #b9a8ff; }
+
+/* The room darkens toward the top and bottom so type can sit on the picture itself. */
+.talk-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none !important;
+  background:
+    linear-gradient(to bottom, rgba(3, 5, 9, 0.66) 0, rgba(3, 5, 9, 0.18) 14%, rgba(3, 5, 9, 0) 26%),
+    linear-gradient(to top, rgba(3, 5, 9, 0.9) 0, rgba(3, 5, 9, 0.62) 22%, rgba(3, 5, 9, 0.2) 44%, rgba(3, 5, 9, 0) 58%);
+  animation: talk-fade 0.5s ease both;
+}
+
+/* Every piece of glass on this screen shares one edge: brighter where the light would catch it. */
+.talk-plate, .talk-close, .talk-live, .talk-caption, .talk .chip, .talk-tool, .talk-input, .talk-sheet { position: relative; isolation: isolate; }
+.talk-plate::after, .talk-close::after, .talk-caption::after, .talk .chip::after, .talk-tool::after, .talk-input::after, .talk-sheet::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--t-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------- who it is */
+.talk-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding: calc(var(--safe-t, 0px) + 12px) var(--gutter-r, 16px) 0 var(--gutter-l, 16px);
+  animation: talk-drop 0.5s var(--spring, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+.talk-plate {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  max-width: calc(100% - 132px);
+  padding: 9px 18px 10px 14px;
+  border-radius: 24px;
+  background: var(--t-bg);
+  -webkit-backdrop-filter: var(--t-blur-lite);
+  backdrop-filter: var(--t-blur-lite);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.talk-dot {
+  flex: none;
+  align-self: flex-start;
+  margin-top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--mood);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--mood) 22%, transparent), 0 0 16px var(--mood);
+  transition: background 0.6s, box-shadow 0.6s;
+}
+.talk-who { min-width: 0; }
+.talk-name { display: flex; align-items: baseline; gap: 8px; font-family: var(--display, sans-serif); font-weight: 700; font-size: 17px; letter-spacing: -0.012em; line-height: 1.15; white-space: nowrap; }
+.talk-role { margin-top: 2px; font-size: 12px; line-height: 1.3; color: var(--t-2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; text-wrap: balance; }
+.talk-mood { font-family: var(--mono, monospace); font-size: 9.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mood); transition: color 0.6s; }
+.talk-top-right { display: flex; align-items: center; gap: 8px; flex: none; }
+.talk-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 11px 0 9px;
+  border-radius: 999px;
+  font-family: var(--mono, monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 0;
+  cursor: pointer;
+  color: var(--t-2);
+  background: rgba(10, 14, 22, 0.42);
+  -webkit-backdrop-filter: var(--t-blur-lite);
+  backdrop-filter: var(--t-blur-lite);
+}
+.talk-live i { width: 6px; height: 6px; border-radius: 50%; background: var(--t-3); }
+.talk-live.on i { background: #7df0b0; box-shadow: 0 0 10px #7df0b0; animation: talk-pulse 2.4s ease-in-out infinite; }
+.talk-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--t-1);
+  background: var(--t-bg);
+  -webkit-backdrop-filter: var(--t-blur-lite);
+  backdrop-filter: var(--t-blur-lite);
+  cursor: pointer;
+  transition: transform 0.2s var(--spring, ease), background 0.2s;
+}
+.talk-close:active { transform: scale(0.92); }
+
+/* ------------------------------------------------------ what is being said */
+.talk-stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  max-height: 64%;
+  padding: 0 var(--gutter-r, 16px) calc(var(--safe-b, 0px) + 12px) var(--gutter-l, 16px);
+}
+.talk-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 0;
+  padding: 16px 20px 16px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 46%), var(--t-dense);
+  -webkit-backdrop-filter: var(--t-blur);
+  backdrop-filter: var(--t-blur);
+  box-shadow: var(--t-shadow);
+  animation: talk-rise 0.55s var(--spring, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+.cap-speaker { font-family: var(--mono, monospace); font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--mood); transition: color 0.6s; }
+.cap-body { min-height: 4.2em; max-height: 34vh; max-height: 34dvh; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.cap-body::-webkit-scrollbar { display: none; }
+.cap-text p { margin: 0; font-size: 18.5px; line-height: 1.44; font-weight: 500; letter-spacing: -0.006em; text-wrap: pretty; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35); }
+.cap-text em { font-style: italic; font-weight: 400; color: var(--t-2); }
+/* A long line is set smaller rather than cut off under a face. */
+.talk-caption[data-size='m'] .cap-text p { font-size: 17px; }
+.talk-caption[data-size='s'] .cap-text p { font-size: 15.5px; line-height: 1.42; font-weight: 450; }
+.talk-caption.aside .cap-text p { font-size: 16px; }
+.talk-caption.pending .cap-body { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 9px; min-height: 2.6em; }
+/* What they do while they think. */
+.cap-text.beat p { font-size: 16px; font-weight: 400; }
+.cap-text.beat { animation: talk-fade 0.7s ease both; }
+.talk .dots i { background: var(--mood); }
+/* Their mood colours the light on the glass, the way a lamp would. */
+.talk-caption::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(120% 90% at 0% 0%, var(--mood), transparent 62%);
+  opacity: 0.11;
+  pointer-events: none;
+  transition: opacity 0.6s;
+}
+.talk[data-mood='calm'] .talk-caption::before { opacity: 0.06; }
+/* More of the line is below: fade the last of it, and offer the rest. */
+.talk-caption.more .cap-body { -webkit-mask-image: linear-gradient(#000 calc(100% - 46px), transparent); mask-image: linear-gradient(#000 calc(100% - 46px), transparent); }
+.cap-more { display: none; position: relative; z-index: 3; flex: none; align-self: center; width: 44px; height: 30px; margin-top: -38px; padding: 0; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.14); cursor: pointer; place-items: center; -webkit-tap-highlight-color: transparent; }
+.cap-more i { width: 8px; height: 8px; margin-top: -4px; border-right: 2px solid var(--t-1); border-bottom: 2px solid var(--t-1); transform: rotate(45deg); animation: cap-nudge 1.6s ease-in-out infinite; }
+.talk-caption.more .cap-more { display: grid; }
+
+/* A thread: words you can pull on. */
+.thread {
+  display: inline;
+  margin: 0;
+  padding: 1px 2px;
+  border: 0;
+  border-radius: 6px;
+  font: inherit;
+  letter-spacing: inherit;
+  -webkit-user-select: none;
+  user-select: none;
+  color: #ffdca3;
+  background: linear-gradient(transparent 68%, rgba(255, 179, 71, 0.3) 0);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 190, 100, 0.9);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, color 0.2s;
+  animation: thread-in 0.7s ease both;
+}
+.thread:hover, .thread:focus-visible { color: #fff; background: rgba(255, 179, 71, 0.34); outline: none; }
+.thread:active { background: rgba(255, 179, 71, 0.55); }
+.talk.busy .thread { pointer-events: none; opacity: 0.75; }
+/* The word you pulled, on its way to becoming your question. */
+.thread-ghost { position: absolute; z-index: 6; pointer-events: none !important; font-size: 18.5px; font-weight: 600; line-height: 1.44; white-space: nowrap; color: #ffe2b4; text-shadow: 0 0 18px rgba(255, 190, 100, 0.85), 0 1px 2px rgba(0, 0, 0, 0.5); will-change: transform, opacity; }
+
+/* What you just said, small, on its way out of the frame. */
+.talk-you { align-self: flex-end; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; max-width: 92%; margin-bottom: 2px; animation: talk-rise 0.35s var(--spring, ease) both; }
+.you-text { padding: 6px 12px; border-radius: 16px 16px 5px 16px; font-size: 13.5px; line-height: 1.35; color: #ffe2b4; background: rgba(255, 179, 71, 0.16); box-shadow: inset 0 0 0 1px rgba(255, 190, 100, 0.3); }
+.you-show { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 8px; font-family: var(--typed, monospace); font-size: 12.5px; color: var(--paper-ink, #241f18); background: var(--paper, #ece4d0); }
+.talk-note { font-size: 12.5px; line-height: 1.4; color: var(--t-3); }
+
+/* Your side: threads as pills, then the line you type. */
+.talk .chips { display: flex; flex-wrap: nowrap; gap: 8px; margin: 0 calc(var(--gutter-r, 16px) * -1) 0 calc(var(--gutter-l, 16px) * -1); padding: 2px var(--gutter-r, 16px) 2px var(--gutter-l, 16px); overflow-x: auto; scrollbar-width: none; flex: none; }
+.talk .chips::-webkit-scrollbar { display: none; }
+.talk .chip {
+  flex: none;
+  max-width: 78vw;
+  min-height: 44px;
+  padding: 10px 17px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--t-1);
+  background: var(--t-bg);
+  -webkit-backdrop-filter: var(--t-blur-lite);
+  backdrop-filter: var(--t-blur-lite);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.2s var(--spring, ease), background 0.2s;
+  animation: talk-rise 0.5s var(--spring, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+.talk .chip:hover { background: rgba(255, 179, 71, 0.22); }
+.talk .chip:active { transform: scale(0.96); }
+.talk .chips.nudge .chip { box-shadow: 0 0 0 1.5px rgba(255, 190, 100, 0.7), 0 8px 24px rgba(0, 0, 0, 0.3); }
+.talk .chips .line.note { display: flex; justify-content: center; width: 100%; max-width: none; margin: 0; padding: 4px 0; animation: talk-rise 0.5s var(--spring, ease) both; }
+.talk .chips .line.note .btn { min-height: 48px; padding: 0 28px; }
+
+.talk-bar { display: flex; align-items: flex-end; gap: 8px; flex: none; }
+/* Besides talking: read them, show them something, look back over what was said.
+   A rail of glass at the thumb's edge of the picture, not a toolbar. */
+.talk-rail {
+  position: absolute;
+  right: var(--gutter-r, 16px);
+  bottom: calc(100% + 14px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  animation: talk-rise 0.6s 0.12s var(--spring, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+.talk-tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 54px;
+  min-height: 54px;
+  padding: 7px 0 6px;
+  border: 0;
+  border-radius: 19px;
+  color: var(--t-1);
+  background: var(--t-bg);
+  -webkit-backdrop-filter: var(--t-blur-lite);
+  backdrop-filter: var(--t-blur-lite);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s var(--spring, ease), background 0.2s;
+}
+.tool-label { font-family: var(--mono, monospace); font-size: 8.5px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--t-2); }
+.talk-tool:hover { background: rgba(255, 255, 255, 0.16); }
+.talk-tool:active { transform: scale(0.92); }
+.talk.busy .talk-tool { opacity: 0.6; }
+.talk-input {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  min-height: 48px;
+  padding: 4px 4px 4px 18px;
+  border-radius: 26px;
+  background: var(--t-dense);
+  -webkit-backdrop-filter: var(--t-blur-lite);
+  backdrop-filter: var(--t-blur-lite);
+  transition: box-shadow 0.2s;
+}
+.talk-input:focus-within { box-shadow: 0 0 0 2px rgba(255, 190, 100, 0.55); }
+.talk-input textarea {
+  flex: 1;
+  min-width: 0;
+  max-height: 96px;
+  margin: 0;
+  padding: 10px 0;
+  border: 0;
+  outline: none;
+  resize: none;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--t-1);
+  background: none;
+  box-shadow: none;
+}
+.talk-input textarea::placeholder { color: var(--t-3); }
+.talk-input textarea:disabled { opacity: 0.5; }
+.talk-send {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--lamp-ink, #2a1803);
+  background: linear-gradient(180deg, #ffd08a, #ffab3d);
+  box-shadow: 0 6px 18px rgba(255, 170, 60, 0.35);
+  cursor: pointer;
+  transition: transform 0.2s var(--spring, ease), opacity 0.2s;
+}
+.talk-send:active { transform: scale(0.9); }
+.talk-send:disabled { opacity: 0.45; box-shadow: none; }
+.talk.ended .talk-bar { display: none; }
+
+/* Evidence to show, and the transcript: sheets of the same glass over the lower screen. */
+.talk-sheet {
+  position: absolute;
+  z-index: 4;
+  left: max(10px, var(--safe-l, 0px));
+  right: max(10px, var(--safe-r, 0px));
+  bottom: calc(var(--safe-b, 0px) + 10px);
+  top: 16%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 30px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 30%), rgba(10, 14, 22, 0.74);
+  -webkit-backdrop-filter: var(--t-blur);
+  backdrop-filter: var(--t-blur);
+  box-shadow: var(--t-shadow);
+  overflow: hidden;
+  animation: talk-rise 0.4s var(--spring, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+.talk-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 12px 10px 22px; flex: none; }
+.talk-sheet-title { font-family: var(--display, sans-serif); font-weight: 700; font-size: 20px; letter-spacing: -0.015em; }
+.talk-sheet .pick-list { padding: 4px 12px 16px; }
+.talk-sheet .pick { background: rgba(255, 255, 255, 0.05); }
+/* The transcript: what was said, as messages. */
+.talk .dlg-log { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 6px 18px 20px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.2) transparent; }
+.talk .dlg-log[hidden] { display: none; }
+.talk .dlg-log .line { max-width: 90%; font-size: 15px; line-height: 1.48; }
+.talk .dlg-log .line.npc { align-self: flex-start; padding: 10px 14px; border-radius: 20px 20px 20px 6px; background: rgba(255, 255, 255, 0.07); }
+.talk .dlg-log .line.you { align-self: flex-end; padding: 9px 14px; border-radius: 20px 20px 6px 20px; color: var(--lamp-ink, #2a1803); font-weight: 500; background: linear-gradient(180deg, #ffcd85, #ffb44d); }
+.talk .dlg-log .line.show { align-self: flex-end; display: inline-flex; align-items: center; gap: 7px; font-family: var(--typed, monospace); font-size: 13px; padding: 7px 11px; background: var(--paper, #ece4d0); color: var(--paper-ink, #241f18); border-radius: 8px; }
+.talk .dlg-log .line.note { align-self: center; max-width: 94%; font-size: 12.5px; color: var(--t-3); text-align: center; }
+.talk .dlg-log .cap-text p { font-size: 15px; font-weight: 400; text-shadow: none; }
+.dlg-turns { padding: 0 6px; font-family: var(--mono, monospace); font-size: 11.5px; color: var(--lamp, #ffb347); letter-spacing: 0.06em; flex: none; }
+.dlg-turns:empty { display: none; }
+
+/* The keyboard is up: the caption gives ground so the face stays in view. */
+.talk.kb .talk-stage { padding-bottom: calc(var(--kb, 0px) + 8px); max-height: none; }
+.talk.kb .cap-body { max-height: 16vh; }
+.talk.kb .chips, .talk.kb .talk-rail { display: none; }
+
+/* A short screen (a panel inside another app): the rail loses its labels to stay clear of the top. */
+@media (max-height: 700px) {
+  .talk-rail { gap: 7px; bottom: calc(100% + 10px); }
+  .talk-tool { width: 46px; min-height: 46px; padding: 0; border-radius: 50%; }
+  .tool-label { display: none; }
+}
+
+/* Beside them rather than under them: desks, and phones on their side. */
+@media (min-width: 900px) and (min-height: 520px), (orientation: landscape) and (min-width: 560px) and (max-height: 520px) {
+  .talk-shade { background: linear-gradient(to bottom, rgba(3, 5, 9, 0.5) 0, rgba(3, 5, 9, 0) 22%), linear-gradient(to left, rgba(3, 5, 9, 0.82) 0, rgba(3, 5, 9, 0.5) 24%, rgba(3, 5, 9, 0) 52%); }
+  .talk-stage { position: absolute; right: 0; bottom: 0; width: min(470px, 44vw); max-height: 84%; padding: 0 max(18px, var(--safe-r, 0px)) calc(var(--safe-b, 0px) + 18px) 0; }
+  .talk .chips { flex-wrap: wrap; overflow: visible; margin: 0; padding: 2px 0; }
+  .talk .chip { white-space: normal; text-align: left; max-width: 100%; border-radius: 22px; }
+  .talk-sheet { left: auto; top: 12%; width: min(470px, 44vw); right: max(18px, var(--safe-r, 0px)); bottom: calc(var(--safe-b, 0px) + 18px); }
+  .cap-body { max-height: 42vh; }
+  /* The rail stands at the foot of the picture, just clear of the column. */
+  .talk-rail { right: calc(100% + 14px); bottom: calc(var(--safe-b, 0px) + 18px); }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .cap-text p { font-size: 16px; }
+  .cap-body { max-height: 36vh; }
+  .talk-stage { max-height: 96%; gap: 7px; }
+  .talk-top { padding-top: calc(var(--safe-t, 0px) + 8px); }
+}
+
+/* The cheapest setting still gets glass, with a lighter blur and a denser tint. */
+html[data-quality='low'] .talk-caption, html[data-quality='low'] .talk-sheet { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); background: rgba(10, 14, 22, 0.78); }
+html[data-quality='low'] .talk-plate, html[data-quality='low'] .talk-close, html[data-quality='low'] .talk .chip, html[data-quality='low'] .talk-tool, html[data-quality='low'] .talk-input, html[data-quality='low'] .talk-live { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(16, 21, 31, 0.8); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .talk-caption, .talk-sheet { background: rgba(10, 14, 22, 0.9); }
+  .talk-plate, .talk-close, .talk .chip, .talk-tool, .talk-input, .talk-live { background: rgba(18, 24, 34, 0.9); }
+}
+
+@keyframes talk-rise { from { opacity: 0; transform: translateY(14px) scale(0.975); } to { opacity: 1; transform: none; } }
+@keyframes talk-drop { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@keyframes talk-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes talk-pulse { 50% { opacity: 0.45; } }
+@keyframes cap-nudge { 50% { transform: translateY(3px) rotate(45deg); } }
+@keyframes thread-in { from { background-size: 0 100%; text-decoration-color: transparent; } to { background-size: 100% 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .talk-shade, .talk-top, .talk-caption, .talk .chip, .talk-you, .talk-sheet, .thread, .talk .chips .line.note, .talk-rail { animation: none; }
+  .talk-live.on i, .cap-more i, .cap-text.beat { animation: none; }
+}

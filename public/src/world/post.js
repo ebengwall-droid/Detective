@@ -4,7 +4,7 @@
 //   ambient occlusion  corners, the undersides of furniture, where things meet the floor (N8AO)
 //   depth of field     the room falls out of focus behind whoever you are talking to
 //   bloom              lamps and flames glow
-//   the film look      filmic tone curve, a slight grade, vignette and grain
+//   the film look      filmic tone curve, a grade (cool shadows, warm light), vignette and grain
 //
 // Built on pmndrs/postprocessing and N8AO, the libraries most three.js games
 // use for this. Anything that goes wrong here is caught by the caller, which
@@ -14,11 +14,11 @@ import * as THREE from 'three';
 import {
   BlendFunction,
   BloomEffect,
-  BrightnessContrastEffect,
   DepthOfFieldEffect,
+  Effect,
   EffectComposer,
   EffectPass,
-  HueSaturationEffect,
+  FXAAEffect,
   NoiseEffect,
   RenderPass,
   SMAAEffect,
@@ -29,6 +29,34 @@ import {
 } from 'postprocessing';
 import { N8AOPostPass } from 'n8ao';
 
+/**
+ * The grade: how the picture is printed. Shadows lean cool and highlights
+ * warm, so lamplight separates from the dark instead of washing the whole
+ * room one brown; contrast is firmer, shadows stay open enough to read on a
+ * phone, and colour is a little richer. One small step in the last pass, so
+ * even the cheapest tier gets it.
+ */
+class GradeEffect extends Effect {
+  constructor({ amount = 1 } = {}) {
+    super(
+      'GradeEffect',
+      `uniform float amount;
+      void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
+        vec3 c = inputColor.rgb;
+        float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+        vec3 tone = mix(vec3(0.84, 0.97, 1.13), vec3(1.07, 1.0, 0.9), smoothstep(0.06, 0.62, l));
+        vec3 g = c * tone;
+        g = mix(g, g * g * (3.0 - 2.0 * g), 0.24);
+        // Open the shadows a little: a phone is looked at in daylight, and a room that is only black is not moody, just unreadable.
+        g = pow(max(g, 0.0), vec3(0.93));
+        g = mix(vec3(dot(g, vec3(0.2126, 0.7152, 0.0722))), g, 1.1);
+        outputColor = vec4(mix(c, clamp(g, 0.0, 1.0), amount), inputColor.a);
+      }`,
+      { uniforms: new Map([['amount', new THREE.Uniform(amount)]]) },
+    );
+  }
+}
+
 export class Post {
   /** How much brighter the picture is than the light in the room, for a given exposure (three's filmic curve works from exposure / 0.6). */
   static gain(exposure) {
@@ -38,8 +66,8 @@ export class Post {
   /** @param {THREE.WebGLRenderer} renderer */
   constructor(renderer) {
     this.renderer = renderer;
-    /** What this device is asked to do: ambient occlusion samples (0 for none) and whether to blur by depth. */
-    this.features = { ao: 10, dof: true };
+    /** What this device is asked to do: ambient occlusion samples (0 for none), whether to blur by depth, and how much bloom to afford. */
+    this.features = { ao: 10, dof: true, lite: false };
     const ext = renderer.extensions;
     // Bright values above 1 need a float buffer. Without one, the effects still run, just more modestly.
     this.type = ext.has('EXT_color_buffer_float') || ext.has('EXT_color_buffer_half_float') ? THREE.HalfFloatType : THREE.UnsignedByteType;
@@ -51,9 +79,9 @@ export class Post {
     this.camera = null;
   }
 
-  /** @param {{ao: number, dof: boolean}} features */
+  /** @param {{ao: number, dof: boolean, lite?: boolean}} features */
   configure(features) {
-    if (features.ao === this.features.ao && features.dof === this.features.dof) return;
+    if (features.ao === this.features.ao && features.dof === this.features.dof && !!features.lite === !!this.features.lite) return;
     this.features = { ...features };
     this.dispose();
   }
@@ -88,17 +116,19 @@ export class Post {
       composer.addPass(this.dofPass);
     }
 
-    this.bloom = new BloomEffect({ mipmapBlur: true, luminanceThreshold: 0.9, luminanceSmoothing: 0.25, intensity: 0.8, radius: 0.72, levels: 6 });
+    const lite = !!this.features.lite;
+    this.bloom = new BloomEffect({ mipmapBlur: true, luminanceThreshold: 0.9, luminanceSmoothing: 0.25, intensity: 0.8, radius: lite ? 0.66 : 0.72, levels: lite ? 4 : 6 });
     const tone = new ToneMappingEffect({ mode: ToneMappingMode.ACES_FILMIC });
-    // The grade: a little less colour, a little more contrast, the way night interiors are printed.
-    const grade = new HueSaturationEffect({ saturation: -0.06 });
-    const contrast = new BrightnessContrastEffect({ brightness: 0.0, contrast: 0.05 });
+    this.grade = new GradeEffect({ amount: 0.85 });
     const vignette = new VignetteEffect({ offset: 0.3, darkness: 0.5 });
-    this.grain = new NoiseEffect({ blendFunction: BlendFunction.OVERLAY, premultiply: false });
-    this.grain.blendMode.opacity.value = 0.06;
-    const finish = [this.bloom, tone, grade, contrast, vignette, this.grain];
-    // Where the room could not be multisampled, smooth its edges afterwards instead.
-    if (!this.samples) finish.push(new SMAAEffect({ preset: SMAAPreset.MEDIUM }));
+    const finish = [this.bloom, tone, this.grade, vignette];
+    if (!lite) {
+      this.grain = new NoiseEffect({ blendFunction: BlendFunction.OVERLAY, premultiply: false });
+      this.grain.blendMode.opacity.value = 0.06;
+      finish.push(this.grain);
+    }
+    // Where the room could not be multisampled, smooth its edges afterwards instead: properly where there is time for it, cheaply where there is not.
+    if (!this.samples) finish.push(lite ? new FXAAEffect() : new SMAAEffect({ preset: SMAAPreset.MEDIUM }));
     composer.addPass(new EffectPass(camera, ...finish));
 
     composer.setSize(this.cssW, this.cssH);

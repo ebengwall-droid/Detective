@@ -73,7 +73,7 @@ export const LOCATIONS = {
         views: [
           {
             if: { any: ['fact:pendry_paper', 'fact:locked_inside'] },
-            text: "The Lodge: a counter, a kettle, a stool nobody has ever seen sat on, and the Porter's daybook open at the week.\n\n'Sat. Letter-locks, annual oil and re-pin before the Proving: 4 Nonesuch Row (Mr Pendry); the Meridian (Mrs Sallow); the Crux (Mr Voss); Warden's Parlour; the Lantern grille.\nSun. Wound the sixty-one.\nMon. Hold-rack wound. Syndics' tea at four. Mr Pendry not down to breakfast Tues.'\n\nSmall, upright ink. Not a blot in forty-six years of it.",
+            text: "The Lodge: a counter, a kettle, a stool nobody has ever seen sat on, and the Porter's daybook open at the week.\n\n'Sat. Letter-locks, annual oil and re-pin before the Proving: 4 Nonesuch Row (Mr Pendry); the Meridian (Mrs Sallow); the Crux (Mr Voss); Warden's Parlour; the Lantern grille.\nSun. Wound the sixty-one. Syndics' tea at four.\nMon. Mr Pendry not down. Constables sent for, 7.40. Hold-rack wound.'\n\nSmall, upright ink. Not a blot in forty-six years of it.",
             facts: ['locks_oiled'],
           },
           { text: "The Lodge: a counter, a kettle, a stool nobody has ever seen sat on, and a daybook in small upright ink. Deliveries, visitors, clocks wound. It is the tidiest thing you have seen in your life." },
@@ -425,7 +425,7 @@ export const LOCATIONS = {
             facts: ['ariadne_fettle'],
           },
           {
-            text: "A ledger as fat as a loaf. Every crossing of the Cut since 1988: the date, the passenger, the riddle Nell asked, and what they answered.\n\nMonday: nobody after the last ferry at ten. Tuesday: nobody at all before she found the cat on the roof. Whoever did this did not come by water, and did not leave by it.",
+            text: "A ledger as fat as a loaf. Every crossing of the Cut since 1988: the date, the passenger, the riddle Nell asked, and what they answered.\n\nSunday: nobody after the last ferry at ten. Monday: the same. Tuesday: nobody at all before she found the cat on the roof. Whoever did this did not come by water, and did not leave by it.",
             facts: ['nobody_crossed'],
           },
         ],

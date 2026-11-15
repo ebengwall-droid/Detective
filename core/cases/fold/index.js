@@ -8,9 +8,14 @@ import { RECORDS } from './records.js';
 import { LOCATIONS } from './locations.js';
 import { SCENES } from './scenes.js';
 import { NPCS, PEOPLE } from './npcs.js';
+import { SMALL } from './smalltalk.js';
 import { PUZZLES, FEEDS, TOOLS } from './puzzles.js';
 import { META, START, WORLD, ACTS, ACT4_CARDS, BEATS, OBJECTIVES, REST, DEDUCTIONS, ACCUSE, FINALE, LAPTOP_HINTS, LAPTOP, PROMPTS, PUZZLE_MISS, DIRECTOR, ENDINGS } from './story.js';
 import { conditionRefs } from '../../conditions.js';
+
+// Each person's small talk travels with them; the detective's partner is the one who answers "what do I do?".
+for (const [id, npc] of Object.entries(NPCS)) npc.small = SMALL[id] ?? {};
+NPCS.kit.guide = true;
 
 // A lecture should always be found by its own title.
 for (const r of Object.values(RECORDS)) if (r.kind === 'lecture') r.keys.push(r.title.replace(/^Lecture · /, ''));
@@ -181,6 +186,15 @@ export function validateCase(c = CASE) {
     const where = `npc ${nid}`;
     if (!npc.look) problems.push(`${where}: no look`);
     if (!npc.fallback?.length) problems.push(`${where}: no fallback lines`);
+    for (const kind of ['hello', 'who', 'how', 'ack', 'thanks', 'bye', 'accuse', 'case']) {
+      const line = npc.small?.[kind];
+      if (!line || (Array.isArray(line) && !line.length)) problems.push(`${where}: no small talk for "${kind}"`);
+      else if (typeof line === 'string' && line.startsWith('@') && !npc.know.some((k) => k.id === line.slice(1))) problems.push(`${where}: small talk "${kind}" points at unknown item ${line}`);
+    }
+    if (!npc.guide && !npc.small?.next) problems.push(`${where}: no answer to "what should I do?"`);
+    const beats = npc.small?.beat ?? [];
+    if (!beats.length) problems.push(`${where}: nothing to do while thinking`);
+    for (const b of beats) if (!/^\*[^*]+\*$/.test(b)) problems.push(`${where}: a thinking beat must be one stage direction: ${b}`);
     for (const w of npc.where) {
       checkCond(w.if, where);
       if (w.loc && !c.locations[w.loc]) problems.push(`${where}: placed in unknown location "${w.loc}"`);

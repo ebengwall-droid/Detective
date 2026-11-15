@@ -1,7 +1,7 @@
 // The heads-up display: where you are, what you are looking at, what just
 // happened, and the small panels that sit over the 3D view.
 
-import { el, clear, icon, prose, typeInto } from './dom.js';
+import { el, clear, icon, prose, typeInto, leave } from './dom.js';
 
 const TOAST_MS = 5200;
 
@@ -164,8 +164,7 @@ export function showHere(panels, game) {
 
     const close = (pick) => {
       window.removeEventListener('keydown', onKey);
-      panel.remove();
-      scrim.remove();
+      leave(panel, scrim);
       resolve(pick);
     };
     const onKey = (e) => {
@@ -184,14 +183,14 @@ export function showHere(panels, game) {
       { class: 'panel-body' },
       people.length ? el('div', { class: 'section-label', text: 'People' }) : null,
       people.map(row),
-      el('div', { class: 'section-label', style: { marginTop: people.length ? '10px' : '0' }, text: 'Things' }),
+      el('div', { class: 'section-label', text: 'Things' }),
       things.map(row),
     );
     const scrim = el('div', { class: 'scrim clear', onClick: () => close(null) });
     const panel = el(
       'section',
       { class: 'panel around', role: 'dialog', 'aria-label': 'Around you' },
-      el('div', { class: 'panel-head' }, icon('eye'), el('div', { class: 'around-head' }, el('div', { class: 'panel-title', text: v.location.name }), el('div', { class: 'panel-kicker', text: 'Choose one and you will walk to it' })), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close', 'data-back': '', onClick: () => close(null) }, icon('close'))),
+      el('div', { class: 'panel-head' }, el('div', { class: 'around-head' }, el('div', { class: 'panel-title', text: v.location.name }), el('div', { class: 'panel-kicker', text: 'Choose one and you will walk to it' })), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close', 'data-back': '', onClick: () => close(null) }, icon('close'))),
       body,
     );
     panels.append(scrim, panel);
@@ -204,7 +203,7 @@ export function showInspect(panels, { title, text, taken = [], actions = [] }) {
   return new Promise((resolve) => {
     const body = el('div', { class: 'panel-body' });
     const close = (value) => {
-      panel.remove();
+      leave(panel);
       window.removeEventListener('keydown', onKey);
       resolve(value);
     };
@@ -214,13 +213,17 @@ export function showInspect(panels, { title, text, taken = [], actions = [] }) {
         close(null);
       }
     };
+    // What was bagged, as tags; then what can be done next, with the way on at the end.
     const foot = el(
       'div',
       { class: 'inspect-foot' },
-      taken.map((t) => el('span', { class: 'tagline' }, icon(t.icon ?? 'bag', 16), `Bagged: ${t.name}`)),
-      el('span', { class: 'spacer' }),
-      actions.map((a) => el('button', { class: 'btn small', type: 'button', text: a.label, onClick: () => close(a.id) })),
-      el('button', { class: 'btn small solid', type: 'button', text: 'Continue', 'data-back': '', onClick: () => close(null) }),
+      taken.length ? el('div', { class: 'inspect-tags' }, taken.map((t) => el('span', { class: 'tagline' }, icon(t.icon ?? 'bag', 16), `Bagged: ${t.name}`))) : null,
+      el(
+        'div',
+        { class: 'inspect-actions' },
+        actions.map((a) => el('button', { class: 'btn small', type: 'button', text: a.label, onClick: () => close(a.id) })),
+        el('button', { class: 'btn small solid', type: 'button', text: 'Continue', 'data-back': '', onClick: () => close(null) }),
+      ),
     );
     const panel = el('section', { class: 'panel inspect', role: 'dialog', 'aria-label': title }, el('div', { class: 'panel-head' }, el('div', { class: 'panel-title', text: title })), body, foot);
     panels.append(panel);
@@ -235,8 +238,7 @@ export function showThink(panels, run) {
     const body = el('div', { class: 'panel-body' }, el('div', { class: 'dots' }, el('i'), el('i'), el('i')));
     const kicker = el('div', { class: 'panel-kicker', text: 'You think it over' });
     const close = () => {
-      panel.remove();
-      scrim.remove();
+      leave(panel, scrim);
       window.removeEventListener('keydown', onKey);
       resolve();
     };
@@ -247,7 +249,7 @@ export function showThink(panels, run) {
     const panel = el(
       'section',
       { class: 'panel think', role: 'dialog', 'aria-label': 'Thinking' },
-      el('div', { class: 'panel-head' }, el('div', { style: { flex: '1' } }, kicker), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close', 'data-back': '', onClick: close }, icon('close'))),
+      el('div', { class: 'panel-head' }, el('div', { class: 'think-head' }, kicker), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close', 'data-back': '', onClick: close }, icon('close'))),
       body,
     );
     panels.append(scrim, panel);
@@ -305,8 +307,11 @@ export function showCard(cards, { kicker, title, date, lines = [], button = 'Con
   });
 }
 
-/** Yes/no question in the game's own style (the host page cannot show confirm()). */
-export function confirmCard(cards, { title, text, yes = 'Yes', no = 'Not yet' }) {
+/**
+ * Yes/no question in the game's own style (the host page cannot show confirm()).
+ * `accuse` marks the one question that names somebody: its yes is red, not the lamp.
+ */
+export function confirmCard(cards, { title, text, yes = 'Yes', no = 'Not yet', accuse = false }) {
   return new Promise((resolve) => {
     const close = (value) => {
       card.remove();
@@ -315,7 +320,7 @@ export function confirmCard(cards, { title, text, yes = 'Yes', no = 'Not yet' })
     const card = el(
       'section',
       { class: 'card veil', role: 'alertdialog', 'aria-label': title },
-      el('div', { class: 'card-inner' }, el('h2', { class: 'card-title', style: { fontSize: 'clamp(24px, 5vw, 32px)' }, text: title }), el('div', { class: 'rule' }), el('p', { class: 'epilogue', style: { textAlign: 'center' }, text }), el('div', { class: 'card-actions' }, el('button', { class: 'btn quiet', type: 'button', text: no, 'data-back': '', onClick: () => close(false) }), el('button', { class: 'btn solid', type: 'button', text: yes, onClick: () => close(true) }))),
+      el('div', { class: 'card-inner' }, el('h2', { class: 'card-title small', text: title }), el('div', { class: 'rule' }), el('p', { class: 'card-text', text }), el('div', { class: 'card-actions' }, el('button', { class: 'btn quiet', type: 'button', text: no, 'data-back': '', onClick: () => close(false) }), el('button', { class: accuse ? 'btn solid danger' : 'btn solid', type: 'button', text: yes, onClick: () => close(true) }))),
     );
     cards.append(card);
   });

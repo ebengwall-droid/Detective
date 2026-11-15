@@ -1,7 +1,7 @@
 // The Lectern: the detective's reference desk. Ask the records system anything in
 // plain language, read what it turns up, and follow the lab queue.
 
-import { el, add, clear, icon } from './dom.js';
+import { el, add, clear, icon, leave, setThumb } from './dom.js';
 
 export function createLaptop(panels, game) {
   let panel = null;
@@ -22,6 +22,7 @@ export function createLaptop(panels, game) {
   function renderTabs() {
     const v = game.view;
     clear(tabBar);
+    setThumb(tabBar, tabs.findIndex((t) => t.id === tab), tabs.length);
     for (const t of tabs) {
       const n = t.id === 'records' ? v.records.length : t.id === 'lab' ? v.evidence.filter((e) => e.lab).length : 0;
       add(tabBar, el('button', { class: 'tab', type: 'button', role: 'tab', 'aria-selected': String(tab === t.id), onClick: () => api.open(t.id) }, t.label, n ? el('span', { class: 'count', text: String(n) }) : null));
@@ -61,7 +62,7 @@ export function createLaptop(panels, game) {
     }
     clear(chips);
     chips.hidden = busy || !v.laptopHints.length;
-    for (const q of v.laptopHints) add(chips, el('button', { class: 'chip', type: 'button', text: q, onClick: () => ask(q) }));
+    for (const q of v.laptopHints) add(chips, el('button', { class: 'ask-chip', type: 'button', text: q, onClick: () => ask(q) }));
     form.hidden = false;
     body.scrollTop = body.scrollHeight;
   }
@@ -145,14 +146,14 @@ export function createLaptop(panels, game) {
       if (!panel) {
         tabBar = el('div', { class: 'tabs', role: 'tablist' });
         body = el('div', { class: 'panel-body' });
-        chips = el('div', { class: 'chips' });
+        chips = el('div', { class: 'ask-chips' });
         input = el('input', { class: 'field', id: 'lectern-query', type: 'text', placeholder: game.view.laptop.placeholder, autocomplete: 'off', enterkeyhint: 'search', maxlength: '200' });
         input.addEventListener('keydown', (e) => {
           // Keep typing from reaching the game's hotkeys, but let Escape close the lid.
           e.stopPropagation();
           if (e.key === 'Escape') api.close();
         });
-        form = el('form', { class: 'term-form' }, input, el('button', { class: 'btn', type: 'submit', text: 'ASK' }));
+        form = el('form', { class: 'term-form' }, input, el('button', { class: 'btn solid', type: 'submit', text: 'ASK' }));
         form.addEventListener('submit', (e) => {
           e.preventDefault();
           ask();
@@ -189,8 +190,7 @@ export function createLaptop(panels, game) {
 
     close() {
       if (!panel) return;
-      panel.remove();
-      scrim.remove();
+      leave(panel, scrim);
       panel = null;
       game.panelClosed('laptop');
     },

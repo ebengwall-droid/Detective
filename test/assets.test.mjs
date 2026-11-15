@@ -84,3 +84,65 @@ test('nothing shipped is too big for the hosted build, and the whole set stays m
   }
   assert.ok(total < 40 * 1048576, `all assets together are under 40 MB (${(total / 1048576).toFixed(1)} MB)`);
 });
+
+// ------------------------------------------------------------ bad connections
+// The loader itself, with the network replaced by a stand-in that fails on demand.
+
+test('a dropped request is tried again, a few at a time, and a missing file is asked for again later', async () => {
+  const { assets: loader } = await import('../public/src/world/assets.js');
+  loader.backoff = 1;
+  loader.retryAfter = 30;
+  const real = loader.fetchModel;
+  const tries = new Map();
+  let running = 0;
+  let most = 0;
+  let failUntil = 2;
+  const order = [];
+  loader.fetchModel = async (file) => {
+    const n = (tries.get(file) ?? 0) + 1;
+    tries.set(file, n);
+    running += 1;
+    most = Math.max(most, running);
+    order.push(file);
+    await new Promise((r) => setTimeout(r, 4));
+    running -= 1;
+    if (n <= failUntil) throw new Error('connection reset');
+    return { scene: { name: file } };
+  };
+  try {
+    // Twelve files, each dropped twice: all arrive, never more than four requests at once.
+    const got = await Promise.all(Array.from({ length: 12 }, (_, i) => loader.gltf(`t/a${i}.glb`, 100)));
+    assert.ok(got.every((g, i) => g?.scene.name === `t/a${i}.glb`));
+    assert.ok(most <= 4, `no more than four at once (saw ${most})`);
+    assert.equal(tries.get('t/a0.glb'), 3);
+    assert.deepEqual(loader.status().failed, []);
+    assert.equal(loader.fraction(), 1);
+
+    // A file that will not come is given up on for now, without hammering the host...
+    failUntil = 99;
+    assert.equal(await loader.gltf('t/gone.glb', 50), null);
+    assert.equal(tries.get('t/gone.glb'), 3);
+    assert.deepEqual(loader.status().failed, ['t/gone.glb']);
+    assert.equal(await loader.gltf('t/gone.glb', 50), null);
+    assert.equal(tries.get('t/gone.glb'), 3, 'asked again at once, nothing is sent');
+    // ...and asked for again once a little time has passed, and kept if it comes.
+    await new Promise((r) => setTimeout(r, 40));
+    failUntil = 0;
+    assert.equal((await loader.gltf('t/gone.glb', 50))?.scene.name, 't/gone.glb');
+    assert.deepEqual(loader.status().failed, []);
+    assert.equal(loader.fraction(), 1, 'the progress line does not count a retried file twice');
+
+    // Fetching ahead waits behind what the room on screen needs.
+    order.length = 0;
+    const quiet = [0, 1, 2, 3, 4, 5].map((i) => loader.gltf(`t/q${i}.glb`, 10, true));
+    const urgent = [0, 1, 2].map((i) => loader.gltf(`t/u${i}.glb`, 10));
+    await Promise.all([...quiet, ...urgent]);
+    const lastUrgent = Math.max(...[0, 1, 2].map((i) => order.indexOf(`t/u${i}.glb`)));
+    const lastQuiet = order.indexOf('t/q5.glb');
+    assert.ok(lastUrgent < lastQuiet, 'urgent files go out before the tail of the quiet ones');
+  } finally {
+    loader.fetchModel = real;
+    loader.backoff = 450;
+    loader.retryAfter = 12000;
+  }
+});

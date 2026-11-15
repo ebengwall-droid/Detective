@@ -26,7 +26,7 @@ export const EVIDENCE = {
   cup_pendry: {
     name: "Pendry's teacup",
     icon: 'flask',
-    desc: "A Hall cup with a clock face painted in the bottom, carried back from the Syndics' tea on Monday, with half an inch of cold tea in it.",
+    desc: "A Hall cup with a clock face painted in the bottom, carried back from the Syndics' tea on Sunday, with half an inch of cold tea in it.",
     facts: ['hall_tea'],
     lab: {
       steps: 6,
@@ -37,7 +37,7 @@ export const EVIDENCE = {
   paper_pendry: {
     name: "The Paper from Pendry's tube",
     icon: 'letter',
-    desc: "One sheet of Company paper in green ink, in a small upright hand, set out like an examination paper. It reached him by the Bellows at eight on Monday night.",
+    desc: "One sheet of Company paper in green ink, in a small upright hand, set out like an examination paper. It reached him by the Bellows at eight on Sunday night.",
     doc: SYNDIC_PAPER('Ignatius Pendry, Grand Setter', 'You swore that you had examined it.'),
     facts: ['pendry_paper'],
   },
@@ -52,7 +52,7 @@ Examined Monday by L. Marsh, M.D.
 CAUSE OF DEATH: Poisoning by cardiac glycosides (Digitalis: foxglove).
 Blood level several times the fatal. Stomach contains tea and fragments of foxglove leaf: a brew of the plant, not a medicine.
 
-TIMING: Ingested 16:10 to 16:30 Greenwich (about four o'clock by the Fold's clocks). Onset of symptoms about 20:00. Death about midnight. Consciousness clear until shortly before.
+TIMING: Ingested 16:10 to 16:30 Greenwich on Sunday (about four o'clock by the Fold's clocks). Onset of symptoms about 20:00. Death about midnight. Consciousness clear until shortly before.
 
 OTHER FINDINGS:
 — All ten fingertips abraded; brass under the nails. Hours of work at a metal object with rings.

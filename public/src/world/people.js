@@ -510,8 +510,13 @@ export function createPerson(look) {
       const flat = Math.hypot(target.x, target.z);
       if (flat < 7 && flat > 0.25 && target.z > -0.6) {
         let yaw = THREE.MathUtils.clamp(Math.atan2(target.x, target.z), -1.1, 1.1);
-        const pitch = THREE.MathUtils.clamp(Math.atan2(target.y - eyeHeight, flat), -0.45, 0.4) + (low ? -0.12 : 0);
+        let pitch = THREE.MathUtils.clamp(Math.atan2(target.y - eyeHeight, flat), -0.45, 0.4) + (low ? -0.12 : 0);
         if (mood === 'guarded') yaw += Math.sin(t * 0.7 + seed * 9) * 0.28;
+        // Working out what to say: the eyes go somewhere over your shoulder, and come back when the words do.
+        if (s.thinking) {
+          yaw += (seed > 0.5 ? 1 : -1) * (0.3 + Math.sin(t * 0.8 + seed * 5) * 0.07);
+          pitch += (low ? -0.05 : 0.07) + Math.sin(t * 0.6 + seed * 3) * 0.03;
+        }
         // Where the head is facing now, in the person's own frame.
         root.getWorldQuaternion(qc);
         const ahead = vb.copy(headAhead).applyQuaternion(bones.head.getWorldQuaternion(qa)).applyQuaternion(qb.copy(qc).invert());

@@ -74,7 +74,8 @@ async function main() {
   // Modelled people, furniture and materials live beside the page. Without them (a single
   // file opened from disk, say) the game draws everything in code instead. ?real=0 forces that.
   assets.packed = !!host.FOLD_PACKED;
-  if (params.get('real') !== '0') await assets.init(host.FOLD_ASSETS ?? 'assets/');
+  const real = params.get('real') !== '0';
+  if (real) await assets.init(host.FOLD_ASSETS ?? 'assets/');
   const game = new Game(root, client, {
     quality: params.get('quality') ?? undefined,
     noAutoQuality: params.has('quality'),
@@ -83,6 +84,19 @@ async function main() {
     backButton: topLevel,
   });
   host.__game = game;
+  // A bad start on a bad connection: the lists of models did not arrive, so everything would be
+  // drawn in code. Keep asking for a while, and rebuild the room on screen when they do come.
+  // (Only where models are published beside the page at all.)
+  if (real && assets.expected && !(assets.people && assets.things)) {
+    let tries = 0;
+    const again = setInterval(async () => {
+      tries += 1;
+      const had = [!!assets.people, !!assets.things];
+      await assets.init();
+      if ((assets.people && assets.things) || tries >= 8) clearInterval(again);
+      if ((!had[0] && assets.people) || (!had[1] && assets.things)) game.world.assetsArrived();
+    }, 9000);
+  }
   await game.boot();
 }
 

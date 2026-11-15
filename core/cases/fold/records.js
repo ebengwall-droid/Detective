@@ -401,7 +401,7 @@ Note: the Rolls record members of the Company. Persons in the Company's employme
 FETTLE, Robert. Porter. Engaged 1979 (boot-boy). Lodge. Copyist to Dame H. Lorimer from 1984.
 ABARA, Dolores. Nurse, Almshouses. Engaged March.
 OKAFOR-REED, Jonah. Engineer to the Repository (member: Solver).
-Under notice from 31 October: the Lodge.`,
+Note: the Porter's Lodge (the rooms, not the man) is under notice to be given up on 31 October; the plan for the Hall after that date shows no Lodge.`,
     facts: ['hob_copyist'],
   },
 };

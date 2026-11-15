@@ -48,7 +48,9 @@ let js = bundle.outputFiles[0].text;
 js = js.replace(/<\/(script)/gi, '<\\/$1');
 if (js.includes('<!--')) throw new Error('bundle contains "<!--", which is not safe to inline');
 
-const css = (await transform(fs.readFileSync(path.join(root, 'public/styles.css'), 'utf8'), { loader: 'css', minify: true })).code;
+// The conversation screen keeps its styles in a file of its own; ship both as one sheet.
+const sheets = ['public/styles.css', 'public/talk.css'].map((f) => fs.readFileSync(path.join(root, f), 'utf8')).join('\n');
+const css = (await transform(sheets, { loader: 'css', minify: true })).code;
 
 const page = (flags) => `<div id="app"><div id="boot"><div class="lamp"></div>The Fold</div></div>
 <script>${flags}</script>

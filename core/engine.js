@@ -12,6 +12,7 @@ import { buildView, npcPlace, presentables } from './view.js';
 import { Brain } from './brain.js';
 import { itemUnlocked } from './prompts.js';
 import { clone, clamp, sanitizePlayerText, GameError, hashString } from './util.js';
+import { openLeads, threadsIn } from './talk.js';
 import { normalise } from './ciphers.js';
 
 export const RPC_METHODS = new Set([
@@ -148,7 +149,9 @@ export class GameSession {
   }
 
   aiInfo() {
-    return this.ai?.describe?.() ?? { live: false, label: 'Scripted', model: null };
+    const info = this.ai?.describe?.() ?? { live: false, label: 'Scripted', model: null };
+    // What has gone wrong lately, if anything: shown in the diagnostics a player can copy.
+    return { ...info, trouble: this.brain?.trouble?.slice(-4) ?? [], resting: !!this.brain && Date.now() < this.brain.coolUntil };
   }
 
   log(type, data = {}) {
@@ -424,6 +427,9 @@ export class GameSession {
         mood: st.mood,
         log: st.log.slice(-40),
         suggestions: this.suggestions(id),
+        threads: greeting ? threadsIn(greeting, openLeads(npc, st, s)) : [],
+        // What they do while they think: only face to face, where it can be seen.
+        beats: phone && !here ? [] : (npc.small?.beat ?? []),
       },
     });
   }
@@ -437,8 +443,8 @@ export class GameSession {
     const s = this.requireState();
     const npc = this.case.npcs[id];
     const st = this.npcState(id);
-    return (npc.ask ?? [])
-      .filter((a) => check(a.if, s) && !st.asked[a.q])
+    // Questions still worth asking: not asked in those words, and not already answered some other way.
+    return openLeads(npc, st, s)
       .slice(0, 4)
       .map((a) => a.q);
   }
@@ -514,9 +520,17 @@ export class GameSession {
     }
     st.pendingOpen = null;
 
+    // A pleasantry ("hello", "I see") costs the detective no time on the clock.
+    if (reply.small) {
+      s.steps -= 1;
+      s.stats.exchanges -= 1;
+    }
+
     const left = (npc.acts ?? []).some((a) => a.ends && st.acts[a.id] !== undefined);
+    // Threads: words in the reply the detective could pull on. The model proposes its own; otherwise they are found in the line.
+    const threads = left ? [] : reply.threads?.length ? reply.threads : threadsIn(reply.say, openLeads(npc, st, s));
     return this.done({
-      reply: { say: reply.say, mood: st.mood, degraded: !!reply.degraded, ended: left },
+      reply: { say: reply.say, mood: st.mood, degraded: !!reply.degraded, why: reply.degraded ? (reply.why ?? null) : null, ended: left, threads, lost: !!reply.lost },
       suggestions: left ? [] : this.suggestions(id),
     });
   }
@@ -540,7 +554,7 @@ export class GameSession {
       this.applyEffects(rec.effects, `rec:${rid}`);
       if (rec.request) this.applyEffects([{ job: { id: rec.request.job, steps: rec.request.steps, effects: rec.request.effects, notify: rec.request.notify } }], `rec:${rid}`);
     }
-    return this.done({ answer: result.answer, opened, degraded: !!result.degraded });
+    return this.done({ answer: result.answer, opened, degraded: !!result.degraded, why: result.degraded ? (result.why ?? null) : null });
   }
 
   async labSubmit({ id } = {}) {
@@ -776,7 +790,7 @@ export class GameSession {
       this.log('finale', { end });
     }
     return this.done({
-      reply: { say, mood: f.stance, ended: !!end, degraded: !!reply.degraded },
+      reply: { say, mood: f.stance, ended: !!end, degraded: !!reply.degraded, why: reply.degraded ? (reply.why ?? null) : null },
       suggestions: this.finaleChips(),
       turnsLeft: Math.max(0, F.maxTurns - f.turn),
       ending: s.ending,

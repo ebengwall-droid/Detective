@@ -1,7 +1,8 @@
 // Screens outside the investigation: title, menu and settings, how to play,
 // the Invigilator's Papers, and the closing report.
 
-import { el, add, icon, prose } from './dom.js';
+import { copyDiagnostics } from './diag.js';
+import { el, add, icon, prose, setThumb } from './dom.js';
 
 const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
@@ -46,10 +47,10 @@ export function showTitle(cards, game, { hasSave, savedName }) {
           hasSave ? el('button', { class: 'btn solid', type: 'button', text: 'Continue the case', onClick: () => finish({ action: 'continue' }) }) : null,
           name,
           el('button', { class: hasSave ? 'btn' : 'btn solid', type: 'button', text: hasSave ? 'Start over' : 'Begin', onClick: begin }),
-          el('button', { class: 'btn quiet small', type: 'button', text: 'How to play', onClick: () => showHelp(cards, game) }),
+          el('button', { class: 'btn quiet small link', type: 'button', text: 'How to play', onClick: () => showHelp(cards, game) }),
         ),
         aiLine(game),
-        game.install?.iosHint ? el('div', { class: 'ai-line', style: { marginTop: '8px' }, text: 'To play full screen: Share, then Add to Home Screen.' }) : null,
+        game.install?.iosHint ? el('div', { class: 'ai-line', text: 'To play full screen: Share, then Add to Home Screen.' }) : null,
       ),
     );
     cards.append(card);
@@ -63,9 +64,9 @@ export function showHelp(cards, game) {
       ['Move', touch ? 'Tap the floor, a marker or a person and you walk there. The ring at the bottom left steers by thumb if you prefer.' : 'Click the floor, a marker or a person and you walk there. Or use W A S D or the arrow keys.'],
       ['Turn', touch ? 'Drag anywhere on the picture.' : 'Hold the mouse button and drag. Press F for full mouse-look.'],
       ['Get around', `Look lists everyone and everything in the room: ${touch ? 'tap' : 'click'} a name and you walk straight to it. Map takes you between places.`],
-      ['Examine', `Glowing diamonds mark what can be examined. ${touch ? 'Tap' : 'Click'} one. What matters is bagged as evidence. Look lights up everything in the room.`],
-      ['Talk', `Speech bubbles are people. Ask them anything, in your own words, or ${touch ? 'tap' : 'click'} a suggested question. They remember. Some of them lie.`],
-      ['Break a lie', 'While talking, Show puts a piece of evidence in front of someone. That is how liars come apart. Observe tells you what you notice about them.'],
+      ['Examine', `Small rings of light mark what can be examined, and a ring with an arrow is a way out. ${touch ? 'Tap' : 'Click'} one. What matters is bagged as evidence. Look lights up everything in the room.`],
+      ['Talk', `A ring with three dots over someone means you can talk to them. Ask anything, in your own words, ${touch ? 'tap' : 'click'} an underlined word in what they say to follow it up, or pick a suggested question. They remember. Some of them lie.`],
+      ['Break a lie', 'While talking, Show puts a piece of evidence in front of someone. That is how liars come apart. Read tells you what you notice about them, and Log is everything that was said.'],
       ['Papers', 'This is a puzzle game. Every puzzle you are set is kept in your notebook under Papers, with your solving tools. Type an answer; a wrong one costs nothing. Each paper has hints, and the last hint gives the answer.'],
       ['Look things up', 'The Lectern (the laptop at your desk) will teach you how any cipher or puzzle is done and where it came from. You are meant to use it, and to look things up outside the game too. It will not give you the answer.'],
       ['Notebook', 'Everything you establish is written down for you: objectives, evidence, people, leads. The Board tab is where you reason and, in the end, name the killer. Evidence goes to the lab from the Lectern.'],
@@ -86,7 +87,7 @@ export function showHelp(cards, game) {
     const card = el(
       'section',
       { class: 'card', role: 'dialog', 'aria-label': 'How to play' },
-      el('div', { class: 'card-inner', style: { width: 'min(100%, 760px)' } }, el('div', { class: 'card-kicker', text: 'How to play' }), el('div', { class: 'rule' }), el('div', { class: 'help-grid' }, items.map(([h, p]) => el('div', { class: 'help-item' }, el('h4', { text: h }), el('p', { text: p })))), el('div', { class: 'card-actions' }, el('button', { class: 'btn solid', type: 'button', text: 'Understood', 'data-back': '', onClick: close }))),
+      el('div', { class: 'card-inner help' }, el('div', { class: 'card-kicker', text: 'How to play' }), el('div', { class: 'rule' }), el('div', { class: 'help-grid' }, items.map(([h, p]) => el('div', { class: 'help-item' }, el('h4', { text: h }), el('p', { text: p })))), el('div', { class: 'card-actions' }, el('button', { class: 'btn solid', type: 'button', text: 'Understood', 'data-back': '', onClick: close }))),
     );
     cards.append(card);
   });
@@ -108,15 +109,18 @@ export function showMenu(cards, game) {
     window.addEventListener('keydown', onKey);
     const seg = (options, current, onPick) => {
       const wrap = el('div', { class: 'seg', role: 'group' });
-      for (const [value, label] of options) {
+      // The stylesheet slides a lit thumb under whichever is chosen.
+      setThumb(wrap, options.findIndex(([value]) => value === current), options.length);
+      options.forEach(([value, label], i) => {
         const b = el('button', { type: 'button', 'aria-pressed': String(value === current), text: label });
         b.addEventListener('click', () => {
           for (const x of wrap.children) x.setAttribute('aria-pressed', 'false');
           b.setAttribute('aria-pressed', 'true');
+          setThumb(wrap, i, options.length);
           onPick(value);
         });
         add(wrap, b);
-      }
+      });
       return wrap;
     };
     const range = (id, min, max, step, value, onInput) => {
@@ -132,7 +136,8 @@ export function showMenu(cards, game) {
       el('div', { class: 'setting' }, el('label', {}, 'Graphics', el('small', { text: 'Lower it if movement feels choppy.' })), seg([['low', 'Low'], ['medium', 'Medium'], ['high', 'High']], game.world.quality, (v) => game.setSetting('quality', v))),
     ];
     if (ai?.hosted && ai.live) {
-      rows.push(el('div', { class: 'setting' }, el('label', {}, 'Characters played by', el('small', { text: 'Opus acts best. Fast answers sooner.' })), seg([['opus', 'Opus'], ['quick', 'Fast']], ai.pref ?? 'opus', (v) => game.setAiPreference(v))));
+      const note = ai.pref === 'auto' && ai.eased ? 'Auto has moved everyday talk to the fast model for now.' : 'Auto starts with Opus and moves everyday talk to the fast model if answers are slow. Opus acts best; Fast answers sooner.';
+      rows.push(el('div', { class: 'setting' }, el('label', {}, 'Characters played by', el('small', { text: note })), seg([['auto', 'Auto'], ['opus', 'Opus'], ['quick', 'Fast']], ai.pref ?? 'auto', (v) => game.setAiPreference(v))));
     }
     const install = game.install;
     if (document.fullscreenEnabled && !install?.installed) {
@@ -149,6 +154,11 @@ export function showMenu(cards, game) {
     } else if (install?.iosHint) {
       rows.push(el('div', { class: 'setting' }, el('label', {}, 'Put it on your home screen', el('small', { text: 'Tap Share in Safari, then Add to Home Screen. It opens full screen, like any other app.' }))));
     }
+    // Something looks wrong: a few lines about this device and this game to send, copied in one tap.
+    const diagHolder = el('div', { class: 'diag' });
+    const diagBtn = el('button', { class: 'btn small', type: 'button', text: 'Copy diagnostics' });
+    diagBtn.addEventListener('click', () => copyDiagnostics(game, diagBtn, diagHolder));
+    rows.push(el('div', { class: 'setting' }, el('label', {}, 'Something look wrong?', el('small', { text: 'Copies a few lines about how the game is running on this device, to paste into a message. Nothing is sent anywhere.' })), diagBtn), diagHolder);
     const card = el(
       'section',
       { class: 'card veil', role: 'dialog', 'aria-label': 'Menu' },
@@ -156,9 +166,9 @@ export function showMenu(cards, game) {
         'div',
         { class: 'card-inner' },
         el('div', { class: 'card-kicker', text: 'Paused' }),
-        el('h2', { class: 'card-title', style: { fontSize: 'clamp(26px, 6vw, 36px)' }, text: game.caseInfo.title }),
+        el('h2', { class: 'card-title small', text: game.caseInfo.title }),
         el('div', { class: 'rule' }),
-        rows,
+        el('div', { class: 'settings' }, rows),
         aiLine(game),
         el(
           'div',
@@ -166,7 +176,7 @@ export function showMenu(cards, game) {
           el('button', { class: 'btn solid', type: 'button', text: 'Back to the case', 'data-back': '', onClick: () => close(null) }),
           el('button', { class: 'btn', type: 'button', text: 'How to play', onClick: () => showHelp(cards, game) }),
           game.view?.ending?.text ? el('button', { class: 'btn', type: 'button', text: 'Case report', onClick: () => close('report') }) : null,
-          el('button', { class: 'btn danger', type: 'button', text: 'Start over', onClick: () => close('new') }),
+          el('button', { class: 'btn quiet', type: 'button', text: 'Start over', onClick: () => close('new') }),
         ),
       ),
     );
@@ -177,7 +187,7 @@ export function showMenu(cards, game) {
 /** A covering note in green ink, written out as it is read. `run(onText)` resolves to { body }. */
 export function showLetter(cards, game, run) {
   return new Promise((resolve) => {
-    const paper = el('div', { class: 'paper ink', style: { textAlign: 'left', minHeight: '220px' } }, el('div', { class: 'dots' }, el('i'), el('i'), el('i')));
+    const paper = el('div', { class: 'paper ink letter' }, el('div', { class: 'dots' }, el('i'), el('i'), el('i')));
     const go = el('button', { class: 'btn solid', type: 'button', text: 'Bag it', disabled: true });
     const card = el(
       'section',
@@ -238,7 +248,7 @@ export function showEnding(cards, game, run) {
     const card = el(
       'section',
       { class: 'card', role: 'dialog', 'aria-label': 'Epilogue' },
-      el('div', { class: 'card-inner', style: { width: 'min(100%, 640px)' } }, el('div', { class: 'card-kicker', text: 'The morning after' }), el('h1', { class: 'card-title', text: 'After' }), el('div', { class: 'rule' }), text, report, actions),
+      el('div', { class: 'card-inner wide' }, el('div', { class: 'card-kicker', text: 'The morning after' }), el('h1', { class: 'card-title', text: 'After' }), el('div', { class: 'rule' }), text, report, actions),
     );
     cards.append(card);
     const close = (value) => {
@@ -259,12 +269,12 @@ export function showEnding(cards, game, run) {
           el('div', { class: 'rule' }),
           el('div', { class: 'report-rank', text: ending.rank }),
           el('div', { class: 'report-score', text: `CASE RATING ${ending.score} / 100` }),
-          el('p', { class: 'muted', style: { textAlign: 'center', margin: '0 0 18px' }, text: ending.rankLine }),
+          el('p', { class: 'report-line', text: ending.rankLine }),
           el('div', { class: 'section-label', text: `What you uncovered · ${found} of ${ending.truths.length}` }),
           ending.truths.map((t) => el('div', { class: `truth ${t.found ? '' : 'missed'}` }, icon(t.found ? 'check' : 'close', 16), t.label)),
-          ending.puzzles ? el('div', { class: 'section-label', style: { marginTop: '16px' }, text: `Papers answered · ${ending.puzzles.solved} of ${ending.puzzles.of}` }) : null,
-          ending.puzzles ? el('p', { class: 'muted', style: { fontSize: '13px', margin: '0' }, text: [count(ending.puzzles.hints, 'hint taken', 'hints taken'), count(ending.puzzles.given, 'answer given away', 'answers given away')].join(' · ') }) : null,
-          el('p', { class: 'muted', style: { fontSize: '13px', marginTop: '14px' }, text: [count(ending.stats.exchanges, 'question asked', 'questions asked'), count(ending.stats.hints, 'moment of thought', 'moments of thought'), count(ending.stats.wrong, 'wrong turn on the board', 'wrong turns on the board')].join(' · ') }),
+          ending.puzzles ? el('div', { class: 'section-label', text: `Papers answered · ${ending.puzzles.solved} of ${ending.puzzles.of}` }) : null,
+          ending.puzzles ? el('p', { class: 'note', text: [count(ending.puzzles.hints, 'hint taken', 'hints taken'), count(ending.puzzles.given, 'answer given away', 'answers given away')].join(' · ') }) : null,
+          el('p', { class: 'note', text: [count(ending.stats.exchanges, 'question asked', 'questions asked'), count(ending.stats.hints, 'moment of thought', 'moments of thought'), count(ending.stats.wrong, 'wrong turn on the board', 'wrong turns on the board')].join(' · ') }),
         );
         add(actions, el('button', { class: 'btn solid', type: 'button', text: 'A new case file', onClick: () => close('new') }), el('button', { class: 'btn quiet', type: 'button', text: 'Stay a while', onClick: () => close('stay') }));
         if (!streamed) card.scrollTop = 0;

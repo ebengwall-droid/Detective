@@ -32,7 +32,7 @@ export const FACTS = {
   pendry_quarter: { tag: 'scene', about: ['pendry'], text: "Pendry's ledger: 'Greywether. On completion 31 Oct. My quarter: £2,750,000.' His, not the Company's." },
   wilf_found: { tag: 'testimony', about: ['wilf', 'pendry'], text: 'Wilf found the door would not open at 7:15 on Monday morning. The constables took it off its hinges.' },
   word_was_pendrys: { tag: 'testimony', about: ['wilf', 'pendry'], text: "Pendry's lock word was PENDRYS and had been for years. It still was on Friday." },
-  banging: { tag: 'testimony', about: ['quoin', 'pendry'], text: "Mrs Quoin heard a slow knocking through the party wall from ten until past eleven on Monday night, and took it for a clock." },
+  banging: { tag: 'testimony', about: ['quoin', 'pendry'], text: "Mrs Quoin heard a slow knocking through the party wall from ten until past eleven on Sunday night, and took it for a clock." },
   worked_lock: { tag: 'forensic', about: ['pendry'], text: "Pendry's fingertips were rubbed raw, with brass under the nails. He spent hours trying to turn the rings of his lock." },
   foxglove: { tag: 'forensic', about: ['pendry'], key: true, text: 'Pendry died of foxglove (digitalis) poisoning: a strong brew of the plant itself, drunk in tea.' },
   drank_at_four: { tag: 'forensic', about: ['pendry'], key: true, text: 'He drank it at about four in the afternoon, was ill by eight, and died around midnight, clear-headed nearly to the end.' },

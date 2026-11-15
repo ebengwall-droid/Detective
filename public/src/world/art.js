@@ -773,6 +773,18 @@ Object.assign(ART, {
     cut(d, d, 'rgba(244,240,226,0.8)');
     cut(-d * 0.7, -d * 0.7, 'rgba(12,10,8,0.85)');
     cut(0, 0, '#26231e');
+    if (opts.scratch) {
+      // Scratched beneath it with a key: thin, pale, not quite level.
+      ctx.save();
+      ctx.translate(w * 0.5, h * 0.865);
+      ctx.rotate(-0.012);
+      ctx.fillStyle = 'rgba(236,232,216,0.82)';
+      ctx.font = `${Math.round(h * 0.085)}px ${HAND}`;
+      ctx.textAlign = 'center';
+      ctx.fillText(opts.scratch, 0, 0, w * 0.6);
+      ctx.restore();
+      ctx.textAlign = 'left';
+    }
     // A cut border, lit the same way.
     const m = h * 0.07;
     ctx.lineWidth = d * 1.6;
@@ -1009,6 +1021,59 @@ Object.assign(ART, {
         ctx.stroke();
       }
     }
+    if (opts.ruff) {
+      // A ruff: a wheel of starched pleats under the chin.
+      for (let i = 0; i < 22; i++) {
+        const a = Math.PI * (0.02 + (i / 21) * 0.96);
+        ctx.fillStyle = i % 2 ? '#e9e2d0' : '#bdb4a0';
+        ctx.beginPath();
+        ctx.ellipse(cx + Math.cos(a) * rx * 1.25, cy + ry * 0.92 + Math.sin(a) * ry * 0.34, rx * 0.2, ry * 0.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    if (opts.disc) {
+      // What he holds: a cipher disc, or possibly a pie.
+      const dx = w * 0.68;
+      const dy = h * 0.83;
+      ctx.fillStyle = skin;
+      ctx.beginPath();
+      ctx.ellipse(dx - w * 0.07, dy + h * 0.03, w * 0.06, h * 0.035, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#b08a3a';
+      ctx.strokeStyle = 'rgba(40,26,8,0.8)';
+      ctx.lineWidth = Math.max(1.5, w * 0.008);
+      ctx.beginPath();
+      ctx.arc(dx, dy, w * 0.11, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(dx, dy, w * 0.07, 0, Math.PI * 2);
+      ctx.stroke();
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(dx + Math.cos(a) * w * 0.07, dy + Math.sin(a) * w * 0.07);
+        ctx.lineTo(dx + Math.cos(a) * w * 0.11, dy + Math.sin(a) * w * 0.11);
+        ctx.stroke();
+      }
+    }
+    if (opts.pencil) {
+      // The pencil behind her ear, which the painter was plainly told to leave in.
+      ctx.save();
+      ctx.translate(cx + rx * 0.98, cy - ry * 0.2);
+      ctx.rotate(-0.5);
+      ctx.fillStyle = '#d2a53a';
+      ctx.fillRect(-rx * 0.1, -ry * 0.035, rx * 0.72, ry * 0.07);
+      ctx.fillStyle = '#e8d8b8';
+      ctx.beginPath();
+      ctx.moveTo(-rx * 0.1, -ry * 0.035);
+      ctx.lineTo(-rx * 0.24, 0);
+      ctx.lineTo(-rx * 0.1, ry * 0.035);
+      ctx.fill();
+      ctx.fillStyle = '#b05a52';
+      ctx.fillRect(rx * 0.62, -ry * 0.035, rx * 0.08, ry * 0.07);
+      ctx.restore();
+    }
     if (opts.glasses) {
       ctx.strokeStyle = 'rgba(20,16,12,0.8)';
       ctx.lineWidth = Math.max(1, w * 0.008);
@@ -1147,8 +1212,24 @@ Object.assign(ART, {
     ctx.fillText('PRINTED IN THE FOLD · FOLD TIME · ONE ANSWER', w / 2, h * 0.165, w * 0.9);
     ctx.fillRect(w * 0.05, h * 0.175, w * 0.9, 1);
     ctx.font = `bold ${Math.round(h * 0.07)}px ${SERIF}`;
-    ctx.fillText(opts.headline ?? 'DEATH IN NONESUCH ROW', w / 2, h * 0.255, w * 0.9);
+    const headline = [].concat(opts.headline ?? ['GREYWETHER TO SECURE', "THE FOLD'S FUTURE"]);
+    if (headline.length > 1) {
+      ctx.font = `bold ${Math.round(h * 0.048)}px ${SERIF}`;
+      ctx.fillText(headline[0], w / 2, h * 0.228, w * 0.9);
+      ctx.fillText(headline[1], w / 2, h * 0.28, w * 0.9);
+    } else ctx.fillText(headline[0], w / 2, h * 0.255, w * 0.9);
     ctx.textAlign = 'left';
+    if (opts.scrawl) {
+      ctx.save();
+      ctx.translate(w * 0.5, h * 0.56);
+      ctx.rotate(-0.32);
+      ctx.fillStyle = 'rgba(40,44,60,0.62)';
+      ctx.font = `bold ${Math.round(h * 0.2)}px ${HAND}`;
+      ctx.textAlign = 'center';
+      ctx.fillText(opts.scrawl, 0, 0, w * 0.86);
+      ctx.restore();
+      ctx.textAlign = 'left';
+    }
     if (opts.puzzle !== false) {
       const size = w * 0.4;
       crosswordGrid(ctx, w * 0.54, h * 0.31, size, 13, rnd, { filled: opts.filled ?? 0, paper: '#e4dec9' });
@@ -1469,13 +1550,13 @@ Object.assign(ART, {
       const tx = x0 + size + w * 0.05;
       const tw = w - tx - w * 0.04;
       c.font = `bold ${Math.round(h * 0.085)}px ${SANS}`;
-      c.fillText(opts.title ?? 'THE DRAW', tx, h * 0.16, tw);
+      c.fillText(opts.title ?? "TONIGHT'S PROBLEM", tx, h * 0.16, tw);
       c.lineWidth = 2;
       c.beginPath();
       c.moveTo(tx, h * 0.22);
       c.lineTo(tx + tw, h * 0.23);
       c.stroke();
-      const lines = opts.lines ?? ['WHITE TO PLAY', 'AND NOT TO WIN', '', '1. ?', '', 'ANSWERS TO', 'THE COUNTER'];
+      const lines = opts.lines ?? ['WHITE TO PLAY', 'MATE IN THREE', '', '1. ?', '', 'FIRST COME,', 'FIRST CHALKED'];
       c.font = `${Math.round(h * 0.062)}px ${HAND}`;
       lines.forEach((line, i) => c.fillText(line, tx, h * (0.33 + i * 0.085), tw));
     });
@@ -1757,47 +1838,60 @@ Object.assign(ART, {
   /** A garden seen at night through a window: dark leaves, and foxgloves standing up into the light. */
   garden(ctx, w, h, rnd) {
     ctx.clearRect(0, 0, w, h);
-    // Leaves along the bottom.
-    for (let i = 0; i < 170; i++) {
+    // The herb beds beyond: low dark mounds, rosemary and rue, each with its white label on a stick.
+    for (let i = 0; i < 150; i++) {
       const x = rnd() * w;
-      const y = h * (0.5 + rnd() * rnd() * 0.56);
-      ctx.fillStyle = `rgba(${10 + rnd() * 16},${24 + rnd() * 26},${14 + rnd() * 12},${0.8 + rnd() * 0.2})`;
+      const y = h * (0.6 + rnd() * rnd() * 0.44);
+      ctx.fillStyle = `rgba(${12 + rnd() * 16},${26 + rnd() * 24},${16 + rnd() * 12},${0.82 + rnd() * 0.18})`;
       ctx.beginPath();
-      ctx.ellipse(x, y, w * (0.03 + rnd() * 0.05), h * (0.03 + rnd() * 0.07), rnd() * 3, 0, Math.PI * 2);
+      ctx.ellipse(x, y, w * (0.03 + rnd() * 0.05), h * (0.025 + rnd() * 0.05), rnd() * 3, 0, Math.PI * 2);
       ctx.fill();
     }
-    // Foxglove spires: a stem, and bells hung down one side, smaller toward the tip.
-    const spires = 7;
-    for (let i = 0; i < spires; i++) {
-      const x = w * (0.08 + (i + rnd() * 0.5) * (0.86 / spires));
-      const top = h * (0.1 + rnd() * 0.28);
-      const base = h * 0.92;
-      const lean = (rnd() - 0.5) * w * 0.05;
-      ctx.strokeStyle = 'rgba(30,54,32,0.95)';
-      ctx.lineWidth = Math.max(2, w * 0.007);
+    for (let i = 0; i < 4; i++) {
+      const x = w * (0.14 + i * 0.24 + rnd() * 0.05);
+      const y = h * (0.66 + rnd() * 0.08);
+      ctx.fillStyle = 'rgba(70,56,40,0.95)';
+      ctx.fillRect(x, y, Math.max(1.5, w * 0.004), h * 0.12);
+      ctx.fillStyle = 'rgba(206,204,190,0.92)';
+      ctx.fillRect(x - w * 0.022, y - h * 0.012, w * 0.05, h * 0.03);
+    }
+    // Under the window: the foxgloves, gone over for the year and cut back. Brown stalks of different
+    // heights, a few dry seed-cases left on the tallest, and every one taken off with the same clean slant.
+    const stems = 16;
+    for (let i = 0; i < stems; i++) {
+      const x = w * (0.05 + (i + rnd() * 0.6) * (0.9 / stems));
+      const base = h * 0.98;
+      const top = h * (0.5 + rnd() * 0.3);
+      const lean = (rnd() - 0.5) * w * 0.03;
+      const thick = Math.max(2.5, w * (0.007 + rnd() * 0.004));
+      ctx.strokeStyle = `rgba(${96 + rnd() * 30},${80 + rnd() * 22},${52 + rnd() * 16},0.97)`;
+      ctx.lineWidth = thick;
+      ctx.lineCap = 'butt';
       ctx.beginPath();
       ctx.moveTo(x, base);
-      ctx.quadraticCurveTo(x + lean, (base + top) / 2, x + lean * 1.4, top);
+      ctx.lineTo(x + lean, top);
       ctx.stroke();
-      const pale = rnd() < 0.3;
-      const bells = 13;
-      for (let b = 0; b < bells; b++) {
-        const t = b / (bells - 1);
-        const by = top + (base - top) * 0.62 * t + h * 0.012;
-        const bx = x + lean * (1.4 - t * 0.9);
-        const size = w * 0.014 * (0.5 + t * 0.9);
-        for (const s of b % 2 ? [-1] : [1, -1]) {
-          const lit = 86 + rnd() * 54;
-          ctx.fillStyle = pale ? `rgba(${lit + 40},${lit + 26},${lit + 20},0.96)` : `rgba(${lit},${lit * 0.42 + rnd() * 12},${lit * 0.7},0.96)`;
+      // The cut: one slant, pale and fresh.
+      ctx.fillStyle = 'rgba(232,222,186,0.98)';
+      ctx.beginPath();
+      ctx.moveTo(x + lean - thick * 0.7, top + thick * 0.2);
+      ctx.lineTo(x + lean + thick * 0.7, top - thick * 1.5);
+      ctx.lineTo(x + lean + thick * 0.7, top + thick * 0.5);
+      ctx.closePath();
+      ctx.fill();
+      if (i % 3 === 0) {
+        ctx.fillStyle = 'rgba(84,66,42,0.95)';
+        for (let b = 0; b < 4; b++) {
           ctx.beginPath();
-          ctx.ellipse(bx + s * size * 1.1, by, size, size * 1.5, s * 0.5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = 'rgba(40,8,28,0.55)';
-          ctx.beginPath();
-          ctx.ellipse(bx + s * size * 1.3, by + size * 1.1, size * 0.5, size * 0.35, 0, 0, Math.PI * 2);
+          ctx.ellipse(x + lean * (1 - b * 0.12) + (b % 2 ? 1 : -1) * thick * 1.6, top + (base - top) * (0.14 + b * 0.1), thick * 1.1, thick * 1.5, 0, 0, Math.PI * 2);
           ctx.fill();
         }
       }
+      // A dead leaf or two at the foot.
+      ctx.fillStyle = `rgba(${70 + rnd() * 30},${62 + rnd() * 20},${34 + rnd() * 14},0.9)`;
+      ctx.beginPath();
+      ctx.ellipse(x + (rnd() - 0.5) * w * 0.05, base - h * 0.03 * rnd(), w * 0.03, h * 0.014, rnd() * 3, 0, Math.PI * 2);
+      ctx.fill();
     }
   },
 
@@ -1824,7 +1918,14 @@ Object.assign(ART, {
     ctx.textBaseline = 'middle';
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2;
-      ctx.fillText(String(i + 1), r + Math.sin(a) * r * 0.7, r - Math.cos(a) * r * 0.7);
+      if (opts.plain) {
+        // Too small for figures: a tick for each hour.
+        ctx.lineWidth = Math.max(2, w * 0.03);
+        ctx.beginPath();
+        ctx.moveTo(r + Math.sin(a) * r * 0.62, r - Math.cos(a) * r * 0.62);
+        ctx.lineTo(r + Math.sin(a) * r * 0.84, r - Math.cos(a) * r * 0.84);
+        ctx.stroke();
+      } else ctx.fillText(String(i + 1), r + Math.sin(a) * r * 0.7, r - Math.cos(a) * r * 0.7);
     }
     const a = ((opts.at ?? 4) / n) * Math.PI * 2;
     ctx.strokeStyle = '#9c2a20';
@@ -1885,6 +1986,392 @@ Object.assign(ART, {
       ctx.moveTo(w * (0.3 + rnd() * 0.4), y);
       ctx.lineTo(w * 0.84, y);
       ctx.stroke();
+    }
+  },
+});
+
+Object.assign(ART, {
+  /**
+   * GREYWETHER FOLD: MASTERPLAN. The Fold drawn straight for once, and renamed as it went: a developer's
+   * grid of units where the lanes were, one of them ruled through in red.
+   */
+  masterplan(ctx, w, h, rnd) {
+    paperGround(ctx, w, h, rnd, '#e4dfcf');
+    const ink = '#1d2436';
+    ctx.strokeStyle = ink;
+    ctx.fillStyle = ink;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(w * 0.03, h * 0.04, w * 0.94, h * 0.92);
+    // Title block.
+    ctx.font = `bold ${Math.round(h * 0.062)}px ${SANS}`;
+    ctx.fillText('GREYWETHER FOLD', w * 0.06, h * 0.13);
+    ctx.font = `${Math.round(h * 0.04)}px ${SANS}`;
+    ctx.fillText('MASTERPLAN · PHASES ONE AND TWO', w * 0.06, h * 0.185);
+    // The Cut, straightened too.
+    ctx.fillStyle = 'rgba(80,130,150,0.4)';
+    ctx.fillRect(w * 0.06, h * 0.84, w * 0.88, h * 0.06);
+    // Six lanes become a grid: two streets across, three down.
+    const x0 = w * 0.1;
+    const x1 = w * 0.9;
+    const y0 = h * 0.26;
+    const y1 = h * 0.8;
+    ctx.fillStyle = '#f6f2e4';
+    ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+    const cols = [0, 0.2, 0.42, 0.62, 0.82, 1].map((t) => x0 + (x1 - x0) * t);
+    const rows = [0, 0.36, 0.68, 1].map((t) => y0 + (y1 - y0) * t);
+    const names = [['UNIT 1', 'UNIT 2', 'UNIT 3 F&B', 'UNIT 4', 'UNIT 5'], ['PLAZA', 'GREYWETHER CAMPUS', '', 'RECEPTION POD', 'UNIT 6'], ['APARTMENTS PH.2', '', 'UNIT 7', 'UNIT 8', 'FOOTBRIDGE']];
+    ctx.font = `${Math.round(h * 0.027)}px ${SANS}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 5; c++) {
+        if (r === 1 && c === 2) continue; // the campus takes two plots
+        const span = r === 1 && c === 1 ? 2 : 1;
+        const bx = cols[c] + w * 0.012;
+        const by = rows[r] + h * 0.016;
+        const bw = cols[c + span] - cols[c] - w * 0.024;
+        const bh = rows[r + 1] - rows[r] - h * 0.032;
+        ctx.fillStyle = r === 1 && c === 1 ? 'rgba(170,60,50,0.3)' : c % 2 ? 'rgba(90,110,150,0.24)' : 'rgba(90,110,150,0.14)';
+        ctx.fillRect(bx, by, bw, bh);
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(bx, by, bw, bh);
+        ctx.fillStyle = ink;
+        ctx.fillText(names[r][c], bx + bw / 2, by + bh / 2, bw * 0.92);
+        if (names[r][c] === 'RECEPTION POD') {
+          // The Porter's Lodge, ruled through in red.
+          ctx.strokeStyle = '#b02a20';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(bx, by);
+          ctx.lineTo(bx + bw, by + bh);
+          ctx.moveTo(bx + bw, by);
+          ctx.lineTo(bx, by + bh);
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    // North point and scale bar, as an office draws them.
+    ctx.strokeStyle = ink;
+    ctx.fillStyle = ink;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.9, h * 0.2);
+    ctx.lineTo(w * 0.9, h * 0.09);
+    ctx.lineTo(w * 0.885, h * 0.125);
+    ctx.stroke();
+    ctx.font = `${Math.round(h * 0.03)}px ${SANS}`;
+    ctx.fillText('N', w * 0.908, h * 0.115);
+    for (let i = 0; i < 4; i++) {
+      ctx.fillStyle = i % 2 ? '#f6f2e4' : ink;
+      ctx.fillRect(w * (0.62 + i * 0.05), h * 0.165, w * 0.05, h * 0.014);
+      ctx.strokeRect(w * (0.62 + i * 0.05), h * 0.165, w * 0.05, h * 0.014);
+    }
+  },
+
+  /** His blotter: a column of seven-letter words in tiny capitals, each struck through, and the tallies beside them. */
+  blotter(ctx, w, h, rnd, opts = {}) {
+    ctx.fillStyle = '#c9b8a2';
+    ctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < 60; i++) {
+      const x = rnd() * w;
+      const y = rnd() * h;
+      const r = w * (0.02 + rnd() * 0.06);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, `rgba(30,34,70,${0.05 + rnd() * 0.16})`);
+      g.addColorStop(1, 'rgba(30,34,70,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    const words = opts.words ?? ['PENDRYS', 'HOROLOG', 'HESPERL', 'LORIMER', 'VESPERS', 'LORIMER'];
+    ctx.fillStyle = 'rgba(22,24,52,0.92)';
+    ctx.strokeStyle = 'rgba(22,24,52,0.92)';
+    ctx.font = `bold ${Math.round(h * 0.07)}px ${MONO}`;
+    words.forEach((word, i) => {
+      const y = h * (0.14 + i * 0.105);
+      const last = i === words.length - 1;
+      ctx.lineWidth = last ? 4 : 2;
+      if (last) ctx.font = `bold ${Math.round(h * 0.08)}px ${MONO}`;
+      ctx.fillText(word, w * 0.1, y);
+      const tw = ctx.measureText(word).width;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.085, y - h * 0.024);
+      ctx.lineTo(w * 0.115 + tw, y - h * 0.03);
+      ctx.stroke();
+    });
+    // Tallies in fives, down the other side and along the foot.
+    ctx.lineWidth = 1.6;
+    const five = (x, y) => {
+      for (let k = 0; k < 4; k++) {
+        ctx.beginPath();
+        ctx.moveTo(x + k * w * 0.014, y);
+        ctx.lineTo(x + k * w * 0.014 + (rnd() - 0.5) * 2, y + h * 0.045);
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.moveTo(x - w * 0.008, y + h * 0.04);
+      ctx.lineTo(x + w * 0.052, y + h * 0.008);
+      ctx.stroke();
+    };
+    for (let r = 0; r < 9; r++) for (let c = 0; c < 4; c++) five(w * (0.56 + c * 0.1), h * (0.07 + r * 0.075));
+    for (let c = 0; c < 2; c++) five(w * (0.56 + c * 0.1), h * 0.745);
+    // Leather corners.
+    ctx.fillStyle = '#3a2418';
+    for (const [cx, cy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+      ctx.beginPath();
+      ctx.moveTo(cx * w, cy * h);
+      ctx.lineTo(cx * w + (cx ? -1 : 1) * w * 0.13, cy * h);
+      ctx.lineTo(cx * w, cy * h + (cy ? -1 : 1) * h * 0.13);
+      ctx.fill();
+    }
+  },
+
+  /** One page in green ink, set out like an examination paper. opts.title, opts.lines */
+  greenPaper(ctx, w, h, rnd, opts = {}) {
+    paperGround(ctx, w, h, rnd, '#eee9d8');
+    const ink = 'rgba(20,104,62,0.92)';
+    ctx.fillStyle = ink;
+    ctx.strokeStyle = ink;
+    ctx.textAlign = 'center';
+    ctx.font = `${Math.round(h * 0.06)}px ${SERIF}`;
+    ctx.fillText(opts.title ?? 'PAPER', w / 2, h * 0.1, w * 0.84);
+    ctx.font = `${Math.round(h * 0.032)}px ${SERIF}`;
+    ctx.fillText(opts.sub ?? 'ONE QUESTION · TIME ALLOWED: UNTIL MORNING', w / 2, h * 0.15, w * 0.84);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.12, h * 0.175);
+    ctx.lineTo(w * 0.88, h * 0.175);
+    ctx.stroke();
+    ctx.textAlign = 'left';
+    // A small, upright hand: lines of it, evenly spaced, nothing crossed out.
+    for (let i = 0; i < 11; i++) {
+      const y = h * (0.25 + i * 0.058);
+      const end = w * (i === 10 ? 0.5 : 0.8 + rnd() * 0.08);
+      let x = w * (i % 4 === 0 ? 0.12 : 0.16);
+      if (i % 4 === 0) {
+        ctx.font = `${Math.round(h * 0.036)}px ${SERIF}`;
+        ctx.fillText(`${i / 4 + 1}.`, w * 0.08, y + h * 0.008);
+      }
+      while (x < end) {
+        const len = 5 + rnd() * 16;
+        ctx.fillRect(x, y - h * 0.012, Math.min(len, end - x), Math.max(1.5, h * 0.011));
+        x += len + 4;
+      }
+    }
+  },
+
+  /** A painted hand pointing up a stair, and what is up it. opts.lines */
+  handSign(ctx, w, h, rnd, opts = {}) {
+    ART.board(ctx, w, h, rnd, { lines: [''], bg: opts.bg ?? '#161210', fg: opts.fg ?? '#d9b869' });
+    const fg = opts.fg ?? '#d9b869';
+    // The hand: a cuff, a fist, and one finger pointing up and to the side the stair goes.
+    ctx.save();
+    ctx.translate(w * 0.17, h * 0.56);
+    ctx.rotate(opts.turn ?? -0.5);
+    const u = h * 0.11;
+    ctx.fillStyle = fg;
+    ctx.strokeStyle = '#161210';
+    ctx.lineWidth = Math.max(1, u * 0.08);
+    ctx.fillRect(-u * 1.7, -u * 0.62, u * 0.9, u * 1.24); // cuff
+    ctx.beginPath();
+    ctx.roundRect(-u * 0.9, -u * 0.72, u * 1.5, u * 1.44, u * 0.3); // fist
+    ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(u * 0.3, -u * 0.72, u * 2.2, u * 0.44, u * 0.2); // the finger
+    ctx.fill();
+    for (let i = 1; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(u * 0.1, -u * 0.72 + i * u * 0.36);
+      ctx.lineTo(u * 0.6, -u * 0.72 + i * u * 0.36);
+      ctx.stroke();
+    }
+    ctx.restore();
+    ctx.fillStyle = fg;
+    centredLines(ctx, opts.lines ?? ['THE CRUX', 'EDITORIAL', 'NO SOLVERS'], w * 0.36, h * 0.16, w * 0.56, h * 0.68, SERIF, { max: 0.3, lead: 1.3 });
+  },
+
+  /** The lid of a box, lettered in neat white paint. opts.lines */
+  boxLid(ctx, w, h, rnd, opts = {}) {
+    ctx.fillStyle = opts.bg ?? '#4a3020';
+    ctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < 70; i++) {
+      const y = rnd() * h;
+      ctx.strokeStyle = `rgba(${rnd() > 0.5 ? '0,0,0' : '255,230,190'},${0.03 + rnd() * 0.07})`;
+      ctx.lineWidth = 0.6 + rnd() * 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y + (rnd() - 0.5) * 4);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(238,234,220,0.95)';
+    centredLines(ctx, opts.lines ?? ['R. FETTLE', 'PLEASE RETURN'], w * 0.08, h * 0.14, w * 0.84, h * 0.72, SANS, { max: 0.34, weight: '700', lead: 1.35 });
+  },
+
+  /** A page on a music stand that is plainly not music: staves, and on them letters and squares where notes should be. */
+  notMusic(ctx, w, h, rnd) {
+    ctx.fillStyle = '#ece6d2';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(40,36,30,0.25)';
+    ctx.fillRect(w / 2 - 1, 0, 2, h);
+    ctx.strokeStyle = 'rgba(30,26,22,0.8)';
+    ctx.fillStyle = 'rgba(30,26,22,0.9)';
+    ctx.font = `bold ${Math.round(h * 0.055)}px ${SERIF}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (const x0 of [w * 0.05, w * 0.55]) {
+      for (let st = 0; st < 5; st++) {
+        const y0 = h * (0.12 + st * 0.17);
+        ctx.lineWidth = 1;
+        for (let l = 0; l < 5; l++) {
+          ctx.beginPath();
+          ctx.moveTo(x0, y0 + l * 4);
+          ctx.lineTo(x0 + w * 0.4, y0 + l * 4);
+          ctx.stroke();
+        }
+        for (let n = 0; n < 8; n++) {
+          const nx = x0 + w * (0.035 + n * 0.047);
+          const ny = y0 + 2 + rnd() * 14;
+          if (rnd() < 0.55) ctx.fillText('ABCDEFGH'[Math.floor(rnd() * 8)], nx, ny);
+          else if (rnd() < 0.5) ctx.fillRect(nx - 4, ny - 4, 8, 8);
+          else ctx.strokeRect(nx - 4, ny - 4, 8, 8);
+        }
+      }
+    }
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  },
+
+  /** A square of seven answers, a Tithe as the Late Tithes are kept: letters in every cell, in a small upright hand. */
+  titheSquare(ctx, w, h, rnd, opts = {}) {
+    paperGround(ctx, w, h, rnd, '#efe9d6');
+    const n = 7;
+    const size = Math.min(w, h) * 0.8;
+    const x0 = (w - size) / 2;
+    const y0 = (h - size) / 2 + h * 0.03;
+    const cell = size / n;
+    ctx.strokeStyle = '#1a1816';
+    ctx.lineWidth = Math.max(1, size / 180);
+    ctx.fillStyle = 'rgba(24,30,84,0.9)';
+    ctx.font = `${Math.round(cell * 0.62)}px ${SERIF}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        ctx.strokeRect(x0 + c * cell, y0 + r * cell, cell, cell);
+        // The letters are whatever they are, except down the long diagonal, which nobody has read.
+        const ch = r === c ? 'ARIADNE'[r] : ALPHABET[Math.floor(rnd() * 26)];
+        ctx.fillText(opts.blank ? '' : ch, x0 + (c + 0.5) * cell, y0 + (r + 0.55) * cell);
+      }
+    }
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#1a1816';
+    ctx.font = `${Math.round(h * 0.055)}px ${SERIF}`;
+    ctx.fillText(opts.year ? `TITHE, ${opts.year}` : 'TITHE', x0, y0 - h * 0.03);
+  },
+
+  /** Rows of small numbered tiles in a tray. */
+  tiles(ctx, w, h, rnd) {
+    ctx.fillStyle = '#24362c';
+    ctx.fillRect(0, 0, w, h);
+    const cols = 16;
+    const rows = Math.max(2, Math.round((h / w) * cols));
+    const cw = w / cols;
+    const ch = h / rows;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `bold ${Math.round(Math.min(cw, ch) * 0.5)}px ${SERIF}`;
+    let k = 1;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (rnd() < 0.08) { k++; continue; }
+        ctx.fillStyle = `hsl(42, 30%, ${78 + rnd() * 10}%)`;
+        ctx.fillRect(c * cw + 2, r * ch + 2, cw - 4, ch - 4);
+        ctx.fillStyle = '#2a2218';
+        ctx.fillText(String(k++), (c + 0.5) * cw, (r + 0.55) * ch);
+      }
+    }
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  },
+
+  /** What is painted in the bottom of a Hall cup. opts.kind: 'clock' | 'compass' | 'grid' | 'arms' */
+  cupBottom(ctx, w, h, _rnd, opts = {}) {
+    const r = w / 2;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#e6e2d6';
+    ctx.beginPath();
+    ctx.arc(r, r, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2a3a6a';
+    ctx.fillStyle = '#2a3a6a';
+    ctx.lineWidth = Math.max(1.5, w * 0.04);
+    const kind = opts.kind ?? 'compass';
+    if (kind === 'clock') {
+      ctx.beginPath();
+      ctx.arc(r, r, r * 0.7, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(r, r);
+      ctx.lineTo(r, r * 0.45);
+      ctx.moveTo(r, r);
+      ctx.lineTo(r * 1.35, r * 1.1);
+      ctx.stroke();
+    } else if (kind === 'grid') {
+      const g = r * 1.1;
+      for (let i = 0; i <= 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(r - g / 2 + (g * i) / 4, r - g / 2);
+        ctx.lineTo(r - g / 2 + (g * i) / 4, r + g / 2);
+        ctx.moveTo(r - g / 2, r - g / 2 + (g * i) / 4);
+        ctx.lineTo(r + g / 2, r - g / 2 + (g * i) / 4);
+        ctx.stroke();
+      }
+      ctx.fillRect(r - g / 4, r - g / 4, g / 4, g / 4);
+      ctx.fillRect(r + g / 4, r, g / 4, g / 4);
+    } else if (kind === 'arms') {
+      ctx.beginPath();
+      ctx.moveTo(r * 0.5, r * 0.45);
+      ctx.lineTo(r * 1.5, r * 0.45);
+      ctx.lineTo(r * 1.5, r * 1.05);
+      ctx.quadraticCurveTo(r * 1.4, r * 1.5, r, r * 1.65);
+      ctx.quadraticCurveTo(r * 0.6, r * 1.5, r * 0.5, r * 1.05);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(r * 0.5, r * 0.45);
+      ctx.lineTo(r * 1.5, r * 1.3);
+      ctx.stroke();
+    } else {
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4;
+        const len = i % 2 ? r * 0.4 : r * 0.78;
+        ctx.beginPath();
+        ctx.moveTo(r, r);
+        ctx.lineTo(r + Math.sin(a) * len, r - Math.cos(a) * len);
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.arc(r, r, r * 0.5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  },
+
+  /** A small screen with a log scrolling up it. */
+  logScreen(ctx, w, h, rnd) {
+    ctx.fillStyle = '#04100a';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(96,240,150,0.9)';
+    for (let i = 0; i < 9; i++) {
+      let x = w * 0.06;
+      const end = w * (0.4 + rnd() * 0.5);
+      while (x < end) {
+        const len = 6 + rnd() * 22;
+        ctx.fillRect(x, h * (0.1 + i * 0.095), Math.min(len, end - x), Math.max(2, h * 0.04));
+        x += len + 5;
+      }
     }
   },
 });

@@ -22,64 +22,73 @@ const REACH_NPC = 2.7;
 
 // post: the finishing pass (bloom, focus, grade). samples: edge smoothing for
 // the room itself. detail: how much geometry the room is given (bevels, dust).
+/**
+ * What each setting pays for. Every one of them keeps the finishing pass: a
+ * slow phone gives up occlusion, focus blur and shadows in that order, and
+ * some sharpness, but never the tone curve and the grade, which cost almost
+ * nothing and are most of what makes the picture look finished. "lean" sits
+ * between Medium and Low for the game to step down to by itself.
+ */
 const QUALITY = {
-  high: { shadows: true, shadowSize: 2048, pixelRatio: 1.75, maxLights: 9, post: true, samples: 4, detail: 2, ao: 12, dof: true },
-  medium: { shadows: true, shadowSize: 1024, pixelRatio: 1.3, maxLights: 7, post: true, samples: 4, detail: 1, ao: 6, dof: true },
-  low: { shadows: false, shadowSize: 512, pixelRatio: 1, maxLights: 5, post: false, samples: 0, detail: 0, ao: 0, dof: false },
+  high: { shadows: true, shadowSize: 2048, pixelRatio: 2, maxLights: 9, post: true, lite: false, samples: 4, detail: 2, ao: 12, dof: true },
+  medium: { shadows: true, shadowSize: 1024, pixelRatio: 1.75, maxLights: 7, post: true, lite: false, samples: 2, detail: 1, ao: 6, dof: true },
+  lean: { shadows: true, shadowSize: 512, pixelRatio: 1.5, maxLights: 6, post: true, lite: true, samples: 0, detail: 1, ao: 0, dof: false },
+  low: { shadows: false, shadowSize: 512, pixelRatio: 1.25, maxLights: 5, post: true, lite: true, samples: 0, detail: 0, ao: 0, dof: false },
 };
+/** The order the game steps down in when frames run slow. */
+/** How bright the close-up key light is at full (candela, before exposure). */
+const KEY_LIGHT = 3.2;
+export const STEP_DOWN = { high: 'medium', medium: 'lean', lean: 'low' };
 
-/** Screen markers are drawn white (with a dark edge) and tinted per use. */
+/**
+ * Screen markers: a point of light with a fine ring round it, drawn white and
+ * tinted per use. Something to look at rather than a symbol to read; a person
+ * gets three small dots in the ring, a way out gets a chevron.
+ */
 function markerTexture(kind) {
-  return canvasTexture(`marker:${kind}`, 128, (ctx, s) => {
+  return canvasTexture(`marker2:${kind}`, 128, (ctx, s) => {
     ctx.clearRect(0, 0, s, s);
     ctx.save();
     ctx.scale(s / 64, s / 64);
     const c = 32;
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'rgba(8,14,16,0.9)';
-    ctx.lineWidth = 3.5;
-    if (kind === 'talk') {
-      ctx.fillStyle = 'rgba(255,255,255,0.98)';
-      ctx.beginPath();
-      ctx.roundRect(9, 11, 46, 31, 10);
-      ctx.moveTo(23, 41);
-      ctx.lineTo(21, 55);
-      ctx.lineTo(37, 41);
-      ctx.stroke();
-      ctx.fill();
-      ctx.fillStyle = 'rgba(8,24,26,0.92)';
-      for (const x of [22, 32, 42]) {
-        ctx.beginPath();
-        ctx.arc(x, 26.5, 3.1, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-      return;
-    }
-    const g = ctx.createRadialGradient(c, c, 0, c, c, c);
-    g.addColorStop(0, 'rgba(255,255,255,0.5)');
-    g.addColorStop(0.55, 'rgba(255,255,255,0.1)');
+    // A breath of dark behind it, so it holds against a lit wall; then the glow.
+    let g = ctx.createRadialGradient(c, c, 4, c, c, 30);
+    g.addColorStop(0, 'rgba(0,0,0,0.34)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 64, 64);
+    g = ctx.createRadialGradient(c, c, 0, c, c, 26);
+    g.addColorStop(0, 'rgba(255,255,255,0.55)');
+    g.addColorStop(0.35, 'rgba(255,255,255,0.16)');
     g.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, 64, 64);
-    ctx.fillStyle = 'rgba(255,255,255,0.98)';
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+    ctx.fillStyle = 'rgba(255,255,255,1)';
+    ctx.lineWidth = 1.7;
     ctx.beginPath();
-    if (kind === 'exit') {
-      ctx.moveTo(c - 13, c + 10);
-      ctx.lineTo(c, c - 13);
-      ctx.lineTo(c + 13, c + 10);
-      ctx.lineTo(c + 5.5, c + 10);
-      ctx.lineTo(c, c);
-      ctx.lineTo(c - 5.5, c + 10);
-    } else {
-      ctx.moveTo(c, c - 14);
-      ctx.lineTo(c + 11, c);
-      ctx.lineTo(c, c + 14);
-      ctx.lineTo(c - 11, c);
-    }
-    ctx.closePath();
+    ctx.arc(c, c, kind === 'spot' ? 11.5 : 14, 0, Math.PI * 2);
     ctx.stroke();
-    ctx.fill();
+    if (kind === 'talk') {
+      for (const x of [-6, 0, 6]) {
+        ctx.beginPath();
+        ctx.arc(c + x, c, 2.1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (kind === 'exit') {
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(c - 6, c + 3);
+      ctx.lineTo(c, c - 4);
+      ctx.lineTo(c + 6, c + 3);
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.arc(c, c, 4.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.restore();
   }, { repeat: false });
 }
@@ -102,6 +111,9 @@ export class World {
     this.brightness = 1;
     this.mode = 'idle';
     this.player = { x: 0, z: 0, yaw: 0, pitch: 0 };
+    this.restPitch = 0;
+    /** The player has asked for less motion. */
+    this.still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.bob = 0;
     /** @type {import('./builder.js').BuiltScene | null} */
     this.built = null;
@@ -169,6 +181,13 @@ export class World {
       this.post = null;
     }
     this.scene = new THREE.Scene();
+    // A key light for close-ups: when you talk to someone, a soft lamp comes up on their face from
+    // beside the camera, the way a film would light them. It is always in the scene (dark when not
+    // in use), so starting a conversation never changes how many lights the shaders are built for.
+    this.keyLight = new THREE.SpotLight(0xfff0df, 0, 7, 0.42, 1, 1.6);
+    this.keyLight.castShadow = false;
+    this.keyAmt = 0;
+    this.scene.add(this.keyLight, this.keyLight.target);
     /** Markers are drawn after everything else, crisp and unblurred. */
     this.overlay = new THREE.Scene();
     this.scene.environment = buildEnvironment(this.renderer);
@@ -179,7 +198,18 @@ export class World {
     // Phones take the graphics context away when the game is put in the
     // background for a while. When it comes back, lay the room out again.
     this.canvas.addEventListener('webglcontextrestored', () => {
-      this.scene.environment = this.photoEnvironment ?? buildEnvironment(this.renderer);
+      // Everything the finishing pass kept on the graphics card went with the old context: build it afresh.
+      try {
+        this.post?.dispose();
+      } catch {
+        /* nothing of it is left to give back */
+      }
+      // The photographed room that shiny things reflect was baked on the card too: bake it again.
+      this.photoEnvironment = null;
+      if (this.got) this.got.light = false;
+      this.scene.environment = buildEnvironment(this.renderer);
+      this.scene.environmentIntensity = 0.3;
+      this.surroundings = null;
       this.portraitCache?.clear();
       if (this.lastLoc) {
         const pose = { ...this.player };
@@ -204,12 +234,14 @@ export class World {
     this.renderer.setPixelRatio(ratio);
     this.renderer.setSize(w, h, false);
     if (this.post && q.post) {
-      this.post.configure({ ao: q.ao, dof: q.dof });
+      this.post.configure({ ao: q.ao, dof: q.dof, lite: q.lite });
       this.post.setSize(w, h, ratio, q.samples);
     }
     this.camera.aspect = w / h;
     // A tall phone screen needs a wider vertical field of view to feel right.
     this.baseFov = w / h < 0.8 ? 84 : w / h < 1.2 ? 76 : 66;
+    // Held upright, a level gaze is half ceiling: tip it down a little so the room, not the roof, fills the screen.
+    this.restPitch = w / h < 0.8 ? -0.13 : w / h < 1.2 ? -0.06 : 0;
     this.camera.fov = this.baseFov;
     this.camera.updateProjectionMatrix();
     this.viewport = { w, h };
@@ -247,46 +279,93 @@ export class World {
    */
   fetchSurroundings() {
     if (!assets.things || this.surroundings) return;
-    this.surroundings = Promise.all([
-      assets.loadSurfaces().then((ok) => {
-        if (ok) useSurfaces((name) => assets.surface(name));
-      }),
-      assets.loadEnvironment().then((picture) => {
-        if (!picture) return;
-        const pmrem = new THREE.PMREMGenerator(this.renderer);
-        this.photoEnvironment = pmrem.fromEquirectangular(picture).texture;
-        this.scene.environment = this.photoEnvironment;
-        this.scene.environmentIntensity = 0.42;
-        picture.dispose();
-        pmrem.dispose();
-      }),
-      assets.loadNight().then((picture) => {
-        if (picture) setNightView(picture);
-      }),
+    this.got ??= { surfaces: false, light: false, night: false };
+    const got = this.got;
+    if (got.surfaces && got.light && got.night) return;
+    const job = Promise.all([
+      got.surfaces ||
+        assets.loadSurfaces().then((ok) => {
+          if (!ok) return;
+          got.surfaces = true;
+          useSurfaces((name) => assets.surface(name));
+        }),
+      got.light ||
+        assets.loadEnvironment().then((picture) => {
+          if (!picture) return;
+          got.light = true;
+          const pmrem = new THREE.PMREMGenerator(this.renderer);
+          this.photoEnvironment = pmrem.fromEquirectangular(picture).texture;
+          this.scene.environment = this.photoEnvironment;
+          this.scene.environmentIntensity = 0.42;
+          picture.dispose();
+          pmrem.dispose();
+        }),
+      got.night ||
+        assets.loadNight().then((picture) => {
+          if (!picture) return;
+          got.night = true;
+          setNightView(picture);
+        }),
     ]).then(() => {
-      this.surroundings = true;
+      // Whatever did not arrive is asked for again with the next room, rather than given up on.
+      if (this.surroundings === job) this.surroundings = null;
     });
+    this.surroundings = job;
   }
 
   /**
    * Fetch the furniture and prop models this room wants and are not in memory yet.
    * The room is built with what there is, and built again once the rest has landed.
    */
-  fetchModels(loc) {
+  fetchModels(loc, again = 0) {
     if (!assets.things) return;
-    const missing = modelsFor(loc.scene.props).filter((name) => assets.things.models[name] && !assets.prop(name));
-    if (!missing.length) return;
+    const wanted = modelsFor(loc.scene.props).filter((name) => assets.things.models[name]);
+    const missing = wanted.filter((name) => !assets.prop(name));
+    if (!missing.length) return this.fetchAhead();
     const waitingFor = loc;
     const job = assets.loadProps(missing).then(() => {
       if (this.modelJob === job) this.modelJob = null;
       if (this.lastLoc !== waitingFor && this.lastLoc?.id !== waitingFor.id) return;
-      const pose = { ...this.player };
-      const focus = this.focus;
-      this.locKey = null;
-      this.loadLocation(this.lastLoc, { pose });
-      this.focus = focus;
+      const landed = missing.some((name) => assets.prop(name));
+      const still = missing.filter((name) => !assets.prop(name));
+      if (landed) {
+        const pose = { ...this.player };
+        const focus = this.focus;
+        this.locKey = null;
+        this.loadLocation(this.lastLoc, { pose });
+        this.focus = focus;
+      }
+      // Something would not come: keep asking while the player is still in the room, a few times.
+      if (still.length && again < 4) {
+        this.emit('missing', { kind: 'models', names: still });
+        clearTimeout(this.modelRetry);
+        this.modelRetry = setTimeout(() => {
+          if (this.lastLoc?.id === waitingFor.id && !this.modelJob) this.fetchModels(this.lastLoc, again + 1);
+        }, 13000);
+      } else if (!still.length) this.fetchAhead();
     });
     this.modelJob = job;
+  }
+
+  /**
+   * Once the room on screen has what it needs, fetch the rest of the game quietly, a little at a
+   * time, so that later rooms open at once and a patchy connection has been and gone by then.
+   */
+  fetchAhead() {
+    if (this.aheadStarted || !assets.things || this.noFetchAhead) return;
+    this.aheadStarted = true;
+    assets.loadProps(Object.keys(assets.things.models), true);
+  }
+
+  /** The manifests arrived late (a bad start on a bad connection): build the room again with what they offer. */
+  assetsArrived() {
+    this.surroundings = null;
+    if (!this.lastLoc) return;
+    const pose = { ...this.player };
+    const focus = this.focus;
+    this.locKey = null;
+    this.loadLocation(this.lastLoc, { pose });
+    this.focus = focus;
   }
 
   loadLocation(loc, opts = {}) {
@@ -294,6 +373,7 @@ export class World {
     const rebuilt = key !== this.locKey || !!opts.respawn;
     this.lastLoc = loc;
     if (rebuilt) this.fetchModels(loc);
+    if (rebuilt) this.fetchSurroundings();
     if (rebuilt) {
       const sameRoom = !opts.respawn && this.locKey?.split(':')[0] === loc.id;
       const keep = sameRoom ? { ...this.player } : null;
@@ -314,7 +394,8 @@ export class World {
       else {
         const sp = this.built.spawn;
         const free = this.nav.nearestFree(sp.p[0], sp.p[1]) ?? { x: sp.p[0], z: sp.p[1] };
-        Object.assign(this.player, { x: free.x, z: free.z, yaw: ((sp.yaw ?? 0) * Math.PI) / 180, pitch: 0 });
+        // A room may say how far to tip the first look (spawn.pitch, degrees); otherwise the screen's shape decides.
+        Object.assign(this.player, { x: free.x, z: free.z, yaw: ((sp.yaw ?? 0) * Math.PI) / 180, pitch: sp.pitch === undefined ? this.restPitch : (sp.pitch * Math.PI) / 180 });
       }
       this.walk = null;
       this.focus = keepFocus;
@@ -387,7 +468,7 @@ export class World {
    * Fetch the modelled people this place needs and are not in memory yet.
    * Until they arrive anyone missing is drawn in code; they are swapped the moment the files land.
    */
-  fetchPeople(list) {
+  fetchPeople(list, again = 0) {
     const missing = [...new Set(list.map((n) => n.look?.model).filter((id) => id && assets.people?.characters[id] && !assets.person(id)))];
     if (!missing.length || !assets.people) return;
     const job = assets.loadPeople(missing).then(() => {
@@ -396,10 +477,19 @@ export class World {
         this.syncNpcs(this.lastLoc.npcs);
         this.rebuildPickables();
       }
+      // Somebody would not come: keep asking while they are in the room, a few times.
+      const still = missing.filter((id) => !assets.person(id));
+      if (still.length && again < 4) {
+        this.emit('missing', { kind: 'people', names: still });
+        clearTimeout(this.peopleRetry);
+        this.peopleRetry = setTimeout(() => {
+          if (this.lastLoc && !this.loading) this.fetchPeople(this.lastLoc.npcs, again + 1);
+        }, 13000);
+      }
       // Everyone else, quietly, so that nobody is ever a stand-in again.
-      if (!this.castFetched) {
+      if (!this.castFetched && !this.noFetchAhead) {
         this.castFetched = true;
-        assets.loadPeople(Object.keys(assets.people.characters)).then(() => this.portraitCache?.clear());
+        assets.loadPeople(Object.keys(assets.people.characters), true).then(() => this.portraitCache?.clear());
       }
     });
     this.loading = job;
@@ -407,7 +497,7 @@ export class World {
 
   /** Resolves once the place on screen has everything it was waiting for (or has waited long enough). */
   whenReady(limit = 15000) {
-    const jobs = [this.loading, this.modelJob, this.surroundings === true ? null : this.surroundings].filter(Boolean);
+    const jobs = [this.loading, this.modelJob, this.surroundings].filter(Boolean);
     if (!jobs.length) return Promise.resolve();
     // One thing landing can start another (a room rebuilt for its furniture asks again for its people).
     const settle = Promise.all(jobs).then(() => (this.loading || this.modelJob ? this.whenReady(limit) : undefined));
@@ -494,7 +584,7 @@ export class World {
    * @param {'bottom'|'right'} side where the conversation panel sits
    * @param {number} [frac] how much of the height (bottom) or width (right) it covers
    */
-  focusNpc(id, side = 'bottom', frac = side === 'bottom' ? 0.6 : 0.42) {
+  focusNpc(id, side = 'bottom', frac = side === 'bottom' ? 0.6 : 0.42, rail = 0) {
     const n = this.npcs.get(id);
     if (!n) {
       this.focus = null;
@@ -515,27 +605,43 @@ export class World {
         dist = COMFORT;
       }
     }
-    const fov = side === 'bottom' ? this.baseFov - 8 : this.baseFov - 12;
+    // A portrait lens: long enough to flatter a face and let the room fall away behind it,
+    // from a little under their eye line rather than from the detective's full height.
+    const tall = this.camera.aspect < 0.8;
+    const fov = side === 'bottom' ? (tall ? 44 : 40) : 34;
     const half = Math.tan((fov * Math.PI) / 360);
     const f = THREE.MathUtils.clamp(frac, 0, 0.8);
+    const eye = THREE.MathUtils.clamp(n.head - 0.16, 1.02, EYE);
     let yaw = Math.atan2(-dx, -dz);
-    let pitch = Math.atan2(n.head - 0.12 - EYE, dist);
+    let pitch = Math.atan2(n.head - 0.1 - eye, dist);
     // Looking past someone by this much lands them at the centre of the free part of the screen.
-    if (side === 'bottom') pitch -= Math.atan(f * half);
-    else yaw -= Math.atan(f * half * this.camera.aspect);
+    if (side === 'bottom') {
+      pitch -= Math.atan(f * half);
+      // A rail of buttons down one edge: stand them in the middle of what is left beside it.
+      yaw -= Math.atan(THREE.MathUtils.clamp(rail, 0, 0.3) * half * this.camera.aspect);
+    } else yaw -= Math.atan(f * half * this.camera.aspect);
     this.turnTo = null;
-    this.focus = { id, yaw, pitch: Math.max(-1.1, pitch), fov, stand };
+    this.focus = { id, yaw, pitch: Math.max(-1.1, pitch), fov, stand, eye };
     for (const e of this.npcs.values()) e.talking = false;
   }
 
   unfocus() {
     this.focus = null;
-    for (const e of this.npcs.values()) e.talking = false;
+    for (const e of this.npcs.values()) {
+      e.talking = false;
+      e.thinking = false;
+    }
   }
 
   setTalking(id, on) {
     const n = this.npcs.get(id);
     if (n) n.talking = on;
+  }
+
+  /** Somebody working out what to say: their eyes leave you for a moment. */
+  setThinking(id, on) {
+    const n = this.npcs.get(id);
+    if (n) n.thinking = on;
   }
 
   setMood(id, mood) {
@@ -778,10 +884,30 @@ export class World {
       }
     }
     const bobY = moving ? Math.sin(this.bob) * 0.022 : 0;
-    this.camera.position.set(p.x, EYE + bobY, p.z);
-    this.camera.rotation.set(p.pitch, p.yaw, 0, 'YXZ');
+    // In a conversation the camera comes down to the other person's eye line, and goes back up after.
+    const eyeWant = this.focus && this.mode !== 'explore' ? (this.focus.eye ?? EYE) : EYE;
+    this.eyeY = (this.eyeY ?? EYE) + (eyeWant - (this.eyeY ?? EYE)) * (1 - Math.exp(-dt * 4));
+    this.camera.position.set(p.x, this.eyeY + bobY, p.z);
+    // The camera is held, not bolted down: the faintest drift keeps the picture alive. Most in a
+    // close-up, a little when you stand and look at a room, none while you walk or if motion is unwelcome.
+    const swayWant = this.still ? 0 : this.focus && this.mode !== 'explore' ? 1 : this.mode === 'explore' && !moving ? 0.45 : 0;
+    this.sway = (this.sway ?? 0) + (swayWant - (this.sway ?? 0)) * (1 - Math.exp(-dt * 2));
+    const held = this.sway;
+    this.camera.rotation.set(p.pitch + Math.sin(t * 0.83) * 0.0026 * held, p.yaw + Math.sin(t * 0.61 + 1.3) * 0.0032 * held, Math.sin(t * 0.37) * 0.0014 * held, 'YXZ');
 
     for (const fn of this.built.anims) fn(t, dt);
+
+    // The key light: up on whoever you are talking to, down again when you look away.
+    const lit = this.focus && this.mode !== 'explore' ? this.npcs.get(this.focus.id) : null;
+    this.keyAmt += ((lit ? 1 : 0) - this.keyAmt) * (1 - Math.exp(-dt * 3.2));
+    if (lit) {
+      // From beside and a little above the lens, so the face has a lit side and a modelled one.
+      const cy = Math.cos(p.yaw);
+      const sy = Math.sin(p.yaw);
+      this.keyLight.position.set(p.x + cy * 0.55, this.eyeY + 0.34, p.z - sy * 0.55);
+      this.keyLight.target.position.set(lit.pos.x, lit.head - 0.08, lit.pos.z);
+    }
+    this.keyLight.intensity = this.keyAmt < 0.004 ? 0 : KEY_LIGHT * this.keyAmt;
 
     // People.
     for (const [id, n] of this.npcs) {
@@ -790,7 +916,7 @@ export class World {
       const want = facing && pose !== 'sit' && pose !== 'bound' && pose !== 'slumped' ? Math.atan2(p.x - n.pos.x, p.z - n.pos.z) : n.baseYaw;
       n.yaw = lerpAngle(n.yaw, want, 1 - Math.exp(-dt * 4));
       n.ch.root.rotation.y = n.yaw;
-      n.ch.update(t, dt, { lookAt: this.camera.position, talking: n.talking, mood: n.mood, engaged: this.focus?.id === n.data?.id });
+      n.ch.update(t, dt, { lookAt: this.camera.position, talking: n.talking, thinking: n.thinking && !this.still, mood: n.mood, engaged: this.focus?.id === n.data?.id });
       const dist = Math.hypot(p.x - n.pos.x, p.z - n.pos.z);
       const pulsing = t < this.pulseUntil;
       n.marker.material.opacity = this.mode === 'explore' ? (pulsing ? 1 : THREE.MathUtils.clamp(1.4 - dist / 9, 0.6, 1)) : 0;
@@ -840,7 +966,7 @@ export class World {
     // If the frame rate is poor for a while, step the quality down once.
     if (dt > 0.042) this.slowFrames++;
     else this.slowFrames = Math.max(0, this.slowFrames - 1);
-    if (this.slowFrames > 90 && this.quality !== 'low' && !this.noAutoQuality) {
+    if (this.slowFrames > 90 && STEP_DOWN[this.quality] && !this.noAutoQuality) {
       this.slowFrames = 0;
       this.emit('slow', this.quality);
     }
@@ -875,6 +1001,17 @@ export class World {
     r.autoClear = false;
     r.render(this.overlay, this.camera);
     r.autoClear = true;
+
+    // The interface is glass standing in the room: as you turn, the light along its edges turns too.
+    // A few degrees at a time, and not more than a dozen times a second; not at all on the lowest setting.
+    if (!this.still && this.quality !== 'low') {
+      const tilt = Math.round(((this.player.yaw * 180) / Math.PI) * 0.4 + ((this.player.pitch * 180) / Math.PI) * 0.6);
+      if (tilt !== this.lastTilt && t - (this.tiltAt ?? -1) > 0.08) {
+        this.lastTilt = tilt;
+        this.tiltAt = t;
+        this.emit('tilt', tilt);
+      }
+    }
   }
 
   followPath(dt) {
@@ -894,7 +1031,7 @@ export class World {
     // Look where we are going, gently, unless the player is steering the view.
     const yaw = Math.atan2(-dx, -dz);
     if (dist > 0.25) p.yaw = lerpAngle(p.yaw, yaw, 1 - Math.exp(-dt * 5));
-    p.pitch += (0 - p.pitch) * (1 - Math.exp(-dt * 3));
+    p.pitch += (this.restPitch - p.pitch) * (1 - Math.exp(-dt * 3));
     if (dist <= step) {
       p.x = next.x;
       p.z = next.z;

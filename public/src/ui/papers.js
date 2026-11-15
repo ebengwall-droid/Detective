@@ -237,7 +237,7 @@ const TOOL_VIEWS = { wheel: toolWheel, fence: toolFence, square: toolSquare, fra
  * @param {HTMLElement} body
  * @param {any} game
  * @param {{ puzzle: string|null, tool: string|null }} sel
- * @param {{ refresh: () => void, close: () => void }} api
+ * @param {{ refresh: (turn?: boolean) => void, close: () => void }} api  refresh(true) when the page itself changes
  */
 export function renderPapers(body, game, sel, api) {
   const v = game.view;
@@ -248,16 +248,16 @@ export function renderPapers(body, game, sel, api) {
   }
   const current = puzzles.find((p) => p.id === sel.puzzle);
   if (current) {
-    add(body, el('button', { class: 'btn small quiet', type: 'button', style: { marginBottom: '12px' }, onClick: () => { sel.puzzle = null; sel.tool = null; api.refresh(); } }, icon('back', 16), 'All papers'), puzzleView(current, game, sel, api));
+    add(body, el('button', { class: 'btn small quiet back', type: 'button', onClick: () => { sel.puzzle = null; sel.tool = null; api.refresh(true); } }, icon('back', 16), 'All papers'), puzzleView(current, game, sel, api));
     return;
   }
   const open = puzzles.filter((p) => !p.solved);
   const tools = v.tools ?? [];
-  add(body, el('p', { class: 'muted', style: { margin: '0 0 14px', fontSize: '13.5px' } }, open.length ? `${open.length} unanswered. Choose one to work on it.` : 'Nothing unanswered. For now.'));
+  add(body, el('p', { class: 'muted papers-count' }, open.length ? `${open.length} unanswered. Choose one to work on it.` : 'Nothing unanswered. For now.'));
   for (const [key, label] of GROUPS) {
     const list = puzzles.filter((p) => (key === 'extra' ? p.extra : !p.extra && p.setter === key));
     if (!list.length) continue;
-    add(body, el('div', { class: 'section-label', style: { marginTop: '14px' }, text: label }));
+    add(body, el('div', { class: 'section-label list-label', text: label }));
     add(
       body,
       el(
@@ -266,7 +266,7 @@ export function renderPapers(body, game, sel, api) {
         list.map((p) =>
           el(
             'button',
-            { class: 'row', type: 'button', onClick: () => { sel.puzzle = p.id; sel.tool = null; api.refresh(); } },
+            { class: `row paper-row ${p.solved ? 'answered' : ''} ${key}`, type: 'button', onClick: () => { sel.puzzle = p.id; sel.tool = null; api.refresh(true); } },
             icon(p.solved ? 'check' : 'paper', 20),
             el('div', { class: 'row-main' }, el('div', { class: 'row-title', text: p.title }), el('div', { class: 'row-sub' }, p.solved ? `Answered: ${p.answer}` : p.ask)),
             tierDots(p.tier),
@@ -276,7 +276,7 @@ export function renderPapers(body, game, sel, api) {
     );
   }
   if (tools.length) {
-    add(body, el('div', { class: 'section-label', style: { marginTop: '20px' }, text: 'Your tools' }));
+    add(body, el('div', { class: 'section-label list-label', text: 'Your tools' }));
     add(body, el('div', { class: 'list' }, tools.map((t) => el('div', { class: 'row static' }, icon('gear', 20), el('div', { class: 'row-main' }, el('div', { class: 'row-title', text: t.name }), el('div', { class: 'row-sub', text: t.desc }))))));
   }
 }
@@ -357,12 +357,12 @@ function puzzleView(p, game, sel, api) {
   // The bench: whichever tools have been earned, working on this paper's cipher text.
   if (tools.length && !p.solved) {
     const bar = el('div', { class: 'filterbar toolbar' }, tools.map((t) => el('button', { class: 'filter', type: 'button', 'aria-pressed': String(sel.tool === t.id), text: t.name, title: t.desc, onClick: () => { sel.tool = sel.tool === t.id ? null : t.id; api.refresh(); } })));
-    add(root, el('div', { class: 'section-label', style: { marginTop: '20px' }, text: 'Your tools' }), bar);
+    add(root, el('div', { class: 'section-label tools-label', text: 'Your tools' }), bar);
     if (sel.tool === 'primer') add(root, primer());
     else if (TOOL_VIEWS[sel.tool]) add(root, TOOL_VIEWS[sel.tool](cipher));
   }
   if (p.lesson) {
-    add(root, el('button', { class: 'btn small quiet', type: 'button', style: { marginTop: '14px' }, onClick: () => game.askLectern?.(p.lesson) }, icon('laptop', 16), 'Ask the Lectern how this is done'));
+    add(root, el('button', { class: 'btn small quiet lesson', type: 'button', onClick: () => game.askLectern?.(p.lesson) }, icon('laptop', 16), 'Ask the Lectern how this is done'));
   }
   return root;
 }

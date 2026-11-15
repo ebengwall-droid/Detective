@@ -45,6 +45,47 @@ export function clear(node) {
   return node;
 }
 
+/** How long a sheet takes to leave. Matches `.panel.leaving` in the stylesheet. */
+const LEAVE_MS = 190;
+
+/**
+ * Take sheets off the screen. As far as the game goes they are gone at once:
+ * nothing in them can be pressed, focused or found by the Back button. They
+ * stay in the page only for the moment it takes them to fade, because leaving
+ * should be quicker than arriving but not instant. With reduced motion they
+ * are simply removed.
+ * @param {...(Element|null|undefined)} nodes
+ */
+export function leave(...nodes) {
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for (const node of nodes) {
+    if (!node?.isConnected) continue;
+    if (still) {
+      node.remove();
+      continue;
+    }
+    node.classList.add('leaving');
+    node.setAttribute('aria-hidden', 'true');
+    node.setAttribute('inert', '');
+    node.removeAttribute('role');
+    for (const b of node.querySelectorAll('[data-back]')) b.removeAttribute('data-back');
+    for (const b of node.querySelectorAll('[id]')) b.removeAttribute('id');
+    setTimeout(() => node.remove(), LEAVE_MS);
+  }
+}
+
+/**
+ * Tell a segmented control (tabs, an either-or setting) which of its parts is
+ * chosen, so the stylesheet can slide the lit thumb under it.
+ * @param {HTMLElement} track
+ * @param {number} index
+ * @param {number} of
+ */
+export function setThumb(track, index, of) {
+  track.style.setProperty('--n', String(Math.max(1, of)));
+  track.style.setProperty('--i', String(Math.max(0, index)));
+}
+
 const P = {
   notebook: '<path d="M6 3.5h11a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5H6z"/><path d="M6 3.5v17M3.5 7.5h4M3.5 12h4M3.5 16.5h4M10 8h5.5M10 11.5h5.5"/>',
   laptop: '<rect x="4.5" y="5" width="15" height="10" rx="1"/><path d="M2.5 18.5h19l-1.6-3.5H4.1z"/>',

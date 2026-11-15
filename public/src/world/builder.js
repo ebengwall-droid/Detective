@@ -23,7 +23,7 @@ const SELF_Y = new Set(['clock', 'frame', 'caseBoard', 'plaque', 'sign', 'lifebu
  * @property {{r:number}|null} round walkable circle for round rooms
  * @property {((t:number, dt:number) => void)[]} anims
  * @property {Map<string, {center: THREE.Vector3, size: THREE.Vector3}>} anchors
- * @property {{p:[number,number], yaw:number}} spawn
+ * @property {{p:[number,number], yaw:number, pitch?:number}} spawn where the player first stands; yaw and optional pitch in degrees
  * @property {number} height
  * @property {() => void} dispose
  */

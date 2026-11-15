@@ -4,21 +4,43 @@
 //
 // The host has no system-prompt channel, so the character sheet travels as a
 // leading user turn that is kept at the top of every request.
+//
+// Who plays the cast:
+//   'opus'  Claude Opus, always. The best acting; it thinks before it speaks.
+//   'quick' The fastest model, always. Words start almost at once.
+//   'auto'  Opus, unless it keeps people waiting: if two replies in a row are
+//           slow to start (or one is very slow), everyday conversation moves
+//           to the fast model and Opus keeps the parts worth waiting for (the
+//           letters, the Lectern, the last scene).
 
 const MODEL = 'claude-opus-5-5';
 const PREFS_KEY = 'fold.ai';
+const PREFS = new Set(['auto', 'opus', 'quick']);
 /** Codes that mean "not in this view, do not ask again". */
 const GONE = new Set(['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed']);
+/** How long the first words of a conversational reply may take before it counts as slow. Twice this is slow enough to act on at once. */
+const SLOW_FIRST_MS = 6000;
+/** Requests that are a line of conversation, where a quick answer matters more than a deep one. */
+const TALK = /^(npc:|think$)/;
 
 function readPref() {
   try {
-    return localStorage.getItem(PREFS_KEY) === 'quick' ? 'quick' : 'opus';
+    const v = localStorage.getItem(PREFS_KEY);
+    return PREFS.has(v) ? v : 'auto';
   } catch {
-    return 'opus';
+    return 'auto';
   }
 }
 
-export async function createSampleProvider() {
+const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+const median = (list) => {
+  if (!list.length) return null;
+  const s = [...list].sort((a, b) => a - b);
+  return Math.round(s[Math.floor(s.length / 2)]);
+};
+
+/** @param {{ slowMs?: number }} [opts] how long the first words may take before a reply counts as slow */
+export async function createSampleProvider({ slowMs = SLOW_FIRST_MS } = {}) {
   const host = /** @type {any} */ (globalThis).claude;
   if (!host?.use) return null;
   let sample = null;
@@ -34,6 +56,12 @@ export async function createSampleProvider() {
   let pref = readPref();
   /** Whether the named model actually answered the last call, once we know. */
   let namedAnswered = null;
+  /** In 'auto': conversation has moved to the fast model, because Opus kept people waiting ('slow') or ran into a usage limit ('limit'). */
+  let eased = false;
+  let easedWhy = null;
+  let slowRuns = 0;
+  /** How long recent replies took to start, by who answered: for the diagnostics. */
+  const pace = { opus: [], quick: [] };
 
   async function run(input, options) {
     try {
@@ -47,20 +75,35 @@ export async function createSampleProvider() {
         off = true;
         reason = code === 'not_granted' ? 'Claude was not allowed for this page' : 'Claude is not available in this view';
       }
-      throw Object.assign(new Error(`Claude: ${code}`), { code });
+      // Only a passing service failure is worth one more try; everything else is final.
+      throw Object.assign(new Error(`Claude: ${code}`), { code, transient: code === 'upstream_error', final: code !== 'upstream_error' });
     }
   }
 
   return {
     describe() {
-      const label = off ? 'Scripted' : pref === 'quick' ? 'Claude, fast replies' : namedAnswered === false ? 'Claude' : 'Claude Opus';
-      return { live: !off, model: off ? null : pref === 'quick' ? 'quick' : MODEL, label, reason, hosted: true, pref };
+      const fast = pref === 'quick' || (pref === 'auto' && eased);
+      const label = off ? 'Scripted' : fast ? 'Claude, fast replies' : namedAnswered === false ? 'Claude' : 'Claude Opus';
+      return {
+        live: !off,
+        model: off ? null : fast ? 'quick' : MODEL,
+        label,
+        reason,
+        hosted: true,
+        pref,
+        eased,
+        easedWhy,
+        pace: { opus: median(pace.opus), quick: median(pace.quick) },
+      };
     },
 
-    /** 'opus' for the best acting, 'quick' for the fastest replies. */
+    /** 'auto' (the default), 'opus' for the best acting, 'quick' for the fastest replies. */
     setPreference(next) {
-      pref = next === 'quick' ? 'quick' : 'opus';
+      pref = PREFS.has(next) ? next : 'auto';
       namedAnswered = null;
+      eased = false;
+      easedWhy = null;
+      slowRuns = 0;
       try {
         localStorage.setItem(PREFS_KEY, pref);
       } catch {
@@ -83,21 +126,45 @@ export async function createSampleProvider() {
     },
 
     async complete(req) {
-      if (off) throw new Error('Claude is not available');
+      if (off) throw Object.assign(new Error('Claude is not available'), { final: true });
       const format = req.schema ? '\n\nReply with the JSON object only: no code fence, no commentary before or after it.' : '';
       const input = [{ role: 'user', content: req.system + format }, ...req.messages.map((m) => ({ role: m.role, content: m.content }))];
       const effort = req.effort === 'high' ? 'high' : req.effort === 'medium' ? 'medium' : 'low';
+      const talk = TALK.test(req.tag ?? '');
+      const fast = pref === 'quick' || (pref === 'auto' && eased && talk);
+      const started = now();
+      let first = null;
       const options = {
         cache: false,
         signal: req.signal,
-        onText: req.onText ? ({ text }) => req.onText(text) : undefined,
-        ...(pref === 'quick' ? { modelTier: 'quick' } : { model: MODEL, modelTier: 'default', effort }),
+        onText: ({ text }) => {
+          if (first === null) first = now() - started;
+          req.onText?.(text);
+        },
+        ...(fast ? { modelTier: 'quick' } : { model: MODEL, modelTier: 'default', effort }),
       };
       try {
         const { text } = await run(input, options);
+        const took = first ?? now() - started;
+        const list = fast ? pace.quick : pace.opus;
+        list.push(took);
+        if (list.length > 9) list.shift();
+        if (pref === 'auto' && !fast && talk) {
+          slowRuns = took > slowMs ? slowRuns + 1 : 0;
+          if (slowRuns >= 2 || took > slowMs * 2) {
+            eased = true;
+            easedWhy = 'slow';
+          }
+        }
         return { text, refused: false };
       } catch (err) {
         if (err.code === 'refused') return { text: '', refused: true };
+        // The best model has had enough for now (a usage limit). Nothing is retried, but the next
+        // thing said goes to the fast model, which is counted separately and far more generously.
+        if (err.code === 'rate_limited' && pref === 'auto' && !fast && !eased) {
+          eased = true;
+          easedWhy = 'limit';
+        }
         throw err;
       }
     },

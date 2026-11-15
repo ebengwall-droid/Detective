@@ -17,6 +17,9 @@ import './props2.js';
 const WARM = 0xffb45e;
 const DEG = Math.PI / 180;
 
+/** What an anchor is made of: nothing that is ever drawn. */
+const ANCHOR = new THREE.MeshBasicMaterial({ visible: false });
+
 const VELVET = '#3a1420';
 const BAIZE = '#1f4a34';
 const IVORY = '#e4dcc4';
@@ -31,7 +34,6 @@ export const NESTED = {
   chessTable: ['chess_set'],
   automaton: ['chess_set'],
   cakeDome: ['cake'],
-  teaTable: ['tea_set'],
   foxgloves: ['vase'],
   planTable: ['magnifier'],
   watchBench: ['magnifier'],
@@ -56,6 +58,33 @@ function doubleSided(material) {
  * the prop lifts itself; given a `y` away from a wall, the builder has already.
  */
 const hung = (o, fallback) => (o.wall || o.y === undefined ? o.y ?? fallback : 0);
+
+/**
+ * A group that moves with a prop but is not part of it: what is put here is drawn where the prop is,
+ * yet is left out of the box a hotspot takes from the prop (see the builder's anchors). That box is what
+ * a tap answers to and what the marker floats over, so the flue of a stove, the pipe of an outlet, a lamp's
+ * glow or a fence either side of a gate belong out here, and the thing itself stays in the prop.
+ */
+function outside(g) {
+  const o = group(g.parent ?? g);
+  o.position.copy(g.position);
+  o.rotation.copy(g.rotation);
+  o.scale.copy(g.scale);
+  return o;
+}
+
+/**
+ * An unseen box in a prop, standing on (x, y, z): what a hotspot takes hold of when the rest of the prop
+ * has been drawn outside it.
+ */
+function hold(g, w, h, d, x = 0, y = 0, z = 0) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), ANCHOR);
+  m.position.set(x, y + h / 2, z);
+  m.visible = false;
+  m.userData.dyn = true;
+  g.add(m);
+  return m;
+}
 
 /** A model from the manifest, standing on its base at a point in a prop. Null if it is not in memory. */
 function nested(g, name, { x = 0, y = 0, z = 0, s = 1, ry = 0, rx = 0, rz = 0 } = {}) {
@@ -171,6 +200,11 @@ const art = {
     if (kind === 'proof') return artMaterial(key, 160, 480, (c, w, h, r) => ART.proof(c, w, h, r));
     if (kind === 'crux') return artMaterial(key, 384, 512, (c, w, h, r) => ART.crux(c, w, h, r, { puzzle: i % 2 === 0, filled: i ? 0.5 : 0 }));
     if (kind === 'typed') return artMaterial(key, 256, 340, (c, w, h, r) => ART.typed(c, w, h, r, { lines: 10 + i * 2 }));
+    if (kind === 'green') return artMaterial('sheet:green', 384, 512, (c, w, h, r) => ART.greenPaper(c, w, h, r));
+    if (kind === 'warden') return artMaterial('sheet:warden', 384, 512, (c, w, h, r) => ART.greenPaper(c, w, h, r, { title: 'PAPER FOR THE WARDEN', sub: 'One question.' }));
+    if (kind === 'blotter') return artMaterial('sheet:blotter', 512, 384, (c, w, h, r) => ART.blotter(c, w, h, r));
+    if (kind === 'square') return artMaterial(`sheet:square:${i}`, 256, 256, (c, w, h, r) => ART.titheSquare(c, w, h, r, { year: 2012 + i }));
+    if (kind === 'notmusic') return artMaterial('sheet:notmusic', 384, 512, (c, w, h, r) => ART.notMusic(c, w, h, r));
     return artMaterial(key, 256, 340, (c, w, h, r) => ART.handNotes(c, w, h, r));
   },
   plate(text, sub) {
@@ -187,6 +221,31 @@ function cupAndSaucer(parent, x, y, z, { full = false, material = 'ceramic', tur
   lathe(c, [[0.018, 0.008], [0.026, 0.012], [0.04, 0.04], [0.043, 0.062], [0.04, 0.062], [0.036, 0.04], [0.02, 0.016], [0, 0.014]], material, 0, 0, 0, 12);
   torus(c, 0.016, 0.004, material, 0.052, 0.038, 0, { seg: 8 });
   if (full) cyl(c, 0.037, 0.037, 0.002, '#3a2412', 0, 0.054, 0, 12);
+  return c;
+}
+
+/**
+ * One of the Syndics' cups: each has something of its owner's painted in the bottom ('clock', 'compass',
+ * 'grid', 'arms'). `upturned` turns it over on its saucer; `tea` leaves a brown half-inch in it; `pencil`
+ * stands a pencil in it.
+ */
+function hallCup(parent, x, y, z, { kind = 'compass', upturned = false, tea = false, pencil = false, turn = 0, material = 'ceramic' } = {}) {
+  const c = group(parent, x, y, z, turn);
+  cyl(c, 0.068, 0.05, 0.008, material, 0, 0.004, 0, 14);
+  torus(c, 0.066, 0.002, '#2a3a6a', 0, 0.0085, 0, { rx: 90, seg: 16 });
+  const cup = group(c, 0, upturned ? 0.07 : 0, 0);
+  if (upturned) cup.rotation.x = Math.PI;
+  lathe(cup, [[0.018, 0.008], [0.026, 0.012], [0.04, 0.04], [0.043, 0.062], [0.04, 0.062], [0.036, 0.04], [0.02, 0.016], [0, 0.014]], material, 0, 0, 0, 12);
+  torus(cup, 0.016, 0.004, material, 0.052, 0.038, 0, { seg: 8 });
+  torus(cup, 0.0425, 0.0016, '#2a3a6a', 0, 0.06, 0, { rx: 90, seg: 14 });
+  if (!upturned) {
+    if (tea) cyl(c, 0.03, 0.03, 0.002, '#3a2412', 0, 0.03, 0, 12);
+    else if (kind !== 'plain') disc(c, 0.019, artMaterial(`cupBottom:${kind}`, 64, 64, (cx, w, h, r) => ART.cupBottom(cx, w, h, r, { kind }), { transparent: true }), 0, 0.0165, 0, { flat: true, seg: 12 });
+    if (pencil) {
+      rod(c, [0.012, 0.016, 0.006], [-0.03, 0.15, -0.012], 0.0035, 'plasticYellow', 6);
+      rod(c, [-0.03, 0.15, -0.012], [-0.034, 0.163, -0.0135], 0.0035, '#b05a52', 6);
+    }
+  }
   return c;
 }
 
@@ -207,7 +266,7 @@ function teapot(parent, x, y, z, { s = 1, material = 'ceramic', turn = 0, cosy =
 }
 
 /** One of the Bellows' carriers: a brass tube with a leather cap and a felt collar at each end. */
-function carrier(parent, x, y, z, { turn = 0, upright = false, s = 1 } = {}) {
+function carrier(parent, x, y, z, { turn = 0, upright = false, s = 1, uncapped = false } = {}) {
   const c = group(parent, x, y, z, turn);
   c.scale.setScalar(s);
   const body = group(c);
@@ -215,6 +274,14 @@ function carrier(parent, x, y, z, { turn = 0, upright = false, s = 1 } = {}) {
   cyl(body, 0.03, 0.03, 0.15, 'brass', 0, 0, 0, 14);
   for (const sy of [-1, 1]) {
     cyl(body, 0.036, 0.036, 0.018, 'fabricWine', 0, sy * 0.075, 0, 14);
+    if (uncapped && sy > 0) {
+      // Opened: the mouth of the tube shows dark, and its cap lies beside it.
+      cyl(body, 0.026, 0.026, 0.004, 'dark', 0, 0.086, 0, 12);
+      const cap = group(c, -0.02, -0.012, 0.085);
+      cyl(cap, 0.033, 0.033, 0.03, 'leather', 0, 0, 0, 14);
+      cyl(cap, 0.028, 0.033, 0.01, 'leather', 0, 0.02, 0, 14);
+      continue;
+    }
     cyl(body, 0.033, 0.033, 0.03, 'leather', 0, sy * 0.098, 0, 14);
     cyl(body, 0.028, 0.033, 0.01, 'leather', 0, sy * 0.118, 0, 14, sy < 0 ? { rx: 180 } : undefined);
   }
@@ -223,7 +290,7 @@ function carrier(parent, x, y, z, { turn = 0, upright = false, s = 1 } = {}) {
 }
 
 /** The lettered rings of a letter-lock on their spindle, the spindle running left to right. Returns their length. */
-function letterRings(parent, n, rnd, { r = 0.034, len = 0.03, x = 0, y = 0, z = 0 } = {}) {
+function letterRings(parent, n, rnd, { r = 0.034, len = 0.03, x = 0, y = 0, z = 0, word = '' } = {}) {
   const band = artMaterial('letterBand', 1024, 64, (c, w, h) => ART.letterBand(c, w, h), { rough: 0.38 });
   band.metalness = 0.7;
   const pitch = len + 0.007;
@@ -235,8 +302,9 @@ function letterRings(parent, n, rnd, { r = 0.034, len = 0.03, x = 0, y = 0, z = 
     const spin = group(holder, cx, 0, 0);
     spin.rotation.z = Math.PI / 2;
     const ring = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 26, 1, true), band);
-    // Stop each ring on a letter, a different one for each.
-    ring.rotation.y = -((Math.floor(rnd() * 26) + 0.5) / 26) * Math.PI * 2;
+    // Stop each ring on a letter: the word it has been left at, or any letter at all.
+    const at = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf((word[i] ?? '').toUpperCase());
+    ring.rotation.y = -(((at >= 0 ? at : Math.floor(rnd() * 26)) + 0.5) / 26) * Math.PI * 2;
     spin.add(ring);
     for (const s of [-1, 1]) cyl(holder, r * 1.05, r * 1.05, 0.004, 'brassDull', cx + (s * len) / 2, 0, 0, 20, { rz: 90 });
   }
@@ -245,7 +313,7 @@ function letterRings(parent, n, rnd, { r = 0.034, len = 0.03, x = 0, y = 0, z = 
 }
 
 /** A letter-lock on its brass plate, built facing +Z about the given parent's origin. Returns its width. */
-function buildLetterLock(parent, n, rnd, { bolt = 1 } = {}) {
+function buildLetterLock(parent, n, rnd, { bolt = 1, word = '' } = {}) {
   const r = 0.034;
   const span = n * 0.037;
   const w = span + 0.15;
@@ -260,7 +328,7 @@ function buildLetterLock(parent, n, rnd, { bolt = 1 } = {}) {
     sph(parent, 0.008, 'steelDark', s * (w / 2 - 0.022), 0.045, 0.014, 6);
     sph(parent, 0.008, 'steelDark', s * (w / 2 - 0.022), -0.045, 0.014, 6);
   }
-  letterRings(parent, n, rnd, { r, z: 0.052 });
+  letterRings(parent, n, rnd, { r, z: 0.052, word });
   // The line the letters are read against.
   box(parent, span + 0.02, 0.004, 0.004, 'steelDark', 0, r + 0.012, 0.05);
   box(parent, span + 0.02, 0.004, 0.004, 'steelDark', 0, -r - 0.012, 0.05);
@@ -274,19 +342,38 @@ function buildLetterLock(parent, n, rnd, { bolt = 1 } = {}) {
 
 // --------------------------------------------------------------- letter-locks
 
-/** A letter-lock on a wall, a post or a gate: a brass plate, a spindle, and o.n lettered rings. */
+/** A letter-lock on a wall, a post or a gate: a brass plate, a spindle, and o.n lettered rings (o.word: what they stand at). */
 def('letterLock', (g, o, ctx) => {
   const L = group(g, 0, hung(o, 1.1), 0);
-  buildLetterLock(L, o.n ?? 7, ctx.rnd, { bolt: o.bolt ?? 1 });
+  buildLetterLock(L, o.n ?? 7, ctx.rnd, { bolt: o.bolt ?? 1, word: o.word });
+  return { c: null, h: 0 };
+});
+
+/**
+ * Nothing to see: a box for a hotspot to take hold of, where the thing it is about is part of something
+ * bigger or is drawn by a prop whose own outline will not do (a lamp is as wide as its glow, a stove as
+ * tall as its flue). Stands on p at height y; o.w, o.h, o.d its size. On a wall it is centred at y.
+ */
+def('hotspot', (g, o) => {
+  const w = o.w ?? 0.4;
+  const h = o.h ?? 0.4;
+  const d = o.d ?? 0.4;
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), ANCHOR);
+  m.position.set(0, o.wall ? o.y ?? 1.2 : h / 2, o.wall ? d / 2 : 0);
+  m.visible = false;
+  m.userData.dyn = true;
+  g.add(m);
   return { c: null, h: 0 };
 });
 
 /**
  * A door seen from inside its room, with what holds it shut.
- *   lock: 'letter' (a letter-lock of o.n rings), 'night' (a night latch and chain) or 'none'
+ *   lock: 'letter' (a letter-lock of o.n rings, standing at o.word), 'night' (a night latch and chain) or 'none'
  *   forced: the frame is splintered round the keep and the door stands ajar
+ *   off: the door has been lifted off its hinges and leans against the wall beside its opening ('left' or 'right' of it)
  *   flip: hang it from the other jamb
- *   port: a brass porthole in the leaf (a boat's hatch)
+ *   straps: iron strap hinges across the leaf
+ *   port: a brass porthole in the leaf (a boat's hatch); 'broken' has had a boathook through it
  */
 def('lockDoor', (g, o, ctx) => {
   const w = o.w ?? 0.92;
@@ -296,13 +383,31 @@ def('lockDoor', (g, o, ctx) => {
   const lock = o.lock ?? 'letter';
   // The leaf runs from its hinge toward +X, or with o.flip toward -X.
   const side = o.flip ? -1 : 1;
-  box(g, 0.08, h + 0.08, 0.14, frame, -w / 2 - 0.04, (h + 0.08) / 2, 0);
-  box(g, 0.08, h + 0.08, 0.14, frame, w / 2 + 0.04, (h + 0.08) / 2, 0);
-  box(g, w + 0.16, 0.08, 0.14, frame, 0, h + 0.04, 0);
-  const open = o.open ?? (o.forced ? 17 : 0);
-  if (open) box(g, w, h, 0.012, 'dark', 0, h / 2, -0.03, { noShadow: true });
-  const leaf = group(g, (-side * w) / 2, 0, 0);
-  leaf.rotation.y = -side * open * DEG;
+  // Off its hinges, the door is the thing to look at and the hole in the wall is not part of it.
+  const wallG = o.off ? outside(g) : g;
+  box(wallG, 0.08, h + 0.08, 0.14, frame, -w / 2 - 0.04, (h + 0.08) / 2, 0);
+  box(wallG, 0.08, h + 0.08, 0.14, frame, w / 2 + 0.04, (h + 0.08) / 2, 0);
+  box(wallG, w + 0.16, 0.08, 0.14, frame, 0, h + 0.04, 0);
+  const open = o.off ? 0 : o.open ?? (o.forced ? 17 : 0);
+  if (open || o.off) box(wallG, w, h, 0.012, 'dark', 0, h / 2, -0.03, { noShadow: true });
+  let leaf;
+  if (o.off) {
+    // Leant against the wall, its inside face to the room, the hinge pins in a saucer of their own.
+    const lean = Math.asin(Math.min(0.9, 0.3 / h));
+    const lx = (o.off === 'left' ? -1 : 1) * (w + 0.26);
+    const tilt = group(g, lx, 0, 0.34);
+    tilt.rotation.x = -lean;
+    tilt.rotation.z = (o.off === 'left' ? 1 : -1) * 0.012;
+    leaf = group(tilt, (-side * w) / 2, 0, 0);
+    for (const hy of [0.18, 0.85]) {
+      cyl(wallG, 0.013, 0.013, 0.09, 'brassDull', (-side * w) / 2, h * hy, 0.075, 8);
+      box(wallG, 0.05, 0.09, 0.008, 'brassDull', (-side * w) / 2 - side * 0.03, h * hy, 0.072);
+    }
+    for (let i = 0; i < 2; i++) cyl(wallG, 0.005, 0.005, 0.09, 'steel', lx + side * (w / 2 + 0.14) + i * 0.03, 0.006, 0.2 + i * 0.05, 5, { rz: 90, ry: 25 + i * 40 });
+  } else {
+    leaf = group(g, (-side * w) / 2, 0, 0);
+    leaf.rotation.y = -side * open * DEG;
+  }
   const at = (x) => side * x;
   box(leaf, w, h, 0.045, m, at(w / 2), h / 2, 0);
   for (const py of [0.3, 0.72]) {
@@ -310,20 +415,42 @@ def('lockDoor', (g, o, ctx) => {
     box(leaf, w * 0.7 + 0.03, 0.012, 0.058, frame, at(w / 2), h * py + h * 0.16, 0);
     box(leaf, w * 0.7 + 0.03, 0.012, 0.058, frame, at(w / 2), h * py - h * 0.16, 0);
   }
-  for (const hy of [0.18, 0.85]) cyl(leaf, 0.012, 0.012, 0.1, 'brassDull', at(0.004), h * hy, 0.028, 8);
+  if (o.straps) {
+    // Strap hinges: a long iron tongue across the leaf from each hinge, nailed.
+    for (const hy of [0.18, 0.85]) {
+      box(leaf, w * 0.82, 0.055, 0.008, 'iron', at(w * 0.43), h * hy, 0.032);
+      const tip = cyl(leaf, 0.045, 0.045, 0.008, 'iron', at(w * 0.84), h * hy, 0.032, 3, { rx: 90 });
+      tip.rotation.z = side > 0 ? -Math.PI / 2 : Math.PI / 2;
+      for (let i = 0; i < 5; i++) sph(leaf, 0.009, 'steelDark', at(0.08 + i * w * 0.17), h * hy, 0.038, 5);
+    }
+  }
+  if (!o.off) for (const hy of [0.18, 0.85]) cyl(leaf, 0.012, 0.012, 0.1, 'brassDull', at(0.004), h * hy, 0.028, 8);
   if (o.port) {
     torus(leaf, 0.11, 0.02, 'brass', at(w / 2), h * 0.74, 0.03, { seg: 16 });
-    cyl(leaf, 0.105, 0.105, 0.012, 'glassDark', at(w / 2), h * 0.74, 0.026, 16, { rx: 90, noShadow: true });
+    if (o.port === 'broken') {
+      // What a boathook leaves: a dark hole, teeth of glass round the rim, the rest on the floor.
+      cyl(leaf, 0.1, 0.1, 0.05, 'dark', at(w / 2), h * 0.74, 0.0, 14, { rx: 90, noShadow: true });
+      for (let i = 0; i < 9; i++) {
+        const a = (i / 9) * Math.PI * 2 + ctx.rnd();
+        const len = 0.03 + ctx.rnd() * 0.035;
+        const shard = cyl(leaf, 0.0005, 0.012 + ctx.rnd() * 0.01, len, 'glassClear', at(w / 2) + Math.cos(a) * (0.1 - len / 2), h * 0.74 + Math.sin(a) * (0.1 - len / 2), 0.028, 3, { noShadow: true });
+        shard.rotation.z = a + Math.PI / 2;
+      }
+      for (let i = 0; i < 10; i++) {
+        const shard = cyl(g, 0.0005, 0.012 + ctx.rnd() * 0.02, 0.03 + ctx.rnd() * 0.04, 'glassClear', (ctx.rnd() - 0.5) * 0.6, 0.004, 0.12 + ctx.rnd() * 0.45, 3, { noShadow: true });
+        shard.rotation.set(Math.PI / 2, 0, ctx.rnd() * 6);
+      }
+    } else cyl(leaf, 0.105, 0.105, 0.012, 'glassDark', at(w / 2), h * 0.74, 0.026, 16, { rx: 90, noShadow: true });
   }
   const ly = Math.min(1.08, h * 0.56);
   const jamb = side * (w / 2 + 0.03);
   if (lock === 'letter') {
     const L = group(leaf, at(w - 0.3), ly, 0.0235);
-    buildLetterLock(L, o.n ?? 7, ctx.rnd, { bolt: o.forced ? 0 : side });
+    buildLetterLock(L, o.n ?? 7, ctx.rnd, { bolt: o.forced || o.off ? 0 : side, word: o.word });
     // A drop handle under it.
     torus(leaf, 0.035, 0.007, 'brass', at(w - 0.14), ly - 0.2, 0.04, { seg: 12 });
     cyl(leaf, 0.022, 0.022, 0.012, 'brass', at(w - 0.14), ly - 0.165, 0.03, 10, { rx: 90 });
-    if (!o.forced) box(g, 0.03, 0.07, 0.04, 'brass', jamb + side * 0.005, ly, 0.075);
+    if (!o.forced) box(wallG, 0.03, 0.07, 0.04, 'brass', jamb + side * 0.005, ly, 0.075);
   } else if (lock === 'night') {
     // A night latch: the brass box, its little turn and snib; and a chain above it.
     box(leaf, 0.1, 0.075, 0.03, 'brass', at(w - 0.075), ly + 0.25, 0.038);
@@ -367,26 +494,28 @@ def('bellowsOutlet', (g, o, ctx) => {
   const y = hung(o, 1.12);
   const ceil = (ctx.ceil ?? 2.8) - (o.wall || o.y === undefined ? 0 : o.y);
   const b = group(g, 0, y, 0);
+  // The pipe is the building's, not the outlet's: a hotspot here is the mouth and the tray.
+  const pipe = group(outside(g), 0, y, 0);
   // Backboard.
   box(b, 0.36, 0.66, PROUD, 'woodDark', 0, 0.02, PROUD / 2);
   box(b, 0.4, 0.03, 0.035, 'woodBlack', 0, 0.36, 0.0175);
   box(b, 0.4, 0.03, 0.035, 'woodBlack', 0, -0.32, 0.0175);
   // The pipe, clipped to the wall, and the bend that brings it out over the tray.
   const top = ceil - y;
-  cyl(b, 0.046, 0.046, top - 0.26, 'brass', 0, 0.26 + (top - 0.26) / 2, 0.085, 14);
+  cyl(pipe, 0.046, 0.046, top - 0.26, 'brass', 0, 0.26 + (top - 0.26) / 2, 0.085, 14);
   for (let cy = 0.5; cy < top - 0.1; cy += 0.6) {
-    cyl(b, 0.052, 0.052, 0.03, 'brassDull', 0, cy, 0.085, 14);
-    box(b, 0.15, 0.03, 0.04, 'brassDull', 0, cy, 0.03);
+    cyl(pipe, 0.052, 0.052, 0.03, 'brassDull', 0, cy, 0.085, 14);
+    box(pipe, 0.15, 0.03, 0.04, 'brassDull', 0, cy, 0.03);
   }
-  cyl(b, 0.07, 0.07, 0.02, 'brassDull', 0, top - 0.01, 0.085, 14);
+  cyl(pipe, 0.07, 0.07, 0.02, 'brassDull', 0, top - 0.01, 0.085, 14);
   tube(b, [[0, 0.3, 0.085], [0, 0.2, 0.09], [0, 0.11, 0.125], [0, 0.05, 0.185]], 0.046, 'brass', { seg: 10, radial: 12 });
-  // The mouth: a flared collar, and a flap hung from a hinge above it, a little open.
+  // The mouth: a flared collar, and a flap hung from a hinge above it, a little open (o.open: thrown right back).
   const mouth = group(b, 0, 0.04, 0.195);
   mouth.rotation.x = 0.85;
   cyl(mouth, 0.064, 0.05, 0.035, 'brassDull', 0, -0.01, 0, 16);
   cyl(mouth, 0.045, 0.045, 0.004, 'dark', 0, -0.029, 0, 14);
   const flap = group(mouth, 0, -0.032, -0.062);
-  flap.rotation.x = 0.5;
+  flap.rotation.x = o.open ? 1.9 : 0.5;
   cyl(flap, 0.062, 0.062, 0.006, 'brass', 0, 0, 0.062, 16);
   cyl(flap, 0.008, 0.008, 0.11, 'brassDull', 0, 0, 0, 6, { rz: 90 });
   // The bell that says something has come.
@@ -405,7 +534,7 @@ def('bellowsOutlet', (g, o, ctx) => {
   }
   // Which station this is.
   plane(b, 0.11, 0.04, art.plate(o.label ?? 'BELLOWS'), 0.1, 0.2, PROUD + 0.002, { unitUv: true, noShadow: true });
-  if (o.carrier !== false) carrier(b, 0.01, ty + 0.046, 0.12, { turn: 12 });
+  if (o.carrier !== false) carrier(b, 0.01, ty + 0.046, 0.12, { turn: 12, uncapped: !!o.uncapped });
   return { c: null, h: 0 };
 });
 
@@ -477,14 +606,29 @@ def('bellowsExchange', (g, o, ctx) => {
   cyl(b, 0.007, 0.007, tw, 'brass', tx, 0.78, 0.262, 6, { rz: 90 });
   carrier(b, tx - tw * 0.28, 0.748, 0.15, { turn: 20 });
   carrier(b, tx + tw * 0.2, 0.748, 0.12, { turn: -8 });
-  // Carriers waiting, stood in a rack.
-  box(b, tw, 0.03, 0.14, 'wood', tx, 0.36, 0.09);
-  box(b, tw, 0.03, 0.14, 'wood', tx, 0.2, 0.09);
-  for (const s of [-1, 1]) box(b, 0.025, 0.24, 0.14, 'wood', tx + s * (tw / 2 - 0.012), 0.27, 0.09);
-  const slots = Math.floor(tw / 0.115);
+  // The hold-rack: a row of brass cradles, each with its own little dial, like egg-timers. Put a carrier in
+  // one, set the dial, and the clockwork sends it on at the hour chosen.
+  box(b, tw, 0.03, 0.16, 'wood', tx, 0.2, 0.1);
+  box(b, tw, 0.3, 0.02, 'wood', tx, 0.36, 0.03);
+  for (const s of [-1, 1]) box(b, 0.025, 0.3, 0.16, 'wood', tx + s * (tw / 2 - 0.012), 0.36, 0.1);
+  const slots = Math.max(4, Math.floor(tw / 0.19));
+  const small = artMaterial('dial:hold', 96, 96, (c, cw, ch, r) => ART.dial(c, cw, ch, r, { n: 12, at: 7, plain: true }));
   for (let i = 0; i < slots; i++) {
-    if (i % 4 === 3) continue;
-    carrier(b, tx - tw / 2 + 0.09 + i * ((tw - 0.18) / (slots - 1)), 0.34, 0.09, { upright: true });
+    const cx = tx - tw / 2 + 0.11 + i * ((tw - 0.22) / (slots - 1));
+    // The cradle: two brass saddles on the shelf.
+    for (const sz of [0.06, 0.14]) {
+      const saddle = torus(b, 0.036, 0.006, 'brass', cx, 0.257, sz, { seg: 10, arc: Math.PI });
+      saddle.rotation.z = Math.PI;
+      box(b, 0.012, 0.03, 0.012, 'brass', cx, 0.228, sz);
+    }
+    // Its dial, on the board above it, turned to a different hour from its neighbours'.
+    cyl(b, 0.04, 0.04, 0.014, 'brassDull', cx, 0.43, 0.047, 16, { rx: 90 });
+    disc(b, 0.034, small, cx, 0.43, 0.0545, { turn: (i * 67) % 360, seg: 16 });
+    cyl(b, 0.006, 0.006, 0.02, 'brass', cx, 0.43, 0.06, 6, { rx: 90 });
+    if (i % 3 !== 1) {
+      const held = carrier(b, cx, 0.262, 0.1, {});
+      held.rotation.y = Math.PI / 2;
+    }
   }
   // The dial and its levers.
   const dx = w / 2 - 0.3;
@@ -500,6 +644,7 @@ def('bellowsExchange', (g, o, ctx) => {
     sph(b, 0.02, 'woodBlack', lx + (i - 1) * 0.03, 0.73, 0.135, 8);
   }
   plane(b, 0.34, 0.085, art.plate('THE BELLOWS', 'EXCHANGE'), dx, 1.44, PROUD + 0.002, { unitUv: true, noShadow: true });
+  plane(b, 0.24, 0.07, art.plate('WOUND MONDAYS', 'R.F.'), dx, 0.62, PROUD + 0.002, { unitUv: true, noShadow: true });
   return { c: [w, 0.3], h: 0 };
 });
 
@@ -540,18 +685,21 @@ def('turnstile', (g, o, ctx) => {
   const w = o.w ?? 6;
   const at = o.at ?? 0;
   const half = 0.6;
-  railings(g, -w / 2 + 0.02, at - half - 0.08);
-  railings(g, at + half + 0.08, w / 2 - 0.02);
-  pier(g, at - half, 0, 1.55);
-  pier(g, at + half, 0, 1.55);
+  // The fence is the room's; the hotspot is the stile and its lock. (A slate on the pier, a tablet on the wall
+  // behind, would otherwise sit inside the turnstile's own box and every tap on them would go to it.)
+  const fence = outside(g);
+  railings(fence, -w / 2 + 0.02, at - half - 0.08);
+  railings(fence, at + half + 0.08, w / 2 - 0.02);
+  pier(fence, at - half, 0, 1.55);
+  pier(fence, at + half, 0, 1.55);
   // Hoops either side keep you in the path of the arms.
   for (const s of [-1, 1]) {
     for (const hy of [1.0, 0.5]) {
-      tube(g, [[at + s * half, hy, 0.08], [at + s * (half - 0.02), hy, 0.5], [at + s * (half - 0.14), hy, 0.62], [at + s * (half - 0.14), 0, 0.62]].slice(0, hy === 1.0 ? 4 : 3), 0.016, 'iron', { seg: 12, radial: 6, tension: 0.2 });
-      tube(g, [[at + s * half, hy, -0.08], [at + s * (half - 0.02), hy, -0.5], [at + s * (half - 0.14), hy, -0.62], [at + s * (half - 0.14), 0, -0.62]].slice(0, hy === 1.0 ? 4 : 3), 0.016, 'iron', { seg: 12, radial: 6, tension: 0.2 });
+      tube(fence, [[at + s * half, hy, 0.08], [at + s * (half - 0.02), hy, 0.5], [at + s * (half - 0.14), hy, 0.62], [at + s * (half - 0.14), 0, 0.62]].slice(0, hy === 1.0 ? 4 : 3), 0.016, 'iron', { seg: 12, radial: 6, tension: 0.2 });
+      tube(fence, [[at + s * half, hy, -0.08], [at + s * (half - 0.02), hy, -0.5], [at + s * (half - 0.14), hy, -0.62], [at + s * (half - 0.14), 0, -0.62]].slice(0, hy === 1.0 ? 4 : 3), 0.016, 'iron', { seg: 12, radial: 6, tension: 0.2 });
     }
   }
-  // The stile: a column, a ratchet drum, a brass hub and four arms.
+  // The stile: a column, a ratchet drum, a brass hub and four arms, worn silver where hands have pushed them.
   cyl(g, 0.2, 0.22, 0.03, 'iron', at, 0.015, 0, 16);
   cyl(g, 0.05, 0.06, 0.86, 'iron', at, 0.46, 0, 10);
   cyl(g, 0.085, 0.085, 0.09, 'iron', at, 0.86, 0, 14);
@@ -562,15 +710,18 @@ def('turnstile', (g, o, ctx) => {
   lathe(hub, [[0.075, 0.045], [0.05, 0.075], [0.02, 0.09], [0, 0.092]], 'brass', 0, 0, 0, 12);
   for (let i = 0; i < 4; i++) {
     const a = (i * Math.PI) / 2;
-    rod(hub, [Math.cos(a) * 0.06, 0, Math.sin(a) * 0.06], [Math.cos(a) * 0.5, 0, Math.sin(a) * 0.5], 0.019, 'iron', 8);
-    sph(hub, 0.028, 'brassDull', Math.cos(a) * 0.5, 0, Math.sin(a) * 0.5, 8);
+    const c = Math.cos(a);
+    const sn = Math.sin(a);
+    rod(hub, [c * 0.06, 0, sn * 0.06], [c * 0.3, 0, sn * 0.3], 0.019, 'iron', 8);
+    rod(hub, [c * 0.3, 0, sn * 0.3], [c * 0.5, 0, sn * 0.5], 0.0195, 'steel', 8);
+    sph(hub, 0.028, 'steel', c * 0.5, 0, sn * 0.5, 8);
   }
   // The pawl that holds it, and the rod up from it to the lock.
   box(g, 0.2, 0.025, 0.03, 'steelDark', at + 0.2, 0.925, 0.06, { ry: -18 });
   rod(g, [at + half - 0.06, 0.93, 0.09], [at + half - 0.02, 1.12, 0.09], 0.008, 'steelDark');
   // The letter-lock, on the pier's face.
   const L = group(g, at + half, 1.2, 0.082);
-  buildLetterLock(L, o.n ?? 5, ctx.rnd, { bolt: -1 });
+  buildLetterLock(L, o.n ?? 5, ctx.rnd, { bolt: -1, word: o.word });
   return { c: [w, 0.44], h: 1.6 };
 });
 
@@ -612,7 +763,7 @@ def('stoneTablet', (g, o) => {
   box(g, w + 0.22, 0.06, 0.07, stone, 0, y - h / 2 - 0.09, 0.035);
   box(g, w + 0.18, 0.045, 0.055, stone, 0, y + h / 2 + 0.085, 0.0275);
   const lines = o.lines ?? [''];
-  const m = artMaterial(`carved:${lines.join('|')}`, 640, Math.round((640 * h) / w), (c, cw, ch, r) => ART.carved(c, cw, ch, r, { lines }), { rough: 0.95 });
+  const m = artMaterial(`carved:${lines.join('|')}:${o.scratch ?? ''}`, 640, Math.round((640 * h) / w), (c, cw, ch, r) => ART.carved(c, cw, ch, r, { lines, scratch: o.scratch }), { rough: 0.95 });
   plane(g, w, h, m, 0, y, 0.0365, { unitUv: true, noShadow: true });
   return { c: null, h: 0 };
 });
@@ -757,6 +908,7 @@ function frameBars(g, w, h, y, depth, bar, material, z0 = 0) {
 }
 
 const SITTERS = [
+  { coat: '#1c1a22', hair: '#3a2a1e', style: 'short', old: 0.5, collar: '#e9e2d0', ruff: true, disc: true, ground: '#2e2418' },
   { coat: '#2b2f3a', hair: '#b9b3a6', style: 'wig', old: 0.6, collar: '#e0d8c4' },
   { coat: '#3a2a1e', hair: '#4a3626', style: 'long', old: 0.3, collar: '#d8d0bc', chain: true },
   { coat: '#1f3a33', hair: '#8f8b84', style: 'bald', old: 0.8, collar: '#d0c8b4', glasses: true },
@@ -800,23 +952,43 @@ def('portrait', (g, o, ctx) => {
     rod(g, [0, ly - 0.04, 0.01], [0, ly + 0.02, 0.2], 0.008, 'brass');
     cyl(g, 0.022, 0.022, w * 0.6, 'brass', 0, ly + 0.02, 0.2, 8, { rz: 90 });
     box(g, w * 0.56, 0.006, 0.02, glow(0xffe2b0, 1.4), 0, ly + 0.002, 0.2);
-    ctx.halo(g, WARM, 0.7, 0, ly - 0.05, 0.22, 0.4);
+    ctx.halo(outside(g), WARM, 0.7, 0, ly - 0.05, 0.22, 0.4);
     if (o.light !== false) ctx.light(g, { color: 0xffd9a0, intensity: o.intensity ?? 3, distance: 4.5, x: 0, y: ly - 0.1, z: 0.45 });
   }
   return { c: null, h: 0 };
 });
 
-/** A row of portraits: the Company's past Wardens, o.n of them. */
+/**
+ * A row of portraits: the Company's Wardens, o.n of them, oldest first (the first is the man in the ruff).
+ * o.newest makes the last frame a photograph with a card under it: the portrait is in hand.
+ */
 def('portraitRow', (g, o, ctx) => {
   const n = o.n ?? 4;
+  const rows = o.rows ?? 1;
   const w = o.w ?? 0.56;
   const h = o.h ?? 0.72;
   const gap = o.gap ?? 0.34;
-  const y = hung(o, 2.0);
-  for (let i = 0; i < n; i++) {
-    const x = (i - (n - 1) / 2) * (w + gap);
-    const look = SITTERS[(i + (o.first ?? 0)) % SITTERS.length];
-    buildPortrait(g, { plate: ' ' }, ctx, x, y + (i % 2 ? 0.012 : 0), w, h, look, `row:${(i + (o.first ?? 0)) % SITTERS.length}`);
+  const y0 = hung(o, 2.0);
+  for (let row = 0; row < rows; row++) {
+    const y = y0 - row * (h + (o.rowGap ?? 0.2));
+    for (let i = 0; i < n; i++) {
+      const x = (i - (n - 1) / 2) * (w + gap);
+      if (o.newest && row === rows - 1 && i === n - 1) {
+        // A plain black frame, a photograph, and the card.
+        const pw = w * 0.8;
+        const ph = h * 0.8;
+        backing(group(g, x, 0, 0), pw + 0.06, ph + 0.06, y);
+        frameBars(group(g, x, 0, 0), pw, ph, y, 0.05, 0.035, 'woodBlack');
+        const photo = artMaterial('photo:portrait', 256, Math.round((256 * ph) / pw), (c, cw, ch, r) => ART.photo(c, cw, ch, r, { kind: 'portrait' }));
+        plane(g, pw, ph, photo, x, y, PROUD, { unitUv: true, noShadow: true });
+        const card = artMaterial('card:clay', 256, 96, (c, cw, ch, r) => ART.sign(c, cw, ch, r, { text: 'A. CLAY, WARDEN', sub: 'PORTRAIT IN HAND', bg: '#e6dcc0', fg: '#2a2218', size: 0.3 }));
+        plane(g, pw * 0.8, pw * 0.3, card, x, y - ph / 2 - 0.035 - pw * 0.17, PROUD - 0.02, { unitUv: true, noShadow: true });
+        continue;
+      }
+      // The first of them all is the man in the ruff; after him they come round again in other frames.
+      const k = row === 0 && i === 0 ? 0 : 1 + ((i + row * 3 + (o.first ?? 0)) % (SITTERS.length - 1));
+      buildPortrait(g, { plate: ' ' }, ctx, x, y + (i % 2 ? 0.012 : 0), w, h, SITTERS[k], `row:${k}`);
+    }
   }
   return { c: null, h: 0 };
 });
@@ -932,13 +1104,12 @@ def('foldClock', (g, o, ctx) => {
   return { c: null, h: 0 };
 });
 
-const CLOCK_TIMES = ['08:29', '03:12', '10:44', '06:01', '01:36', '11:20'];
 const CLOCK_STYLES = ['round', 'drop', 'octagon', 'cuckoo', 'banjo', 'round', 'lantern', 'ebony', 'sun', 'drop', 'bracket', 'octagon'];
 
 /**
- * A wall crowded with clocks, no two alike and no two agreeing: o.w along the
- * wall, between o.y0 and o.y1, o.n of them. o.skip [[x, y, r], ...] keeps room
- * for something hung there separately.
+ * A wall crowded with clocks, no two alike and every one of them right (o.time, by the Fold's
+ * reckoning): o.w along the wall, between o.y0 and o.y1, o.n of them. o.skip [[x, y, r], ...]
+ * keeps room for something hung there separately.
  */
 def('clockWall', (g, o, ctx) => {
   const w = o.w ?? 4;
@@ -962,7 +1133,7 @@ def('clockWall', (g, o, ctx) => {
       if (placed.some(([px, py, pr]) => Math.hypot(px - x, (py - y) * 0.75) < pr + reach * 0.8)) continue;
       placed.push([x, y, reach]);
       const c = group(g, x, y, 0);
-      clockBody(c, style, r, CLOCK_TIMES[Math.floor(ctx.rnd() * CLOCK_TIMES.length)], ctx.rnd() < 0.3 ? 'brass' : 'cream', ctx, { swing: made % 7 === 1 });
+      clockBody(c, style, r, o.time ?? '08:29', ctx.rnd() < 0.3 ? 'brass' : 'cream', ctx, { swing: made % 7 === 1 });
       made++;
       break;
     }
@@ -1068,18 +1239,30 @@ def('titheWall', (g, o, ctx) => {
   const y = hung(o, 1.75);
   backing(g, w + 0.04, h + 0.04, y);
   frameBars(g, w, h, y, 0.052, 0.045, 'woodDark');
-  const m = artMaterial(`tithe:${w}x${h}`, 1024, Math.round((1024 * h) / w), (c, cw, ch, r) => ART.tithe(c, cw, ch, r, { n: Math.round(w * h * 8) }));
+  const m = artMaterial(`tithe:${w}x${h}`, 1024, Math.min(1024, Math.round((1024 * h) / w)), (c, cw, ch, r) => ART.tithe(c, cw, ch, r, { n: Math.round(w * h * (o.dense ?? 8)) }));
   plane(g, w, h, m, 0, y, PROUD, { unitUv: true, noShadow: true });
   // A few stand proud of the rest: newer, or pinned by one corner only.
   const kinds = ['grid', 'crossword', 'notes', 'grid', 'crossword'];
+  const reach = Math.min(h - 0.36, 1.5);
   for (let i = 0; i < (o.loose ?? 7); i++) {
     const sx = (ctx.rnd() - 0.5) * (w - 0.3);
-    const sy = y + (ctx.rnd() - 0.5) * (h - 0.36);
+    const sy = Math.min(y, 1.6) + (ctx.rnd() - 0.5) * reach;
     const kind = kinds[i % kinds.length];
     const size = kind === 'grid' ? [0.2, 0.2] : [0.2, 0.27];
     const p = plane(g, size[0], size[1], art.sheet(kind, i % 3), sx, sy, PROUD + 0.012 + i * 0.002, { unitUv: true, noShadow: true });
     p.rotation.set((ctx.rnd() - 0.5) * 0.12, (ctx.rnd() - 0.5) * 0.14, (ctx.rnd() - 0.5) * 0.3);
     sph(g, 0.008, 'brass', sx, sy + size[1] / 2 - 0.02, PROUD + 0.018 + i * 0.002, 6);
+  }
+  if (o.tiles) {
+    // At the very top, behind glass: a tray of numbered tiles.
+    const tw = Math.min(1.5, w * 0.5);
+    const th = 0.34;
+    const ty = y + h / 2 - th / 2 - 0.06;
+    box(g, tw + 0.06, th + 0.06, 0.07, 'woodBlack', 0, ty, PROUD + 0.035);
+    const tiles = artMaterial('tiles', 512, Math.round((512 * th) / tw), (c, cw, ch, r) => ART.tiles(c, cw, ch, r));
+    plane(g, tw, th, tiles, 0, ty, PROUD + 0.072, { unitUv: true, noShadow: true });
+    box(g, tw, th, 0.006, 'glassClear', 0, ty, PROUD + 0.09, { noShadow: true });
+    frameBars(g, tw, th, ty, 0.03, 0.018, 'brassDull', PROUD + 0.07);
   }
   return { c: null, h: 0 };
 });
@@ -1091,7 +1274,7 @@ def('noticeboard', (g, o) => {
   const y = hung(o, 1.6);
   backing(g, w + 0.04, h + 0.04, y);
   frameBars(g, w, h, y, 0.052, 0.04, 'woodDark');
-  const m = artMaterial(`noticeboard:${w}x${h}`, 768, Math.round((768 * h) / w), (c, cw, ch, rnd) => {
+  const m = artMaterial(`noticeboard2:${w}x${h}`, 768, Math.round((768 * h) / w), (c, cw, ch, rnd) => {
     c.fillStyle = '#9a7648';
     c.fillRect(0, 0, cw, ch);
     for (let i = 0; i < 5000; i++) {
@@ -1115,9 +1298,9 @@ def('noticeboard', (g, o) => {
       c.fill();
       c.restore();
     };
-    page(cw * 0.2, ch * 0.5, cw * 0.3, -0.05, { headline: 'A SETTER IS FOUND DEAD' });
-    page(cw * 0.52, ch * 0.47, cw * 0.28, 0.04, { headline: 'TITHE DAY: 412 PAPERS', puzzle: false });
-    page(cw * 0.82, ch * 0.52, cw * 0.27, -0.03, { headline: 'THE CUT FERRY RAISES ITS TOLL' });
+    page(cw * 0.17, ch * 0.5, cw * 0.25, -0.05, { headline: 'TITHE DAY: 412 PAPERS', puzzle: false });
+    page(cw * 0.5, ch * 0.5, cw * 0.36, 0.02, { headline: ['GREYWETHER TO SECURE', "THE FOLD'S FUTURE"], puzzle: false, scrawl: 'SOLD' });
+    page(cw * 0.84, ch * 0.52, cw * 0.25, -0.03, { headline: 'THE CUT FERRY RAISES ITS TOLL' });
   });
   plane(g, w, h, m, 0, y, PROUD, { unitUv: true, noShadow: true });
   return { c: null, h: 0 };
@@ -1220,7 +1403,14 @@ def('sheets', (g, o, ctx) => {
   const spread = o.spread ?? 0.16;
   for (let i = 0; i < n; i++) {
     const k = kinds[i % kinds.length];
-    const size = k === 'grid' ? [0.2, 0.2] : k === 'proof' ? [0.12, 0.36] : k === 'crux' ? [0.3, 0.4] : [0.21, 0.297];
+    const size = k === 'grid' || k === 'square' ? [0.2, 0.2] : k === 'proof' ? [0.12, 0.36] : k === 'crux' ? [0.3, 0.4] : k === 'blotter' ? [0.46, 0.34] : [0.21, 0.297];
+    if (k === 'blotter') box(g, 0.5, 0.006, 0.38, 'leatherGreen', 0, 0.003, 0);
+    if (k === 'pad') {
+      // A clean blotter: a leather pad, fresh pink paper, nothing written.
+      box(g, 0.5, 0.006, 0.38, 'leatherGreen', 0, 0.003, 0);
+      box(g, 0.44, 0.003, 0.32, '#d9b8ac', 0, 0.0075, 0);
+      continue;
+    }
     plane(g, size[0], size[1], art.sheet(k, i % 3), (ctx.rnd() - 0.5) * spread, 0.003 + i * 0.002, (ctx.rnd() - 0.5) * spread * 0.7, { rx: -90, rz: (ctx.rnd() - 0.5) * (o.neat ? 8 : 50), unitUv: true, noShadow: true });
   }
   if (o.pens) {
@@ -1244,6 +1434,14 @@ def('cruxPaper', (g, o) => {
     plane(g, 0.19, 0.19, m, -0.04, 0.0146, 0, { rx: -90, unitUv: true, noShadow: true });
     plane(g, 0.08, 0.19, art.sheet('typed', 1), 0.1, 0.0146, 0, { rx: -90, unitUv: true, noShadow: true });
   } else plane(g, w, d, m, 0, fold ? 0.0146 : 0.0066, 0, { rx: -90, unitUv: true, noShadow: true });
+  if (o.tray) {
+    // On a lap tray, with the two things it has been done with: a soft pencil and a pen.
+    box(g, 0.46, 0.012, 0.34, 'woodDark', 0, -0.006, 0);
+    for (const sz of [-1, 1]) box(g, 0.46, 0.022, 0.012, 'woodDark', 0, 0.005, sz * 0.164);
+    for (const sx of [-1, 1]) box(g, 0.012, 0.022, 0.34, 'woodDark', sx * 0.224, 0.005, 0);
+    cyl(g, 0.004, 0.004, 0.15, 'plasticYellow', 0.18, 0.005, 0.02, 6, { rx: 90, ry: 14 });
+    cyl(g, 0.0045, 0.0045, 0.13, '#1c2a5a', 0.2, 0.005, -0.05, 6, { rx: 90, ry: -20 });
+  }
   return { c: null, h: 0.02 };
 });
 
@@ -1261,15 +1459,18 @@ def('deskSpike', (g, o, ctx) => {
   return { c: null, h: 0.24 };
 });
 
-/** A vacuum flask with its cup stood beside it (the cup stays; the flask is modelled, see dress.js). */
+/** A vacuum flask with a cup stood beside it (the cup stays; the flask is modelled, see dress.js). */
 def('flask', (g, o) => {
   lathe(g, [[0, 0], [0.04, 0], [0.043, 0.01], [0.043, 0.2], [0.036, 0.225], [0.03, 0.24], [0.031, 0.29], [0.028, 0.3], [0, 0.3]], o.mat ?? 'enamelGreen', 0, 0, 0, 14);
   cyl(g, 0.044, 0.044, 0.012, 'steel', 0, 0.2, 0, 14);
-  // The cup that screws on top, taken off and half full.
-  const c = group(g, o.cupX ?? 0.1, 0, o.cupZ ?? 0.03);
-  c.userData.dyn = true;
-  lathe(c, [[0, 0], [0.03, 0], [0.036, 0.055], [0.033, 0.055], [0.028, 0.006], [0, 0.006]], 'ceramic', 0, 0, 0, 12);
-  cyl(c, 0.03, 0.028, 0.002, '#3a2412', 0, 0.036, 0, 10);
+  // The cup beside it: o.cup names what is painted in the bottom of a Hall cup; otherwise the flask's own, half full.
+  if (o.cup) hallCup(g, o.cupX ?? 0.13, 0, o.cupZ ?? 0.04, { kind: o.cup, turn: 140 });
+  else {
+    const c = group(g, o.cupX ?? 0.1, 0, o.cupZ ?? 0.03);
+    c.userData.dyn = true;
+    lathe(c, [[0, 0], [0.03, 0], [0.036, 0.055], [0.033, 0.055], [0.028, 0.006], [0, 0.006]], 'ceramic', 0, 0, 0, 12);
+    cyl(c, 0.03, 0.028, 0.002, '#3a2412', 0, 0.036, 0, 10);
+  }
   return { c: null, h: 0.3 };
 });
 
@@ -1280,10 +1481,68 @@ def('oilLamp', (g, o, ctx) => {
   if (o.lit !== false) {
     const flame = sph(g, 0.014, glow(0xffd27a, 2.4), 0, 0.29, 0, 8, { dyn: true });
     flame.scale.set(0.8, 1.8, 0.8);
-    ctx.halo(g, WARM, o.halo ?? 0.8, 0, 0.3, 0, 0.65);
+    ctx.halo(outside(g), WARM, o.halo ?? 0.8, 0, 0.3, 0, 0.65);
     if (o.light !== false) ctx.light(g, { color: WARM, intensity: o.intensity ?? 3, distance: o.distance ?? 5.5, x: 0, y: 0.32, z: 0, flicker: 0.12 });
   }
   return { c: null, h: 0.46 };
+});
+
+/** One of the Syndics' cups, stood by itself (see hallCup): o.kind, o.upturned, o.tea, o.pencil. */
+def('hallCup', (g, o) => {
+  hallCup(g, 0, 0, 0, { kind: o.kind ?? 'grid', upturned: o.upturned, tea: o.tea, pencil: o.pencil });
+  return { c: null, h: 0.1 };
+});
+
+/** A shoe, kicked off: o.mat, o.side lays it over. */
+def('shoe', (g, o) => {
+  const m = o.mat ?? '#2a1c14';
+  const sh = group(g);
+  if (o.side) { sh.rotation.z = Math.PI / 2 - 0.15; sh.position.y = 0.04; }
+  box(sh, 0.085, 0.012, 0.25, 'dark', 0, 0.006, 0);
+  box(sh, 0.07, 0.03, 0.05, 'dark', 0, 0.02, -0.095);
+  const toe = sph(sh, 0.045, m, 0, 0.04, 0.07, 10);
+  toe.scale.set(0.95, 0.75, 1.5);
+  const heel = sph(sh, 0.044, m, 0, 0.055, -0.085, 10);
+  heel.scale.set(0.95, 1.0, 0.9);
+  box(sh, 0.076, 0.035, 0.1, m, 0, 0.04, -0.02);
+  box(sh, 0.06, 0.006, 0.02, m, 0, 0.066, 0.0, { rx: -18 });
+  return { c: null, h: 0.1 };
+});
+
+/**
+ * A boathook: an ash shaft with a brass spike and hook. Lies along X on the floor, or with o.lean (degrees
+ * from upright) stands against a wall, its foot out on the floor and its head on the wall behind the prop.
+ */
+def('boathook', (g, o) => {
+  const len = o.len ?? 2.0;
+  const b = group(g);
+  if (o.lean) {
+    const a = (o.lean === true ? 12 : o.lean) * DEG;
+    b.position.set(0, 0.01, len * Math.sin(a) + 0.03);
+    b.rotation.order = 'XYZ';
+    b.rotation.x = -a;
+    b.rotation.z = Math.PI / 2;
+  } else b.position.y = 0.02;
+  cyl(b, 0.017, 0.017, len, 'woodLight', len / 2, 0, 0, 8, { rz: 90 });
+  cyl(b, 0.02, 0.02, 0.12, 'brass', len - 0.06, 0, 0, 8, { rz: 90 });
+  cyl(b, 0.002, 0.014, 0.1, 'brass', len + 0.05, 0, 0, 6, { rz: -90 });
+  const hook = torus(b, 0.04, 0.007, 'brass', len - 0.04, 0.045, 0, { seg: 10, arc: Math.PI * 1.2 });
+  hook.rotation.z = -0.4;
+  return { c: null, h: 0.1 };
+});
+
+/** One typed sheet under a glass paperweight, and a silver pen laid square beside it. o.title heads the sheet. */
+def('paperweight', (g, o) => {
+  const m = artMaterial(`typed:weight:${o.title ?? ''}`, 256, 340, (c, w, h, r) => ART.typed(c, w, h, r, { title: o.title ?? 'HEADS OF TERMS', lines: 13 }));
+  plane(g, 0.21, 0.297, m, 0, 0.003, 0, { rx: -90, unitUv: true, noShadow: true });
+  const dome = sph(g, 0.045, 'glassClear', 0.02, 0.006, -0.05, 14, { noShadow: true });
+  dome.scale.y = 0.62;
+  cyl(g, 0.03, 0.03, 0.004, '#2a4a7a', 0.02, 0.006, -0.05, 12, { noShadow: true });
+  if (o.pen !== false) {
+    cyl(g, 0.0055, 0.0055, 0.135, 'steel', 0.19, 0.008, 0.02, 8, { rx: 90 });
+    cyl(g, 0.006, 0.006, 0.05, 'steel', 0.19, 0.008, -0.03, 8, { rx: 90 });
+  }
+  return { c: null, h: 0.05 };
 });
 
 /** A brass candlestick with its candle. o.lit */
@@ -1293,7 +1552,7 @@ def('candlestick', (g, o, ctx) => {
   if (o.lit) {
     const flame = sph(g, 0.011, glow(0xffd27a, 2.4), 0, 0.385, 0, 6, { dyn: true });
     flame.scale.set(0.8, 1.9, 0.8);
-    ctx.halo(g, WARM, 0.55, 0, 0.39, 0, 0.6);
+    ctx.halo(outside(g), WARM, 0.55, 0, 0.39, 0, 0.6);
     if (o.light) ctx.light(g, { color: WARM, intensity: o.intensity ?? 2, distance: 4.5, x: 0, y: 0.4, z: 0, flicker: 0.2 });
   }
   return { c: null, h: 0.4 };
@@ -1327,63 +1586,219 @@ def('plinth', (g, o) => {
   return { c: [s + 0.1, s + 0.1], h };
 });
 
+/** A painted hand pointing the way, and what lies that way: a board for a wall. o.lines; o.turn tips the hand (radians, negative is up). */
+def('handSign', (g, o) => {
+  const w = o.w ?? 0.72;
+  const h = o.h ?? 0.46;
+  const y = hung(o, 1.75);
+  box(g, w + 0.05, h + 0.05, 0.03, 'woodBlack', 0, y, 0.015);
+  const m = artMaterial(`handSign:${(o.lines ?? []).join('|')}:${o.turn ?? ''}`, 512, Math.round((512 * h) / w), (c, cw, ch, r) => ART.handSign(c, cw, ch, r, { lines: o.lines, turn: o.turn }));
+  plane(g, w, h, m, 0, y, 0.0315, { unitUv: true, noShadow: true });
+  return { c: null, h: 0 };
+});
+
+/** A jug of garden flowers: michaelmas daisies on short stems. */
+def('posy', (g, o, ctx) => {
+  lathe(g, [[0, 0], [0.04, 0], [0.055, 0.04], [0.05, 0.09], [0.032, 0.12], [0.038, 0.14], [0.03, 0.14], [0.026, 0.12]], o.mat ?? 'ceramic', 0, 0, 0, 12);
+  const colours = o.colours ?? ['#8a78c8', '#b9a8e0', '#e9e4f0'];
+  const n = o.n ?? 9;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + ctx.rnd();
+    const lean = 0.03 + ctx.rnd() * 0.07;
+    const top = [Math.cos(a) * lean, 0.2 + ctx.rnd() * 0.1, Math.sin(a) * lean];
+    rod(g, [0, 0.1, 0], top, 0.0025, LEAF, 4);
+    const f = cyl(g, 0.024, 0.012, 0.008, colours[i % colours.length], top[0], top[1], top[2], 8);
+    f.rotation.set(Math.sin(a) * 0.5, 0, -Math.cos(a) * 0.5);
+    sph(g, 0.008, '#d8b030', top[0], top[1] + 0.005, top[2], 6);
+  }
+  return { c: null, h: 0.32 };
+});
+
+/**
+ * A bookcase of one author's collected papers, uniform in the Company's blue cloth with a gilt band. The last
+ * volume stands a little proud of the rest, with something pressed in it for a marker.
+ */
+def('blueShelf', (g, o) => {
+  const w = o.w ?? 0.9;
+  const h = o.h ?? 1.3;
+  const d = 0.27;
+  const m = o.mat ?? 'woodDark';
+  const blue = o.cloth ?? '#27407a';
+  box(g, w, 0.08, d, m, 0, 0.04, 0);
+  box(g, w + 0.04, 0.035, d + 0.03, m, 0, h - 0.0175, 0);
+  for (const sx of [-1, 1]) box(g, 0.03, h - 0.115, d, m, sx * (w / 2 - 0.015), 0.08 + (h - 0.115) / 2, 0);
+  box(g, w - 0.04, h - 0.115, 0.012, 'woodBlack', 0, 0.08 + (h - 0.115) / 2, -d / 2 + 0.006);
+  const rows = o.rows ?? 3;
+  const gap = (h - 0.115) / rows;
+  const t = 0.047;
+  const per = Math.floor((w - 0.08) / (t + 0.004));
+  for (let r = 0; r < rows; r++) {
+    const y0 = 0.08 + (rows - 1 - r) * gap;
+    if (r < rows - 1) box(g, w - 0.06, 0.022, d - 0.02, m, 0, y0 - 0.011, 0.005);
+    const bh = gap - 0.085;
+    for (let k = 0; k < per; k++) {
+      const last = r === rows - 1 && k === per - 1;
+      const x = -w / 2 + 0.042 + k * (t + 0.004) + t / 2;
+      const z = 0.012 + (last ? 0.035 : 0);
+      box(g, t, bh, 0.19, blue, x, y0 + bh / 2, z);
+      box(g, t + 0.001, 0.012, 0.004, 'brass', x, y0 + bh * 0.84, z + 0.094);
+      box(g, t * 0.62, bh * 0.14, 0.003, '#d9c88a', x, y0 + bh * 0.62, z + 0.0945);
+      if (last) {
+        // The marker: a pressed flower, its tip out of the top of the book.
+        box(g, 0.004, 0.07, 0.022, '#a4627e', x, y0 + bh + 0.02, z + 0.02);
+        box(g, 0.003, 0.03, 0.012, '#5a6a3a', x, y0 + bh + 0.005, z + 0.045);
+      }
+    }
+  }
+  return { c: [w + 0.04, d + 0.03], h };
+});
+
+/** A shelf of varnish tins for a wall: tins of every size, their labels gone brown, a jar of brushes at the end. */
+def('tinShelf', (g, o, ctx) => {
+  const w = o.w ?? 1.4;
+  const d = 0.2;
+  const y = hung(o, 1.35);
+  box(g, w, 0.03, d, o.mat ?? 'woodDark', 0, y - 0.015, d / 2);
+  for (const sx of [-1, 1]) {
+    box(g, 0.022, 0.16, 0.02, 'iron', sx * (w / 2 - 0.14), y - 0.11, 0.01);
+    rod(g, [sx * (w / 2 - 0.14), y - 0.18, 0.012], [sx * (w / 2 - 0.14), y - 0.03, d - 0.03], 0.008, 'iron');
+  }
+  const labels = ['#7a5a22', '#8a3a22', '#2f4a34', '#c9b27c', '#5a3a1c', '#27407a'];
+  let x = -w / 2 + 0.05;
+  let i = 0;
+  while (x < w / 2 - 0.26) {
+    const r = 0.04 + ctx.rnd() * 0.032;
+    const th = 0.09 + ctx.rnd() * 0.11;
+    const z = d / 2 + (ctx.rnd() - 0.5) * 0.03;
+    cyl(g, r, r, th, 'steel', x + r, y + th / 2, z, 12);
+    cyl(g, r + 0.0012, r + 0.0012, th * 0.56, labels[i % labels.length], x + r, y + th * 0.46, z, 12);
+    cyl(g, r * 0.72, r * 0.72, 0.008, 'steelDark', x + r, y + th + 0.004, z, 10);
+    // A run of old varnish down the side of some of them.
+    if (i % 3 === 1) box(g, 0.008, th * 0.5, 0.004, '#6a3a12', x + r, y + th * 0.72, z + r);
+    x += r * 2 + 0.014 + ctx.rnd() * 0.03;
+    i++;
+  }
+  // The brushes, bristles up in a jar.
+  const jx = w / 2 - 0.13;
+  cyl(g, 0.045, 0.04, 0.11, 'glassBottleAmber', jx, y + 0.055, d / 2, 10, { noShadow: true });
+  for (let k = 0; k < 4; k++) {
+    const a = k * 1.7;
+    rod(g, [jx, y + 0.01, d / 2], [jx + Math.cos(a) * 0.03, y + 0.2 + k * 0.012, d / 2 + Math.sin(a) * 0.03], 0.005, 'woodLight', 5);
+    box(g, 0.016, 0.035, 0.008, '#3a2a1a', jx + Math.cos(a) * 0.033, y + 0.225 + k * 0.012, d / 2 + Math.sin(a) * 0.033);
+  }
+  return { c: null, h: 0 };
+});
+
+/** A carton for a medicine fridge: white, with a red band round it. */
+def('medBox', (g, o) => {
+  const w = o.w ?? 0.16;
+  const h = o.h ?? 0.09;
+  const d = o.d ?? 0.1;
+  box(g, w, h, d, 'paperWhite', 0, h / 2, 0);
+  box(g, w + 0.002, h * 0.3, d + 0.002, '#b6261e', 0, h * 0.6, 0);
+  box(g, w * 0.5, h * 0.18, 0.002, 'dark', 0, h * 0.24, d / 2 + 0.001);
+  return { c: null, h };
+});
+
+/** A dust-sheet thrown over an armchair: what the Fold does with a place somebody has died in. */
+def('dustSheet', (g, o) => {
+  const w = o.w ?? 1.04;
+  const d = o.d ?? 1.0;
+  const m = o.mat ?? 'fabricWhite';
+  const seat = sph(g, 0.5, m, 0, 0.3, 0.08, 14);
+  seat.scale.set(w, 0.95, d * 0.92);
+  const back = sph(g, 0.5, m, 0, 0.62, -d * 0.3, 14);
+  back.scale.set(w * 0.96, 1.25, 0.5);
+  for (const sx of [-1, 1]) {
+    const arm = sph(g, 0.5, m, sx * w * 0.38, 0.42, 0.06, 10);
+    arm.scale.set(0.34, 0.8, d * 0.8);
+  }
+  // The hem, lying out on the floor in folds.
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * Math.PI * 2;
+    const fold = sph(g, 0.12, m, Math.cos(a) * w * 0.52, 0.03, 0.03 + Math.sin(a) * d * 0.5, 6);
+    fold.scale.set(1.2, 0.4, 1.2);
+  }
+  return { c: [w, d], h: 1.25 };
+});
+
 // ------------------------------------------------------------- Setters' Hall
 
 /**
- * The Porter's Lodge: a panelled counter, glazed above along most of its length,
- * with a hatch to speak through, the daybook lying open, a bell and a lamp.
- * Runs along X and faces +Z; the porter stands behind it.
+ * The Porter's Lodge: a panelled counter, glazed above along most of its length, with a hatch to speak
+ * through, the daybook lying open at the open end, a bell, a lamp and the kettle. Runs along X and faces +Z;
+ * the porter stands behind it. What a hotspot takes from it is the open end and its daybook: the counter
+ * under the screen and the screen itself are drawn beside it.
  */
 def('lodge', (g, o, ctx) => {
   const len = o.len ?? 3.0;
   const d = 0.62;
   const h = 1.05;
-  box(g, len, h - 0.05, d - 0.1, 'woodDark', 0, (h - 0.05) / 2, -0.02);
-  box(g, len + 0.1, 0.05, d + 0.08, 'wood', 0, h - 0.025, 0);
-  box(g, len + 0.04, 0.1, d - 0.06, 'woodBlack', 0, 0.05, -0.02);
-  const panels = Math.max(2, Math.round(len / 0.75));
-  for (let i = 0; i < panels; i++) {
-    const pw = len / panels;
-    const x = -len / 2 + pw * (i + 0.5);
-    box(g, pw - 0.12, h - 0.36, 0.02, 'wallPanel', x, h / 2 + 0.02, d / 2 - 0.062);
-    box(g, pw - 0.26, h - 0.52, 0.03, 'wood', x, h / 2 + 0.02, d / 2 - 0.06);
-  }
-  cyl(g, 0.018, 0.018, len, 'brass', 0, 0.22, d / 2 - 0.02, 8, { rz: 90 });
-  // The screen.
+  const out = outside(g);
   const open = o.open ?? 0.36;
   const side = o.flip ? -1 : 1;
   const sx0 = o.flip ? -len / 2 : -len / 2 + len * open;
   const sx1 = o.flip ? len / 2 - len * open : len / 2;
+  const bx = side * (-len / 2 + (len * open) / 2);
+  // The counter: the open end belongs to the hotspot, the rest stands beside it.
+  const run = (to, x0, x1) => {
+    const w = x1 - x0;
+    const cx = (x0 + x1) / 2;
+    box(to, w, h - 0.05, d - 0.1, 'woodDark', cx, (h - 0.05) / 2, -0.02);
+    box(to, w + (to === g ? 0.05 : 0.1), 0.05, d + 0.08, 'wood', cx, h - 0.025, 0);
+    box(to, w, 0.1, d - 0.06, 'woodBlack', cx, 0.05, -0.02);
+    const panels = Math.max(1, Math.round(w / 0.75));
+    for (let i = 0; i < panels; i++) {
+      const pw = w / panels;
+      const x = x0 + pw * (i + 0.5);
+      box(to, pw - 0.12, h - 0.36, 0.02, 'wallPanel', x, h / 2 + 0.02, d / 2 - 0.062);
+      box(to, pw - 0.26, h - 0.52, 0.03, 'wood', x, h / 2 + 0.02, d / 2 - 0.06);
+    }
+    cyl(to, 0.018, 0.018, w, 'brass', cx, 0.22, d / 2 - 0.02, 8, { rz: 90 });
+  };
+  const ox0 = o.flip ? sx1 : -len / 2;
+  const ox1 = o.flip ? len / 2 : sx0;
+  run(g, ox0, ox1);
+  run(out, sx0, sx1);
+  // The screen.
   const top = 2.28;
   const bays = Math.max(2, Math.round((sx1 - sx0) / 0.72));
   for (let i = 0; i <= bays; i++) {
     const x = sx0 + ((sx1 - sx0) * i) / bays;
-    box(g, 0.06, top - h, 0.06, 'woodBlack', x, (top + h) / 2, 0.18);
+    box(out, 0.06, top - h, 0.06, 'woodBlack', x, (top + h) / 2, 0.18);
   }
   for (let i = 0; i < bays; i++) {
     const bw = (sx1 - sx0) / bays;
     const x = sx0 + bw * (i + 0.5);
     const hatch = i === (o.flip ? bays - 1 : 0);
     const gy0 = hatch ? 1.72 : h + 0.36;
-    box(g, bw - 0.06, 0.04, 0.05, 'woodBlack', x, gy0, 0.18);
-    box(g, bw - 0.07, top - 0.05 - gy0, 0.01, 'glassDark', x, (top - 0.05 + gy0) / 2, 0.18, { noShadow: true });
-    if (!hatch) box(g, bw - 0.06, gy0 - h - 0.02, 0.03, 'wallPanel', x, (gy0 + h) / 2, 0.18);
-    else box(g, bw - 0.1, 0.02, 0.2, 'brassDull', x, h + 0.012, 0.2);
+    box(out, bw - 0.06, 0.04, 0.05, 'woodBlack', x, gy0, 0.18);
+    box(out, bw - 0.07, top - 0.05 - gy0, 0.01, 'glassClear', x, (top - 0.05 + gy0) / 2, 0.18, { noShadow: true });
+    if (!hatch) box(out, bw - 0.06, gy0 - h - 0.02, 0.03, 'wallPanel', x, (gy0 + h) / 2, 0.18);
+    else box(out, bw - 0.1, 0.02, 0.2, 'brassDull', x, h + 0.012, 0.2);
   }
-  box(g, sx1 - sx0 + 0.1, 0.2, 0.09, 'woodBlack', (sx0 + sx1) / 2, top + 0.08, 0.18);
+  box(out, sx1 - sx0 + 0.1, 0.2, 0.09, 'woodBlack', (sx0 + sx1) / 2, top + 0.08, 0.18);
   const sign = artMaterial('sign:lodge', 768, 96, (c, cw, ch, r) => ART.sign(c, cw, ch, r, { text: "PORTER'S LODGE", size: 0.5, bg: '#161210' }));
-  plane(g, Math.min(1.5, sx1 - sx0 - 0.1), 0.16, sign, (sx0 + sx1) / 2, top + 0.08, 0.227, { unitUv: true, noShadow: true });
-  // The open end: the daybook, a pen across it, ink, the bell, a lamp.
-  const bx = side * (-len / 2 + (len * open) / 2);
+  plane(out, Math.min(1.5, sx1 - sx0 - 0.1), 0.16, sign, (sx0 + sx1) / 2, top + 0.08, 0.227, { unitUv: true, noShadow: true });
+  // The open end: the daybook, a pen across it, ink, the bell.
   openBook(g, bx, h, 0.04, { w: 0.62, d: 0.42, t: 0.045, turn: 4, material: 'leatherGreen' });
   const pen = group(g, bx + 0.12, h + 0.07, 0.1, 35);
   cyl(pen, 0.005, 0.005, 0.15, 'woodBlack', 0, 0, 0, 6, { rz: 90 });
   cyl(g, 0.032, 0.036, 0.045, 'glassDark', bx + side * 0.42, h + 0.022, -0.14, 10);
   cyl(g, 0.02, 0.02, 0.012, 'brass', bx + side * 0.42, h + 0.05, -0.14, 10);
   lathe(g, [[0, 0], [0.06, 0], [0.062, 0.012], [0.05, 0.035], [0.03, 0.055], [0.01, 0.062], [0.012, 0.075], [0, 0.078]], 'brass', bx - side * 0.42, h, 0.12, 14);
-  PROPS.deskLamp(group(g, bx + side * 0.44, h, 0.12, -30 * side), { intensity: o.intensity ?? 2.4 }, ctx);
-  shadowBlob(g, len, d * 1.5);
-  return { c: [len, d], h: top };
+  // Behind the glass: a lamp, and the kettle on its ring.
+  PROPS.deskLamp(group(out, bx + side * 0.62, h, 0.02, -30 * side), { intensity: o.intensity ?? 2.4, light: o.light }, ctx);
+  const kx = (sx0 + sx1) / 2 + side * (sx1 - sx0) * 0.2;
+  cyl(out, 0.1, 0.11, 0.05, 'iron', kx, h + 0.025, -0.08, 12);
+  torus(out, 0.075, 0.008, 'iron', kx, h + 0.055, -0.08, { rx: 90, seg: 12 });
+  const kettle = group(out, kx, h + 0.06, -0.08, o.flip ? 150 : 30);
+  lathe(kettle, [[0, 0], [0.085, 0], [0.105, 0.03], [0.1, 0.1], [0.07, 0.15], [0.03, 0.165], [0.03, 0.175], [0, 0.18]], 'copper', 0, 0, 0, 14);
+  sph(kettle, 0.014, 'woodBlack', 0, 0.19, 0, 8);
+  tube(kettle, [[0.09, 0.07, 0], [0.14, 0.1, 0], [0.165, 0.15, 0], [0.19, 0.16, 0]], 0.014, 'copper', { seg: 8, radial: 6 });
+  tube(kettle, [[-0.06, 0.15, 0], [-0.05, 0.25, 0], [0.05, 0.25, 0], [0.06, 0.15, 0]], 0.007, 'brassDull', { seg: 10, radial: 5 });
+  shadowBlob(out, len, d * 1.5);
+  return { c: [len, d], h: h + 0.1 };
 });
 
 /** A wall cabinet of keys: baize, brass hooks in rows, a key on most of them, and its glazed door standing open. */
@@ -1431,6 +1846,56 @@ def('keyCabinet', (g, o, ctx) => {
 });
 
 /**
+ * The key board: a hundred and forty-four hooks in twelve rows of twelve, a brass tally on each and a key
+ * on all but the last (number 144, the master, lives in the Porter's pocket). Along the foot, on open
+ * hooks, seven thin steel setting-pins like knitting needles: one for each private letter-lock.
+ */
+def('keyBoard', (g, o, ctx) => {
+  const cols = 12;
+  const rows = 12;
+  const px = 0.074;
+  const py = 0.094;
+  const w = cols * px + 0.1;
+  const h = rows * py + 0.36;
+  const k = group(g, 0, hung(o, 1.55), 0);
+  box(k, w, h, PROUD, BAIZE, 0, 0, PROUD / 2);
+  frameBars(k, w, h, 0, 0.055, 0.04, 'woodDark');
+  box(k, w + 0.14, 0.04, 0.09, 'woodBlack', 0, h / 2 + 0.06, 0.045);
+  const z = PROUD;
+  const metals = ['iron', 'brass', 'steel', 'brassDull', 'iron', 'steelDark'];
+  const top = h / 2 - 0.085;
+  for (let r = 0; r < rows; r++) {
+    const yy = top - r * py;
+    for (let c = 0; c < cols; c++) {
+      const x = -((cols - 1) * px) / 2 + c * px;
+      // The tally: a brass disc over the hook, with the number stamped in it.
+      cyl(k, 0.011, 0.011, 0.004, 'brass', x, yy + 0.016, z + 0.003, 8, { rx: 90 });
+      cyl(k, 0.003, 0.003, 0.02, 'brassDull', x, yy, z + 0.01, 4, { rx: 90 });
+      if (r === 0 && c === cols - 1) continue; // number 144: the master is not here
+      const metal = metals[Math.floor(ctx.rnd() * metals.length)];
+      const key = group(k, x, yy, z + 0.018);
+      key.rotation.z = (ctx.rnd() - 0.5) * 0.24;
+      const long = 0.03 + ctx.rnd() * 0.026;
+      cyl(key, 0.0095, 0.0095, 0.003, metal, 0, -0.011, 0, 8, { rx: 90 });
+      box(key, 0.004, long, 0.004, metal, 0, -0.02 - long / 2, 0);
+      box(key, 0.011, 0.01, 0.003, metal, 0.005, -0.02 - long + 0.006, 0);
+    }
+  }
+  // The setting-pins.
+  const by = top - rows * py - 0.035;
+  box(k, w - 0.14, 0.012, 0.012, 'brassDull', 0, by + 0.012, z + 0.008);
+  for (let i = 0; i < 7; i++) {
+    const x = -0.27 + i * 0.09;
+    cyl(k, 0.0035, 0.0035, 0.02, 'brass', x, by, z + 0.012, 4, { rx: 90 });
+    const pin = group(k, x, by, z + 0.02);
+    pin.rotation.z = (ctx.rnd() - 0.5) * 0.08;
+    torus(pin, 0.008, 0.0018, 'steel', 0, -0.008, 0, { seg: 8 });
+    cyl(pin, 0.0018, 0.0018, 0.17, 'steel', 0, -0.1, 0, 4);
+  }
+  return { c: null, h: 0 };
+});
+
+/**
  * The tea table: a white cloth, a copper urn, the big brown pot, cups, milk,
  * sugar and a tin of biscuits.
  */
@@ -1460,12 +1925,12 @@ def('teaTable', (g, o, ctx) => {
   lathe(g, [[0, 0], [0.04, 0], [0.06, 0.03], [0.055, 0.03], [0.036, 0.008], [0, 0.008]], 'ceramic', ux, top, 0.14, 12);
   // The pot.
   teapot(g, ux + 0.42, top, 0.02, { s: 1.35, material: '#4a2a18', turn: 155 });
-  // China.
-  if (!nested(g, 'tea_set', { x: w / 2 - 0.5, y: top, z: -0.04, s: 0.88, ry: 180 })) {
-    for (let i = 0; i < 6; i++) cupAndSaucer(g, w / 2 - 0.82 + (i % 3) * 0.17, top, -0.14 + Math.floor(i / 3) * 0.17, { turn: 30 + i * 50 });
-    lathe(g, [[0, 0], [0.03, 0], [0.042, 0.03], [0.036, 0.07], [0.042, 0.09], [0.038, 0.09], [0.03, 0.07], [0, 0.06]], 'ceramic', w / 2 - 0.26, top, -0.1, 12);
-    lathe(g, [[0, 0], [0.035, 0], [0.05, 0.03], [0.05, 0.055], [0.045, 0.055], [0.03, 0.01], [0, 0.01]], 'ceramic', w / 2 - 0.2, top, 0.08, 12);
-  }
+  // The Syndics' cups: four, and no two alike. Two are turned over on their saucers.
+  const cups = [['clock', true], ['compass', true], ['grid', false], ['arms', false]];
+  cups.forEach(([kind, upturned], i) => hallCup(g, w / 2 - 0.86 + i * 0.185, top, 0.04 - (i % 2) * 0.05, { kind, upturned, turn: 30 + i * 70 }));
+  // Milk and sugar.
+  lathe(g, [[0, 0], [0.03, 0], [0.042, 0.03], [0.036, 0.07], [0.042, 0.09], [0.038, 0.09], [0.03, 0.07], [0, 0.06]], 'ceramic', w / 2 - 0.42, top, -0.2, 12);
+  lathe(g, [[0, 0], [0.035, 0], [0.05, 0.03], [0.05, 0.055], [0.045, 0.055], [0.03, 0.01], [0, 0.01]], 'ceramic', w / 2 - 0.26, top, -0.19, 12);
   // Biscuits: the tin, its lid beside it, and a plate.
   cyl(g, 0.09, 0.09, 0.1, 'enamelGreen', ux + 0.4, top + 0.05, -0.2, 16);
   cyl(g, 0.093, 0.093, 0.02, 'brassDull', ux + 0.56, top + 0.01, -0.22, 16);
@@ -1478,7 +1943,11 @@ def('teaTable', (g, o, ctx) => {
   return { c: [w, d], h: 1.4 };
 });
 
-/** A tray of tea things: the pot, o.cups cups (one of them drunk from), milk and sugar. o.cosy a colour for a knitted cosy. */
+/**
+ * A Hall tea tray: the pot (o.cosy a colour for a knitted cosy), a strainer on its bowl, one cup (o.kind: what
+ * is painted in the bottom of it; o.tea leaves a brown half-inch), milk and sugar. o.bread adds a plate of
+ * bread and butter, cut very thin, with the crusts on.
+ */
 def('teaTray', (g, o) => {
   const w = 0.46;
   const d = 0.3;
@@ -1493,11 +1962,27 @@ def('teaTray', (g, o) => {
   }
   const china = o.china ?? 'ceramic';
   if (o.pot !== false) teapot(g, -0.11, 0.01, -0.03, { s: 0.82, material: china, turn: 200, cosy: o.cosy });
-  cupAndSaucer(g, 0.1, 0.01, 0.06, { full: o.full !== false, material: china, turn: 30 });
-  if ((o.cups ?? 1) > 1) cupAndSaucer(g, 0.14, 0.01, -0.08, { material: china, turn: -50 });
-  lathe(g, [[0, 0], [0.02, 0], [0.028, 0.02], [0.024, 0.05], [0.03, 0.062], [0.026, 0.062], [0.02, 0.05], [0, 0.04]], china, 0.01, 0.01, 0.09, 10);
+  hallCup(g, 0.1, 0.01, 0.06, { kind: o.kind ?? 'clock', tea: o.tea !== false, turn: 30, material: china });
+  // Milk, sugar, and the strainer on its drip bowl.
+  lathe(g, [[0, 0], [0.02, 0], [0.028, 0.02], [0.024, 0.05], [0.03, 0.062], [0.026, 0.062], [0.02, 0.05], [0, 0.04]], china, 0.0, 0.01, 0.1, 10);
   lathe(g, [[0, 0], [0.024, 0], [0.034, 0.02], [0.034, 0.036], [0.03, 0.036], [0.02, 0.008], [0, 0.008]], china, -0.01, 0.01, -0.105, 10);
+  lathe(g, [[0, 0], [0.018, 0], [0.026, 0.016], [0.022, 0.016], [0.014, 0.004], [0, 0.004]], 'steel', 0.16, 0.01, -0.09, 10);
+  lathe(g, [[0.004, 0.012], [0.02, 0.02], [0.026, 0.03], [0.027, 0.032]], 'steel', 0.16, 0.01, -0.09, 10);
+  box(g, 0.07, 0.003, 0.008, 'steel', 0.205, 0.04, -0.09);
   box(g, 0.1, 0.003, 0.012, 'steel', 0.06, 0.014, 0.125, { ry: 20 });
+  if (o.bread) {
+    // Bread and butter, on a plate off the tray: thin slices, overlapping, crusts on.
+    const px = o.breadX ?? 0.36;
+    const pz = o.breadZ ?? 0.02;
+    cyl(g, 0.085, 0.06, 0.01, china, px, 0.005, pz, 16);
+    for (let i = 0; i < 5; i++) {
+      const sl = group(g, px - 0.03 + i * 0.014, 0.014 + i * 0.004, pz, 12);
+      sl.rotation.z = -0.22;
+      box(sl, 0.07, 0.005, 0.075, '#e9dfc2', 0, 0, 0);
+      box(sl, 0.072, 0.0055, 0.006, '#9a6a34', 0, 0, 0.038);
+      box(sl, 0.072, 0.0055, 0.006, '#9a6a34', 0, 0, -0.038);
+    }
+  }
   return { c: null, h: 0.2 };
 });
 
@@ -1555,7 +2040,7 @@ def('strongbox', (g, o) => {
  * A safe of the old kind on its stand: japanned green and lined in gold, strap
  * hinges, a brass lever, and where a keyhole would be, a dial of letters.
  */
-def('foldSafe', (g, o) => {
+def('foldSafe', (g, o, { rnd }) => {
   const w = o.w ?? 0.74;
   const h = o.h ?? 0.98;
   const d = o.d ?? 0.64;
@@ -1576,19 +2061,22 @@ def('foldSafe', (g, o) => {
     box(g, 0.2, 0.05, 0.012, 'steelDark', -(w / 2 - 0.15), base + h * fy, z + 0.046);
     for (const sy of [-1, 1]) sph(g, 0.024, 'brassDull', -(w / 2 - 0.045), base + h * fy + sy * 0.075, z + 0.035, 8);
   }
-  // The dial: a ring of letters, and the knob it is turned by.
-  const dx = -0.04;
-  const dy = base + h * 0.6;
-  cyl(g, 0.092, 0.092, 0.018, 'brassDull', dx, dy, z + 0.049, 24, { rx: 90 });
-  disc(g, 0.084, art.wheel('brass', 1), dx, dy, z + 0.0585);
-  cyl(g, 0.024, 0.03, 0.035, 'brass', dx, dy, z + 0.075, 14, { rx: 90 });
-  box(g, 0.012, 0.03, 0.006, 'steelDark', dx, dy + 0.1, z + 0.045);
-  // The lever.
-  const hx = w / 2 - 0.19;
-  const hy = base + h * 0.47;
-  cyl(g, 0.034, 0.038, 0.03, 'brass', hx, hy, z + 0.055, 12, { rx: 90 });
-  rod(g, [hx, hy, z + 0.075], [hx, hy - 0.14, z + 0.095], 0.012, 'brass', 8);
-  sph(g, 0.02, 'brass', hx, hy - 0.145, z + 0.097, 8);
+  // The lock: seven rings of letters on a spindle across the door, and a keyhole below it.
+  const dy = base + h * 0.62;
+  box(g, 0.36, 0.11, 0.012, 'brassDull', 0, dy, z + 0.046);
+  for (const sx of [-1, 1]) box(g, 0.022, 0.085, 0.05, 'brass', sx * 0.158, dy, z + 0.07);
+  letterRings(g, o.n ?? 7, rnd, { r: 0.03, len: 0.04, y: dy, z: z + 0.078, word: o.word });
+  box(g, 0.3, 0.004, 0.004, 'steelDark', 0, dy + 0.037, z + 0.085);
+  const ky = base + h * 0.44;
+  cyl(g, 0.034, 0.034, 0.008, 'brass', 0, ky, z + 0.044, 14, { rx: 90 });
+  cyl(g, 0.008, 0.008, 0.004, 'dark', 0, ky + 0.006, z + 0.049, 8, { rx: 90 });
+  box(g, 0.007, 0.022, 0.004, 'dark', 0, ky - 0.008, z + 0.049);
+  // The handle that throws the bolts once both are satisfied.
+  const hx = w / 2 - 0.17;
+  const hy = base + h * 0.44;
+  cyl(g, 0.03, 0.034, 0.028, 'brass', hx, hy, z + 0.054, 12, { rx: 90 });
+  rod(g, [hx, hy, z + 0.072], [hx - 0.12, hy, z + 0.086], 0.011, 'brass', 8);
+  sph(g, 0.018, 'brass', hx - 0.125, hy, z + 0.087, 8);
   plane(g, 0.24, 0.085, art.plate('TUMBLER & WARD', 'SAFEMAKERS · THE FOLD'), 0, base + h * 0.845, z + 0.041, { unitUv: true, noShadow: true });
   shadowBlob(g, w * 1.1, d * 1.1);
   return { c: [w + 0.06, d + 0.04], h: base + h };
@@ -1658,7 +2146,7 @@ def('bookStand', (g, o, ctx) => {
     }
   }
   if (o.lit !== false) {
-    ctx.halo(g, WARM, 0.9, 0, 1.25, -0.1, 0.45);
+    ctx.halo(outside(g), WARM, 0.9, 0, 1.25, -0.1, 0.45);
     if (o.light !== false) ctx.light(g, { color: WARM, intensity: o.intensity ?? 2.4, distance: 4.5, x: 0, y: 1.4, z: 0.1, flicker: 0.15 });
   }
   shadowBlob(g, 0.9, 0.7);
@@ -1692,7 +2180,7 @@ def('ringLight', (g, o, ctx) => {
     }
   }
   if (lit) {
-    ctx.halo(g, WARM, r * 3.2, 0, y + 0.12, 0, 0.42);
+    ctx.halo(outside(g), WARM, r * 3.2, 0, y + 0.12, 0, 0.42);
     if (o.light !== false) ctx.light(g, { color: 0xffc27a, intensity: o.intensity ?? 14, distance: o.distance ?? 10, x: 0, y: y - 0.05, z: 0, shadow: o.shadow });
   }
   return { c: null, h: 0 };
@@ -1723,87 +2211,91 @@ function movement(parent, x, y, z, s = 1, turn = 0) {
  * of wheels, a dome, the tools in their block. o.lamp lights it.
  */
 def('watchBench', (g, o, ctx) => {
+  const out = outside(g);
   const w = o.w ?? 2.4;
   const d = o.d ?? 0.78;
   const h = 0.92;
-  box(g, w, 0.06, d, 'woodLight', 0, h - 0.03, 0);
-  box(g, w, 0.1, 0.025, 'wood', 0, h + 0.05, -d / 2 + 0.0125);
-  for (const s of [-1, 1]) box(g, 0.025, 0.07, d * 0.55, 'wood', s * (w / 2 - 0.0125), h + 0.035, -d * 0.22);
+  box(out, w, 0.06, d, 'woodLight', 0, h - 0.03, 0);
+  box(out, w, 0.1, 0.025, 'wood', 0, h + 0.05, -d / 2 + 0.0125);
+  for (const s of [-1, 1]) box(out, 0.025, 0.07, d * 0.55, 'wood', s * (w / 2 - 0.0125), h + 0.035, -d * 0.22);
   const pw = 0.62;
   for (const s of [-1, 1]) {
     const x = s * (w / 2 - pw / 2 - 0.02);
-    box(g, pw, h - 0.14, d - 0.1, 'wood', x, 0.08 + (h - 0.14) / 2, -0.01);
-    box(g, pw + 0.02, 0.08, d - 0.08, 'woodDark', x, 0.04, -0.01);
+    box(out, pw, h - 0.14, d - 0.1, 'wood', x, 0.08 + (h - 0.14) / 2, -0.01);
+    box(out, pw + 0.02, 0.08, d - 0.08, 'woodDark', x, 0.04, -0.01);
     for (let i = 0; i < 5; i++) {
       const dy = 0.16 + i * 0.145;
       for (const sx of [-1, 1]) {
-        box(g, pw / 2 - 0.035, 0.125, 0.018, 'woodDark', x + (sx * pw) / 4, dy + 0.02, d / 2 - 0.06);
-        sph(g, 0.011, 'brass', x + (sx * pw) / 4, dy + 0.02, d / 2 - 0.044, 6);
+        box(out, pw / 2 - 0.035, 0.125, 0.018, 'woodDark', x + (sx * pw) / 4, dy + 0.02, d / 2 - 0.06);
+        sph(out, 0.011, 'brass', x + (sx * pw) / 4, dy + 0.02, d / 2 - 0.044, 6);
       }
     }
   }
-  box(g, w - pw * 2 - 0.04, 0.09, d - 0.14, 'wood', 0, h - 0.105, -0.02);
-  box(g, w - pw * 2 - 0.16, 0.06, 0.016, 'woodDark', 0, h - 0.105, d / 2 - 0.085);
-  box(g, w - pw * 2 - 0.04, 0.03, 0.06, 'woodDark', 0, 0.3, -d / 2 + 0.2);
+  box(out, w - pw * 2 - 0.04, 0.09, d - 0.14, 'wood', 0, h - 0.105, -0.02);
+  box(out, w - pw * 2 - 0.16, 0.06, 0.016, 'woodDark', 0, h - 0.105, d / 2 - 0.085);
+  box(out, w - pw * 2 - 0.04, 0.03, 0.06, 'woodDark', 0, 0.3, -d / 2 + 0.2);
   const top = h;
   // A bench vice at the left.
   const vx = -w / 2 + 0.24;
-  box(g, 0.1, 0.07, 0.14, 'iron', vx, top + 0.035, d / 2 - 0.12);
-  box(g, 0.12, 0.05, 0.025, 'steelDark', vx, top + 0.085, d / 2 - 0.07);
-  box(g, 0.12, 0.05, 0.025, 'steelDark', vx, top + 0.085, d / 2 - 0.13);
-  cyl(g, 0.007, 0.007, 0.16, 'steel', vx, top + 0.045, d / 2 - 0.03, 6, { rz: 90 });
+  box(out, 0.1, 0.07, 0.14, 'iron', vx, top + 0.035, d / 2 - 0.12);
+  box(out, 0.12, 0.05, 0.025, 'steelDark', vx, top + 0.085, d / 2 - 0.07);
+  box(out, 0.12, 0.05, 0.025, 'steelDark', vx, top + 0.085, d / 2 - 0.13);
+  cyl(out, 0.007, 0.007, 0.16, 'steel', vx, top + 0.045, d / 2 - 0.03, 6, { rz: 90 });
   // The turns: a watchmaker's lathe, bed, headstock, tailstock and its pulley.
   const lx = w / 2 - 0.5;
   const lz = -d / 2 + 0.2;
-  for (const s of [-1, 1]) box(g, 0.035, 0.05, 0.06, 'iron', lx + s * 0.13, top + 0.025, lz);
-  cyl(g, 0.012, 0.012, 0.36, 'steel', lx, top + 0.06, lz, 8, { rz: 90 });
-  box(g, 0.05, 0.075, 0.05, 'steelDark', lx - 0.1, top + 0.105, lz);
-  cyl(g, 0.012, 0.012, 0.11, 'steel', lx - 0.1, top + 0.12, lz, 8, { rz: 90 });
-  for (let i = 0; i < 3; i++) cyl(g, 0.034 - i * 0.008, 0.034 - i * 0.008, 0.012, 'brass', lx - 0.165 - i * 0.013, top + 0.12, lz, 14, { rz: 90 });
-  cyl(g, 0.016, 0.02, 0.03, 'steel', lx - 0.045, top + 0.12, lz, 8, { rz: 90 });
-  box(g, 0.045, 0.065, 0.045, 'steelDark', lx + 0.1, top + 0.1, lz);
-  cyl(g, 0.0005, 0.007, 0.05, 'steel', lx + 0.06, top + 0.12, lz, 6, { rz: 90 });
-  box(g, 0.012, 0.05, 0.012, 'steel', lx, top + 0.085, lz + 0.03);
-  box(g, 0.07, 0.008, 0.014, 'steel', lx, top + 0.112, lz + 0.03);
+  for (const s of [-1, 1]) box(out, 0.035, 0.05, 0.06, 'iron', lx + s * 0.13, top + 0.025, lz);
+  cyl(out, 0.012, 0.012, 0.36, 'steel', lx, top + 0.06, lz, 8, { rz: 90 });
+  box(out, 0.05, 0.075, 0.05, 'steelDark', lx - 0.1, top + 0.105, lz);
+  cyl(out, 0.012, 0.012, 0.11, 'steel', lx - 0.1, top + 0.12, lz, 8, { rz: 90 });
+  for (let i = 0; i < 3; i++) cyl(out, 0.034 - i * 0.008, 0.034 - i * 0.008, 0.012, 'brass', lx - 0.165 - i * 0.013, top + 0.12, lz, 14, { rz: 90 });
+  cyl(out, 0.016, 0.02, 0.03, 'steel', lx - 0.045, top + 0.12, lz, 8, { rz: 90 });
+  box(out, 0.045, 0.065, 0.045, 'steelDark', lx + 0.1, top + 0.1, lz);
+  cyl(out, 0.0005, 0.007, 0.05, 'steel', lx + 0.06, top + 0.12, lz, 6, { rz: 90 });
+  box(out, 0.012, 0.05, 0.012, 'steel', lx, top + 0.085, lz + 0.03);
+  box(out, 0.07, 0.008, 0.014, 'steel', lx, top + 0.112, lz + 0.03);
   // The movement he was working on, and a finished one under a dome.
-  movement(g, 0.12, top, -0.12, 1.25, -14);
+  movement(out, 0.12, top, -0.12, 1.25, -14);
   const dx = -w / 2 + 0.72;
   const dz = -d / 2 + 0.22;
-  cyl(g, 0.1, 0.11, 0.025, 'woodBlack', dx, top + 0.0125, dz, 18);
-  movement(g, dx, top + 0.025, dz, 0.85, 30);
-  lathe(g, [[0.092, 0.025], [0.094, 0.19], [0.08, 0.25], [0.05, 0.285], [0.015, 0.298], [0, 0.3]], 'glassClear', dx, top, dz, 16, { noShadow: true });
+  cyl(out, 0.1, 0.11, 0.025, 'woodBlack', dx, top + 0.0125, dz, 18);
+  movement(out, dx, top + 0.025, dz, 0.85, 30);
+  lathe(out, [[0.092, 0.025], [0.094, 0.19], [0.08, 0.25], [0.05, 0.285], [0.015, 0.298], [0, 0.3]], 'glassClear', dx, top, dz, 16, { noShadow: true });
   // A tray of wheels and pinions, sorted.
   const tx = -0.42;
   const tz = 0.14;
-  box(g, 0.34, 0.012, 0.22, 'woodDark', tx, top + 0.006, tz);
-  for (let i = 0; i <= 3; i++) box(g, 0.006, 0.026, 0.22, 'woodDark', tx - 0.17 + i * 0.1133, top + 0.013, tz);
-  for (const sz of [-1, 0, 1]) box(g, 0.34, 0.026, 0.006, 'woodDark', tx, top + 0.013, tz + sz * 0.107);
+  box(out, 0.34, 0.012, 0.22, 'woodDark', tx, top + 0.006, tz);
+  for (let i = 0; i <= 3; i++) box(out, 0.006, 0.026, 0.22, 'woodDark', tx - 0.17 + i * 0.1133, top + 0.013, tz);
+  for (const sz of [-1, 0, 1]) box(out, 0.34, 0.026, 0.006, 'woodDark', tx, top + 0.013, tz + sz * 0.107);
   for (let i = 0; i < 9; i++) {
     const r = 0.012 + ctx.rnd() * 0.02;
-    gear(g, r, 8 + Math.floor(ctx.rnd() * 10), 0.004, i % 3 ? 'brass' : 'steel', tx - 0.113 + (i % 3) * 0.113 + (ctx.rnd() - 0.5) * 0.03, top + 0.016 + (i % 2) * 0.004, tz - 0.05 + Math.floor(i / 3) * 0.05 + (ctx.rnd() - 0.5) * 0.02, { rx: -90, spokes: r > 0.02 ? 4 : 0 });
+    gear(out, r, 8 + Math.floor(ctx.rnd() * 10), 0.004, i % 3 ? 'brass' : 'steel', tx - 0.113 + (i % 3) * 0.113 + (ctx.rnd() - 0.5) * 0.03, top + 0.016 + (i % 2) * 0.004, tz - 0.05 + Math.floor(i / 3) * 0.05 + (ctx.rnd() - 0.5) * 0.02, { rx: -90, spokes: r > 0.02 ? 4 : 0 });
   }
   // Loose on the bench: the big wheel, a mainspring, tweezers, an oil pot.
-  gear(g, 0.07, 30, 0.005, 'brass', 0.68, top + 0.004, 0.25, { rx: -90, rz: 20 });
-  gear(g, 0.035, 14, 0.005, 'brassDull', 0.8, top + 0.009, 0.16, { rx: -90 });
-  for (let i = 0; i < 4; i++) torus(g, 0.02 + i * 0.008, 0.002, 'steel', 0.62, top + 0.004, 0.08, { rx: 90, seg: 14, arc: Math.PI * 1.8 });
-  box(g, 0.11, 0.003, 0.008, 'steel', -0.08, top + 0.003, 0.26, { ry: 24 });
-  box(g, 0.11, 0.003, 0.008, 'steel', -0.085, top + 0.003, 0.268, { ry: 18 });
-  cyl(g, 0.022, 0.026, 0.022, 'glassBottleAmber', 0.74, top + 0.011, -0.05, 10, { noShadow: true });
+  // (The right-hand end is left clear for whatever he carried back to the bench with him.)
+  gear(out, 0.07, 30, 0.005, 'brass', -1.1, top + 0.004, -0.02, { rx: -90, rz: 20 });
+  gear(out, 0.035, 14, 0.005, 'brassDull', -0.76, top + 0.009, -0.1, { rx: -90 });
+  for (let i = 0; i < 4; i++) torus(out, 0.02 + i * 0.008, 0.002, 'steel', 0.7, top + 0.004, -0.06, { rx: 90, seg: 14, arc: Math.PI * 1.8 });
+  box(out, 0.11, 0.003, 0.008, 'steel', 0.22, top + 0.003, 0.3, { ry: 24 });
+  box(out, 0.11, 0.003, 0.008, 'steel', 0.215, top + 0.003, 0.308, { ry: 18 });
+  cyl(out, 0.022, 0.026, 0.022, 'glassBottleAmber', 0.5, top + 0.011, -0.07, 10, { noShadow: true });
   // Screwdrivers in their block, by size.
   const sx0 = 0.34;
-  box(g, 0.2, 0.035, 0.05, 'woodDark', sx0, top + 0.0175, -d / 2 + 0.09);
+  box(out, 0.2, 0.035, 0.05, 'woodDark', sx0, top + 0.0175, -d / 2 + 0.09);
   const caps = ['plasticRed', 'plasticYellow', 'plasticBlack', 'plasticRed', 'plasticBlack', 'plasticYellow', 'plasticRed'];
   for (let i = 0; i < 7; i++) {
-    cyl(g, 0.0025, 0.0025, 0.07, 'steel', sx0 - 0.075 + i * 0.025, top + 0.07, -d / 2 + 0.09, 5);
-    cyl(g, 0.006, 0.006, 0.035, caps[i], sx0 - 0.075 + i * 0.025, top + 0.12, -d / 2 + 0.09, 6);
+    cyl(out, 0.0025, 0.0025, 0.07, 'steel', sx0 - 0.075 + i * 0.025, top + 0.07, -d / 2 + 0.09, 5);
+    cyl(out, 0.006, 0.006, 0.035, caps[i], sx0 - 0.075 + i * 0.025, top + 0.12, -d / 2 + 0.09, 6);
   }
   // His glass.
-  if (!nested(g, 'magnifier', { x: -0.86, y: top + 0.017, z: 0.2, rx: 90, ry: 40 })) {
-    torus(g, 0.045, 0.006, 'brass', -0.86, top + 0.008, 0.16, { rx: 90, seg: 16 });
-    cyl(g, 0.008, 0.008, 0.11, 'woodBlack', -0.86, top + 0.008, 0.26, 6, { rx: 90 });
+  if (!nested(out, 'magnifier', { x: -0.86, y: top + 0.017, z: 0.2, rx: 90, ry: 40 })) {
+    torus(out, 0.045, 0.006, 'brass', -0.86, top + 0.008, 0.16, { rx: 90, seg: 16 });
+    cyl(out, 0.008, 0.008, 0.11, 'woodBlack', -0.86, top + 0.008, 0.26, 6, { rx: 90 });
   }
-  if (o.lamp !== false) PROPS.deskLamp(group(g, o.lampX ?? 0.92, top, -d / 2 + 0.2, -35), { intensity: o.intensity ?? 2.6, shade: 'brassDull' }, ctx);
-  shadowBlob(g, w, d);
+  if (o.lamp !== false) PROPS.deskLamp(group(out, o.lampX ?? 0.92, top, -d / 2 + 0.2, -35), { intensity: o.intensity ?? 2.6, shade: 'brassDull' }, ctx);
+  shadowBlob(out, w, d);
+  // The hotspot is the place he sat at, not the whole carcass: what lies along the bench answers for itself.
+  hold(g, o.holdW ?? 0.9, 0.3, d * 0.8, o.holdX ?? 0, top, 0);
   return { c: [w, d], h: 1.2 };
 });
 
@@ -2111,7 +2603,10 @@ def('planTable', (g, o, ctx) => {
   const pw = o.pw ?? Math.min(1.3, w - 0.3);
   const pd = o.pd ?? Math.min(0.82, d - 0.06);
   const px = o.px ?? -0.06;
-  plane(g, pw, pd, artMaterial('plan', 768, 512, (c, cw, ch, r) => ART.plan(c, cw, ch, r)), px, h + 0.003, 0, { rx: -90, rz: 2, unitUv: true, noShadow: true });
+  const sheet = o.plan === 'master'
+    ? artMaterial('masterplan', 1024, Math.round((1024 * pd) / pw), (c, cw, ch, r) => ART.masterplan(c, cw, ch, r))
+    : artMaterial('plan', 768, 512, (c, cw, ch, r) => ART.plan(c, cw, ch, r));
+  plane(g, pw, pd, sheet, px, h + 0.003, 0, { rx: -90, rz: 2, unitUv: true, noShadow: true });
   for (const [sx, sz] of [[-1, -1], [1, -1], [1, 1]]) cyl(g, 0.032, 0.036, 0.028, 'brass', px + sx * (pw / 2 - 0.06), h + 0.018, sz * (pd / 2 - 0.06), 12);
   // The fourth corner has curled up off its weight.
   const curl = cyl(g, 0.03, 0.03, 0.2, 'paper', px - pw / 2 + 0.07, h + 0.03, pd / 2 - 0.09, 8, { rx: 90, rz: 50 });
@@ -2161,7 +2656,7 @@ def('planChest', (g, o) => {
   return { c: [w, d], h };
 });
 
-/** A wall shelf of great atlases: tall, thick, gilt on their spines, one laid flat on the rest. */
+/** A wall shelf of great atlases, gilt on their spines, in order of size. */
 def('atlasShelf', (g, o, ctx) => {
   const w = o.w ?? 1.3;
   const d = 0.32;
@@ -2171,26 +2666,24 @@ def('atlasShelf', (g, o, ctx) => {
     box(g, 0.025, 0.2, 0.025, 'brassDull', s * (w / 2 - 0.14), y - 0.135, 0.0125);
     rod(g, [s * (w / 2 - 0.14), y - 0.22, 0.014], [s * (w / 2 - 0.14), y - 0.035, d - 0.04], 0.009, 'brassDull');
   }
+  // A chart-seller's order, which is to say by size: the biggest (two feet of it) at one end.
   let x = -w / 2 + 0.05;
   let i = 0;
-  while (x < w / 2 - 0.46) {
-    const t = 0.05 + ctx.rnd() * 0.04;
-    const bh = 0.4 + ctx.rnd() * 0.12;
-    const bd = 0.26 + ctx.rnd() * 0.04;
+  const room = w - 0.14;
+  while (x < w / 2 - 0.1) {
+    const along = (x + w / 2 - 0.05) / room;
+    const t = 0.085 - along * 0.04 + ctx.rnd() * 0.012;
+    const bh = 0.61 - along * 0.33;
+    const bd = 0.3 - along * 0.07;
     const bind = BINDINGS[i % BINDINGS.length];
-    const lean = i === 3 ? -9 : 0;
-    const b = group(g, x + t / 2 + (lean ? 0.03 : 0), y, d / 2 + 0.01);
-    b.rotation.z = lean * DEG;
+    const b = group(g, x + t / 2, y, d / 2 + 0.01);
     box(b, t, bh, bd, bind, 0, bh / 2, 0);
     box(b, t - 0.012, bh - 0.014, 0.01, 'paper', 0, bh / 2, -bd / 2 - 0.001);
     for (const fy of [0.16, 0.78, 0.88]) box(b, t + 0.002, 0.012, 0.004, 'brass', 0, bh * fy, bd / 2 + 0.001);
     box(b, t * 0.7, bh * 0.16, 0.003, 'brassDull', 0, bh * 0.6, bd / 2 + 0.001);
-    x += t + 0.006 + (lean ? 0.06 : 0);
+    x += t + 0.006;
     i++;
   }
-  // One that would not go back in.
-  tome(g, w / 2 - 0.21, y, d / 2 + 0.01, { w: 0.3, d: 0.26, t: 0.075, material: 'leatherGreen', turn: 96 });
-  tome(g, w / 2 - 0.2, y + 0.075, d / 2 + 0.01, { w: 0.27, d: 0.22, t: 0.05, material: 'leatherOxblood', turn: 80 });
   box(g, 0.02, 0.2, 0.2, 'brass', w / 2 - 0.03, y + 0.1, d / 2);
   return { c: null, h: 0 };
 });
@@ -2293,7 +2786,7 @@ def('berth', (g, o, ctx) => {
   lathe(g, [[0.012, 0.05], [0.03, 0.04], [0.055, 0], [0.05, 0], [0.026, 0.03]], 'brassDull', len / 2 - 0.5, 1.13, -d / 2 + 0.2, 10);
   if (o.lit !== false) {
     sph(g, 0.022, glow(0xffe2b0, 1.8), len / 2 - 0.5, 1.135, -d / 2 + 0.2, 8);
-    ctx.halo(g, WARM, 0.6, len / 2 - 0.5, 1.1, -d / 2 + 0.22, 0.5);
+    ctx.halo(outside(g), WARM, 0.6, len / 2 - 0.5, 1.1, -d / 2 + 0.22, 0.5);
     if (o.light !== false) ctx.light(g, { color: WARM, intensity: o.intensity ?? 2.6, distance: 4, x: len / 2 - 0.5, y: 1.05, z: -d / 2 + 0.3 });
   }
   // A curtain on a rail, drawn back to the foot.
@@ -2387,7 +2880,20 @@ def('chessTable', (g, o, ctx) => {
   const scale = o.boardScale ?? 0.82;
   const turn = group(g, 0, 0, 0, o.turn ?? 0);
   if (o.set !== false && !nested(turn, 'chess_set', { y: h, s: scale })) chessmen(turn, h, 0.55 * scale, ctx.rnd);
-  if (o.clock !== false) {
+  if (o.card) {
+    // A folded card stood by the board.
+    const lines = [].concat(o.card);
+    const cm = artMaterial(`tableCard:${lines.join('|')}`, 256, 128, (c, cw, ch, r) => ART.board(c, cw, ch, r, { lines, bg: '#ece4cc', fg: '#2a2218' }));
+    const cd = group(turn, o.cardX ?? 0, h, s / 2 - 0.075);
+    const front = group(cd);
+    front.rotation.x = -0.42;
+    box(front, 0.2, 0.1, 0.003, 'paperWhite', 0, 0.05, 0);
+    plane(front, 0.19, 0.092, cm, 0, 0.05, 0.002, { unitUv: true, noShadow: true });
+    const back = group(cd, 0, 0, -0.085);
+    back.rotation.x = 0.42;
+    box(back, 0.2, 0.1, 0.003, 'paperWhite', 0, 0.05, 0);
+  }
+  if (o.clock !== false && !o.card) {
     const c = group(turn, s / 2 - 0.09, h, 0, -90);
     box(c, 0.2, 0.09, 0.06, 'wood', 0, 0.045, 0);
     for (const sx of [-1, 1]) {
@@ -2397,7 +2903,7 @@ def('chessTable', (g, o, ctx) => {
       cyl(c, 0.011, 0.011, sx < 0 ? 0.012 : 0.026, 'brass', sx * 0.05, 0.09 + (sx < 0 ? 0.006 : 0.013), 0, 8);
     }
   }
-  if (o.cups !== false) {
+  if (o.cups !== false && !o.card) {
     cupAndSaucer(turn, -s / 2 + 0.1, h, s / 2 - 0.1, { full: true, turn: 40 });
     cupAndSaucer(turn, -s / 2 + 0.12, h, -s / 2 + 0.1, { turn: 200 });
   }
@@ -2410,40 +2916,25 @@ def('dominoTable', (g, o, ctx) => {
   const r = o.rad ?? 0.5;
   const h = 0.74;
   PROPS.roundTable(group(g), { r, h }, ctx);
-  const tile = (x, z, turn, stand = false, down = false) => {
-    const t = group(g, x, h + (stand ? 0.012 : 0.005), z, turn);
-    t.rotation.order = 'YXZ';
-    if (stand) t.rotation.x = Math.PI / 2 - 0.12;
-    box(t, 0.048, 0.01, 0.024, down ? 'woodBlack' : IVORY, 0, 0, 0);
-    if (down) return;
-    box(t, 0.002, 0.0012, 0.022, 'dark', 0, 0.0052, 0);
-    for (const half of [-1, 1]) {
-      const pips = Math.floor(ctx.rnd() * 7);
-      const spots = [[0, 0], [-1, -1], [1, 1], [-1, 1], [1, -1], [-1, 0], [1, 0]];
-      const use = pips % 2 ? spots.slice(0, pips) : spots.slice(1, pips + 1);
-      for (const [a, b] of use) cyl(t, 0.0026, 0.0026, 0.0014, 'dark', half * 0.012 + a * 0.006, 0.0052, b * 0.0065, 5, { noShadow: true });
-    }
-  };
-  // The line of play wanders across the table and turns twice.
-  let x = -0.24;
-  let z = -0.05;
-  let dir = 0;
-  for (let i = 0; i < 13; i++) {
-    const double = i % 5 === 3;
-    tile(x, z, dir + (double ? 90 : 0));
-    const step = double ? 0.037 : 0.05;
-    x += Math.cos((dir * Math.PI) / 180) * step;
-    z -= Math.sin((dir * Math.PI) / 180) * step;
-    if (i === 5 || i === 9) dir -= 90;
-    else if (double) {
-      x += Math.cos((dir * Math.PI) / 180) * 0.013;
-      z -= Math.sin((dir * Math.PI) / 180) * 0.013;
-    }
+  // The box: a slide-lid box, shut, lettered in white paint, squared up to the table's edge.
+  const bx = group(g, o.boxX ?? 0, h, o.boxZ ?? 0.12, o.boxTurn ?? 0);
+  const bw = 0.3;
+  const bd = 0.13;
+  box(bx, bw, 0.05, bd, '#4a3020', 0, 0.025, 0);
+  box(bx, bw + 0.008, 0.008, bd + 0.008, '#3a2416', 0, 0.004, 0);
+  const lid = artMaterial(`boxLid:${(o.lines ?? []).join('|')}`, 384, 160, (c, cw, ch, rnd) => ART.boxLid(c, cw, ch, rnd, { lines: o.lines }));
+  plane(bx, bw - 0.02, bd - 0.016, lid, 0, 0.0508, 0, { rx: -90, unitUv: true, noShadow: true });
+  box(bx, 0.03, 0.006, 0.012, '#3a2416', bw / 2 - 0.03, 0.053, 0);
+  if (o.game) {
+    // A game left as it stood: the line of play, and two hands face down.
+    const tile = (x, z, turn, down = false) => {
+      const t = group(g, x, h + 0.005, z, turn);
+      box(t, 0.048, 0.01, 0.024, down ? 'woodBlack' : IVORY, 0, 0, 0);
+      if (!down) box(t, 0.002, 0.0012, 0.022, 'dark', 0, 0.0052, 0);
+    };
+    for (let i = 0; i < 9; i++) tile(-0.22 + i * 0.052, -0.14, 0);
+    for (let i = 0; i < 5; i++) tile(-0.12 + i * 0.058, -0.3, 0, true);
   }
-  for (let i = 0; i < 5; i++) tile(-0.13 + i * 0.055, 0.34, 0, true);
-  for (let i = 0; i < 4; i++) tile(0.1 - i * 0.055, -0.36, 180, true);
-  for (let i = 0; i < 6; i++) tile(0.26 + (i % 2) * 0.06 + ctx.rnd() * 0.02, -0.1 + Math.floor(i / 2) * 0.05, ctx.rnd() * 90, false, true);
-  cupAndSaucer(g, -0.32, h, 0.2, { full: true });
   return { c: [r * 1.7, r * 1.7], h };
 });
 
@@ -2581,43 +3072,23 @@ def('uprightPiano', (g, o) => {
   const desk = group(g, 0, 0.9, 0.065);
   desk.rotation.x = -0.22;
   box(desk, 0.62, 0.02, 0.035, m, 0, 0, 0.012);
-  const music = artMaterial('sheetMusic', 384, 256, (c, cw, ch, rnd) => {
-    c.fillStyle = '#ece6d2';
-    c.fillRect(0, 0, cw, ch);
-    c.fillStyle = 'rgba(40,36,30,0.25)';
-    c.fillRect(cw / 2 - 1, 0, 2, ch);
-    c.strokeStyle = 'rgba(30,26,22,0.8)';
-    c.fillStyle = 'rgba(30,26,22,0.9)';
-    for (const x0 of [cw * 0.05, cw * 0.55]) {
-      for (let st = 0; st < 5; st++) {
-        const y0 = ch * (0.12 + st * 0.17);
-        c.lineWidth = 1;
-        for (let l = 0; l < 5; l++) {
-          c.beginPath();
-          c.moveTo(x0, y0 + l * 4);
-          c.lineTo(x0 + cw * 0.4, y0 + l * 4);
-          c.stroke();
-        }
-        for (let n = 0; n < 9; n++) {
-          const nx = x0 + cw * (0.03 + n * 0.042);
-          const ny = y0 + rnd() * 18 - 1;
-          c.beginPath();
-          c.ellipse(nx, ny, 3.2, 2.4, -0.4, 0, Math.PI * 2);
-          c.fill();
-          c.beginPath();
-          c.moveTo(nx + 3, ny);
-          c.lineTo(nx + 3, ny - 13);
-          c.stroke();
-        }
-      }
-    }
-  });
+  const music = artMaterial('notMusic', 512, 340, (c, cw, ch, rnd) => ART.notMusic(c, cw, ch, rnd));
   plane(desk, 0.5, 0.33, music, 0, 0.18, 0.012, { unitUv: true, noShadow: true });
   // Sconces.
   for (const s of [-1, 1]) {
     tube(g, [[s * 0.47, 1.12, 0.04], [s * 0.5, 1.1, 0.12], [s * 0.56, 1.1, 0.17]], 0.007, 'brass', { seg: 8, radial: 5 });
     cyl(g, 0.028, 0.015, 0.02, 'brass', s * 0.56, 1.11, 0.17, 8);
     cyl(g, 0.01, 0.01, 0.1, IVORY, s * 0.56, 1.17, 0.17, 6);
+  }
+  if (o.sign !== false) {
+    // The sign on the lid.
+    const lines = o.sign ?? ['IF YOU CAN SOLVE IT', 'YOU CAN PLAY IT'];
+    const card = artMaterial(`pianoSign:${lines.join('|')}`, 512, 160, (c, cw, ch, r) => ART.board(c, cw, ch, r, { lines, bg: '#e9e1c8', fg: '#231c14' }));
+    const sg = group(g, o.signX ?? 0.3, 1.32, -0.02);
+    sg.rotation.x = -0.2;
+    box(sg, 0.56, 0.18, 0.008, 'cardboard', 0, 0.09, 0);
+    plane(sg, 0.54, 0.165, card, 0, 0.09, 0.0045, { unitUv: true, noShadow: true });
+    box(g, 0.1, 0.012, 0.09, 'cardboard', o.signX ?? 0.3, 1.326, -0.07);
   }
   shadowBlob(g, 1.6, 0.8);
   return { c: [w, 0.66], h: 1.32 };
@@ -2632,6 +3103,12 @@ def('cakeDome', (g, o) => {
     for (let i = 0; i < 7; i++) sph(g, 0.012, '#6a4420', Math.cos(i * 0.9) * 0.07, 0.202, Math.sin(i * 0.9) * 0.07, 5);
   }
   lathe(g, [[0.16, 0.116], [0.162, 0.2], [0.15, 0.27], [0.11, 0.33], [0.05, 0.36], [0.012, 0.365], [0.012, 0.378], [0.022, 0.385], [0.022, 0.4], [0, 0.404]], 'glassClear', 0, 0, 0, 20, { noShadow: true });
+  if (o.knife !== false) {
+    const k = group(g, -0.26, 0.004, 0.06, o.knifeTurn ?? 72);
+    box(k, 0.2, 0.003, 0.026, 'steel', 0.07, 0, 0);
+    box(k, 0.11, 0.012, 0.018, 'steel', -0.085, 0.004, 0);
+    sph(k, 0.011, 'steel', -0.142, 0.004, 0, 6);
+  }
   if (o.label !== false) {
     const card = artMaterial(`card:${o.label ?? 'THE DRAW CAKE'}`, 256, 96, (c, w, h, r) => ART.sign(c, w, h, r, { text: o.label ?? 'THE DRAW CAKE', bg: '#e6dcc0', fg: '#2a2218', size: 0.42 }));
     const p = plane(g, 0.16, 0.06, card, 0.02, 0.031, 0.21, { unitUv: true, noShadow: true });
@@ -2791,7 +3268,7 @@ def('lectern', (g, o, ctx) => {
   // Its lead goes down the column and away across the floor.
   tube(g, [[0, 0.5, -0.1], [0, 0.2, -0.16], [0.02, 0.03, -0.3], [0.1, 0.012, -0.5]], 0.012, 'rubber', { seg: 12, radial: 6 });
   const glowAt = [0, 1.32, 0.16];
-  ctx.halo(g, 0x9fe6d8, 1.5, ...glowAt, 0.32);
+  ctx.halo(outside(g), 0x9fe6d8, 1.5, ...glowAt, 0.32);
   if (o.light !== false) ctx.light(g, { color: 0x9fe6d8, intensity: o.intensity ?? 3.2, distance: o.distance ?? 6, x: 0, y: 1.5, z: 0.45 });
   shadowBlob(g, 0.9, 0.9);
   return { c: [0.74, 0.7], h: 1.4 };
@@ -2824,7 +3301,7 @@ def('vitrine', (g, o, ctx) => {
     box(rest, 0.3, 0.4, 0.012, 'woodDark', 0, 0.2, -0.008);
     plane(rest, 0.24, 0.32, art.sheet(kinds[0] === 'grid' ? 'notes' : kinds[0], 2), 0, 0.21, 0, { unitUv: true, noShadow: true });
     box(g, 0.14, 0.004, 0.05, 'paperWhite', 0, 0.95, 0.22);
-    ctx.halo(g, cool, 1.3, 0, 1.4, 0.1, 0.22);
+    ctx.halo(outside(g), cool, 1.3, 0, 1.4, 0.1, 0.22);
     if (o.light !== false) ctx.light(g, { color: cool, intensity: o.intensity ?? 3, distance: 4.5, x: 0, y: 1.55, z: 0 });
     shadowBlob(g, s + 0.2, s + 0.2);
     return { c: [s + 0.06, s + 0.06], h: 1.75 };
@@ -2845,8 +3322,17 @@ def('vitrine', (g, o, ctx) => {
   }
   for (const sz of [-1, 1]) box(g, w, 0.018, 0.018, 'brassDull', 0, h + gh, sz * (d / 2 - 0.012));
   for (const sx of [-1, 1]) box(g, 0.018, 0.018, d, 'brassDull', sx * (w / 2 - 0.012), h + gh, 0);
-  // What it holds.
-  kinds.forEach((kind, i) => {
+  // What it holds: three of the Late Tithes, each square with the fair copy of its clues, or whatever o.sheets says.
+  if (o.tithes) {
+    const count = o.count ?? 3;
+    for (let i = 0; i < count; i++) {
+      const x = -w / 2 + (w * (i + 0.5)) / count;
+      const year = o.tithes + i;
+      plane(g, 0.25, 0.25, art.sheet('square', year - 2012), x - 0.09, h + 0.009, -0.05, { rx: -90, rz: (i - 1) * 3, unitUv: true, noShadow: true });
+      plane(g, 0.15, 0.212, art.sheet('notes', i % 3), x + 0.13, h + 0.0095, 0.02, { rx: -90, rz: (1 - (i % 3)) * 4, unitUv: true, noShadow: true });
+      box(g, 0.1, 0.002, 0.035, 'paperWhite', x - 0.09, h + 0.008, d / 2 - 0.09);
+    }
+  } else kinds.forEach((kind, i) => {
     const size = kind === 'grid' ? [0.22, 0.22] : [0.2, 0.28];
     const x = -w / 2 + (w * (i + 0.5)) / kinds.length;
     plane(g, size[0], size[1], art.sheet(kind, (i + (o.first ?? 0)) % 3), x, h + 0.009 + i * 0.001, -0.03, { rx: -90, rz: (i - 1) * 7 + (o.first ?? 0) * 3, unitUv: true, noShadow: true });
@@ -2854,41 +3340,55 @@ def('vitrine', (g, o, ctx) => {
   });
   // A strip of light under the back rail.
   box(g, w - 0.12, 0.008, 0.012, glow(cool, 1.5), 0, h + gh - 0.02, -d / 2 + 0.03);
-  ctx.halo(g, cool, 1.1, 0, h + 0.14, 0, 0.2);
+  ctx.halo(outside(g), cool, 1.1, 0, h + 0.14, 0, 0.2);
   if (o.light) ctx.light(g, { color: cool, intensity: o.intensity ?? 3, distance: 4.5, x: 0, y: h + 0.5, z: 0.2 });
   shadowBlob(g, w, d);
   return { c: [w, d], h: h + gh };
 });
 
-/** A relic: the wicker waste-paper basket, on a plinth under its own lamp, a rope across in front of it. */
+/**
+ * A relic: the wicker waste-paper basket, on a plinth, under glass, with its own lamp over it.
+ * o.rope puts a rope on two stanchions across in front of it.
+ */
 def('relicBasket', (g, o, ctx) => {
   const s = 0.5;
   const h = o.h ?? 0.9;
+  const out = outside(g);
   box(g, s + 0.1, 0.08, s + 0.1, 'woodBlack', 0, 0.04, 0);
   box(g, s, h - 0.13, s, 'woodDark', 0, 0.08 + (h - 0.13) / 2, 0);
   box(g, s + 0.08, 0.05, s + 0.08, 'woodBlack', 0, h - 0.025, 0);
   box(g, s - 0.04, 0.012, s - 0.04, VELVET, 0, h + 0.006, 0);
-  plane(g, 0.26, 0.09, art.plate(o.plate ?? 'THE BASKET', o.sub ?? 'NOT TO BE EMPTIED'), 0, h * 0.66, s / 2 + 0.002, { unitUv: true, noShadow: true });
+  plane(g, 0.3, 0.1, art.plate(o.plate ?? 'THE BASKET', o.sub ?? 'NOT TO BE EMPTIED'), 0, h * 0.66, s / 2 + 0.002, { unitUv: true, noShadow: true });
   wicker(g, 0, h + 0.012, 0, 0.95);
   for (let i = 0; i < 2; i++) {
     const ball = sph(g, 0.04, 'paper', (i - 0.5) * 0.09, h + 0.24 + i * 0.03, (i - 0.5) * 0.05, 5);
     ball.scale.set(1, 0.8, 0.9);
   }
-  // Stanchions and a rope.
+  // The glass over it, in a brass frame.
+  const gh = 0.48;
+  const gs = s - 0.03;
+  box(g, gs, gh, gs, 'glassClear', 0, h + 0.012 + gh / 2, 0, { noShadow: true });
   for (const sx of [-1, 1]) {
-    cyl(g, 0.11, 0.12, 0.025, 'brass', sx * 0.62, 0.0125, 0.62, 14);
-    cyl(g, 0.018, 0.018, 0.88, 'brass', sx * 0.62, 0.46, 0.62, 8);
-    sph(g, 0.035, 'brass', sx * 0.62, 0.92, 0.62, 8);
+    for (const sz of [-1, 1]) box(g, 0.012, gh, 0.012, 'brassDull', sx * (gs / 2), h + 0.012 + gh / 2, sz * (gs / 2));
+    box(g, 0.012, 0.012, gs, 'brassDull', sx * (gs / 2), h + 0.012 + gh, 0);
+    box(g, gs, 0.012, 0.012, 'brassDull', 0, h + 0.012 + gh, sx * (gs / 2));
   }
-  tube(g, [[-0.62, 0.86, 0.62], [-0.3, 0.74, 0.62], [0, 0.7, 0.62], [0.3, 0.74, 0.62], [0.62, 0.86, 0.62]], 0.016, 'fabricWine', { seg: 14, radial: 6 });
+  if (o.rope) {
+    for (const sx of [-1, 1]) {
+      cyl(out, 0.11, 0.12, 0.025, 'brass', sx * 0.62, 0.0125, 0.62, 14);
+      cyl(out, 0.018, 0.018, 0.88, 'brass', sx * 0.62, 0.46, 0.62, 8);
+      sph(out, 0.035, 'brass', sx * 0.62, 0.92, 0.62, 8);
+    }
+    tube(out, [[-0.62, 0.86, 0.62], [-0.3, 0.74, 0.62], [0, 0.7, 0.62], [0.3, 0.74, 0.62], [0.62, 0.86, 0.62]], 0.016, 'fabricWine', { seg: 14, radial: 6 });
+  }
   // Its lamp.
   const ceil = ctx.ceil ?? 2.7;
-  cyl(g, 0.07, 0.1, 0.1, 'iron', 0, ceil - 0.05, 0, 12);
-  cyl(g, 0.06, 0.06, 0.006, glow(0xffe6c0, 1.8), 0, ceil - 0.103, 0, 12);
-  ctx.beam(g, { y: ceil - 0.1, top: 0.07, bottom: 0.42, h: ceil - h - 0.2, color: 0xffe6c0, opacity: 0.06 });
-  if (o.light !== false) ctx.light(g, { color: 0xffe2b8, intensity: o.intensity ?? 9, distance: 5, x: 0, y: ceil - 0.15, z: 0, spot: { angle: 0.5, penumbra: 0.6, target: [0, h, 0] } });
-  shadowBlob(g, s + 0.3, s + 0.3);
-  return { c: [1.4, 1.4], h: h + 0.35 };
+  cyl(out, 0.07, 0.1, 0.1, 'iron', 0, ceil - 0.05, 0, 12);
+  cyl(out, 0.06, 0.06, 0.006, glow(0xffe6c0, 1.8), 0, ceil - 0.103, 0, 12);
+  ctx.beam(out, { y: ceil - 0.1, top: 0.07, bottom: 0.42, h: ceil - h - 0.2, color: 0xffe6c0, opacity: 0.06 });
+  if (o.light !== false) ctx.light(out, { color: 0xffe2b8, intensity: o.intensity ?? 9, distance: 5, x: 0, y: ceil - 0.15, z: 0, spot: { angle: 0.5, penumbra: 0.6, target: [0, h, 0] }, shadow: o.shadow });
+  shadowBlob(out, s + 0.3, s + 0.3);
+  return { c: o.rope ? [1.4, 1.4] : [s + 0.12, s + 0.12], h: h + gh };
 });
 
 /** Dark equipment cabinets with small coloured lights: o.n of them side by side. */
@@ -2898,7 +3398,8 @@ def('serverRack', (g, o, ctx) => {
   const d = 0.9;
   const h = 2.0;
   const body = '#16191d';
-  const lights = [0x4cff8a, 0x4cff8a, 0xffb040, 0x4cc8ff, 0x4cff8a];
+  const lights = [0x4cff8a, 0x4cff8a, 0x8dffb4, 0x35d070, 0x4cff8a];
+  const out = outside(g);
   for (let k = 0; k < n; k++) {
     const x = (k - (n - 1) / 2) * (w + 0.02);
     const face = d / 2 - 0.07;
@@ -2925,7 +3426,7 @@ def('serverRack', (g, o, ctx) => {
     }
     // Two that blink.
     for (let i = 0; i < 2; i++) {
-      const blink = box(g, 0.016, 0.016, 0.005, glow(i ? 0xffb040 : 0x4cff8a, 1.15), x - w / 2 + 0.11 + i * 0.06, 0.22 + (3 + i * 4) * ((h - 0.36) / 10) - 0.02, face + 0.013, { dyn: true });
+      const blink = box(g, 0.016, 0.016, 0.005, glow(i ? 0x8dffb4 : 0x4cff8a, 1.15), x - w / 2 + 0.11 + i * 0.06, 0.22 + (3 + i * 4) * ((h - 0.36) / 10) - 0.02, face + 0.013, { dyn: true });
       const rate = 3 + ctx.rnd() * 9;
       const phase = ctx.rnd() * 10;
       ctx.anim((t) => {
@@ -2934,10 +3435,23 @@ def('serverRack', (g, o, ctx) => {
     }
     // Cables up to the ceiling.
     const ceil = ctx.ceil ?? 2.7;
-    cyl(g, 0.035, 0.035, ceil - h - 0.03, 'rubber', x - 0.1, (ceil + h + 0.03) / 2, -0.2, 8);
-    box(g, w - 0.1, 0.02, 0.3, 'iron', x, h + 0.04, -0.2);
+    cyl(out, 0.035, 0.035, ceil - h - 0.03, 'rubber', x - 0.1, (ceil + h + 0.03) / 2, -0.2, 8);
+    box(out, w - 0.1, 0.02, 0.3, 'iron', x, h + 0.04, -0.2);
   }
-  ctx.halo(g, 0x6cffb0, 1.2, 0, 1.2, d / 2 + 0.1, 0.16);
+  // The log, scrolling on a small screen on the first door.
+  const lx = -((n - 1) / 2) * (w + 0.02);
+  const log = artMaterial('logScreen', 256, 256, (c, cw, ch, r) => ART.logScreen(c, cw, ch, r), { basic: true });
+  if (log.map) {
+    log.map.wrapT = THREE.RepeatWrapping;
+    log.map.repeat.set(1, 0.6);
+    log.map.needsUpdate = true;
+    ctx.anim((t) => {
+      log.map.offset.y = -Math.floor(t * 1.4) * 0.095;
+    });
+  }
+  box(g, 0.25, 0.17, 0.02, 'plasticBlack', lx, 1.5, d / 2 + 0.014);
+  plane(g, 0.22, 0.14, log, lx, 1.5, d / 2 + 0.0245, { unitUv: true, noShadow: true, dyn: true });
+  ctx.halo(outside(g), 0x6cffb0, 1.2, 0, 1.2, d / 2 + 0.1, 0.16);
   shadowBlob(g, n * w + 0.2, d + 0.2);
   return { c: [n * (w + 0.02), d], h: h + 0.03 };
 });
@@ -3000,9 +3514,9 @@ def('vaultRib', (g, o, ctx) => {
   return { c: null, h: 0 };
 });
 
-/** A modern desk in an old room: trestle legs, two screens, a keyboard, a scanner with a ledger on it, and everything else. */
+/** A modern desk in an old room: trestle legs, three screens, a keyboard with a printout face down under it, a cold coffee, and a sleeping bag stuffed underneath. */
 def('techDesk', (g, o, ctx) => {
-  const w = o.w ?? 1.7;
+  const w = o.w ?? 1.9;
   const d = o.d ?? 0.78;
   const h = 0.74;
   box(g, w, 0.03, d, 'woodLight', 0, h - 0.015, 0);
@@ -3014,14 +3528,14 @@ def('techDesk', (g, o, ctx) => {
   }
   box(g, w - 0.4, 0.04, 0.03, 'steelDark', 0, h - 0.2, -d / 2 + 0.16);
   const top = h;
-  // Two screens on one arm.
+  // Three screens on one arm, the outer two turned in.
   cyl(g, 0.02, 0.02, 0.36, 'steelDark', 0, top + 0.18, -d / 2 + 0.1, 8);
   box(g, 0.1, 0.012, 0.1, 'steelDark', 0, top + 0.006, -d / 2 + 0.1);
-  [-1, 1].forEach((s, i) => {
-    const scr = group(g, s * 0.3, top + 0.34, -d / 2 + 0.16, -s * 14);
-    box(scr, 0.56, 0.34, 0.02, 'plasticBlack', 0, 0, 0);
-    plane(scr, 0.53, 0.3, artMaterial(`monitor:${i}`, 384, 224, (c, cw, ch, r) => ART.monitor(c, cw, ch, r), { basic: true }), 0, 0.005, 0.0105, { unitUv: true, noShadow: true, dyn: true });
-    rod(g, [0, top + 0.3, -d / 2 + 0.1], [s * 0.3, top + 0.34, -d / 2 + 0.15], 0.012, 'steelDark');
+  box(g, 1.0, 0.03, 0.02, 'steelDark', 0, top + 0.3, -d / 2 + 0.1);
+  [-1, 0, 1].forEach((s, i) => {
+    const scr = group(g, s * 0.5, top + 0.34, -d / 2 + 0.13 + Math.abs(s) * 0.09, -s * 24);
+    box(scr, 0.48, 0.3, 0.02, 'plasticBlack', 0, 0, 0);
+    plane(scr, 0.455, 0.265, artMaterial(`monitor:${i}`, 384, 224, (c, cw, ch, r) => ART.monitor(c, cw, ch, r), { basic: true }), 0, 0.004, 0.0105, { unitUv: true, noShadow: true, dyn: true });
   });
   // Keyboard, mouse, a mug, cans.
   box(g, 0.42, 0.018, 0.14, 'plasticBlack', -0.05, top + 0.009, 0.12, { ry: 3 });
@@ -3033,20 +3547,17 @@ def('techDesk', (g, o, ctx) => {
     cyl(g, 0.03, 0.03, 0.12, 'steel', 0.6 + (i % 2) * 0.07, top + 0.06, -0.12 + i * 0.065, 10);
     cyl(g, 0.0305, 0.0305, 0.05, i === 1 ? 'plasticRed' : '#2a6a4a', 0.6 + (i % 2) * 0.07, top + 0.06, -0.12 + i * 0.065, 10);
   }
-  // A flatbed scanner, lid up, with one of the old ledgers face down on the glass.
-  const sx = -w / 2 + 0.34;
-  box(g, 0.46, 0.06, 0.34, '#d8d8d4', sx, top + 0.03, 0.02);
-  box(g, 0.4, 0.004, 0.28, 'glassDark', sx, top + 0.062, 0.02, { noShadow: true });
-  box(g, 0.36, 0.002, 0.01, glow(0xcfe8ff, 1.6), sx, top + 0.065, 0.12);
-  const lid = group(g, sx, top + 0.06, -0.15);
-  lid.rotation.x = -1.2;
-  box(lid, 0.46, 0.02, 0.34, '#d8d8d4', 0, 0.01, 0.17);
-  tome(g, sx + 0.02, top + 0.065, 0.0, { w: 0.3, d: 0.22, t: 0.05, material: 'leather', turn: 6 });
+  // The printout, face down under the keyboard with a corner showing.
+  box(g, 0.21, 0.002, 0.297, 'paperWhite', 0.1, top + 0.002, 0.2, { ry: 24 });
+  // The sleeping bag, rolled and strapped, under the desk.
+  const bag = group(g, o.bagX ?? -0.35, 0.15, 0.02, 8);
+  cyl(bag, 0.15, 0.15, 0.52, 'fabricOlive', 0, 0, 0, 14, { rz: 90 });
+  for (const bx of [-0.14, 0.14]) cyl(bag, 0.153, 0.153, 0.03, 'dark', bx, 0, 0, 14, { rz: 90 });
+  cyl(bag, 0.1, 0.1, 0.525, '#3a4a2a', 0, 0, 0, 12, { rz: 90 });
   // Headphones, notes stuck to the screen's edge, a tangle of leads.
   const hp = torus(g, 0.08, 0.008, 'plasticBlack', 0.44, top + 0.085, 0.24, { seg: 12, arc: Math.PI });
   hp.rotation.y = 0.5;
   for (const s of [-1, 1]) cyl(g, 0.035, 0.035, 0.03, 'plasticBlack', 0.44 + s * 0.07, top + 0.04, 0.24 - s * 0.038, 10, { rz: 90, ry: 28 });
-  for (let i = 0; i < 4; i++) plane(g, 0.07, 0.07, 'plasticYellow', -0.58 + i * 0.09, top + 0.1 + (i % 2) * 0.08, -d / 2 + 0.2, { noShadow: true, ry: 14, rz: (i - 2) * 4 });
   tube(g, [[0.1, top + 0.01, -d / 2 + 0.12], [0.3, top + 0.012, -d / 2 + 0.2], [0.5, top + 0.01, -d / 2 + 0.1], [0.62, 0.4, -d / 2 + 0.05], [0.5, 0.02, -d / 2 + 0.1]], 0.008, 'rubber', { seg: 16, radial: 5 });
   // A lamp on an arm.
   const lx = -w / 2 + 0.14;
@@ -3055,7 +3566,7 @@ def('techDesk', (g, o, ctx) => {
   rod(g, [lx + 0.04, top + 0.4, -d / 2 + 0.2], [lx + 0.3, top + 0.5, -d / 2 + 0.34], 0.008, 'steelDark');
   box(g, 0.26, 0.02, 0.05, 'steelDark', lx + 0.32, top + 0.5, -d / 2 + 0.36, { ry: -28 });
   box(g, 0.24, 0.004, 0.04, glow(0xfff0d0, 1.8), lx + 0.32, top + 0.488, -d / 2 + 0.36, { ry: -28 });
-  ctx.halo(g, 0xfff0d0, 0.8, lx + 0.32, top + 0.44, -d / 2 + 0.36, 0.4);
+  ctx.halo(outside(g), 0xfff0d0, 0.8, lx + 0.32, top + 0.44, -d / 2 + 0.36, 0.4);
   if (o.light !== false) ctx.light(g, { color: 0xffe6c0, intensity: o.intensity ?? 3.4, distance: 5, x: lx + 0.32, y: top + 0.44, z: -d / 2 + 0.4 });
   shadowBlob(g, w, d);
   return { c: [w, d], h: top + 0.5 };
@@ -3079,41 +3590,46 @@ def('cable', (g, o) => {
  * great rings of an armillary. It turns, slowly.
  */
 def('orrery', (g, o, ctx) => {
+  const out = outside(g);
   // The drum.
-  cyl(g, 0.92, 0.98, 0.1, 'woodDark', 0, 0.05, 0, 8, { ry: 22.5 });
-  cyl(g, 0.8, 0.8, 0.04, 'woodDark', 0, 0.12, 0, 8, { ry: 22.5 });
-  cyl(g, 0.84, 0.84, 0.06, 'woodDark', 0, 0.58, 0, 8, { ry: 22.5 });
+  cyl(out, 0.92, 0.98, 0.1, 'woodDark', 0, 0.05, 0, 8, { ry: 22.5 });
+  cyl(out, 0.8, 0.8, 0.04, 'woodDark', 0, 0.12, 0, 8, { ry: 22.5 });
+  cyl(out, 0.84, 0.84, 0.06, 'woodDark', 0, 0.58, 0, 8, { ry: 22.5 });
   for (let i = 0; i < 8; i++) {
     const a = (i / 8) * Math.PI * 2 + Math.PI / 8;
     const am = a + Math.PI / 8;
-    box(g, 0.05, 0.44, 0.05, 'brassDull', Math.cos(a) * 0.79, 0.34, Math.sin(a) * 0.79, { ry: (-a * 180) / Math.PI });
-    box(g, 0.56, 0.4, 0.008, 'glassClear', Math.cos(am) * 0.73, 0.34, Math.sin(am) * 0.73, { ry: 90 - (am * 180) / Math.PI, noShadow: true });
+    box(out, 0.05, 0.44, 0.05, 'brassDull', Math.cos(a) * 0.79, 0.34, Math.sin(a) * 0.79, { ry: (-a * 180) / Math.PI });
+    box(out, 0.56, 0.4, 0.008, 'glassClear', Math.cos(am) * 0.73, 0.34, Math.sin(am) * 0.73, { ry: 90 - (am * 180) / Math.PI, noShadow: true });
   }
   // The wheelwork inside it.
-  gear(g, 0.5, 72, 0.02, 'brass', 0, 0.2, 0, { rx: -90, spokes: 6 });
-  gear(g, 0.26, 40, 0.02, 'brassDull', 0.36, 0.28, 0.2, { rx: -90, spokes: 5 });
-  gear(g, 0.18, 28, 0.02, 'brass', -0.4, 0.33, -0.12, { rx: -90, spokes: 4 });
-  gear(g, 0.12, 20, 0.02, 'steel', 0.05, 0.4, -0.42, { rx: -90, spokes: 4 });
-  gear(g, 0.3, 48, 0.016, 'brassDull', -0.12, 0.44, 0.3, { rx: -90, spokes: 5 });
-  for (const [x, z, h] of [[0.36, 0.2, 0.3], [-0.4, -0.12, 0.34], [0.05, -0.42, 0.4], [-0.12, 0.3, 0.44]]) cyl(g, 0.014, 0.014, h, 'steel', x, 0.14 + h / 2, z, 6);
+  gear(out, 0.5, 72, 0.02, 'brass', 0, 0.2, 0, { rx: -90, spokes: 6 });
+  gear(out, 0.26, 40, 0.02, 'brassDull', 0.36, 0.28, 0.2, { rx: -90, spokes: 5 });
+  gear(out, 0.18, 28, 0.02, 'brass', -0.4, 0.33, -0.12, { rx: -90, spokes: 4 });
+  gear(out, 0.12, 20, 0.02, 'steel', 0.05, 0.4, -0.42, { rx: -90, spokes: 4 });
+  gear(out, 0.3, 48, 0.016, 'brassDull', -0.12, 0.44, 0.3, { rx: -90, spokes: 5 });
+  for (const [x, z, h] of [[0.36, 0.2, 0.3], [-0.4, -0.12, 0.34], [0.05, -0.42, 0.4], [-0.12, 0.3, 0.44]]) cyl(out, 0.014, 0.014, h, 'steel', x, 0.14 + h / 2, z, 6);
   // The winding handle.
-  rod(g, [0.78, 0.36, 0], [1.02, 0.36, 0], 0.014, 'steel');
-  rod(g, [1.02, 0.36, 0], [1.02, 0.5, 0], 0.012, 'brass');
-  cyl(g, 0.018, 0.018, 0.09, 'woodBlack', 1.065, 0.5, 0, 8, { rz: 90 });
+  rod(out, [0.78, 0.36, 0], [1.02, 0.36, 0], 0.014, 'steel');
+  rod(out, [1.02, 0.36, 0], [1.02, 0.5, 0], 0.012, 'brass');
+  cyl(out, 0.018, 0.018, 0.09, 'woodBlack', 1.065, 0.5, 0, 8, { rz: 90 });
   // Top plate and column.
-  cyl(g, 0.72, 0.72, 0.03, 'brass', 0, 0.625, 0, 32);
-  torus(g, 0.7, 0.012, 'brassDull', 0, 0.645, 0, { rx: 90, seg: 40 });
-  lathe(g, [[0.16, 0.64], [0.1, 0.7], [0.06, 0.82], [0.085, 0.92], [0.05, 1.0], [0.045, 1.34], [0.07, 1.38], [0.04, 1.42]], 'brass', 0, 0, 0, 14);
+  cyl(out, 0.72, 0.72, 0.03, 'brass', 0, 0.625, 0, 32);
+  torus(out, 0.7, 0.012, 'brassDull', 0, 0.645, 0, { rx: 90, seg: 40 });
+  lathe(out, [[0.16, 0.64], [0.1, 0.7], [0.06, 0.82], [0.085, 0.92], [0.05, 1.0], [0.045, 1.34], [0.07, 1.38], [0.04, 1.42]], 'brass', 0, 0, 0, 14);
   // The sun: a lamp in a glass globe.
   const sunY = 1.56;
-  sph(g, 0.17, 'glassClear', 0, sunY, 0, 18, { noShadow: true });
-  torus(g, 0.172, 0.006, 'brass', 0, sunY, 0, { rx: 90, seg: 24 });
+  sph(out, 0.17, 'glassClear', 0, sunY, 0, 18, { noShadow: true });
+  torus(out, 0.172, 0.006, 'brass', 0, sunY, 0, { rx: 90, seg: 24 });
   const lit = o.lit !== false;
   if (lit) {
-    sph(g, 0.085, glow(0xffd890, 2.2), 0, sunY, 0, 12);
-    ctx.halo(g, WARM, 2.6, 0, sunY, 0, 0.5);
-    if (o.light !== false) ctx.light(g, { color: 0xffc680, intensity: o.intensity ?? 11, distance: 11, x: 0, y: sunY, z: 0, flicker: 0.04 });
-  } else sph(g, 0.085, 'brassDull', 0, sunY, 0, 12);
+    sph(out, 0.085, glow(0xffd890, 2.2), 0, sunY, 0, 12);
+    ctx.halo(out, WARM, 2.6, 0, sunY, 0, 0.5);
+    if (o.light !== false) ctx.light(out, { color: 0xffc680, intensity: o.intensity ?? 11, distance: 11, x: 0, y: sunY, z: 0, flicker: 0.04 });
+  } else {
+    // Not lit since 1911: a cold burner in a dusty globe.
+    cyl(out, 0.03, 0.04, 0.07, 'brassDull', 0, sunY - 0.1, 0, 10);
+    cyl(out, 0.012, 0.012, 0.05, 'dark', 0, sunY - 0.04, 0, 6);
+  }
   // Six planets, each on its own arm from its own collar, each at its own pace.
   const planets = [
     { r: 0.34, size: 0.03, m: 'steel', rate: 0.42 },
@@ -3125,7 +3641,7 @@ def('orrery', (g, o, ctx) => {
   ];
   planets.forEach((p, i) => {
     const cy = 1.3 - i * 0.04;
-    const armG = group(g, 0, 0, 0, (i * 67 + 20) % 360);
+    const armG = group(out, 0, 0, 0, (i * 67 + 20) % 360);
     armG.userData.dyn = true;
     cyl(armG, 0.062, 0.062, 0.03, 'brassDull', 0, cy, 0, 12);
     rod(armG, [0.05, cy, 0], [p.r, cy, 0], 0.006, 'brass', 5);
@@ -3147,20 +3663,22 @@ def('orrery', (g, o, ctx) => {
   });
   // The armillary: horizon, meridian, and the band of the ecliptic at its tilt.
   const R = 1.42;
-  torus(g, R, 0.022, 'brass', 0, sunY, 0, { rx: 90, seg: 56 });
-  torus(g, R, 0.022, 'brass', 0, sunY, 0, { seg: 56 });
-  const ecl = torus(g, R - 0.03, 0.03, 'brassDull', 0, sunY, 0, { seg: 56 });
+  torus(out, R, 0.022, 'brass', 0, sunY, 0, { rx: 90, seg: 56 });
+  torus(out, R, 0.022, 'brass', 0, sunY, 0, { seg: 56 });
+  const ecl = torus(out, R - 0.03, 0.03, 'brassDull', 0, sunY, 0, { seg: 56 });
   ecl.rotation.set(Math.PI / 2 - 0.41, 0, 0);
   ecl.scale.z = 0.35;
-  const colure = torus(g, R - 0.004, 0.016, 'brass', 0, sunY, 0, { seg: 56 });
+  const colure = torus(out, R - 0.004, 0.016, 'brass', 0, sunY, 0, { seg: 56 });
   colure.rotation.y = Math.PI / 2;
   // The cradle that carries the rings on the drum.
   for (const s of [-1, 1]) {
-    tube(g, [[s * 0.6, 0.64, 0], [s * 0.86, 0.5, 0], [s * 1.12, 0.52, 0], [s * 1.3, 0.92, 0], [s * 1.4, 1.4, 0]], 0.022, 'brass', { seg: 14, radial: 6 });
-    sph(g, 0.04, 'brassDull', s * R, sunY, 0, 8);
+    tube(out, [[s * 0.6, 0.64, 0], [s * 0.86, 0.5, 0], [s * 1.12, 0.52, 0], [s * 1.3, 0.92, 0], [s * 1.4, 1.4, 0]], 0.022, 'brass', { seg: 14, radial: 6 });
+    sph(out, 0.04, 'brassDull', s * R, sunY, 0, 8);
   }
-  sph(g, 0.04, 'brassDull', 0, sunY + R, 0, 8);
-  shadowBlob(g, 2.4, 2.4);
+  sph(out, 0.04, 'brassDull', 0, sunY + R, 0, 8);
+  shadowBlob(out, 2.4, 2.4);
+  // What a hotspot holds is the sun on its column; the rings and the planets go round outside it.
+  hold(g, 0.5, 0.75, 0.5, 0, 1.0, 0);
   return { c: [1.8, 1.8], h: 3 };
 });
 
@@ -3208,10 +3726,11 @@ def('grille', (g, o) => {
 
 /** The trap in the floor that the stair comes up through: its leaf thrown back, a rail on two sides. */
 def('trapdoor', (g, o) => {
+  const out = outside(g);
   const s = o.size ?? 1.0;
   // The curb and the dark under it, with the first treads showing.
-  for (const sx of [-1, 1]) box(g, 0.07, 0.05, s + 0.14, 'woodDark', sx * (s / 2 + 0.035), 0.025, 0);
-  for (const sz of [-1, 1]) box(g, s, 0.05, 0.07, 'woodDark', 0, 0.025, sz * (s / 2 + 0.035));
+  for (const sx of [-1, 1]) box(out, 0.07, 0.05, s + 0.14, 'woodDark', sx * (s / 2 + 0.035), 0.025, 0);
+  for (const sz of [-1, 1]) box(out, s, 0.05, 0.07, 'woodDark', 0, 0.025, sz * (s / 2 + 0.035));
   const well = artMaterial('stairwell', 128, 128, (c, w, h) => {
     c.fillStyle = '#050608';
     c.fillRect(0, 0, w, h);
@@ -3224,9 +3743,9 @@ def('trapdoor', (g, o) => {
       c.fillRect(w * (0.08 + i * 0.03), y + h * 0.1, w * (0.84 - i * 0.06), h * 0.05);
     }
   }, { basic: true });
-  plane(g, s, s, well, 0, 0.012, 0, { rx: -90, unitUv: true, noShadow: true });
+  plane(out, s, s, well, 0, 0.012, 0, { rx: -90, unitUv: true, noShadow: true });
   // The leaf, thrown back against its stay.
-  const leaf = group(g, 0, 0.05, -s / 2 - 0.02);
+  const leaf = group(out, 0, 0.05, -s / 2 - 0.02);
   leaf.rotation.x = -(o.open ?? 100) * DEG;
   box(leaf, s + 0.04, 0.045, s + 0.04, 'wood', 0, 0.0225, (s + 0.04) / 2);
   for (const sx of [-0.3, 0.3]) box(leaf, 0.06, 0.008, s * 0.8, 'iron', sx * s, 0.05, s * 0.45);
@@ -3234,11 +3753,25 @@ def('trapdoor', (g, o) => {
   // Newels and a rail on the two open sides.
   const posts = [[-s / 2 - 0.035, s / 2 + 0.035], [s / 2 + 0.035, s / 2 + 0.035], [s / 2 + 0.035, -s / 2 - 0.035]];
   for (const [x, z] of posts) {
-    box(g, 0.06, 0.95, 0.06, 'woodDark', x, 0.475, z);
-    sph(g, 0.045, 'brass', x, 0.99, z, 10);
+    box(out, 0.06, 0.95, 0.06, 'woodDark', x, 0.475, z);
+    sph(out, 0.045, 'brass', x, 0.99, z, 10);
   }
-  box(g, 0.04, 0.05, s + 0.07, 'wood', s / 2 + 0.035, 0.9, 0);
-  box(g, 0.03, 0.03, s + 0.07, 'woodDark', s / 2 + 0.035, 0.5, 0);
-  for (let i = 1; i < 6; i++) cyl(g, 0.012, 0.012, 0.86, 'woodDark', s / 2 + 0.035, 0.45, -s / 2 + (s * i) / 6, 6);
+  box(out, 0.04, 0.05, s + 0.07, 'wood', s / 2 + 0.035, 0.9, 0);
+  box(out, 0.03, 0.03, s + 0.07, 'woodDark', s / 2 + 0.035, 0.5, 0);
+  for (let i = 1; i < 6; i++) cyl(out, 0.012, 0.012, 0.86, 'woodDark', s / 2 + 0.035, 0.45, -s / 2 + (s * i) / 6, 6);
+  if (o.second) {
+    // The smaller one beside it, shut: for the man who winds the clocks.
+    const [dx, dz] = o.second;
+    const q = 0.6;
+    const small = group(out, dx, 0, dz);
+    box(small, q + 0.1, 0.03, q + 0.1, 'woodDark', 0, 0.015, 0);
+    box(small, q, 0.02, q, 'wood', 0, 0.035, 0);
+    for (const sx of [-0.3, 0.3]) box(small, 0.05, 0.008, q * 0.8, 'iron', sx * q, 0.048, 0);
+    const ring = torus(small, 0.045, 0.007, 'brass', 0, 0.052, q * 0.28, { seg: 12 });
+    ring.rotation.x = Math.PI / 2 - 0.12;
+    cyl(small, 0.03, 0.03, 0.006, 'brass', 0, 0.048, q * 0.4, 10);
+  }
+  // The hotspot is the well itself, low on the floor: the leaf and the rail stand outside it.
+  hold(g, s, 0.3, s, 0, 0, 0);
   return { c: null, h: 1.0 };
 });

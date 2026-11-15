@@ -44,6 +44,9 @@ It is a few hours long, longer if you refuse the hints.
   personality, things they know, things they are hiding and conditions under
   which they give them up. They remember what you said and what you showed
   them.
+- **You can pull on what people say.** Words in a reply that lead somewhere
+  are underlined: tap one and you have asked about it. Claude chooses them as
+  it speaks; you never have to wonder what to type next.
 - **The killer writes to you.** Each Paper comes with a covering note written
   at the moment you open it, about what you actually did that day and what
   you missed.
@@ -64,7 +67,12 @@ same person did it every time, the clues are always there, and Claude cannot
 hand out a clue you have not earned. The rules are code; the voices are
 Claude.
 
-The game uses Claude Opus (`claude-opus-5-5`).
+The game uses Claude Opus (`claude-opus-5-5`). As a claude.ai page it starts
+with Opus and watches how long answers take to begin: if people are kept
+waiting, or Opus reaches a usage limit, everyday conversation moves to
+Claude's fast model, and Opus keeps the parts worth waiting for (the letters,
+the Lectern, the last scene). The game says so when it happens, and **Menu,
+Characters played by** lets you choose Auto, Opus or Fast yourself.
 
 ![Questioning your partner](docs/conversation.jpg)
 
@@ -79,9 +87,11 @@ npm start
 Open <http://localhost:3000>.
 
 Without a key the game still runs from start to finish in **scripted mode**:
-characters answer the suggested questions from their script and give a stock
-reply to anything else. It is a good way to check everything works. It is not
-the game.
+characters answer from their script. They understand ordinary remarks and
+questions put in plain words, follow the threads in their own replies, and
+say so when they cannot help. The conversation screen shows *Live* or
+*Script* so you always know which you are talking to. Scripted mode is a good
+way to check everything works. It is not the game.
 
 ## On a phone
 
@@ -97,19 +107,27 @@ nothing needs careful steering.
   straight to it. With Look and the Map you can play the whole case without
   steering at all.
 - **Tools sit in a dock along the bottom**: Look, Think, Notes, Lectern, Map.
-  Panels open as sheets from the bottom and close from the bottom.
-- **Suggested questions** are one tap. Type or dictate your own whenever you
-  like.
+  Panels are sheets of glass over the room, and close from the bottom.
+- **Conversations are close-ups.** The person fills the screen, a soft light
+  comes up on their face and the room falls out of focus behind them; what
+  they say is one caption. Tap an underlined word to follow it up, tap a
+  suggested question, or type or dictate your own. Beside them, **Read**
+  sizes them up, **Show** puts a piece of evidence in front of them and
+  **Log** is everything that was said.
 - The phone's **Back** button or swipe closes whatever is open instead of
   leaving the game.
 - Works upright or on its side. The screen stays awake while you read.
-- If movement feels choppy, **Menu, Graphics, Low** turns off shadows and the
-  finishing effects (ambient occlusion, bloom, depth of field, frosted
-  glass). The game also steps down by itself when it sees the frame rate
-  struggling.
+- The game eases its own graphics when frames run slow, a step at a time:
+  first ambient occlusion and focus blur, then shadows, then some sharpness.
+  The tone curve and the grade stay on at every setting. **Menu, Graphics**
+  lets you choose for yourself.
+- If something looks wrong on your phone, **Menu, Copy diagnostics** puts a
+  few lines about what the game is doing on the clipboard. Nothing is sent
+  anywhere unless you paste it.
 - Getting to the first room is about a 6 MB download on a phone, so it takes
-  a few seconds on a mobile connection; each new place after that is around
-  a megabyte.
+  a few seconds on a mobile connection. The rest of the game is fetched
+  quietly while you play, and a request that is dropped is asked for again,
+  so a patchy connection costs time rather than furniture.
 
 ### Install it as an app
 
@@ -131,6 +149,7 @@ or host the `dist/app` folder from `npm run build` (below) on any static host.
 | Turn | Drag | Drag, or press `F` for mouse-look |
 | Examine or talk | Tap the glowing marker | Click it, or look at it and press `E` |
 | Everything in the room | **Look** | `Q` |
+| Follow something up | Tap an underlined word in what they said | Click it |
 | Catch a lie | In a conversation, **Show** puts evidence in front of them | The same |
 | Notebook (and Papers), Lectern, map | Dock along the bottom | `N`, `L`, `M` |
 | A nudge on the case | **Think** | `T` |
@@ -180,12 +199,15 @@ core/                 The game itself. Runs unchanged in Node and in the browser
   prompts.js          Character sheets and briefs sent to Claude
   view.js             What the player is allowed to see of the state
   ciphers.js          The classical ciphers: makes every puzzle text, and powers the solving tools
+  talk.js             Understanding the detective without a model: small talk, subjects, threads
   cases/fold/         The case: scenes, people, facts, evidence, lectures, puzzles, story
 server/               Node server: hosts the core, keeps the API key and the saves
 public/               The browser client
   assets/             Models, textures and animation, ready to load (built by scripts/assets)
   src/world/          3D: rooms, people, furniture, movement, finishing pass
   src/ui/             HUD, conversation, notebook and Papers, the Lectern, map, title, ending
+  styles.css          The interface: glass over the room
+  talk.css            The conversation screen
   src/game.js         Ties the world and the UI to the game core
 scripts/              Playtest, browser test driver, builds
   assets/             Fetches and prepares the models, textures and animation
@@ -213,12 +235,16 @@ test/                 Tests
 - **The finish** is [postprocessing](https://github.com/pmndrs/postprocessing)
   and [N8AO](https://github.com/N8python/n8ao): ambient occlusion, depth of
   field behind whoever you are talking to, bloom on lamps, filmic tone
-  mapping, a light grade, vignette and grain.
+  mapping, a light grade, vignette and grain. In a conversation a key light
+  comes up on the speaker from beside the camera, as a film would light them.
 - Rain on the glass, wind on the roof, a hull creaking at its mooring, the
   hum of the cold room and the odd phrase of piano are all synthesised.
 
-If the assets cannot be fetched the game still runs: people and furniture
-are drawn in code instead (`world/characters.js`, `world/props.js`).
+Models are fetched a few at a time and a dropped request is tried again
+(`world/assets.js`). If something still cannot be had the game runs anyway:
+that person or piece of furniture is drawn in code (`world/characters.js`,
+`world/props.js`), the game says so, keeps asking, and swaps the stand-in
+for the real thing the moment it arrives.
 
 ### Rebuilding the assets
 
@@ -253,7 +279,7 @@ is in the page.
 ### Developing
 
 ```bash
-npm test            # every puzzle undone, every ending, saves, view leaks, the server, the Claude calls
+npm test            # every puzzle undone, every ending, conversations, the story's calendar, saves, view leaks, the server, the Claude calls, bad connections
 npm run playtest    # plays the best path through the core and prints the route
 npm run dev         # server with reload
 ```
@@ -262,7 +288,9 @@ npm run dev         # server with reload
 the fastest way to read the case, and it spoils everything.
 
 `scripts/ui.mjs` drives the real game in headless Chromium for screenshots and
-flow checks. It needs Playwright.
+flow checks. It needs Playwright. `--flaky 2` drops the first two requests for
+every model and picture, `--fake-claude slow` stands in for a claude.ai host
+whose best model takes its time.
 
 `node scripts/prompt-lab.mjs dump all out/` writes the exact requests the game
 sends to Claude at a dozen points in the story, as readable text.
