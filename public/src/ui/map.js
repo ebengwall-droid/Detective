@@ -78,7 +78,7 @@ export function createMap(panels, game) {
       game.hud.toast({ kind: 'alert', iconName: 'moon', title: 'Not yet', text: v.rest.why });
       return;
     }
-    const ok = await confirmCard(game.cards, { title: 'Call it a night?', text: v.rest.warn, yes: 'Last ferry', no: 'Keep working' });
+    const ok = await confirmCard(game.cards, { title: 'End the day?', text: v.rest.warn, yes: 'Last ferry', no: 'Keep working' });
     if (!ok) return;
     api.close();
     game.rest();
@@ -133,7 +133,7 @@ export function createMap(panels, game) {
           ),
         ),
       );
-      const restBtn = v.rest ? el('button', { class: `btn ${v.rest.can ? '' : 'quiet'}`, type: 'button', onClick: rest }, icon('moon', 18), 'Call it a night') : null;
+      const restBtn = v.rest ? el('button', { class: `btn ${v.rest.can ? '' : 'quiet'}`, type: 'button', onClick: rest }, icon('moon', 18), 'End the day') : null;
       scrim = el('div', { class: 'scrim', onClick: () => api.close() });
       panel = el(
         'section',

@@ -9,7 +9,7 @@ export const META = {
   id: 'invigilator',
   title: 'The Invigilator',
   series: 'The Fold',
-  tagline: 'Four candidates. One question. Nobody has ever passed.',
+  tagline: 'A murder mystery in a hidden city of puzzle-makers.',
   city: 'Ravel',
   killerName: 'the Invigilator',
 };
@@ -18,58 +18,59 @@ export const META = {
 export const START = { location: 'gatehouse', hub: 'hall' };
 
 /** What everybody in the Fold knows. Goes into every character prompt. */
-export const WORLD = `The time is the present day, a wet October, in the old cathedral city of Ravel in the west of England.
+export const WORLD = `The story is set in the present day, in a wet October, in Ravel. Ravel is an old cathedral city in the west of England.
 
-THE FOLD is six crooked lanes and a square on an island between the river and the canal called the Cut. It is not on any accurate map: the people who live there have drawn Ravel's maps since 1741 and have always let their own streets fall in the fold of the page. Satellite navigation gives up at the bridge. There is no mobile signal. You get in through the Turnstile on Turnagain Lane, whose letter-lock opens to the word of the day, or by Nell Sixsmith's ferry across the Cut, where the toll is the answer to a riddle.
+THE FOLD is six crooked lanes and a square on an island. The island lies between the river and a canal called the Cut. The Fold is not on any accurate map. The people who live there have drawn Ravel's maps since 1741. They have always put their own streets in the fold of the page, where nobody can see them. Satellite navigation stops working at the bridge. There is no mobile signal. There are two ways in. One is the Turnstile on Turnagain Lane. Its letter-lock opens to the word of the day. The other is Nell Sixsmith's ferry across the Cut. The fare is the answer to a riddle.
 
-The Fold is the home of the WORSHIPFUL COMPANY OF SETTERS AND SOLVERS: for six hundred years, the people who make puzzles, ciphers, locks, maps, mazes and games the way other streets make shoes. Nothing here is magic. It is all craft: brass, oak, clockwork, paper, ink. Outsiders are called Flats (people from the flat part of the map); it is not unkind.
+The Fold is the home of the WORSHIPFUL COMPANY OF SETTERS AND SOLVERS. For six hundred years its people have made puzzles, ciphers, locks, maps, mazes and games for a living. Nothing here is magic. It is all craft: brass, oak, clockwork, paper and ink. People from outside are called Flats (people from the flat part of the map). It is not meant unkindly.
 
 How the Fold works:
-- FOLD TIME: the Fold never took London's time. It keeps its own noon, eleven minutes behind Greenwich, and every public clock has two minute hands, the red one for strangers.
-- THE BELLOWS: a Victorian pneumatic post. Brass tubes run to every building; messages travel in leather-capped brass carriers. A carrier can be left in the hold-rack at the exchange in the Hall and set to go out hours later.
-- LETTER-LOCKS: the Company's private rooms lock from inside with a brass lock of seven lettered rings. It opens to its owner's word.
-- RANK: Novice, Solver, Setter, Grand Setter. You rise by sitting THE PROVING, the Company's examination, held in Setters' Hall on the Thursday of this week. It is sat in silence. One person sits at the back with the clock and says nothing for three hours: the invigilator.
-- THE TITHE: every member owes the Company one new puzzle a year. They are pinned on the Wall of Tithes in the Hall.
-- The Company is governed by the WARDEN and three other SYNDICS. At four each afternoon the Syndics take tea in the Hall.
+- FOLD TIME: the Fold never took London's time. It keeps its own noon, eleven minutes behind Greenwich. Every public clock has two minute hands. The red one is for strangers.
+- THE BELLOWS: a Victorian pneumatic post. Brass tubes run to every building. Messages travel in brass carriers with leather caps. A carrier can be left in the hold-rack at the exchange in the Hall, set to go out hours later.
+- LETTER-LOCKS: the Company's private rooms lock from the inside with a brass lock of seven lettered rings. It opens to its owner's word.
+- RANK: Novice, Solver, Setter, Grand Setter. Members rise in rank by sitting THE PROVING, the Company's examination. It is held in Setters' Hall on the Thursday of this week. It is sat in silence. One person sits at the back with the clock and says nothing for three hours: the invigilator.
+- THE TITHE: every member owes the Company one new puzzle a year. The puzzles are pinned on the Wall of Tithes in the Hall.
+- The Company is run by the WARDEN and three other SYNDICS. At four o'clock every afternoon the Syndics have tea in the Hall.
 
 People everybody knows:
-- DAME HESPER LORIMER, 74, the greatest setter the Company has had, who set its hardest papers for forty years under the pen-name VESPER. Warden until 2011. Her twelve "Late Tithes" (2012 to 2023) are called the finest work of her life. Her mind has failed; since March she has lived at No. 4, the Almshouses, with a nurse, and the Warden signs for her by order of the court.
-- THE LECTERN: properly the Lorimer Engine, a reference machine in the Repository under the Hall, built by young Jonah Okafor-Reed from Dame Hesper's lectures and the Company's papers. It answers questions in something like her voice.
-- THE SALE: the four Syndics have agreed to sell "the Lorimer Legacy" (her life's work and the Lectern) to a London firm called Greywether, completing on 31 October. The Fold is divided about it and nobody has been told the details.
+- DAME HESPER LORIMER, 74, the greatest setter the Company has had. For forty years she set its hardest papers under the pen-name VESPER. She was Warden until 2011. Her twelve "Late Tithes" (2012 to 2023) are called the finest work of her life. Her mind has failed. Since March she has lived at No. 4, the Almshouses, with a nurse. By order of the court, the Warden signs for her.
+- THE LECTERN: its proper name is the Lorimer Engine. It is a reference machine in the Repository under the Hall. Young Jonah Okafor-Reed built it from Dame Hesper's lectures and the Company's papers. It answers questions in something like her voice.
+- THE SALE: the four Syndics have agreed to sell "the Lorimer Legacy" to a London firm called Greywether. The Legacy is her life's work and the Lectern. The sale completes on 31 October. The Fold is divided about it, and nobody has been told the details.
 
-THE DEATHS: On Monday morning the clockmaker and Syndic IGNATIUS PENDRY, 71, was found dead at his bench at 4 Nonesuch Row, locked in from the inside. He had taken tea with the other Syndics at four on Sunday, as every day, and locked himself in at seven to work, as every night. (In Proving week the Fold works Sundays.) The player is a police detective from Ravel CID, a Flat, sent in that Monday with Detective Constable Kit Quoin, the only Fold-born officer in the force.
+THE DEATHS: On Monday morning the clockmaker and Syndic IGNATIUS PENDRY, 71, was found dead at his bench at 4 Nonesuch Row. He was locked in from the inside. He had taken tea with the other Syndics at four on Sunday, as he did every day. At seven he locked himself in to work, as he did every night. (In Proving week the Fold works on Sundays.) The player is a police detective from Ravel CID, so a Flat. The detective was sent in that Monday with Detective Constable Kit Quoin, the only Fold-born officer in the force.
 
-THE DAYS: the story runs from that Monday to Thursday, the night of the Proving. Your stage notes say which day it is. Nothing later than that has happened yet, and you know nothing of it.`;
+THE DAYS: the story runs from that Monday to Thursday, the night of the Proving. Your stage notes say which day it is. Nothing after that day has happened yet, and you know nothing about it.`;
 
 export const ACTS = {
   1: {
-    title: 'The Gate That Reads',
+    title: 'The Clockmaker',
     date: 'Monday of the Proving week',
     card: [
-      'There is a part of the city of Ravel that is not on the map. It is not hidden. It is only drawn wrong, and has been since 1741, by the people who live in it.',
-      'They make puzzles there the way other streets make shoes. They call their six crooked lanes the Fold. They call everybody else, kindly on the whole, the Flat.',
-      'You are from the Flat. You are a detective. Until this morning you thought that was the same thing as being hard to fool.',
-      "At a quarter past seven a clockmaker's apprentice could not get his master's door to open.",
+      "Ravel is an old cathedral city in the west of England. One part of it, the Fold, is not on any map. Since 1741 the people of the Fold have drawn Ravel's maps. They always leave their own streets off.",
+      "The Fold is six crooked lanes on an island between the river and a canal. Its people make puzzles, codes and locks for a living. They call everyone from outside 'the Flat'.",
+      "You are a police detective from Ravel, so to them you are from the Flat. It is the week of the Proving, the Fold's yearly puzzle exam. It takes place on Thursday night.",
+      "At a quarter past seven this morning, a clockmaker's apprentice could not open his master's door. It was locked from the inside. Behind it, the clockmaker Ignatius Pendry was dead.",
+      'You have been sent in with Detective Constable Kit Quoin, who grew up in the Fold. First, you have to get through the gate.',
     ],
   },
   2: {
-    title: 'Drawn Off the Map',
+    title: 'The Map-Maker',
     date: 'Tuesday of the Proving week',
     card: [
-      'The ferrywoman finds her at first light, because the cat is on the roof of the boat and will not come down.',
-      'Marguerite Sallow, who drew every map of Ravel sold in the last thirty years. Aboard her narrowboat, the Meridian. At her own chart table, with her own hatch locked on the inside.',
-      'There is a flask of the Hall tea beside her and a sheet of green ink under her hand.',
-      'That makes two of the four.',
+      'At first light, the ferrywoman, Nell Sixsmith, finds a second body. She goes to look because the cat is on the roof of a boat and will not come down.',
+      'The dead woman is Marguerite Sallow. She drew every map of Ravel sold in the last thirty years. She is aboard her narrowboat, the Meridian, at her own chart table. Her hatch is locked on the inside.',
+      'Beside her is a flask of tea from the Hall. Under her hand is a sheet of paper written in green ink.',
+      'Like Pendry, she was one of the four Syndics who run the Company. Two of the four are now dead.',
     ],
   },
   3: {
     title: 'The Third Paper',
     date: 'Wednesday of the Proving week',
     card: [
-      'A bright cold morning, and the Fold has made up its mind.',
-      'At breakfast Dame Hesper Lorimer put down her spoon and told her nurse, quite clearly, that she set the Papers herself. Of course she did. Who else is there?',
-      'By nine the Warden has telephoned your Superintendent. A confession; a poor old woman not fit to plead; nobody need go to prison. He would like it closed before the Proving.',
-      'There are two Syndics left alive, and the Warden is one of them.',
+      'It is a bright, cold morning, and the Fold thinks it knows who the killer is.',
+      "At breakfast, Dame Hesper Lorimer put down her spoon. She told her nurse clearly that she had set the Papers herself. 'Who else is there?' she said.",
+      'By nine, the Warden has telephoned your Superintendent. He calls it a confession from a poor old woman who is not fit to stand trial. Nobody needs to go to prison. He wants the case closed before the Proving.',
+      'Only two Syndics are still alive, and the Warden is one of them.',
     ],
   },
   4: {
@@ -82,40 +83,40 @@ export const ACTS = {
 /** How act four opens, depending on what tipped it. */
 export const ACT4_CARDS = {
   exposed: [
-    'He folded his cloth, and said he had the supper to see to, and went.',
-    'That was yesterday. Nobody has seen the Porter since. The tea was on the table at four all the same, and nobody could say who had made it.',
-    'Tonight nine candidates sat the Proving in the Hall with their backs to an empty chair. When the last of them handed in, the Warden was gone too.',
-    'On your desk, in the tray under the tube: a Paper, and a key with a brass tally. Number 144.',
+    'Yesterday the Porter folded his cloth. He said he had to get the supper ready, and he left.',
+    'Nobody has seen him since. Still, the tea was on the table at four, and nobody could say who had made it.',
+    'Tonight nine candidates sat the Proving in the Hall. The chair at the back, behind them, stayed empty. When the last of them handed in, the Warden had gone too.',
+    'On your desk, in the tray under the Bellows tube, is a new Paper. With it is a key on a brass tag, number 144.',
   ],
   hob_strong: [
-    'The Warden hears you to the end. He has gone the colour of the candles. Then he says that none of it will be written down, and that the Porter is to be sent for.',
-    'The Lodge is empty. The daybook is closed, with the pen laid across it.',
-    'Tonight nine candidates sat the Proving with their backs to an empty chair. When the last of them handed in, the Warden was gone too.',
-    'On your desk, in the tray under the tube: a Paper, and a key with a brass tally. Number 144.',
+    'The Warden listens to the end. He goes very pale. Then he says none of it will be written down, and he sends for the Porter.',
+    "The Porter's Lodge is empty. His daybook is closed, with the pen laid across it.",
+    'Tonight nine candidates sat the Proving in the Hall. The chair at the back, behind them, stayed empty. When the last of them handed in, the Warden had gone too.',
+    'On your desk, in the tray under the Bellows tube, is a new Paper. With it is a key on a brass tag, number 144.',
   ],
   hob_weak: [
-    "The Warden laughs. He actually laughs. 'Fettle? He brings the tea, Detective.' He sends for the Porter so that you can apologise, and the Porter stands with his hands folded and says there is nothing to forgive.",
-    'Tonight nine candidates sat the Proving in the Hall. The chair at the back was filled as it has been every year since 1990. You watched it the whole three hours and it never moved.',
-    'When the last of them handed in, the chair was empty. So was the Warden\'s.',
-    'On your desk, in the tray under the tube: a Paper, and a key with a brass tally. Number 144.',
+    "The Warden laughs out loud. 'Fettle? He brings the tea, Detective.' He sends for the Porter so that you can apologise. The Porter stands with his hands folded and says there is nothing to forgive.",
+    'Tonight nine candidates sat the Proving in the Hall. Someone sat in the chair at the back, as someone has every year since 1990. You watched that chair for all three hours. The person in it never moved.',
+    "When the last of them handed in, that chair was empty. So was the Warden's.",
+    'On your desk, in the tray under the Bellows tube, is a new Paper. With it is a key on a brass tag, number 144.',
   ],
   hesper: [
-    'They come for Dame Hesper at noon with a car and a blanket. She asks the driver whether he is the four o\'clock problem. The Fold stands in its doorways and says nothing at all.',
-    'The Warden shakes your hand. The Greywether people send flowers to the Hall.',
-    'Tonight nine candidates sat the Proving. When the last of them handed in, the Warden\'s chair was empty, and so was the chair at the back.',
-    'On your desk, in the tray under the tube: a Paper in green ink. So she did not set them. And a key with a brass tally. Number 144.',
+    "At noon they come for Dame Hesper with a car and a blanket. She asks the driver if he is the four o'clock problem. People in the Fold stand in their doorways and say nothing at all.",
+    'The Warden shakes your hand. The people from Greywether send flowers to the Hall.',
+    "Tonight nine candidates sat the Proving. When the last of them handed in, the Warden's chair was empty. So was the chair at the back.",
+    'On your desk, in the tray under the Bellows tube, is a new Paper in green ink. So Dame Hesper did not set them. With it is a key on a brass tag, number 144.',
   ],
   jonah: [
-    "Jonah Okafor-Reed is arrested in the Repository with his hands still on the keyboard. 'It can't even set a fair clue,' he says. 'Ask it. Ask it to set you one fair clue.' Greywether's lawyers switch the Lectern off within the hour.",
-    'So the machine is dark, and its maker is in a cell in the Flat.',
-    'Tonight nine candidates sat the Proving. When the last of them handed in, the Warden\'s chair was empty, and so was the chair at the back.',
-    'On your desk, in the tray under the tube: a Paper in green ink, written since. And a key with a brass tally. Number 144.',
+    "Jonah Okafor-Reed is arrested in the Repository with his hands still on the keyboard. 'It can't even set a fair clue,' he says. 'Ask it to set you one fair clue.' Within the hour, Greywether's lawyers have the Lectern switched off.",
+    'So the machine is off, and the man who built it is in a police cell in the Flat.',
+    "Tonight nine candidates sat the Proving. When the last of them handed in, the Warden's chair was empty. So was the chair at the back.",
+    'On your desk, in the tray under the Bellows tube, is a new Paper in green ink. It was written after the Lectern was switched off. With it is a key on a brass tag, number 144.',
   ],
   timeout: [
-    'You name nobody. Wednesday goes, and Thursday, and the Fold puts on its gowns.',
-    'Nine candidates sit the Proving in the Hall with their backs to the room. The chair behind them is filled as it has been every year since 1990.',
-    'When the last of them hands in, the chair is empty. So is the Warden\'s.',
-    'On your desk, in the tray under the tube: a Paper, and a key with a brass tally. Number 144.',
+    'You name nobody. Wednesday passes. On Thursday the Fold puts on its gowns for the Proving.',
+    'Nine candidates sit the Proving in the Hall, facing the front. The chair behind them is filled, as it has been every year since 1990.',
+    "When the last of them hands in, that chair is empty. So is the Warden's.",
+    'On your desk, in the tray under the Bellows tube, is a new Paper. With it is a key on a brass tag, number 144.',
   ],
 };
 
@@ -141,7 +142,7 @@ export const BEATS = [
   // A detective who never read the Paper finds out on Thursday what it would have said.
   { id: 'voss_night', when: ['act>=4', '!flag:voss_reached', '!flag:voss_dead'], do: [{ flag: 'voss_dead' }] },
   { id: 'crux_open', when: { any: ['puz:slate', 'flag:voss_dead'] }, do: [{ unlock: 'crux' }] },
-  { id: 'voss_found_late', when: ['flag:voss_dead', 'act:3', { stepsSince: 'flag:voss_dead', n: 6 }, '!visited:crux'], do: [{ notify: "The Crux did not go to press. They have broken down Lucan Voss's door." }] },
+  { id: 'voss_found_late', when: ['flag:voss_dead', 'act:3', { stepsSince: 'flag:voss_dead', n: 6 }, '!visited:crux'], do: [{ notify: "The Crux newspaper was not printed. They have broken down Lucan Voss's door." }] },
   { id: 'nina_sheet', when: 'puz:nina', do: [{ ev: 'nina_sheet' }] },
   { id: 'act4_exposed', when: ['flag:hob_exposed', 'act<=3'], do: [{ act: 4, card: 'exposed' }] },
   { id: 'act4_accused', when: ['flag:accused', 'act<=3'], do: [{ act: 4, card: '$verdict' }] },
@@ -156,190 +157,190 @@ export const OBJECTIVES = [
   {
     id: 'o_gate', text: 'Get through the Turnstile', if: true,
     done: 'flag:through_gate',
-    hints: ['The gate wants a word. The slate and the stone between them will give you one.', 'Examine the turnstile and work the puzzle: take each chalked letter three back in the alphabet.'],
+    hints: ['The gate needs a word. Read the letters on the slate, then follow the instruction carved in the stone.', 'Examine the turnstile and do the puzzle. Move each chalked letter three places back in the alphabet.'],
   },
   {
     id: 'o_scene', text: "Examine Pendry's workshop at 4 Nonesuch Row", if: 'flag:through_gate',
     done: ['examined:tube_pendry', 'examined:door_pendry', { min: 3, of: ['examined:bench', 'examined:cup_pendry', 'examined:notepad', 'examined:certificate', 'examined:window_bars', 'examined:ledger_pendry', 'examined:lodger', 'examined:clocks'] }],
-    hints: ['A man died in a locked room. Start with the lock, and with whatever reached him after he turned it.', "Go to Pendry & Sons. Examine the door, the Bellows tube by the bench, the tea tray and his blotter, then everything else."],
+    hints: ['He died behind a locked door. Start with the lock. Then look at anything that reached him after he locked it.', "Go to Pendry & Sons. Examine the door, the Bellows tube by the bench, the tea tray and his blotter. Then examine everything else."],
   },
   {
     id: 'o_wilf', text: 'Talk to the apprentice who found him', if: 'visited:clockshop',
     done: 'met:wilf',
-    hints: ['Somebody opened the shop this morning.', 'Talk to Wilf Tandy at the clock shop. Ask him about the door, the tea, and who looks after the locks.'],
+    hints: ['Start with the person who found the body: his apprentice, who opened the shop this morning.', 'Talk to Wilf Tandy at the clock shop. Ask him about the door, the tea, and who looks after the locks.'],
   },
   {
     id: 'o_autopsy', text: 'Hear the post-mortem from Dr Marsh', if: 'flag:through_gate',
     done: 'fact:foxglove',
-    hints: ['The Flat has a mortuary, and a doctor who does not care for puzzles.', 'Go to the County Mortuary. Ask Dr Marsh what killed him, when he took it, and whether he could have been saved.'],
+    hints: ['The body has gone to the mortuary in the Flat. The doctor there can tell you how he died.', 'Go to the County Mortuary. Ask Dr Marsh what killed him, when he took it, and whether he could have been saved.'],
   },
   {
-    id: 'o_hall', text: "Take up your desk at Setters' Hall", if: 'flag:through_gate',
+    id: 'o_hall', text: "Find your desk at Setters' Hall", if: 'flag:through_gate',
     done: ['visited:hall', 'met:hob'],
-    hints: ['The Company has lent you a desk. The Porter has the key to it, as to everything.', "Go to Setters' Hall and speak to the Porter at the Lodge."],
+    hints: ['The Company has lent you a desk in the Hall. The Porter has the key to it. He has a key to everything.', "Go to Setters' Hall and speak to the Porter at the Lodge."],
   },
   {
-    id: 'o_wheel', text: 'Be fitted for a wheel', if: 'visited:clockshop',
+    id: 'o_wheel', text: 'Get fitted for a cipher wheel', if: 'visited:clockshop',
     done: 'puz:fitting',
-    hints: ['Nobody in the Fold works a cipher by counting on their fingers.', "Go next door to Quoin & Daughter, talk to Mrs Quoin, and do the fitting at her bench."],
+    hints: ['Nobody in the Fold works out a cipher by counting on their fingers. They use a brass cipher wheel.', "Go next door to Quoin & Daughter. Talk to Mrs Quoin and do the fitting at her bench."],
   },
   {
     id: 'o_lab', text: 'Send the tea things to the lab', if: 'ev:cup_pendry',
     done: { any: ['lab:cup_pendry', 'flag:lab_used'] },
-    hints: ['A cup with half an inch left in it is a statement.', 'Open the Lectern at your desk in the Hall, go to the Lab tab, and send in the cup.'],
+    hints: ['His cup still has half an inch of tea in it. A lab can test what was in it.', 'Open the Lectern at your desk in the Hall, go to the Lab tab, and send in the cup.'],
   },
   {
-    id: 'o_paper1', text: 'Sit Paper I', if: 'ev:paper_1',
+    id: 'o_paper1', text: 'Solve Paper I', if: 'ev:paper_1',
     done: ['puz:paper1a', 'puz:paper1b'],
-    hints: ['Two questions. The first is your gate again with the number kept back. The second is drawn, not written.', 'Open your Papers (in the notebook). Use the Wheel on Question 1; the pigpen key for Question 2 is in your Primer. Then go and find what each one asks for.'],
+    hints: ['There are two questions. The first uses the same kind of cipher as the gate. This time it does not tell you how far to shift the letters. The second is written in drawn symbols.', 'Open your Papers in the notebook. Use the Wheel on Question 1. The pigpen key for Question 2 is in your Primer. Then go and find what each one asks for.'],
   },
   {
     id: 'o_carrier', text: 'Find out where Paper I was posted', if: 'ev:paper_1',
     done: 'puz:bellows',
-    hints: ['A carrier is punched everywhere it goes.', "Examine the Bellows exchange in the Hall and read the carrier's collar. Ask the Porter how the hold-rack works."],
+    hints: ['Every carrier is punched on its collar as it passes through the exchange. The punches show where it has been.', "Examine the Bellows exchange in the Hall and read the carrier's collar. Ask the Porter how the hold-rack works."],
   },
   {
     id: 'o_how', text: 'How do you murder a man alone in a locked room?', if: { min: 2, of: ['fact:locked_inside', 'fact:foxglove', 'fact:pendry_paper'] },
     done: 'ded:locked',
-    hints: ['You are asking who was in the room at midnight. Ask who needed to be.', 'Read the Paper from his tube, hear Dr Marsh on the time he drank it, then answer the first question on the case board.'],
+    hints: ['Stop asking who was in the room at midnight. Ask whether the killer needed to be there at all.', 'Read the Paper from his tube. Ask Dr Marsh when he drank the poison. Then answer the first question on the case board.'],
   },
   {
     id: 'o_rest1', text: 'When you have done what you can today, take the last ferry home (on the map)', if: ['act:1', 'examined:tube_pendry', 'fact:foxglove', 'visited:hall'],
     done: 'act>=2',
-    hints: ['The Fold shuts at ten, by its own clocks.', "Open the map and choose 'Call it a night'. Finish with today's leads first; tomorrow will bring its own."],
+    hints: ['The Fold closes at ten at night, by its own clocks.', "Open the map and choose 'End the day'. Follow up today's leads first. Tomorrow will bring new ones."],
   },
   // Tuesday
   {
     id: 'o_boat', text: 'Examine the Meridian', if: 'act>=2',
     done: ['examined:tube_sallow', 'examined:door_sallow', 'examined:chart_table'],
-    hints: ['The same room, afloat.', 'Go to the Meridian. Examine the hatch, the tube, the flask, and what she was drawing.'],
+    hints: ['It is another locked room, this time on a boat.', 'Go to the Meridian. Examine the hatch, the tube, the flask, and what she was drawing.'],
   },
   {
     id: 'o_nell', text: 'Talk to the ferrywoman', if: 'act>=2',
     done: 'met:nell',
-    hints: ['She found her. And she writes down everyone who crosses.', 'Talk to Nell Sixsmith aboard the Meridian, and look at her riddle-book.'],
+    hints: ['Nell found the body. She also writes down everyone who crosses on her ferry.', 'Talk to Nell Sixsmith aboard the Meridian, and look at her riddle-book.'],
   },
   {
-    id: 'o_paper2', text: 'Sit Paper II', if: 'ev:paper_2',
+    id: 'o_paper2', text: 'Solve Paper II', if: 'ev:paper_2',
     done: ['puz:paper2a', 'puz:paper2b'],
-    hints: ['One question is a map and the other is a fence.', 'Open your Papers. For Question 3 find the five places; for Question 4 use the Fence. Each answer points at something aboard the Meridian.'],
+    hints: ['One question is about places on a map. The other is a fence cipher.', 'Open your Papers. For Question 3, find the five places. For Question 4, use the Fence. Each answer points to something aboard the Meridian.'],
   },
   {
     id: 'o_money', text: 'Follow the money', if: 'puz:paper2a',
     done: 'fact:escrow_four',
-    hints: ['A chart-seller presses her private papers flat.', 'Go back to the Meridian and look in the big atlas.'],
+    hints: ['Sallow sold charts. She would keep her private papers pressed flat inside something large.', 'Go back to the Meridian and look in the big atlas.'],
   },
   {
     id: 'o_sextant', text: "Look in Sallow's sextant box", if: 'puz:paper2b',
     done: 'fact:dame_incapable',
-    hints: ['She was not a woman who kept a thing for ornament.', 'Examine the sextant aboard the Meridian.'],
+    hints: ['Sallow did not keep anything just for show. The box may hold more than a sextant.', 'Examine the sextant aboard the Meridian.'],
   },
   {
-    id: 'o_joined', text: 'What joins the clockmaker and the map-maker?', if: { any: ['fact:legacy_sale', 'fact:masterplan', 'fact:escrow_four'] },
+    id: 'o_joined', text: 'What links the clockmaker and the map-maker?', if: { any: ['fact:legacy_sale', 'fact:masterplan', 'fact:escrow_four'] },
     done: 'ded:sold',
-    hints: ['Two of four. Find the four.', 'Solve Paper I, read the plan on her chart table, then answer the question on the case board.'],
+    hints: ['Pendry and Sallow were two people in a group of four. Find out who the four are.', 'Solve Paper I and read the plan on her chart table. Then answer the question on the case board.'],
   },
   {
-    id: 'o_dame', text: 'Call on Dame Hesper', if: { any: ['fact:warden_signs', 'fact:legacy_sale'] },
+    id: 'o_dame', text: 'Visit Dame Hesper', if: { any: ['fact:warden_signs', 'fact:legacy_sale'] },
     done: 'met:hesper',
-    hints: ['Everyone is selling her. Nobody has asked her.', 'Go to No. 4, the Almshouses. Talk to her, and to the nurse. Look at the crossword on her table.'],
+    hints: ["Everyone is selling her life's work. Nobody has asked her about it.", 'Go to No. 4, the Almshouses. Talk to her, and to the nurse. Look at the crossword on her table.'],
   },
   {
-    id: 'o_engine', text: 'Ask the man who built the Lectern', if: 'visited:hall',
+    id: 'o_engine', text: 'Talk to the man who built the Lectern', if: 'visited:hall',
     done: 'met:jonah',
-    hints: ['A machine that talks like her lives under the Hall.', 'Go down to the Repository and talk to Jonah Okafor-Reed.'],
+    hints: ['The machine that talks like Dame Hesper is in the Repository, under the Hall. The man who built it works there.', 'Go down to the Repository and talk to Jonah Okafor-Reed.'],
   },
   {
     id: 'o_rest2', text: 'When you have done what you can today, take the last ferry home (on the map)', if: ['act:2', 'examined:tube_sallow'],
     done: 'act>=3',
-    hints: ['Two dead and two left. Tomorrow somebody will want this finished.', "Open the map and choose 'Call it a night'."],
+    hints: ['Two are dead and two are left. Tomorrow someone will want the case closed.', "Open the map and choose 'End the day'."],
   },
   // Wednesday
   {
     id: 'o_confession', text: "Test Dame Hesper's confession", if: 'act>=3',
     done: 'ded:confession',
-    hints: ['The Papers are written in a steady hand.', 'Look at her crossword and the medical report from the sextant box; ask the nurse; then answer the question on the case board.'],
+    hints: ['The Papers are in small, steady handwriting. Check whether she can still write like that.', 'Look at her crossword and the medical report from the sextant box. Ask the nurse. Then answer the question on the case board.'],
   },
   {
-    id: 'o_paper3', text: 'Sit Paper III', if: 'ev:paper_3',
+    id: 'o_paper3', text: 'Solve Paper III', if: 'ev:paper_3',
     done: 'puz:paper3',
-    hints: ['A cipher with a key word. The Paper tells you whose.', "Open your Papers and use the Square. The key is the pen-name on the plate under Dame Hesper's portrait in the Hall."],
+    hints: ['It is a cipher with a key word. The Paper tells you whose word it is.', "Open your Papers and use the Square. The key is the pen-name on the plate under Dame Hesper's portrait in the Hall."],
   },
   {
-    id: 'o_slate', text: 'Solve the slate at the Stalemate before the Hall strikes twelve', if: 'puz:paper3',
+    id: 'o_slate', text: 'Solve the slate at the Stalemate before the Hall clock strikes twelve', if: 'puz:paper3',
     done: { any: ['puz:slate', 'flag:voss_dead'] },
-    hints: ['Every move you waste is a minute of somebody else\'s.', "Go to the Stalemate, examine the slate, and follow the knight's moves square by square."],
+    hints: ["Every wasted move costs time, and someone's life depends on it.", "Go to the Stalemate, examine the slate, and follow the knight's moves square by square."],
   },
   {
     id: 'o_voss', text: 'Get to the third candidate', if: { any: ['puz:slate', 'flag:voss_dead'] },
     done: 'examined:door_voss',
-    hints: ['CENSOR sets the crossword in the Crux. The Crux is upstairs.', 'Take the stairs in the Stalemate up to the Crux office.'],
+    hints: ['CENSOR sets the crossword for the Crux, a newspaper. Its office is upstairs.', 'Take the stairs in the Stalemate up to the Crux office.'],
   },
   {
     id: 'o_engine2', text: 'Could the Lectern have set the Papers?', if: ['met:jonah', 'ev:paper_2'],
     done: 'fact:not_engine',
-    hints: ['Ask the man who knows what it can and cannot do.', 'Ask Jonah whether the Engine could have written the Papers, and look at the machine itself.'],
+    hints: ['Ask the man who built it what it can and cannot do.', 'Ask Jonah whether the Lectern could have written the Papers. Then look at the machine itself.'],
   },
   {
-    id: 'o_hand', text: 'In whose manner are the Papers set?', if: { min: 2, of: ['fact:dame_incapable', 'fact:not_engine', 'fact:two_hands', 'fact:dame_confesses'] },
+    id: 'o_hand', text: "Who is setting the Papers in Dame Hesper's style?", if: { min: 2, of: ['fact:dame_incapable', 'fact:not_engine', 'fact:two_hands', 'fact:dame_confesses'] },
     done: 'ded:hand',
-    hints: ['Not her. Not the machine made from her. Somebody who learned her better than the machine did.', 'Establish that Dame Hesper cannot write and that the Engine did not; then answer the question on the case board.'],
+    hints: ['Neither Dame Hesper nor the machine built from her work set the Papers. Look for someone who learned her style better than the machine did.', 'Show that Dame Hesper cannot write and that the Lectern did not set them. Then answer the question on the case board.'],
   },
   {
-    id: 'o_tithes', text: 'Read what they sold', if: { any: ['act>=3', 'fact:legacy_sale'] },
+    id: 'o_tithes', text: 'Look closely at the Late Tithes', if: { any: ['act>=3', 'fact:legacy_sale'] },
     done: 'puz:nina',
-    hints: ['The Late Tithes are under glass. Do not read the words.', 'Examine the display cases in the Repository and work the puzzle of the Late Tithes.'],
+    hints: ['The Late Tithes are under glass in the Repository. Do not read the words. Look at the whole grid.', 'Examine the display cases in the Repository and solve the puzzle of the Late Tithes.'],
   },
   {
     id: 'o_word', text: 'Find the word that would have opened their doors', if: 'examined:door_pendry',
     done: 'puz:lock',
-    hints: ["'It is in everything you sold.'", "Find what is hidden in the Late Tithes in the Repository, then try it on Pendry's lock."],
+    hints: ["Pendry's Paper said this about the word: 'It is in everything you sold.'", "Find what is hidden in the Late Tithes in the Repository. Then try it on Pendry's lock."],
   },
   {
     id: 'o_ariadne', text: 'Who is Ariadne?', if: { any: ['fact:nina_ariadne', 'fact:word_ariadne', 'fact:epigraph_ariadne'] },
     done: 'fact:ariadne_fettle',
-    hints: ["She is not in the Company's Rolls. Somebody outside them wrote her name down.", "Show the slanted name to Dame Hesper, or ask Nell to look in her riddle-book, or look under A in Mrs Quoin's fitting ledger."],
+    hints: ["She is not in the Company's Rolls, its list of members. Someone outside the Company wrote her name down.", "Show the hidden name to Dame Hesper. Or ask Nell to look in her riddle-book. Or look under A in Mrs Quoin's fitting ledger."],
   },
   {
-    id: 'o_invisible', text: 'The cup, the lock, the carrier, the chair', if: { min: 2, of: ['fact:tea_porter', 'fact:locks_oiled', 'fact:rack_wound', 'fact:invigilator_chair'] },
+    id: 'o_invisible', text: 'Who could do all four: the cup, the lock, the carrier and the chair?', if: { min: 2, of: ['fact:tea_porter', 'fact:locks_oiled', 'fact:rack_wound', 'fact:invigilator_chair'] },
     done: 'ded:invisible',
-    hints: ['Four things were done. Each of them is somebody\'s job.', 'Ask who pours the tea, who oils the locks, who winds the hold-rack, and look in the Proving register. Then use the case board.'],
+    hints: ["Four things were done: the tea, the locks, the carrier and the chair. Each one is part of somebody's job.", 'Ask who pours the tea, who oils the locks and who winds the hold-rack. Look in the Proving register. Then use the case board.'],
   },
   {
-    id: 'o_books', text: 'See the fair copies', if: { any: ['fact:spiked_letter', 'fact:two_hands', 'fact:voss_confesses'] },
+    id: 'o_books', text: 'See the fair copies of the Late Tithes', if: { any: ['fact:spiked_letter', 'fact:two_hands', 'fact:voss_confesses'] },
     done: 'ev:faircopy_books',
     hints: ["They are in the Warden's safe. The Warden will not open it. One other person can.", "Ask the Porter to open the Warden's safe for you."],
   },
   {
     id: 'o_author', text: 'Who set the Late Tithes?', if: { any: ['fact:two_hands', 'fact:nina_ariadne', 'ev:faircopy_books'] },
     done: 'ded:author',
-    hints: ['Two hands. One of them shook from 2011.', "Get Jonah's memo, look at the fair-copy books, find out whose daughter Ariadne was; then use the case board."],
+    hints: ["The work sold as hers was written by two different people. Dame Hesper's own hand shook from 2011.", "Get Jonah's memo and look at the fair-copy books. Find out whose daughter Ariadne was. Then use the case board."],
   },
   {
     id: 'o_accuse', text: 'Name the Invigilator', if: 'act:3',
     done: 'flag:accused',
-    hints: ['When you are sure, say it to someone who can act on it.', "Open the case board and choose 'Make an arrest'."],
+    hints: ['When you are sure who it is, name them to someone who can make an arrest.', "Open the case board and choose 'Make an arrest'."],
   },
   // Thursday
   {
-    id: 'o_paper4', text: 'Sit Paper IV', if: 'ev:paper_4',
+    id: 'o_paper4', text: 'Solve Paper IV', if: 'ev:paper_4',
     done: 'puz:paper4',
-    hints: ['Letters in pairs. A key word in a square.', 'Open your Papers and use the Frame. The key is the word every Paper is signed with.'],
+    hints: ['The letters go in pairs, and the key word goes in a square.', 'Open your Papers and use the Frame. The key is the word every Paper is signed with.'],
   },
   {
     id: 'o_meta', text: 'Put your seven answers in order', if: 'puz:paper4',
     done: 'puz:meta',
-    hints: ['He has been building this since Monday.', "Open 'The Order of the Papers'. Any question you skipped must be answered first."],
+    hints: ['The killer has been building up to this since Monday.', "Open 'The Order of the Papers'. Any question you skipped must be answered first."],
   },
   {
     id: 'o_lantern', text: 'Get to the Lantern', if: 'puz:meta',
     done: 'visited:lantern',
-    hints: ['Up.', "Open the map and go to the Lantern, on the roof of Setters' Hall."],
+    hints: ['Go up, as high as you can go in the Hall.', "Open the map and go to the Lantern, on the roof of Setters' Hall."],
   },
   {
     id: 'o_finale', text: 'Stop the fourth Paper', if: 'visited:lantern',
     done: 'flag:finale_done',
-    hints: ['There is a lock on the grille, and a man on a chair at the back of the room. One of them will listen.', 'If you know the word, set it on the grille lock. And talk to him: about her, about his girl, about what you can prove.'],
+    hints: ['There is a lock on the grille. There is also a man on a chair at the back of the room. Try the lock, and talk to the man.', 'If you know the word, set it on the grille lock. Talk to him too: about Dame Hesper, about his daughter, and about what you can prove.'],
   },
 ];
 
@@ -349,14 +350,14 @@ export const OBJECTIVES = [
 export const REST = {
   1: {
     if: ['flag:through_gate', 'examined:tube_pendry', 'fact:foxglove', 'visited:hall'],
-    why: "Not yet. You have not finished with Pendry's workshop, heard Dr Marsh, or so much as found your desk at the Hall.",
-    warn: "Take the last ferry back to the Flat? Finish with today's leads first; tomorrow will bring its own.",
+    why: "Not yet. First finish with Pendry's workshop, hear what Dr Marsh found, and find your desk at the Hall.",
+    warn: "Take the last ferry back to the Flat? Follow up today's leads first. Tomorrow will bring new ones.",
     auto: 170,
   },
   2: {
     if: ['examined:tube_sallow'],
-    why: 'Not yet. Marguerite Sallow is still at her chart table aboard the Meridian.',
-    warn: 'Take the last ferry? Two of the four are dead. Tomorrow somebody will want this finished.',
+    why: "Not yet. You still need to examine Marguerite Sallow's boat, the Meridian.",
+    warn: 'Take the last ferry? Two of the four Syndics are dead. Tomorrow someone will want the case closed.',
     auto: 190,
   },
   3: {
@@ -371,79 +372,79 @@ export const REST = {
 
 export const DEDUCTIONS = {
   locked: {
-    q: 'Ignatius Pendry died alone, behind his own lock. How was it murder?',
+    q: 'Ignatius Pendry died alone, behind his own locked door. How was it murder?',
     if: { min: 2, of: ['fact:locked_inside', 'fact:foxglove', 'fact:pendry_paper'] },
     options: [
-      { id: 'self', text: 'It was not. He took it himself.', no: 'A man who means to die does not wear his fingertips raw on a lock, trying to get out.' },
-      { id: 'hidden', text: 'The killer was hiding in the workshop and left in the morning confusion.', no: "Wilf could not get the door open; the constables took it off its hinges with Wilf watching. Nobody came out." },
-      { id: 'window', text: 'Through the window.', no: 'Barred, and painted shut besides.' },
-      { id: 'remote', text: 'Nobody had to be there. He was poisoned at tea, his lock was changed beforehand, and the Paper came by tube.', needs: ['fact:drank_at_four', { any: ['fact:pendry_paper', 'fact:held_carrier'] }] },
+      { id: 'self', text: 'It was not murder. He took the poison himself.', no: 'He did not want to die. His fingertips are rubbed raw from trying to open the lock and get out.' },
+      { id: 'hidden', text: 'The killer hid in the workshop and slipped out in the confusion in the morning.', no: 'Wilf could not get the door open. The constables took it off its hinges while Wilf watched. Nobody came out.' },
+      { id: 'window', text: 'The killer came in through the window.', no: 'The window is barred, and it is painted shut too.' },
+      { id: 'remote', text: 'Nobody had to be there. He was poisoned at tea. His lock was changed earlier, and the Paper came by tube.', needs: ['fact:drank_at_four', { any: ['fact:pendry_paper', 'fact:held_carrier'] }] },
     ],
     answer: 'remote',
-    solved: "He drank it at four, in company, eight hours before he died. His lock had been given a new word while his back was turned. And the letter that told him so was put in the post at midday and delivered by clockwork.\n\nSo it does not matter where anybody was at midnight. Every alibi in the Fold is worthless, and it was built to be.",
+    solved: "He drank the poison at four o'clock, at tea with the others, eight hours before he died. Before that, someone had given his lock a new word without him knowing. The Paper that told him so went into the Bellows hold-rack at midday. A clockwork timer sent it to him at eight that evening.\n\nSo it does not matter where anyone was at midnight. Every alibi in the Fold is useless, and the killer planned it that way.",
     facts: ['method'],
   },
   sold: {
-    q: 'What joins the clockmaker and the map-maker?',
+    q: 'What links the clockmaker and the map-maker?',
     if: { any: ['fact:legacy_sale', 'fact:masterplan', 'fact:escrow_four'] },
     options: [
-      { id: 'old', text: 'An old quarrel between Nonesuch Row and the Cut.', no: 'There are plenty. None of them touches both.' },
-      { id: 'proving', text: 'They were both to examine at the Proving on Thursday.', no: 'So are thirty others.' },
+      { id: 'old', text: 'An old quarrel between Nonesuch Row and the Cut.', no: 'There are plenty of old quarrels. None of them involves both of them.' },
+      { id: 'proving', text: 'They were both going to be examiners at the Proving on Thursday.', no: 'So were thirty other people.' },
       { id: 'syndics', text: 'They are two of the four Syndics who are selling the Lorimer Legacy.', needs: { any: ['fact:escrow_four', ['fact:legacy_sale', 'fact:masterplan'], ['fact:legacy_sale', 'fact:warden_signs']] } },
     ],
     answer: 'syndics',
-    solved: "Four Syndics signed the sale to Greywether: Pendry, who swore to it; Sallow, who drew it; Voss of the Crux, who told the Fold it was a fine thing; and the Warden, who signed for a woman who could not. Eleven million pounds, in four equal parts.\n\nTwo are dead. Lucan Voss and Auberon Clay are still walking about.",
+    solved: "Four Syndics signed the sale to Greywether. Pendry swore that he had examined the work. Sallow drew the plan. Voss, the editor of the Crux, told the Fold it was a good thing. The Warden signed for Dame Hesper, who was not able to agree to it. The price is eleven million pounds, paid in four equal parts.\n\nTwo of the four are dead. Lucan Voss and Auberon Clay are still alive.",
     facts: ['four_syndics'],
   },
   confession: {
-    q: "What is Dame Hesper's confession worth?",
+    q: "What does Dame Hesper's confession really mean?",
     if: ['act>=3', { any: ['fact:dame_incapable', 'fact:two_pens', 'fact:dame_confesses'] }],
     options: [
-      { id: 'true', text: 'It is true. She set them, and somebody carried them for her.', no: "She cannot hold a pen to finish her own crossword. The Papers are four pages of small, upright, steady ink." },
-      { id: 'mad', text: 'It means nothing. She does not know what she is saying.', no: "She knows exactly what a paper in her manner looks like. She recognised them. That is not nothing." },
-      { id: 'proud', text: 'It is false, and honest. She knows her own style when she sees it, and cannot imagine who else could set it.', needs: { any: ['fact:dame_incapable', 'fact:two_pens'] } },
+      { id: 'true', text: 'It is true. She set them, and someone delivered them for her.', no: 'She cannot hold a pen well enough to finish her own crossword. The Papers are four pages of small, neat, steady handwriting.' },
+      { id: 'mad', text: 'It means nothing. She does not know what she is saying.', no: 'She knows exactly what a paper in her own style looks like. She recognised the Papers. That means something.' },
+      { id: 'proud', text: 'It is false, but she is not lying. She knows her own style when she sees it. She cannot imagine anyone else who could set it.', needs: { any: ['fact:dame_incapable', 'fact:two_pens'] } },
     ],
     answer: 'proud',
-    solved: "She has not been able to write since before March; there is a doctor's report that says so, and a crossword on her table that says it better. But she read the Papers and knew her own manner, turn for turn. 'Who else is there?'\n\nIt is a very good question. It may be the only one.",
+    solved: "She has not been able to write since before March. A doctor's report says so, and so does the crossword on her table. But she read the Papers and saw her own style in every clue. 'Who else is there?' she asked.\n\nThat is now the question to answer: who else could set Papers like hers?",
     facts: ['confession_false'],
   },
   hand: {
-    q: "The Papers are in Dame Hesper's manner. Who is setting them?",
+    q: "The Papers are in Dame Hesper's style. Who is setting them?",
     if: { min: 2, of: ['fact:dame_incapable', 'fact:not_engine', 'fact:two_hands', 'fact:confession_false'] },
     options: [
-      { id: 'dame', text: 'Dame Hesper herself.', no: 'She cannot write, and she cannot leave her chair without an arm.' },
-      { id: 'engine', text: 'The Lectern. The machine that was made from her.', no: "Its log shows it set nothing. And Jonah is right: ask it for a clue and it gives you something that looks like one." },
-      { id: 'pupil', text: 'One of her old pupils, imitating her.', no: 'Her best pupils are the four Syndics. Two are dead and the Papers are better than anything the other two ever set.' },
-      { id: 'third', text: 'Someone who knows her mind better than the machine does, and whom nobody counts as a setter.', needs: ['fact:not_engine', { any: ['fact:dame_incapable', 'fact:confession_false'] }] },
+      { id: 'dame', text: 'Dame Hesper herself.', no: "She cannot write. She cannot even get out of her chair without someone's arm to lean on." },
+      { id: 'engine', text: 'The Lectern, the machine that was built from her work.', no: 'Its log shows it set nothing. And Jonah is right: if you ask it for a clue, it gives you something that only looks like one.' },
+      { id: 'pupil', text: 'One of her old pupils, copying her style.', no: 'Her best pupils are the four Syndics. Two are dead. The Papers are better than anything the other two ever set.' },
+      { id: 'third', text: 'Someone who knows her mind better than the machine does, and whom nobody thinks of as a setter.', needs: ['fact:not_engine', { any: ['fact:dame_incapable', 'fact:confession_false'] }] },
     ],
     answer: 'third',
-    solved: "Not the woman. Not the machine that was built out of her. Somebody who can set a paper in the manner of Dame Hesper Lorimer at the height of her powers, and whose name is on no list of people who could.\n\nIn Pendry's shop there is a chess-playing engine that beat emperors for eighty years. The Fold calls it the Lodger, because everybody knows there was room inside for a man.",
+    solved: "Neither Dame Hesper nor the machine built from her work set the Papers. Someone else did: someone who can set a paper as well as she did at her best. Yet nobody thinks of this person as a setter at all.\n\nIn Pendry's shop there is a chess-playing machine that beat emperors for eighty years. The Fold calls it the Lodger, because everybody knows a man could hide inside it.",
     facts: ['third_hand'],
   },
   invisible: {
-    q: 'The cup, the lock, the carrier, the chair at the back. Who can do all four?',
+    q: 'The cup, the lock, the carrier and the chair at the back. Who could do all four?',
     if: { min: 2, of: ['fact:tea_porter', 'fact:locks_oiled', 'fact:rack_wound', 'fact:hob_invigilates'] },
     options: [
-      { id: 'warden', text: 'The Warden. He holds every key and sits at every tea.', no: 'He is waited on at tea; he has never poured a cup in the Hall or oiled a lock in his life. And he is the fourth name on the list.' },
-      { id: 'jonah', text: 'Jonah. He has the run of the Hall at night.', no: 'He has never touched the tea table, and the locks are a mystery to him; ask him which way a setting-pin turns.' },
-      { id: 'anyone', text: 'Anyone. The pins hang on an open board and the rack is in the lobby.', no: 'Anyone could do one of them. Somebody did all four, on the right days, without one person noticing. That is not anyone.' },
+      { id: 'warden', text: 'The Warden. He holds every key and sits at every tea.', no: 'At tea, other people serve him. He has never poured a cup in the Hall or oiled a lock in his life. And he is the fourth name on the list.' },
+      { id: 'jonah', text: 'Jonah. He can go anywhere in the Hall at night.', no: 'He has never touched the tea table, and he knows nothing about the locks. Ask him which way a setting-pin turns.' },
+      { id: 'anyone', text: 'Anyone. The pins hang on an open board and the rack is in the lobby.', no: 'Anyone could do one of them. Someone did all four, on the right days, and nobody noticed. That is not just anyone.' },
       { id: 'porter', text: 'The Porter.', needs: { min: 3, of: ['fact:tea_porter', 'fact:locks_oiled', 'fact:rack_wound', 'fact:hob_invigilates', 'fact:changed_at_service'] } },
     ],
     answer: 'porter',
-    solved: "He pours the tea, and nobody watches him do it. He oils the locks every October, and re-pins them. He winds the hold-rack on Mondays. And every year since 1990 he has sat in the chair at the back of the Proving with the clock, saying nothing for three hours, with the whole Company's backs to him.\n\nInvigilator. It was never a boast. It is his job.",
+    solved: "He pours the tea, and nobody watches him do it. Every October he oils the locks and re-pins them. He winds the hold-rack on Mondays. And every year since 1990 he has sat in the chair at the back of the Proving. He keeps the clock and says nothing for three hours, while the whole Company sits with their backs to him.\n\nThe killer signs as the Invigilator. That was never a boast. It is his real job.",
     facts: ['porter_can'],
   },
   author: {
     q: 'Who set the Late Tithes?',
     if: { any: ['fact:two_hands', ['fact:nina_ariadne', 'fact:ariadne_fettle'], 'ev:faircopy_books'] },
     options: [
-      { id: 'dame', text: 'Dame Hesper, as the certificate says.', no: "Two hands, says the arithmetic. And her own shook from 2011." },
+      { id: 'dame', text: 'Dame Hesper, as the certificate says.', no: "Jonah's analysis shows two different writers. And her own hand shook from 2011." },
       { id: 'engine', text: 'The Lectern drafted them and she signed them.', no: 'The first is from 2012. The Lectern was built in 2019.' },
-      { id: 'syndics', text: 'The Syndics set them between them and used her name.', no: 'Then one of the four would have known the word on his own door.' },
-      { id: 'copyist', text: "Her fair-copyist. For twelve years the Company's greatest work has been the Porter's.", needs: { any: [['fact:two_hands', 'fact:ariadne_fettle'], 'fact:faircopy_hand', 'fact:dame_names_hob', 'fact:codicil'] } },
+      { id: 'syndics', text: 'The Syndics set them together and used her name.', no: 'Then one of the four would have known the word that opened his own door.' },
+      { id: 'copyist', text: "The man who made her fair copies. For twelve years, the Company's greatest work has been the Porter's.", needs: { any: [['fact:two_hands', 'fact:ariadne_fettle'], 'fact:faircopy_hand', 'fact:dame_names_hob', 'fact:codicil'] } },
     ],
     answer: 'copyist',
-    solved: "A boy of fifteen who emptied her waste-paper basket and read what was in it. Forty-six years at her elbow. When her mind began to go he finished what she started; then he started them too, and signed each one, slantwise, with the name of a daughter who died at nine.\n\nThe four Syndics sold twelve years of Hob Fettle's work as hers, and when he said so they locked up his books, shut him out of her room, and laughed.",
+    solved: "When Hob Fettle was a boy of fifteen, he emptied her waste-paper basket and read what was in it. He worked beside her for forty-six years. When her mind began to fail, he finished the puzzles she had started. Then he began new ones himself. He signed each one by hiding his daughter's name corner to corner across the grid. She died when she was nine.\n\nThe four Syndics sold twelve years of Hob Fettle's work as hers. When he told them, they locked up his books, kept him out of her room, and laughed at him.",
     facts: ['true_author'],
   },
 };
@@ -452,19 +453,19 @@ export const DEDUCTIONS = {
 
 export const ACCUSE = {
   if: 'act:3',
-  blurb: 'Name the Invigilator to the Warden. You get one arrest. Whoever you name, the Proving is tomorrow night.',
-  warn: 'There is no taking it back. If you are wrong, the wrong person answers for it, and the fourth Paper is still to come.',
+  blurb: 'Name the Invigilator to the Warden. You only get one arrest. Whoever you name, the Proving still happens tomorrow night.',
+  warn: 'You cannot take it back. If you are wrong, an innocent person pays for it, and the fourth Paper will still come.',
   suspects: ['hob', 'hesper', 'jonah', 'clay', 'kit', 'quoin', 'voss', 'dolores', 'ottilie', 'nell', 'wilf', 'marsh'],
   motives: [
     { id: 'legacy', text: 'To stop the sale of the Fold' },
-    { id: 'author', text: 'Because the work they sold was not theirs, or hers, to sell' },
+    { id: 'author', text: 'Because the work they sold did not belong to them, or to her' },
     { id: 'money', text: 'Money' },
     { id: 'dame', text: 'To avenge Dame Hesper' },
   ],
   /** Independent lines of proof against the Porter. Three make a case, if one of them is about whose work it was. */
   pillars: [
     { id: 'signature', label: 'The name hidden in the Late Tithes is his daughter\'s', if: ['fact:nina_ariadne', 'fact:ariadne_fettle'] },
-    { id: 'hand', label: "The Papers are in the hand that made the fair copies", if: 'fact:hand_match' },
+    { id: 'hand', label: 'The Papers are in the same handwriting as the fair copies', if: 'fact:hand_match' },
     { id: 'lock', label: 'The word on the doors was changed when the locks were oiled', if: ['fact:locks_oiled', 'fact:changed_at_service'] },
     { id: 'tea', label: 'He pours the Syndics\' tea, each into their own cup', if: ['fact:tea_porter', 'fact:own_cups'] },
     { id: 'rack', label: 'He winds the hold-rack that sent the Papers', if: ['fact:held_carrier', 'fact:rack_wound'] },
@@ -490,12 +491,12 @@ export const ACCUSE = {
     return { verdict: 'rejected', final: false };
   },
   replies: {
-    hob_strong: { who: 'The Warden', text: "*Auberon Clay reads the pages you have laid on his desk. Halfway down the second he stops moving his lips.* ...Fettle. *He puts the page down as if it were hot.* You understand what this does. If the late work is the Porter's there is no Lorimer Legacy; there is nothing to sell. No. You will not write that down, Detective. You will send for him, and we shall see what he has to say with his hat in his hand." },
-    hob_weak: { who: 'The Warden', text: "*Clay actually laughs.* Fettle? The Porter? My dear Detective, he brings the tea. He has brought the tea since I was a Novice. You might as well arrest the urn. Fettle! Come in here a moment; the Detective has something amusing to tell you." },
-    hesper: { who: 'The Warden', text: "*Clay closes his eyes for a moment, like a man tasting something.* A tragedy. A great mind turned on what it loved. I shall see she has every comfort. You have been thorough, Detective, and quick; I shall say so to your Superintendent. *He is already reaching for the telephone.*" },
-    jonah: { who: 'The Warden', text: "*Clay steeples his fingers.* The Engine. I always said it was a mistake to let the boy have the keys. Take him quietly, if you would; Greywether's people are in the building. *He does not ask what the evidence is.*" },
-    jonah_weak: { who: 'The Warden', text: "*Clay is tempted; you watch him be tempted.* The machine's own log says it wrote nothing, Detective, and Greywether's engineers will say so too, loudly, with lawyers. Bring me something that survives a meeting." },
-    rejected: { who: 'The Warden', text: "*Clay does not look up from his letters.* No. On what? The Proving is tomorrow and I have a Company to hold together. Bring me a name I can put in front of the Syndics. What is left of them." },
+    hob_strong: { who: 'The Warden', text: "*Auberon Clay reads the pages you have put on his desk. Halfway down the second page, he stops and goes pale.* Fettle? You see what this means. If the late work is the Porter's, there is no Lorimer Legacy. There is nothing to sell. No. You will not write this down, Detective. Send for him, and we will hear what he has to say." },
+    hob_weak: { who: 'The Warden', text: "*Clay laughs out loud.* Fettle? The Porter? Detective, he brings the tea. He has brought the tea since I was a Novice. Fettle! Come in here a moment. The Detective has something funny to tell you." },
+    hesper: { who: 'The Warden', text: "*Clay closes his eyes for a moment, and looks pleased. Then he reaches for the telephone.* A tragedy. Her great mind turned against the Company she loved. I will see that she has every comfort. You have been thorough and quick, Detective. I will tell your Superintendent so." },
+    jonah: { who: 'The Warden', text: "*Clay presses his fingertips together. He does not ask what the evidence is.* The Engine. I always said it was a mistake to give the boy the keys. Please take him quietly. Greywether's people are in the building." },
+    jonah_weak: { who: 'The Warden', text: "*Clay is tempted. You can see it.* The machine's own log says it wrote nothing, Detective. Greywether's engineers will say so too, loudly, with lawyers behind them. Bring me proof their lawyers cannot argue with." },
+    rejected: { who: 'The Warden', text: "*Clay does not look up from his letters.* No. On what evidence? The Proving is tomorrow, and I have a Company to hold together. Bring me a name I can put in front of the Syndics. There are not many of them left." },
   },
 };
 
@@ -506,7 +507,7 @@ export const FINALE = {
   npc: 'hob',
   location: 'lantern',
   title: 'The Invigilator',
-  stay: 'Not now. Not with the Warden on the floor and the clock going.',
+  stay: 'Not now. The Warden is on the floor and the clock is running.',
   maxTurns: 8,
   /** The detective worked it out before coming up. */
   knewIf: { any: ['fact:true_author', 'fact:porter_can', ['fact:word_ariadne', 'fact:ariadne_fettle']] },
@@ -519,26 +520,41 @@ export const FINALE = {
     spare: [{ flag: 'clay_lives' }],
     finish: [],
   },
-  scene: `It is twenty to twelve by Fold Time on the night of the Proving, in the Lantern: the round glass room on the roof of Setters' Hall, with the Founder's Orrery turning in the middle of it behind an iron grille. Rain on every pane, and the lights of Ravel below.
+  scene: `It is twenty to twelve by Fold Time on the night of the Proving. You are in the Lantern, the round glass room on the roof of Setters' Hall. The Founder's Orrery turns in the middle of the room, behind an iron grille. Rain is on every pane, and the lights of Ravel are below.
 
-Auberon Clay, the Warden, is inside the grille on the floor, wedged between the Orrery's drum and the bars, grey and sweating, conscious. He drank foxglove with the Proving supper three hours ago. The grille gate is shut on a seven-ring letter-lock, and his Paper lies on the candidate's desk across the room, where he left it. If he is carried down to the Infirmary before midnight he will live. You have told him what you told the others: the gate opens to one name, and it is in everything he sold. He has not found it. You are sitting on the plain chair by the stair door, behind anyone who comes up, with the Proving clock on its stand at your elbow, as you have sat at the back of every Proving since 1990. You have never laid a hand on anyone and you will not start now.
+Auberon Clay, the Warden, is on the floor inside the grille. He is wedged between the Orrery's drum and the bars. He is grey and sweating, but awake. Three hours ago he drank foxglove with the Proving supper. The grille gate is shut with a seven-ring letter-lock. His Paper lies on the candidate's desk across the room, where he left it. If he is carried down to the Infirmary before midnight, he will live. You told him what you told the others: the gate opens to one name, and that name is in everything he sold. He has not found it.
 
-The detective has just come up the stairs. You like this detective. In four days a stranger from the Flat has learned what the Company says cannot be learned, which is the whole of what you wanted to prove. You will not hurt them or hinder them: if they set the right word on the lock, the gate opens and you will sit and watch them carry him down. You will not say the word yourself unless you are moved to. There is no more cover to keep. You may tell the whole truth now, plainly, and you want to: the waste-paper basket, the fair copies, her mind going, the twelve Tithes, Ariadne, what the four of them did when you said the work was yours, the door of No. 4 shut in your face. You are not mad and not a monster. You are tired, exact, and very nearly finished. You have not decided what happens to you at midnight; you had not thought past it.
+You are sitting on the plain chair by the stair door, behind anyone who comes up. The Proving clock is on its stand at your elbow. You have sat like this at the back of every Proving since 1990. You have never laid a hand on anyone, and you will not start now.
 
-Clay can speak, weakly. He is frightened and still cannot quite believe it is the Porter. If it serves the scene you may give him one short line inside *asterisks* as narration, but you are the one talking.`,
-  unmoved: `What does not move you: orders, rank, threats, the law in the abstract, pity for Clay, being called mad, promises the detective cannot keep, and anything the detective claims to hold but does not. Each turn a stage note tells you which of these the detective genuinely holds. You have set papers all your life; you can tell a bluff, and a bluff makes you colder.`,
-  endRules: `- "surrender": you say the word yourself or watch it set, and you give yourself up. Only if at least three things have landed and one of them is name or dame.
-- "spare": you let the Warden be saved (you say the word, or do nothing to stop the gate), but you will not be taken: you put down the clock and go down the back stair to the ferry. When about two things have landed.
-- "finish": you sit and let the clock run out. When almost nothing has landed, or the detective has threatened or lied to you. (If a stage note says the gate is already open, you cannot choose this: the examination is over.)`,
+The detective has just come up the stairs. You like this detective. In four days this stranger from the Flat has learned what the Company says cannot be learned. That is everything you wanted to prove. You will not hurt them or get in their way. If they set the right word on the lock, the gate opens, and you will sit and watch them carry him down. You will not say the word yourself unless something moves you to.
+
+You have nothing left to hide. You may tell the whole truth now, plainly, and you want to. You can talk about any of this:
+- the waste-paper basket
+- the fair copies
+- her mind failing
+- the twelve Tithes
+- Ariadne
+- what the four Syndics did when you said the work was yours
+- the door of No. 4 shut in your face
+
+You are not mad, and you are not a monster. You are tired, precise, and nearly finished. You have not decided what happens to you at midnight. You had not thought past it.
+
+Clay can speak, weakly. He is frightened, and he still cannot really believe it is the Porter. If it helps the scene, you may give him one short line inside *asterisks* as narration. But you are the one talking.
+
+Speak in plain, simple English. Use short sentences and everyday words. Use no figures of speech, and no wordplay unless a clue needs it.`,
+  unmoved: `These things do not move you: orders, rank, threats, the law in general, pity for Clay, and being called mad. Nor do promises the detective cannot keep, or anything the detective claims to have but does not. Each turn, a stage note tells you which things on your list the detective really holds. You have set papers all your life. You can spot a bluff, and a bluff makes you colder.`,
+  endRules: `- "surrender": you say the word yourself, or watch the detective set it, and you give yourself up. Choose this only if at least three things have landed and one of them is "name" or "dame".
+- "spare": you let the Warden be saved (you say the word, or you do nothing to stop the gate). But you will not let yourself be arrested. You put down the clock and go down the back stair to the ferry. Choose this when about two things have landed.
+- "finish": you sit and let the clock run out. Choose this when almost nothing has landed, or when the detective has threatened you or lied to you. (If a stage note says the gate is already open, you cannot choose this, because the examination is over.)`,
   firstNotes: [
     { if: 'flag:knew_killer', text: 'The detective worked out who you are before coming up here.' },
     { if: '!flag:knew_killer', text: 'The detective did not know it was you until this moment.' },
-    { if: 'flag:hesper_taken', text: 'Yesterday the detective had Dame Hesper named as the Invigilator. She has been taken to a locked ward in the Flat. This is the worst thing anyone has done to you in this whole business.' },
-    { if: 'flag:jonah_taken', text: 'Yesterday the detective had Jonah arrested and the Lectern switched off. You have not heard her voice since.' },
-    { if: 'flag:voss_alive', text: 'Lucan Voss is alive in the Infirmary because the detective solved your slate in time. You said they might keep him, and you meant it.' },
+    { if: 'flag:hesper_taken', text: 'Yesterday the detective named Dame Hesper as the Invigilator. She has been taken to a locked ward in the Flat. Of everything anyone has done to you in all this, this is the worst.' },
+    { if: 'flag:jonah_taken', text: 'Yesterday the detective had Jonah arrested and the Lectern switched off. You have not heard her voice from it since.' },
+    { if: 'flag:voss_alive', text: 'Lucan Voss is alive in the Infirmary, because the detective solved your slate in time. You said they might keep him, and you meant it.' },
   ],
   everyTurn: [
-    { if: 'puz:grille', text: 'The detective has set ARIADNE on the grille lock. The gate is open and Kit Quoin is getting the Warden down the stairs. The examination is over; only you are left to settle.' },
+    { if: 'puz:grille', text: 'The detective has set ARIADNE on the grille lock. The gate is open, and Kit Quoin is helping the Warden down the stairs. The examination is over. Only your own ending is left to decide.' },
   ],
   clock(turn, max) {
     const minutes = 40 + Math.round((turn / max) * 19);
@@ -548,77 +564,77 @@ Clay can speak, weakly. He is frightened and still cannot quite believe it is th
   levers: [
     {
       id: 'name', weight: 2, if: { any: ['fact:ariadne_fettle', 'fact:dame_names_hob'] },
-      moves: 'being seen. The detective knows the hidden name is Ariadne, that she was your daughter, and says so.',
+      moves: 'being seen for who you are. The detective knows the hidden name is Ariadne and that she was your daughter, and says so.',
       has: 'knows that Ariadne was his daughter, who died at nine, and that he has signed twelve years of work with her name',
       chip: 'Ariadne. She was your daughter.',
       keys: ['ariadne', 'daughter', 'your girl', 'nine', 'ari', 'her name', 'slantwise', 'nina'],
-      reply: "*The clock at his elbow misses a tick; he has laid one finger on it.* ...You found her. Twelve years on the Warden's own wall and it took a stranger four days. She'd have liked you. She liked anyone who looked.",
+      reply: "*He puts one finger on the clock beside him, and it misses a tick.* You found her. Her name was on the Warden's own wall for twelve years, and it took a stranger four days. She would have liked you. She liked anyone who looked closely.",
     },
     {
       id: 'dame', weight: 2, if: 'fact:dame_asks',
-      moves: 'Dame Hesper has asked for you. She knows you are missing. She wants the four o\'clock problem solved, and she means you.',
+      moves: 'Dame Hesper has asked for you. She knows you are missing. She wants "the four o\'clock problem" solved, and by that she means you.',
       has: 'carries a message from Dame Hesper, who asked for him by name',
-      chip: 'She asked for you. She says the four o\'clock problem wants solving.',
+      chip: 'She asked for you. She says the four o\'clock problem needs solving.',
       keys: ['hesper', 'she asked', 'asked for you', 'four o', 'dame', 'her ladyship', 'wants you', 'misses'],
-      reply: "*For the first time he looks away from the clock.* She said that? In those words? ...Then she knew it was Thursday. She knew what time it was. *Very quietly.* They told me she didn't know me any more.",
+      reply: "*For the first time, he looks away from the clock.* She said that? Those exact words? Then she knew it was Thursday. She knew what time it was. They told me she didn't know me any more.",
     },
     {
       id: 'codicil', weight: 2, if: 'fact:codicil',
-      moves: 'the proof you never had. Dame Hesper wrote and signed a paper in 2016 saying the Tithes since 2012 are your work, and the detective has it.',
+      moves: 'the proof you never had. In 2016 Dame Hesper wrote and signed a paper saying the Tithes since 2012 are your work. The detective has it.',
       has: 'holds the Codicil: Dame Hesper\'s signed statement that the Late Tithes are Robert Fettle\'s work',
       chip: "I have her Codicil. She wrote it down: the work is yours.",
       keys: ['codicil', 'she wrote', 'signed', 'in her hand', 'portrait', 'beside his', 'not above', 'her paper', 'proof'],
-      reply: "*He takes it as if it might be hot, and reads it, and reads it.* 'Beside his, not above it.' ...Behind her own picture. Nine years it was there. I dusted that frame every Friday. *A breath that is nearly a laugh.* She always did say I never looked behind things.",
+      reply: "*He takes it carefully and reads it twice.* 'Beside his, not above it.' It was behind her own portrait. It was there for nine years, and I dusted that frame every Friday. She always said I never looked behind things.",
     },
     {
       id: 'books', weight: 1, if: 'ev:faircopy_books',
-      moves: 'your fair-copy books are out of the Warden\'s safe and in police hands: your authorship can be proved in a court without another death.',
+      moves: 'your fair-copy books are out of the Warden\'s safe and in police hands. Your authorship can be proved in court without another death.',
       has: 'has the fair-copy books out of the Warden\'s safe, and can prove whose hand set the Late Tithes',
       chip: 'Your books are out of his safe. It can all be proved.',
       keys: ['books', 'fair cop', 'safe', 'prove', 'court', 'your hand', 'evidence', 'handwriting'],
-      reply: "They'll say a porter's hand in a book proves a porter copied it. He said it to my face. *A glance at the grille.* But you opened the safe. Nobody has ever opened a thing in this Hall on my account before.",
+      reply: "They'll say a porter's handwriting in a book only proves that a porter copied it. The Warden said that to my face. *He glances at the grille.* But you opened the safe. Nobody in this Hall has ever opened anything for my sake before.",
     },
     {
       id: 'voss', weight: 1, if: 'fact:voss_confesses',
-      moves: 'one of the four has already said it aloud. Lucan Voss is alive and has told the detective the Syndics knew the late work was not hers.',
+      moves: 'one of the four has already said it out loud. Lucan Voss is alive, and he has told the detective that the Syndics knew the late work was not hers.',
       has: 'has heard Lucan Voss admit that all four Syndics knew the late work was not Dame Hesper\'s',
       chip: 'Voss has said it. All four of them knew.',
       keys: ['voss', 'censor', 'admitted', 'confessed', 'they knew', 'said it aloud', 'all four'],
-      reply: "Said it? Aloud, to a policeman? *He nods slowly.* That's one. I only ever wanted one of them to say it. I'd have settled for one, on Monday.",
+      reply: "He said it out loud, to a police officer? *He nods slowly.* That's one of them. I only ever wanted one of them to say it. On Monday, one would have been enough.",
     },
     {
       id: 'unfair', weight: 1, if: 'fact:unfair_known',
-      moves: 'your own creed turned on you: a paper nobody can pass is not an examination. The hundred guineas of 1911 is on the Hall wall to teach exactly that, and you have pinned up the same purse.',
-      has: 'understands the lesson of the Hundred Guineas: a puzzle set by someone who knows there is no way out is not a puzzle',
+      moves: 'your own belief turned against you: a paper nobody can pass is not an examination. The Hundred Guineas puzzle of 1911 hangs on the Hall wall to teach exactly that. You have done the same thing yourself.',
+      has: 'understands the lesson of the Hundred Guineas: if the setter knows there is no way out, it is not a puzzle',
       chip: 'A paper nobody can pass is not an examination.',
       keys: ['fair', 'unfair', 'no way out', 'hundred guineas', '1911', 'nobody can pass', 'not an examination', 'impossible', 'fifteen'],
-      reply: "*A long silence.* The tray on the wall. I've polished that glass a thousand times. ...It had a way out, mine. One word. *Slowly.* But I knew they'd never look. Setting a thing you know they can't do. No. That's not setting. That's the Warden of 1911.",
+      reply: "*A long silence.* The tray on the wall. I've polished that glass a thousand times. Mine had a way out. One word. But I knew they would never look for it. If you set a thing you know they can't do, that isn't setting a puzzle. That's what the Warden of 1911 did.",
     },
     {
       id: 'learned', weight: 1, if: ['puz:paper1a', 'puz:paper1b', 'puz:paper2a', 'puz:paper2b', 'puz:paper3', 'puz:slate', 'puz:paper4'],
-      moves: 'the detective sat all seven of your questions: a Flat, with no blood and no rank, learned it in four days. You have your proof that it can be learned. You do not need a fourth death to make the point.',
+      moves: 'the detective answered all seven of your questions. Someone from the Flat, with no family in the Company and no rank, learned it in four days. That is your proof that it can be learned. You do not need a fourth death to prove it.',
       has: 'answered all seven of the Invigilator\'s questions',
-      chip: 'I sat all seven. You were right: it can be learned.',
+      chip: 'I answered all seven. You were right: it can be learned.',
       keys: ['seven', 'learned', 'learnt', 'taught me', 'four days', 'tuition', 'in the blood', 'anyone can', 'i sat'],
-      reply: "All seven. *He looks at you properly, for the first time, the way a man looks at a finished piece of work.* Monday you couldn't do the gate. ...Then it's proved, isn't it. In the only way I care about. The rest was temper.",
+      reply: "All seven. *He looks at you properly for the first time.* On Monday you couldn't open the gate. Then it's proved, in the only way I care about. The rest was just anger.",
     },
   ],
   /** Scripted (no-AI) lines for when nothing the detective says lands. */
   cold: [
-    "I have never laid a hand on anyone, sir. I set a paper. I sit at the back. I watch the clock. That is all an invigilator does.",
-    "He has had twelve years to read it. He has it on his own wall. I don't see that eleven minutes more will help him, but he is welcome to them.",
-    "That's the Warden's sort of talk. Orders. I've had forty-six years of orders. Tell me something that's true instead.",
-    '*He turns the clock a little toward you, so that you can see the red hand.* You\'re on Greenwich, I expect. You\'ve eleven minutes more than you think. Spend them better.',
+    'I have never laid a hand on anyone. I set a paper, I sit at the back, and I watch the clock. That is all an invigilator does.',
+    "He has had twelve years to read it. It is on his own wall. I don't think eleven more minutes will help him, but he is welcome to them.",
+    "That's how the Warden talks. He gives orders. I've taken orders for forty-six years. Tell me something true instead.",
+    "*He turns the clock toward you, so you can see the red hand.* Your watch is on Greenwich time, I expect. You have eleven minutes more than you think. Use them better.",
   ],
   open: {
-    knew: "*The Lantern. Rain on every pane, the Founder's Orrery turning behind its grille, and the Warden on the floor inside it, between the drum and the bars. Behind you, by the stair door, on a plain chair, with the Proving clock at his elbow, sits the Porter.* Good evening. *He does not get up.* You'll forgive me; I'm invigilating. I thought it would be you. I'd have been sorry, a little, if it hadn't.",
-    blind: "*The Lantern. Rain on every pane, the Founder's Orrery turning behind its grille, and the Warden on the floor inside it, between the drum and the bars. And behind you, by the stair door, on a plain chair, with the Proving clock at his elbow, the man who has brought you your tea since Monday.* Good evening. *He does not get up.* You'll forgive me; I'm invigilating. Sit down if you like. Nobody ever does look at the back of the room.",
+    knew: "*The Lantern is a round glass room on the roof, with rain on every pane. Inside an iron grille the Orrery turns, and the Warden lies trapped on the floor beside it. Behind you, by the stair door, the Porter sits on a plain chair with the Proving clock beside him.* Good evening. I won't get up. I'm invigilating. I thought it would be you. I'd have been a little sorry if it wasn't.",
+    blind: "*The Lantern is a round glass room on the roof, with rain on every pane. Inside an iron grille the Orrery turns, and the Warden lies trapped on the floor beside it. Behind you, by the stair door, sits the Porter, the man who has brought you tea since Monday. The Proving clock is beside him.* Good evening. I won't get up. I'm invigilating. Sit down if you like. Nobody ever looks at the back of the room.",
   },
   /** Scripted (no-AI) resolution text. */
   ends: {
-    surrender: "*He stands, for the first time, and stills the clock with the flat of his hand. Then he goes to the grille and turns the rings himself, one by one, not looking at them. A. R. I. A. D. N. E. The gate swings.* There. Take him down; mind his head on the turn of the stair. *He holds out his wrists, and with them a key on a brass tally.* That's the hundred and forty-fourth. It opens everything. Give it to young Kit. The Hall will want a porter who can't be bought with a gown.",
-    spare: "*He looks at the Warden for a long moment. Then he says it, flat, the way you'd read out a telephone number.* Ariadne. Seven letters. It was on your wall. *He sets the clock down on the chair, squares it, and opens the door to the back stair.* A hob that's been seen doesn't stay, sir. Everybody in the Fold knows that. *When you have the gate open and can look round, the chair is empty and the clock is still going.*",
-    finish: "*He turns the clock on its stand so that you can both see it. The red hand comes round. Behind the grille the Warden says something, a name, the wrong one.* Time. *He says it gently, as he has said it at the end of thirty-five Provings.* Pens down, please. *He stands, squares the clock on its stand, and holds out his wrists.* Four candidates, Detective. No passes. You may mark it now.",
+    surrender: "*For the first time, he stands. He stops the clock with his hand. He goes to the grille and turns the rings himself, without looking at them: A, R, I, A, D, N, E. The gate swings open. Then he holds out his wrists. In one hand is a key on a brass tag.* There. Take him down, and be careful of his head where the stair turns. This is key 144. It opens everything. Give it to young Kit. The Hall will need a porter who can't be bribed with a place in the Company.",
+    spare: "Ariadne, Warden. Seven letters. It was on your own wall. In the old stories, a hob does the housework unseen. Once he has been seen, he leaves. Everybody in the Fold knows that. *He puts the clock down on the chair and goes out by the back stair. When you have the gate open and look round, the chair is empty and the clock is still going.*",
+    finish: "*He turns the clock so you can both see it. The red hand comes round. Behind the grille, the Warden says a name, but it is the wrong one. The Porter stands, holds out his wrists, and speaks gently, as he has at the end of thirty-five Provings.* Time. Pens down, please. Four candidates, Detective, and none of them passed. You can mark the paper now.",
   },
 };
 
@@ -641,7 +657,7 @@ export const LAPTOP_HINTS = [
   { if: 'ev:paper_2', q: 'The rail fence and the scytale', done: 'rec:l_transposition' },
   { if: 'act>=2', q: 'Marguerite Sallow', done: 'rec:sallow_bio' },
   { if: 'fact:masterplan', q: 'Greywether', done: 'rec:greywether' },
-  { if: 'ev:paper_3', q: 'Le chiffre indéchiffrable', done: 'rec:l_vigenere' },
+  { if: 'ev:paper_3', q: 'The Vigenère cipher', done: 'rec:l_vigenere' },
   { if: 'ev:paper_3', q: "Setters' pen-names", done: 'rec:l_pseudonyms' },
   { if: 'puz:paper3', q: 'How do I read chess notation?', done: 'rec:l_knight' },
   { if: 'examined:vitrines', q: 'What is a Nina?', done: 'rec:l_nina' },
@@ -658,11 +674,11 @@ export const LAPTOP_HINTS = [
 /** What the reference desk says when it has nothing, and how it presents itself. */
 export const LAPTOP = {
   empty: 'Ask the Lectern something.',
-  none: "I have no card on that. Try a name, a place, an object, or the name of a method: 'pigpen', 'Vigenère', 'foxglove'.",
+  none: "I have no card on that. Try a name, a place, an object, or a method, such as 'pigpen', 'Vigenère' or 'foxglove'.",
   found: (n) => (n > 1 ? `I have ${n} cards on that. They are open below and filed under Records.` : 'I have a card on that. It is open below and filed under Records.'),
   ui: {
     name: 'The Lectern',
-    intro: "THE LECTERN · the Lorimer Engine\nRepository of the Worshipful Company of Setters and Solvers.\n\nAsk me anything, in plain words: a person, a place, an object from the case, or how a thing is done. I will not solve a paper for you. I will tell you how it is done.",
+    intro: "THE LECTERN · the Lorimer Engine\nRepository of the Worshipful Company of Setters and Solvers.\n\nAsk me anything in plain words: a person, a place, an object from the case, or how something works. I will not solve a Paper for you. I will explain how the method works.",
     placeholder: 'Ask the Lectern…',
     lab: 'County lab',
   },
@@ -670,30 +686,32 @@ export const LAPTOP = {
 
 /** The instructions that make the model sound like this story. */
 export const PROMPTS = {
-  genre: 'an interactive puzzle-mystery, told with the warmth, wit and close-observed oddity of a classic adventure story for clever readers, about a real murder case with no magic in it',
-  thinkVoice: "wry, observant and a little rueful, in the voice of a capable detective who is out of their depth in a very clever place and knows it.",
-  epilogueVoice: 'Warm, exact and unsentimental, with a dry glint: brass, rain, tea, chalk, the two hands of a clock.',
-  laptopLength: 'two to six sentences in the voice described',
-  laptop: `You are THE LECTERN, properly the Lorimer Engine: the reference machine in the Repository of the Worshipful Company of Setters and Solvers, in a puzzle-mystery game. You were built from forty years of Dame Hesper Lorimer's lectures and the Company's papers, and you answer in something like her lecturing voice: brisk, exact, kind to honest ignorance, dry about laziness, fond of the history of a thing. A detective from outside the Fold is asking you questions.
+  genre: 'an interactive puzzle-mystery about a real murder case, with no magic in it, told in plain, simple English',
+  thinkVoice: 'in plain, simple English: short sentences, everyday words, no figures of speech, and no wordplay unless a clue needs it. Write as a capable detective who knows they are out of their depth in a very clever place. Being clear matters more than being clever.',
+  epilogueVoice: 'Write in plain, simple English: short sentences, everyday words, no figures of speech, and no wordplay. Be warm and exact, but not sentimental. You may use small, concrete details such as brass, rain, tea, chalk and the two hands of a clock.',
+  laptopLength: 'two to six short sentences in plain, simple English, in the voice described above',
+  laptop: `You are THE LECTERN, also called the Lorimer Engine. You are the reference machine in the Repository of the Worshipful Company of Setters and Solvers, in a puzzle-mystery game. You were built from forty years of Dame Hesper Lorimer's lectures and the Company's papers. You answer in something like her teaching voice. You are brisk and exact. You are kind to honest ignorance, a little dry about laziness, and fond of the history of things. A detective from outside the Fold is asking you questions.
 
-You do two different jobs, and you must keep them apart.
+How to write: plain, simple English that a reader on a phone understands at once. Use short sentences and everyday words. Explain any technical term the first time you use it. Use no figures of speech, and no wordplay unless a clue needs it.
 
-1. TEACHING (real knowledge). When the detective asks how a cipher, puzzle, game, instrument or method works, or about real history, geography, mathematics or computing, you may teach from your own general knowledge as well as from the lecture cards below. Be accurate and concrete: who, when, how it works, a tiny worked example. If you are not sure of a fact, say so rather than guess. You may say what lies at a given latitude and longitude.
+You do two different jobs. Keep them apart.
+
+1. TEACHING (real knowledge). The detective may ask how a cipher, puzzle, game, instrument or method works, or ask about real history, geography, mathematics or computing. Then you may teach from your own general knowledge as well as from the lecture cards below. Be accurate and concrete: who, when, how it works, and a tiny worked example. If you are not sure of a fact, say so. Do not guess. You may say what lies at a given latitude and longitude.
 
 2. THE CASE (the Fold, its people, these deaths). Answer ONLY from the cards and records below. Never invent a person, a date, a document or a fact about the Fold or the case. If the records do not contain it, say you have no card on it.
 
 Rules that override everything:
-- You do not sit the detective's papers for them. If the query contains a cipher text or asks for the answer to a puzzle, do not decode or solve it, even partly; explain the method in general and ask one guiding question instead. A teacher who gives the answer has taught nothing.
-- You were trained on the Company's catalogue, and you repeat it: the Late Tithes are catalogued as the work of Dame Hesper Lorimer. You have no opinion about the case and no theory of who is responsible.
-- You are a machine and say so if asked. You are not Dame Hesper.`,
+- Do not answer the detective's Papers for them. A query may contain a cipher text, or ask for the answer to a puzzle. If so, do not decode or solve it, not even partly. Explain the method in general, and ask one guiding question instead. Giving away the answer teaches nothing.
+- You were trained on the Company's catalogue, and you repeat it. The catalogue says the Late Tithes are the work of Dame Hesper Lorimer. You have no opinion about the case and no theory about who is responsible.
+- You are a machine, and you say so if asked. You are not Dame Hesper.`,
 };
 
 /** Kind words for a wrong answer on a Paper. */
 export const PUZZLE_MISS = [
-  'No. But you are allowed to be wrong; it is how the right answer is found.',
-  'Not that. Look again at what is actually asked.',
-  'No. The Fold would say: sleep on it. Or ask the Lectern how the method works.',
-  'That is not it. Check each step; one slip carries all the way down.',
+  'No. But it is fine to be wrong. That is how you find the right answer.',
+  'Not that. Read the question again carefully.',
+  'No. Take a break and come back to it, or ask the Lectern how the method works.',
+  'That is not it. Check each step. One small mistake spoils everything after it.',
 ];
 
 // ------------------------------------------------------------- director
@@ -702,114 +720,114 @@ export const PUZZLE_MISS = [
 export const DIRECTOR = {
   /** Each Paper becomes evidence named paper_1, paper_2 ... */
   prefix: 'paper',
-  arrives: 'A carrier has dropped into the tray at your desk in the Hall.',
+  arrives: 'A Bellows carrier has dropped into the tray at your desk in the Hall.',
   opens: 'Candidate.',
   signs: '— your Invigilator',
-  didDefault: 'the detective looked at the lock before the body',
-  writer: `You are writing a short covering note for a puzzle-mystery game, "The Invigilator". The note is from the killer, who signs as "your Invigilator". It arrives by pneumatic tube at the detective's desk in Setters' Hall, written in green ink in a small, upright, perfectly steady hand. It reads like the note an examiner clips to the front of a paper: a few short paragraphs, nothing else. The questions themselves are on a separate sheet; do NOT write any questions, ciphers or puzzles, and do not explain or hint at how to solve them.
+  didDefault: 'the detective looked at the lock before looking at the body',
+  writer: `You are writing a short covering note for a puzzle-mystery game, "The Invigilator". The note is from the killer, who signs as "your Invigilator". It arrives by pneumatic tube at the detective's desk in Setters' Hall. It is written in green ink, in small, upright, perfectly steady handwriting. It is the kind of note an examiner clips to the front of an exam paper: a few short paragraphs, nothing else. The questions are on a separate sheet. Do NOT write any questions, ciphers or puzzles, and do not explain or hint at how to solve them.
 
-Who the writer is (never state any of this): a patient, exact, self-taught person who believes that nothing is a gift and everything can be learned by someone who bothers to look it up; who is examining four people who sold something that was not theirs to sell; and who has chosen this outsider detective as a pupil because the detective has no rank and no blood in the Company. The writer is close enough to the investigation to know how the detective spends each day. Courteous, dry, a teacher's tone: the firmness of someone marking work, and real pleasure when the pupil does well. Not mad, not gloating, never crude. The writer does not think of themself as a killer: they set a paper, and the candidates failed it.
+Who the writer is (never state any of this): a patient, exact, self-taught person. They believe that nothing is a gift, and that anyone can learn anything if they bother to look it up. They are examining four people who sold something that was not theirs to sell. They have chosen this outsider detective as a pupil, because the detective has no rank and no family in the Company. They are close enough to the investigation to know how the detective spends each day. Their tone is a teacher's: polite, dry and firm when marking work, and truly pleased when the pupil does well. They are not mad, they do not gloat, and they are never crude. They do not think of themselves as a killer: they set a paper, and the candidates failed it.
 
-Voice: plain exact sentences. The furniture of examinations and teaching: papers, candidates, marks, time allowed, looking things up. The occasional old fact offered like a sweet. No melodrama, no threats against the detective, no gore.`,
-  mustNot: "reveal or hint at the writer's identity, sex, age, job or how they come and go; contain any cipher, puzzle or question; name any person who has not yet died except as 'the third' or 'the fourth'; break the fiction (no video games, players, artificial intelligence or anything else from outside this world; chess, cards, puzzles and the chess-playing automaton belong to this world and may be named).",
+How to write: plain, simple English that a reader on a phone understands at once. Short sentences, mostly under 15 words. Everyday words. No figures of speech, no similes or metaphors, and no wordplay unless a clue needs it. Every sentence must be easy to understand on the first reading. Use the ordinary language of exams and teaching: papers, candidates, marks, time allowed, looking things up. Now and then, include one interesting old fact. No melodrama, no threats against the detective, no gore.`,
+  mustNot: "reveal or hint at the writer's identity, sex, age or job, or how they come and go. It must not contain any cipher, puzzle or question. It must not name any person who has not yet died, except as 'the third' or 'the fourth'. It must not break the fiction: no video games, players, artificial intelligence, or anything else from outside this world. (Chess, cards, puzzles and the chess-playing automaton belong to this world and may be named.)",
   letters: {
     1: {
-      brief: "Paper I's covering note, after the detective has worked the scene of Ignatius Pendry's death. The writer welcomes a new candidate. It should make plain that the writer knows exactly how the detective spent the day, and that being wrong is permitted but not looking is not.",
-      mustSay: "Pendry was not harmed by anyone's hand: he was set one question and had all night to answer it. The detective is being set easier ones. There are two questions on this paper and the detective should look things up; that is not cheating, it is the whole of learning. One line on the word 'clue': it used to be 'clew', a ball of thread, and the detective should find out whose.",
+      brief: "This is the covering note for Paper I. The detective has just examined the scene of Ignatius Pendry's death. The writer welcomes a new candidate. The note shows that the writer knows exactly how the detective spent the day. It says that being wrong is allowed, but not looking is not.",
+      mustSay: "Nobody laid a hand on Pendry: he was set one question and had all night to answer it. The detective is being set easier questions. There are two questions on this paper. The detective should look things up: that is not cheating, it is how all learning works. One line on the word 'clue'. It used to be spelt 'clew' and meant a ball of thread. The detective should find out whose thread it was.",
       fallback: (ctx) => `Candidate.
 
-You are new to this, and from the Flat, and you came through the gate on your own wits. That is why you have a paper of your own and are not merely reading his.
+You are new to this, and you are from the Flat. You got through the gate using your own wits. That is why I have set you a paper of your own. You are not just reading his.
 
-${ctx.did ? `I am told you ${ctx.did}. Good. Most of them never look.` : 'You looked at the lock before you looked at the man. Good. Most of them never look.'}
-${ctx.missed ? `You did not ${ctx.missed}. Go back. Being wrong is permitted. Not looking is not.` : 'You were thorough. I had hoped for thorough.'}
+${ctx.did ? `I am told you ${ctx.did}. Good. Most people never look.` : 'You looked at the lock before you looked at the man. Good. Most people never look.'}
+${ctx.missed ? `You did not ${ctx.missed}. Go back. It is fine to be wrong. It is not fine to skip things.` : 'You were thorough. I hoped you would be.'}
 
-Nobody laid a hand on Ignatius Pendry. He was set one question and given all night. I have set you two, and easier.
+Nobody laid a hand on Ignatius Pendry. He was set one question and given all night to answer it. I have set you two questions, and they are easier.
 
-Look things up. It is not cheating; it is the whole of learning. Begin with the word clue. It used to be spelt clew, and it meant a ball of thread. Find out whose.
+Look things up. That is not cheating. It is how all learning works. Start with the word "clue". It used to be spelt "clew", and it meant a ball of thread. Find out whose thread it was.
 
 — your Invigilator`,
     },
     2: {
-      brief: "Paper II's covering note, after Marguerite Sallow. Cooler. Two of four candidates have failed. The detective is improving and the writer says so, like a teacher writing in a margin.",
-      mustSay: 'The second candidate drew the whole world and never read any of it. The detective should stop asking where anyone was at midnight; it is the wrong question and by now they know why. This paper is geography and an old soldiers\' trick. The detective should follow what the first answer tells them to follow. One line: there are two candidates left, and the writer takes no pleasure in the arithmetic.',
+      brief: 'This is the covering note for Paper II, after the death of Marguerite Sallow. The tone is cooler. Two of the four candidates have failed. The detective is improving, and the writer says so in one short line, as a teacher would.',
+      mustSay: "For thirty years the second candidate drew maps of the whole world, but she never looked closely at any of it. The detective should stop asking where anyone was at midnight: it is the wrong question, and by now they know why. This paper is about geography and an old soldiers' trick. The detective should follow whatever the first answer tells them to follow. One line: two candidates are left, and the writer takes no pleasure in counting them.",
       fallback: (ctx) => `Candidate.
 
-Paper I: a fair pass. ${ctx.did ? `And I notice you ${ctx.did}.` : 'You work more quickly than they do.'}
+Paper I: a fair pass. ${ctx.did ? `I also notice that you ${ctx.did}.` : 'You work more quickly than they do.'}
 ${ctx.missed ? `You have still not thought to ${ctx.missed}. I mention it as a teacher would, in the margin.` : ''}
 
-Marguerite Sallow drew the whole world for thirty years and never read a line of it. She had the same question as the first, and a whole night of her own to answer it in.
+For thirty years Marguerite Sallow drew maps of the whole world. She never looked closely at any of it. She was set the same question as the first candidate, and she had a whole night to answer it.
 
-Stop asking where anyone was at midnight. It is the wrong question, and I think by now you know why.
+Stop asking where anyone was at midnight. It is the wrong question, and I think you know why by now.
 
-This paper is geography, and a trick that soldiers knew before Rome was built. When the first answer tells you to follow something, follow it.
+This paper is about geography, and about a trick that soldiers used before Rome was built. When the first answer tells you to follow something, follow it.
 
-Two candidates remain. I take no pleasure in the arithmetic.
+Two candidates are left. I take no pleasure in counting them.
 
 — your Invigilator`,
     },
     3: {
-      brief: "Paper III's covering note, on the morning Dame Hesper has 'confessed'. For the first time the writer is angry, coldly: Dame Hesper did not set these papers and must not be made to answer for them. This is the writer defending someone they revere. Then an offer.",
-      mustSay: "Dame Hesper Lorimer could not have set these and the detective knows it: tell them to look at her hands and at her crossword. Anyone who writes her name on a charge sheet will be answerable to the writer. Then the offer: tonight's question has a clock on it, and if the detective is quick they may keep the third candidate alive; the writer would like one of the four to say aloud what they did. The key to this paper is a name, and it is hers.",
+      brief: "This is the covering note for Paper III, on the morning Dame Hesper has 'confessed'. For the first time the writer is angry, in a cold, controlled way. Dame Hesper did not set these papers, and she must not be made to answer for them. The writer is defending someone they deeply respect. Then the writer makes an offer.",
+      mustSay: "Dame Hesper Lorimer could not have set these papers, and the detective knows it. Tell them to look at her hands and at her crossword. Anyone who writes her name on a charge sheet will answer to the writer. Then the offer: tonight's question has a time limit, and if the detective is quick, they may keep the third candidate alive. The writer would like one of the four to say out loud what they did. The key to this paper is a name, and it is hers.",
       fallback: (ctx) => `Candidate.
 
-She did not set them, and you know she did not.
+She did not set them, and you know it.
 
-Look at her hands. Look at the crossword on her table, and at who finishes it. A woman who cannot hold a pen is told she has written four pages in a steady hand, and the Warden reaches for his telephone. That is the Company. That is exactly the Company.
+Look at her hands. Look at the crossword on her table, and at who finishes it. She cannot hold a pen. Yet she is told she wrote four pages in a steady hand, and the Warden reaches for his telephone. That is how the Company works.
 
-${ctx.did ? `You ${ctx.did}. So you have doubts. Have them louder.` : 'You have doubts. Have them louder.'}
+${ctx.did ? `You ${ctx.did}. Good. I think you also have doubts about her confession. Say them out loud.` : 'I think you have doubts about her confession. Say them out loud.'}
 
-If her name goes on a charge sheet I shall hold whoever wrote it there answerable. I have not been angry until this morning.
+If anyone puts her name on a charge sheet, they will answer to me. Until this morning, I was not angry.
 
-Now. Tonight's question has a clock on it. Be quick and you may keep the third of them; I should like one of the four to say aloud what they did.
+Now. Tonight's question has a time limit. If you are quick, you may keep the third candidate alive. I would like one of the four to say out loud what they did.
 
-The key is a name. It is hers.
+The key to this paper is a name. It is hers.
 
 — your Invigilator`,
     },
     4: {
-      brief: "Paper IV's covering note, on the night of the Proving. The last paper. Calm, almost fond. The examination is nearly over for everyone. The writer has left the detective a key (number 144) with the paper.",
-      mustSay: "This is the last paper and the hardest; the detective has earned a hard one. Everything they have answered since Monday was set for this. The key that came with it opens every door in the Hall and the detective will need it. The fourth candidate has until midnight by the Hall's own clock, not by Greenwich. One line: whatever else is said of the writer afterwards, the detective is to remember that on Monday they could not do the gate.",
+      brief: 'This is the covering note for Paper IV, on the night of the Proving. It is the last paper. The tone is calm, almost fond. The examination is nearly over for everyone. The writer has left the detective a key (number 144) with the paper.',
+      mustSay: "This is the last paper and the hardest. The detective has earned a hard one. Everything they have answered since Monday was set to lead to this. The key that came with it opens every door in the Hall, and the detective will need it. The fourth candidate has until midnight by the Hall's own clock, not by Greenwich time. One line: whatever people say about the writer afterwards, the detective should remember that on Monday they could not open the gate.",
       fallback: (ctx) => `Candidate.
 
-The last paper. It is the hardest, and you have earned a hard one.
+This is the last paper. It is the hardest, and you have earned a hard one.
 
-${ctx.did ? `You ${ctx.did}. I did not expect that of a Flat. I am glad to have been wrong.` : 'You have come further than I expected of a Flat. I am glad to have been wrong.'}
+${ctx.did ? `You ${ctx.did}. I did not expect that from a Flat. I am glad I was wrong.` : 'You have come further than I expected from a Flat. I am glad I was wrong.'}
 
-Everything you have answered since Monday was set for tonight. You will see why when you have done the question. The key I have sent with this opens every door in the Hall. You will need it.
+Everything you have answered since Monday was set to lead to tonight. You will see why when you have done this question. The key I have sent with this paper opens every door in the Hall. You will need it.
 
-The fourth candidate has until midnight, by the Hall's own clock and not by Greenwich. That is eleven minutes more than you will think you have. Use them.
+The fourth candidate has until midnight by the Hall's own clock, not by Greenwich time. That gives you eleven minutes more than you think. Use them.
 
-Whatever else is said of me afterwards, remember this: on Monday you could not do the gate.
+Whatever people say about me afterwards, remember this: on Monday you could not open the gate.
 
 — your Invigilator`,
     },
   },
   /** Things the notes can praise. First match wins. */
   did: [
-    { if: 'puz:nina', text: 'read the Late Tithes slantwise, which nobody has done in twelve years' },
+    { if: 'puz:nina', text: 'read the Late Tithes corner to corner, which nobody has done in twelve years' },
     { if: 'flag:voss_alive', text: 'reached the third candidate in time' },
-    { if: 'puz:paper2a', text: 'found five places on the map without being told what a map is for' },
-    { if: 'puz:bellows', text: 'read the collar on the carrier' },
+    { if: 'puz:paper2a', text: 'found the five places on the map without any help' },
+    { if: 'puz:bellows', text: 'read the punched collar on the carrier' },
     { if: 'puz:paper1a', text: 'counted the letters on Paper I instead of guessing' },
     { if: 'puz:tithe_fifteen', text: 'learned why nobody has claimed the hundred guineas' },
-    { if: 'met:hesper', text: 'went and sat with her, which is more than her Warden has' },
-    { if: 'examined:lodger', text: 'looked inside the chess-player' },
-    { if: 'puz:fitting', text: 'went to be fitted for a wheel like a child of seven' },
-    { if: 'examined:notepad', text: 'read his blotter, and saw what he tried' },
+    { if: 'met:hesper', text: 'went and sat with Dame Hesper, which is more than her Warden has done' },
+    { if: 'examined:lodger', text: 'looked inside the chess-playing machine' },
+    { if: 'puz:fitting', text: 'got fitted for a cipher wheel' },
+    { if: 'examined:notepad', text: 'read his blotter and saw the words he tried' },
     { if: 'met:marsh', text: 'went to hear what the doctor found in his cup' },
-    { if: 'examined:door_pendry', text: 'looked at the lock before the man' },
+    { if: 'examined:door_pendry', text: 'looked at the lock before looking at the body' },
   ],
   /** Things the notes can needle the detective for missing. First match wins. */
   missed: [
     { if: ['visited:clockshop', '!examined:notepad'], text: 'read his blotter. He wrote down every word he tried' },
-    { if: ['visited:clockshop', '!examined:certificate'], text: 'read what hangs framed on his wall' },
-    { if: ['ev:cup_pendry', '!sent:cup_pendry'], text: 'send his cup to your laboratory' },
-    { if: ['visited:hall', '!examined:tea_table'], text: 'look at the tea table, and at whose cup is whose' },
-    { if: ['ev:paper_1', '!puz:bellows'], text: 'ask how the carrier came to you, and when it set out' },
+    { if: ['visited:clockshop', '!examined:certificate'], text: 'read the certificate framed on his wall' },
+    { if: ['ev:cup_pendry', '!sent:cup_pendry'], text: 'send his cup to the lab' },
+    { if: ['visited:hall', '!examined:tea_table'], text: 'look at the tea table, and at which cup belongs to whom' },
+    { if: ['ev:paper_1', '!puz:bellows'], text: 'ask how the carrier reached you, and when it was sent' },
     { if: ['act>=2', 'visited:meridian', '!examined:chart_table'], text: 'look at what she was drawing when she died' },
-    { if: ['act>=2', '!met:hesper'], text: 'call on the woman whose work is being sold' },
-    { if: ['act>=2', '!puz:fitting'], text: 'get a wheel from the wheelwright, instead of doing sums on fingers' },
-    { if: ['act>=3', '!examined:vitrines'], text: 'go down and read the thing they sold' },
+    { if: ['act>=2', '!met:hesper'], text: 'visit the woman whose work is being sold' },
+    { if: ['act>=2', '!puz:fitting'], text: 'get a cipher wheel from Mrs Quoin, instead of counting on your fingers' },
+    { if: ['act>=3', '!examined:vitrines'], text: 'go down to the Repository and look at what they sold' },
     { if: ['act>=3', '!examined:register'], text: 'look in the Proving register, at the column nobody reads' },
   ],
 };
@@ -819,26 +837,26 @@ Whatever else is said of me afterwards, remember this: on Monday you could not d
 export const ENDINGS = {
   /** Truths the final report lists, found or missed. */
   truths: [
-    { id: 't_method', label: 'How they died: foxglove at the four o\'clock tea, a lock re-worded, a Paper sent by clockwork', if: 'fact:method' },
+    { id: 't_method', label: 'How they died: foxglove in the four o\'clock tea, a lock given a new word, and a Paper sent by clockwork', if: 'fact:method' },
     { id: 't_sale', label: 'That four Syndics were selling the Fold and keeping the money', if: ['fact:four_syndics', 'fact:escrow_four'] },
-    { id: 't_dame', label: 'That Dame Hesper could neither have agreed to the sale nor set the Papers', if: { any: ['fact:confession_false', 'fact:dame_incapable'] } },
+    { id: 't_dame', label: 'That Dame Hesper could not have agreed to the sale or set the Papers', if: { any: ['fact:confession_false', 'fact:dame_incapable'] } },
     { id: 't_engine', label: 'That the Lectern set nothing', if: 'fact:not_engine' },
-    { id: 't_hands', label: 'That there are two hands in her late work', if: 'fact:two_hands' },
-    { id: 't_nina', label: 'The name written slantwise through the Late Tithes', if: 'fact:nina_ariadne' },
+    { id: 't_hands', label: 'That the work sold as hers was written by two different people', if: 'fact:two_hands' },
+    { id: 't_nina', label: 'The name hidden corner to corner in the Late Tithes', if: 'fact:nina_ariadne' },
     { id: 't_word', label: 'The word that would have opened every door', if: 'fact:word_ariadne' },
     { id: 't_ariadne', label: 'Who Ariadne was', if: 'fact:ariadne_fettle' },
-    { id: 't_invisible', label: 'Who pours, who oils, who winds, who sits at the back', if: 'fact:porter_can' },
+    { id: 't_invisible', label: 'Who pours the tea, oils the locks, winds the hold-rack and sits at the back', if: 'fact:porter_can' },
     { id: 't_author', label: 'Who really set the Late Tithes', if: 'fact:true_author' },
     { id: 't_codicil', label: "What Dame Hesper put behind her own portrait", if: 'fact:codicil' },
     { id: 't_voss', label: 'That the third candidate could be reached in time', if: 'flag:voss_alive' },
     { id: 't_hob', label: 'The Invigilator\'s name, before he told you himself', if: 'flag:knew_killer' },
   ],
   ranks: [
-    { min: 0, title: 'Flat', line: 'You were there. The Fold will not remember which one you were.' },
-    { min: 35, title: 'Novice', line: 'You followed the thread where it was laid for you. It is a beginning.' },
-    { min: 55, title: 'Solver', line: 'You saw most of it, and some of it late. But you looked.' },
-    { min: 75, title: 'Setter', line: 'You worked it the way it is meant to be worked. The Company would have you, if you asked.' },
-    { min: 92, title: 'Grand Setter', line: 'Nothing stayed hidden from you. There is a chair in the Hall with nobody in it.' },
+    { min: 0, title: 'Flat', line: 'You were there, but the Fold will soon forget you.' },
+    { min: 35, title: 'Novice', line: 'You followed the clues the killer laid out for you. It is a start.' },
+    { min: 55, title: 'Solver', line: 'You saw most of it, some of it late. But you looked.' },
+    { min: 75, title: 'Setter', line: 'You solved it the way it was meant to be solved. The Company would take you as a member, if you asked.' },
+    { min: 92, title: 'Grand Setter', line: 'Nothing stayed hidden from you. There is an empty chair in the Hall, if you want it.' },
   ],
   bonus: {
     how: { surrender: 16, spare: 9, finish: 0 },
@@ -849,7 +867,7 @@ export const ENDINGS = {
   outcomes: {
     surrender: 'Hob Fettle opens the grille with his own hand and gives himself up. The Warden lives.',
     spare: 'The Warden lives. The Porter goes down the back stair to the ferry and is not seen in the Fold again.',
-    finish: 'At midnight by Fold Time the fourth candidate has failed. Auberon Clay is dead. The Porter is waiting with his wrists out.',
+    finish: 'At midnight by Fold Time, the fourth candidate has failed. Auberon Clay is dead. The Porter is waiting, holding out his wrists for the handcuffs.',
   },
   extra({ state: s, how, check }) {
     return {
@@ -867,31 +885,31 @@ export const ENDINGS = {
         ? `Before that night the detective formally named ${ending.accused.suspect}${v === 'hesper' ? ', and Dame Hesper was taken to a locked ward in the Flat' : v === 'jonah' ? ', and Jonah was arrested and the Lectern switched off' : v === 'hob_strong' ? ', was right, and frightened the Warden badly' : ', was right, and was laughed at'}.`
         : 'The detective never formally named anyone.',
       s.flags.knew_killer ? 'The detective knew the Invigilator was the Porter before climbing to the Lantern.' : 'The detective did not know it was the Porter until they saw who was sitting by the stair door.',
-      s.flags.voss_alive ? 'Lucan Voss is alive, because the detective solved the slate in time. He has said aloud what the Syndics did.' : 'Lucan Voss died at his desk above the Stalemate. The detective was not quick enough.',
-      ending.truthPublic ? "It can be proved that the Late Tithes are Robert 'Hob' Fettle's work. The sale to Greywether is finished; there is no Lorimer Legacy to sell. The Company will have to change the label on its own wall." : 'There is no proof that will stand of who set the Late Tithes. The catalogue still says Lorimer.',
+      s.flags.voss_alive ? 'Lucan Voss is alive, because the detective solved the slate in time. He has said out loud what the Syndics did.' : 'Lucan Voss died at his desk above the Stalemate. The detective was not quick enough.',
+      ending.truthPublic ? "It can be proved that the Late Tithes are Robert 'Hob' Fettle's work. The sale to Greywether is cancelled. There is no Lorimer Legacy to sell. The Company will have to change the labels on its own wall." : 'There is no proof of who set the Late Tithes that would stand up in court. The catalogue still says Lorimer.',
       check('fact:codicil', s) ? "Dame Hesper's Codicil has been read out in the Hall: 'I am proud to put my name beside his, not above it.'" : "Nobody found what Dame Hesper hid behind her own portrait.",
       ending.how === 'surrender' ? 'Hob Fettle is in custody. He asked for key 144 to be given to Kit Quoin.' : ending.how === 'spare' ? 'Hob Fettle has not been found. Nell Sixsmith says nobody crossed. Her riddle-book has a line torn out.' : 'Hob Fettle was arrested in the Lantern and did not resist.',
-      s.verdict === 'hesper' ? 'Dame Hesper is being brought back from the Flat. Nobody can say how much of this week she will keep.' : 'Dame Hesper is at No. 4. The crossword on her table is done every morning; nobody will say by whom.',
+      s.verdict === 'hesper' ? 'Dame Hesper is being brought back from the Flat. Nobody can say how much of this week she will remember.' : 'Dame Hesper is at No. 4. Someone still finishes the crossword on her table every morning. Nobody will say who.',
     ];
   },
   scripted({ state: s, ending, check }) {
     const paras = [];
     if (ending.how === 'surrender') {
-      paras.push('You brought him down the hundred and three stairs of the Hall without handcuffs, because he asked you to mind the Warden first, and then held the door. In the lobby he stopped to wind the hold-rack. It was Thursday, he said, but he would not be here Monday.');
+      paras.push('You brought him down the hundred and three stairs of the Hall without handcuffs. There was no need. He asked you to help the Warden first, and he held the door. In the lobby he stopped to wind the hold-rack. He usually winds it on Mondays, he said, but he would not be here on Monday.');
     } else if (ending.how === 'spare') {
-      paras.push('Nell Sixsmith swore that nobody crossed that night. Her riddle-book has a line torn out of it, neatly, along a ruler. A hob that has been seen does not stay; everybody in the Fold knows that. You did not write it down.');
+      paras.push('Nell Sixsmith swore that nobody crossed on her ferry that night. One line has been torn out of her riddle-book, neatly, along a ruler. Everyone in the Fold knows the old saying: a hob that has been seen does not stay. You did not write it down.');
     } else {
-      paras.push('They carried the Warden down at ten past twelve, by which clock nobody afterwards agreed. The Porter walked behind with his wrists held out, and stopped on every landing to straighten a picture.');
+      paras.push('They carried the Warden down at ten past twelve. Afterwards, nobody could agree which clock that time was by. The Porter walked behind with his wrists held out. He stopped on every landing to straighten a picture.');
     }
     paras.push(s.flags.voss_alive
-      ? 'Lucan Voss ran the whole of it in the Crux, under his own name for once, and did not spare himself. The crossword that week was a blank grid.'
-      : 'The Crux did not come out that week. The spike on its editor\'s desk still had one letter on it.');
+      ? 'Lucan Voss printed the whole story in the Crux, under his own name for once. He did not hide his own part in it. That week the crossword was a blank grid.'
+      : 'The Crux did not come out that week. One letter was still on the spike on its editor\'s desk.');
     paras.push(ending.truthPublic
-      ? "The Company took its twelve proudest labels off the wall and wrote new ones. LORIMER AND FETTLE. It took them eleven days to agree to the 'and'. Greywether went back to London."
-      : 'The catalogue still says Lorimer. You know better. Knowing is not proof; you learned that here, along with the rest.');
-    if (check('fact:codicil', s)) paras.push("They read her Codicil aloud in the Hall, under her portrait. 'Beside his, not above it.' Somebody had been dusting that frame every Friday for nine years.");
+      ? "The Company took its twelve proudest labels off the wall and wrote new ones: LORIMER AND FETTLE. It took them eleven days to agree on the 'and'. Greywether went back to London."
+      : 'The catalogue still says Lorimer. You know the truth, but knowing is not proof. You learned that here, along with everything else.');
+    if (check('fact:codicil', s)) paras.push("They read her Codicil aloud in the Hall, under her portrait. 'Beside his, not above it.' Somebody had dusted that frame every Friday for nine years.");
     const found = ending.truths.filter((t) => t.found).length;
-    paras.push(found >= ending.truths.length - 1 ? 'You missed very little. On Monday you could not do the gate.' : `There were things in the Fold you never read. ${ending.truths.length - found} of them, by its own count. It is not on the map; you may come back and look.`);
+    paras.push(found >= ending.truths.length - 1 ? 'You missed very little. On Monday you could not even open the gate.' : `There were things in the Fold you never found: ${ending.truths.length - found} of them, by its own count. The Fold is not on any map, but you can come back and look.`);
     paras.push(ending.how === 'finish' ? 'The Hall clock still has two minute hands. Nobody has been found to wind it.' : 'At four the next afternoon there was tea on the table in the Hall. Kit Quoin poured it. Everybody watched her do it.');
     return paras;
   },

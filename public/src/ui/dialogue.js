@@ -182,7 +182,7 @@ export function createDialogue(panels, game) {
     const ai = game.client.ai;
     const scripted = !ai?.live;
     const why = scripted
-      ? `${ai?.reason ?? 'No model is connected here'}, so people keep to their script: tap a thread, or ask in a few plain words.`
+      ? `${ai?.reason ?? 'No model is connected here'}, so people follow a script. Tap an underlined word, or ask a short question.`
       : `Played live by ${ai.label ?? 'Claude'}. Ask anything, in your own words.`;
     liveEl.className = `talk-live ${scripted ? 'off' : 'on'}`;
     liveEl.title = why;
@@ -551,7 +551,8 @@ export function createDialogue(panels, game) {
       for (const entry of (talk.greeting ? talk.log.slice(0, -1) : talk.log).slice(-30)) logLine(entry);
       setMood(talk.mood);
       const threads = talk.threads ?? [];
-      const opening = talk.greeting ?? talk.log.filter((e) => e.who === 'npc').at(-1)?.text ?? '';
+      const said = talk.log.filter((e) => e.who === 'npc');
+      const opening = talk.greeting ?? said[said.length - 1]?.text ?? '';
       if (talk.greeting) {
         logLine({ who: 'npc', text: talk.greeting });
         game.world.setTalking(talk.id, true);
@@ -559,7 +560,7 @@ export function createDialogue(panels, game) {
       } else if (opening) setCaption(opening, []);
       // Say it once: showing evidence is how lies come apart, and the button is easy to miss.
       if (!talk.finale && game.view.presentables.length && !game.settings.tipShow) {
-        setNote('You are holding evidence. Show puts a piece of it in front of them; people who are lying tend to stop.');
+        setNote('You have evidence. Tap Show to show it to them. It is the best way to catch a lie.');
         game.setSetting('tipShow', true);
       } else if (!talk.finale && !game.settings.tipThread && threads.length) {
         setNote('Underlined words are threads. Tap one to ask about it.');

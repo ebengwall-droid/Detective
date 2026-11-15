@@ -215,16 +215,16 @@ function primer() {
     page('The pigpen', el('p', { class: 'muted', text: 'Each letter is drawn as the walls of its own cell, with its dot if it has one.' }), pigpenKey()),
     page(
       'The five-by-five square',
-      el('p', { class: 'muted', text: 'Row first, then column. I and J share a seat.' }),
+      el('p', { class: 'muted', text: 'Read the row number first, then the column. I and J share a square.' }),
       el('table', { class: 'lettergrid small headed' }, el('tr', {}, el('th'), [1, 2, 3, 4, 5].map((n) => el('th', { text: String(n) }))), five.map((row, r) => el('tr', {}, el('th', { text: String(r + 1) }), row.split('').map((ch) => el('td', { text: ch === 'I' ? 'I/J' : ch }))))),
     ),
     page('The chessboard', el('p', { class: 'muted', text: 'Files a to h from the left; ranks 1 to 8 from the bottom. A knight (N) goes two squares one way and one across.' })),
     page(
       'Counting in twos',
-      el('p', { class: 'muted', text: 'Five marks, a or b, for each letter. A is aaaaa, B is aaaab, and so up.' }),
+      el('p', { class: 'muted', text: 'Each letter is five marks, a or b. A is aaaaa, B is aaaab, and so on.' }),
       el('div', { class: 'alpha wide' }, alphabet.map((ch, i) => el('span', {}, el('b', { text: ch }), i.toString(2).padStart(5, '0').replace(/0/g, 'a').replace(/1/g, 'b')))),
     ),
-    page('The rules of the game', el('p', { class: 'muted', text: 'A fair setter always leaves a way in. If you are stuck, the fault is not yours and not the puzzle\'s: you have not yet looked something up. Ask the Lectern how a thing is done. Nobody in the Fold will ever tell you the answer, and nobody will mind how long you take.' })),
+    page('The rules of the game', el('p', { class: 'muted', text: 'Every puzzle can be solved with what the game gives you. If you are stuck, you probably need to look something up. Ask the Lectern how a method works. People in the Fold will help you, but they will not give you the answer.' })),
   );
 }
 
@@ -243,7 +243,7 @@ export function renderPapers(body, game, sel, api) {
   const v = game.view;
   const puzzles = v.puzzles ?? [];
   if (!puzzles.length) {
-    add(body, el('div', { class: 'empty', text: 'No papers yet. In the Fold, sooner or later, somebody will set you one.' }));
+    add(body, el('div', { class: 'empty', text: 'No puzzles yet. You will get your first one soon.' }));
     return;
   }
   const current = puzzles.find((p) => p.id === sel.puzzle);
@@ -340,7 +340,7 @@ function puzzleView(p, game, sel, api) {
       const last = p.hintsLeft === 1;
       const btn = el('button', { class: 'btn small quiet', type: 'button' }, icon('bulb', 16), last ? 'Last hint (gives the answer)' : p.hints.length ? 'Another hint' : 'A hint');
       btn.addEventListener('click', async () => {
-        if (last && !(await confirmCard(game.cards, { title: 'Take the last hint?', text: 'This one gives the answer away, and your final report will say so. Ask the Lectern how the method works first, if you have not.', yes: 'Show me', no: 'Not yet' }))) return;
+        if (last && !(await confirmCard(game.cards, { title: 'Take the last hint?', text: 'This hint gives you the answer, and your final report will show it. You could ask the Lectern how the method works first.', yes: 'Show me', no: 'Not yet' }))) return;
         btn.disabled = true;
         try {
           await game.call('hint', { id: p.id });

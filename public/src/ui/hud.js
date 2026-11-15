@@ -1,7 +1,8 @@
 // The heads-up display: where you are, what you are looking at, what just
 // happened, and the small panels that sit over the 3D view.
 
-import { el, clear, icon, prose, typeInto, leave } from './dom.js';
+import { el, clear, icon, prose, typeInto, leave, watchOverflow } from './dom.js';
+import { announce, revealCard } from './titlefx.js';
 
 const TOAST_MS = 5200;
 
@@ -61,7 +62,11 @@ export function createHud(root, game) {
     },
 
     setView(view) {
-      name.textContent = view.location.name;
+      // A new place is announced: its name rises into the corner, the way a game names where you are.
+      if (name.textContent !== view.location.name) {
+        name.textContent = view.location.name;
+        announce(name);
+      }
       // Date first: on a narrow screen the end of the line is what gets cut.
       sub.textContent = `${view.act.date} · ${view.location.sub}`;
       const current = view.objectives.find((o) => !o.done);
@@ -281,7 +286,7 @@ export function showCard(cards, { kicker, title, date, lines = [], button = 'Con
     const card = el(
       'section',
       { class: `card ${veil ? 'veil' : ''}`, role: 'dialog', 'aria-label': title ?? 'Scene' },
-      el('div', { class: 'card-inner' }, kicker ? el('div', { class: 'card-kicker', text: kicker }) : null, title ? el('h1', { class: 'card-title', text: title }) : null, date ? el('div', { class: 'card-date', text: date }) : null, linesEl, el('div', { class: 'card-actions' }, go)),
+      el('div', { class: 'card-inner' }, kicker ? el('div', { class: 'card-kicker', text: kicker }) : null, title ? el('h1', { class: 'card-title', text: title }) : null, date ? el('div', { class: 'card-date', text: date }) : null, linesEl, el('div', { class: 'card-actions sticky' }, go)),
     );
     const done = () => {
       window.removeEventListener('keydown', onKey);
@@ -300,6 +305,8 @@ export function showCard(cards, { kicker, title, date, lines = [], button = 'Con
     };
     go.addEventListener('click', done);
     cards.append(card);
+    watchOverflow(card);
+    revealCard(card);
     setTimeout(() => {
       window.addEventListener('keydown', onKey);
       go.focus({ preventScroll: true });

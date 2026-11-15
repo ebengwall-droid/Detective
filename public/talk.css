@@ -75,7 +75,8 @@
 /* ------------------------------------------------------------- who it is */
 .talk-top {
   position: relative;
-  z-index: 1;
+  /* Above the caption and the sheets' edges: the way out must always be pressable. */
+  z-index: 5;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -116,8 +117,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 28px;
-  padding: 0 11px 0 9px;
+  height: 34px;
+  padding: 0 12px 0 10px;
   border-radius: 999px;
   font-family: var(--mono, monospace);
   font-size: 9.5px;
@@ -202,7 +203,7 @@
 .talk[data-mood='calm'] .talk-caption::before { opacity: 0.06; }
 /* More of the line is below: fade the last of it, and offer the rest. */
 .talk-caption.more .cap-body { -webkit-mask-image: linear-gradient(#000 calc(100% - 46px), transparent); mask-image: linear-gradient(#000 calc(100% - 46px), transparent); }
-.cap-more { display: none; position: relative; z-index: 3; flex: none; align-self: center; width: 44px; height: 30px; margin-top: -38px; padding: 0; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.14); cursor: pointer; place-items: center; -webkit-tap-highlight-color: transparent; }
+.cap-more { display: none; position: relative; z-index: 3; flex: none; align-self: center; width: 48px; height: 36px; margin-top: -42px; padding: 0; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.14); cursor: pointer; place-items: center; -webkit-tap-highlight-color: transparent; }
 .cap-more i { width: 8px; height: 8px; margin-top: -4px; border-right: 2px solid var(--t-1); border-bottom: 2px solid var(--t-1); transform: rotate(45deg); animation: cap-nudge 1.6s ease-in-out infinite; }
 .talk-caption.more .cap-more { display: grid; }
 
@@ -422,7 +423,8 @@
 @media (orientation: landscape) and (max-height: 520px) {
   .cap-text p { font-size: 16px; }
   .cap-body { max-height: 36vh; }
-  .talk-stage { max-height: 96%; gap: 7px; }
+  /* The column runs from under the top bar to the bottom, so it can never cover the close button. */
+  .talk-stage { top: calc(var(--safe-t, 0px) + 58px); max-height: none; justify-content: flex-end; gap: 7px; }
   .talk-top { padding-top: calc(var(--safe-t, 0px) + 8px); }
 }
 

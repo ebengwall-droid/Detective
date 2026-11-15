@@ -3,24 +3,22 @@
 A 3D puzzle-mystery where every character is played live by Claude, and the
 killer teaches you to solve.
 
+![The title screen: the name of the case sets itself like a letter-lock](docs/title.jpg)
+
+Ravel is an old cathedral city in England. One part of it, the Fold, is not on
+any map. The people who live there make puzzles for a living: codes, locks,
+maps and crosswords. Nothing in the game is magic.
+
+Someone in the Fold is killing the four people who run its puzzle-makers'
+guild, one a day, each behind a door locked from the inside. Then the killer
+starts writing to you, in green ink, and setting you puzzles.
+
+You are a detective from outside. You search the rooms, collect evidence, talk
+to twelve people in your own words, catch them out, and solve the killer's
+puzzles. They start easy and get very hard. Each one you solve opens up more
+of the case.
+
 ![A clockmaker's workshop in the Fold](docs/crime-scene.jpg)
-
-There is a part of the old city of Ravel that is on no map. Six crooked lanes
-where, for six hundred years, a guild has made puzzles the way other streets
-make shoes: ciphers, locks, maps, mazes, the crossword in your Sunday paper.
-Nothing there is magic. It is all craft: brass, oak, clockwork, paper and
-ink. Its clocks run eleven minutes behind yours, its post goes by pneumatic
-tube, and you get in by solving the gate.
-
-Somebody inside is killing the guild's governors, one a day, behind doors
-locked from the inside. Then a letter in green ink arrives for you, set out
-like an examination paper. *Candidate*, it begins.
-
-You are a detective from outside. Walk the scenes, bag evidence, hear the
-post-mortem, question twelve people in your own words, catch them out, and
-sit the Papers: seven questions from the killer that begin with a cipher a
-child of the Fold does on the way to school and end with something a master
-would sweat over. Every answer opens the case a little further.
 
 - **Twenty puzzles**, from easy to very hard: Caesar and ROT13, pigpen, the
   Polybius square, the rail fence, Vigenère, Playfair, Bacon's cipher, a
@@ -98,7 +96,7 @@ way to check everything works. It is not the game.
 The phone is the main way to play. Everything is within reach of a thumb, and
 nothing needs careful steering.
 
-![The first room, a Paper and a conversation on a phone](docs/phone.jpg)
+![The title, a conversation and the first puzzle on a phone](docs/phone.jpg)
 
 - **Tap to go.** Tap the floor, a glowing marker or a person and you walk
   there. Drag to look around. The ring at the bottom left steers by thumb if
@@ -237,6 +235,12 @@ test/                 Tests
   field behind whoever you are talking to, bloom on lamps, filmic tone
   mapping, a light grade, vignette and grain. In a conversation a key light
   comes up on the speaker from beside the camera, as a film would light them.
+- **Motion** is [GSAP](https://gsap.com). The title sets itself like the
+  letter-lock on the gate: each letter starts three places along the alphabet
+  and clicks back to the real one. Chapter cards arrive a line at a time, and
+  each new place announces its name.
+- **Type**: Cinzel, Roman capitals like those carved over the gate, for
+  titles and place names; Instrument Sans for everything you read.
 - Rain on the glass, wind on the roof, a hull creaking at its mooring, the
   hum of the cold room and the odd phrase of piano are all synthesised.
 

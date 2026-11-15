@@ -45,6 +45,21 @@ export function clear(node) {
   return node;
 }
 
+/**
+ * Mark a full-screen card as 'overflowing' while its content is taller than the screen,
+ * so its pinned button gets a backing only when text actually scrolls under it.
+ * @param {HTMLElement} card
+ */
+export function watchOverflow(card) {
+  const check = () => card.classList.toggle('overflowing', card.scrollHeight > card.clientHeight + 4);
+  requestAnimationFrame(check);
+  if (typeof ResizeObserver === 'function') {
+    const ro = new ResizeObserver(check);
+    ro.observe(card);
+    if (card.firstElementChild) ro.observe(card.firstElementChild);
+  }
+}
+
 /** How long a sheet takes to leave. Matches `.panel.leaving` in the stylesheet. */
 const LEAVE_MS = 190;
 

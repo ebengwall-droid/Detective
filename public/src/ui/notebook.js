@@ -68,7 +68,7 @@ export function createNotebook(panels, game) {
       el('div', { class: 'panel-kicker', text: `${v.case.series} · ${v.act.date}` }),
       el('h3', { class: 'case-title', text: v.act.title }),
       el('div', { class: 'section-label', text: 'To do' }),
-      open.length ? open.map((o) => el('div', { class: 'objective', text: o.text })) : el('p', { class: 'muted', text: 'Nothing pressing. Look around; something will turn up.' }),
+      open.length ? open.map((o) => el('div', { class: 'objective', text: o.text })) : el('p', { class: 'muted', text: 'Nothing to do right now. Look around the room.' }),
       el('p', { class: 'note case-note' }, 'Stuck on the case? Think, in the tool bar, gives you a nudge. Stuck on a paper? Each one has its own hints, and the Lectern will teach you the method.'),
       done.length ? el('div', { class: 'section-label', text: 'Done' }) : null,
       done.map((o) => el('div', { class: 'objective done', text: o.text })),
@@ -80,7 +80,7 @@ export function createNotebook(panels, game) {
   function renderBoard() {
     const v = game.view;
     if (!v.deductions.length) {
-      add(body, el('div', { class: 'empty' }, 'The board is bare. When you have enough to reason from, questions will be pinned here.'));
+      add(body, el('div', { class: 'empty' }, 'Nothing here yet. Questions about the case appear here once you have enough clues.'));
     }
     const pending = v.deductions.filter((d) => !d.solved);
     const solved = v.deductions.filter((d) => d.solved);
@@ -183,7 +183,7 @@ export function createNotebook(panels, game) {
   function renderEvidence() {
     const v = game.view;
     if (!v.evidence.length) {
-      add(body, el('div', { class: 'empty', text: 'Nothing bagged yet. Examine the marked objects at a scene; what matters goes in here.' }));
+      add(body, el('div', { class: 'empty', text: 'No evidence yet. Examine the things marked with rings of light. Anything important is kept here.' }));
       return;
     }
     if (!v.evidence.some((e) => e.id === sel.evidence)) sel.evidence = game.isWide() ? v.evidence[0].id : null;
@@ -230,7 +230,7 @@ export function createNotebook(panels, game) {
         });
         add(box, el('p', { class: 'muted lab-note', text: 'The lab has not seen this yet.' }), btn);
       } else if (e.lab.status === 'pending') {
-        add(box, el('p', { class: 'muted lab-note', text: 'With the lab. They will ring when they have something; keep working.' }));
+        add(box, el('p', { class: 'muted lab-note', text: "At the lab. They'll call you when the result is ready. Keep working." }));
       } else {
         add(box, el('p', { class: 'lab-note', text: e.lab.result }));
       }
@@ -302,7 +302,7 @@ export function createNotebook(panels, game) {
   function renderLeads() {
     const v = game.view;
     if (!v.facts.length) {
-      add(body, el('div', { class: 'empty', text: 'No leads yet. Everything you establish is written down here for you.' }));
+      add(body, el('div', { class: 'empty', text: 'No leads yet. Everything you find out is written down here.' }));
       return;
     }
     const present = new Set(v.facts.map((f) => f.tag));

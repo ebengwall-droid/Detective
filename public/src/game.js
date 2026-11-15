@@ -109,7 +109,7 @@ export class Game {
   async boot() {
     try {
       // Signs and papers in the rooms are painted with type the page itself may never show, so ask for each face by name.
-      const faces = ['16px "Marcellus"', '16px "Special Elite"', '16px "Instrument Sans"', '700 16px "Instrument Sans"', '16px "JetBrains Mono"', '700 16px "Bricolage Grotesque"'];
+      const faces = ['16px "Marcellus"', '16px "Special Elite"', '16px "Instrument Sans"', '700 16px "Instrument Sans"', '16px "JetBrains Mono"', '700 16px "Cinzel"'];
       const loaded = Promise.all(faces.map((face) => document.fonts.load(face))).then(() => document.fonts.ready);
       await Promise.race([loaded, new Promise((r) => setTimeout(r, 2500))]);
     } catch {
@@ -468,7 +468,7 @@ export class Game {
       }
       if (places.length) {
         this.unseen.map = true;
-        const list = places.length === 1 ? places[0] : `${places.slice(0, -1).join(', ')} and ${places.at(-1)}`;
+        const list = places.length === 1 ? places[0] : `${places.slice(0, -1).join(', ')} and ${places[places.length - 1]}`;
         this.hud.toast({ kind: 'alert', iconName: 'pin', title: places.length === 1 ? 'New place on the map' : `${places.length} new places on the map`, text: list, onClick: () => this.open('map') });
       }
       if (facts.length) {
@@ -608,7 +608,7 @@ export class Game {
     if (res === 'report') {
       this.runEnding();
     } else if (res === 'new') {
-      const sure = await confirmCard(this.cards, { title: 'Start over?', text: 'This case file will be closed and a new one opened from the first morning.', yes: 'Start over', no: 'Keep this case' });
+      const sure = await confirmCard(this.cards, { title: 'Start over?', text: 'Your current case will be deleted, and a new one will start from the first day.', yes: 'Start over', no: 'Keep this case' });
       if (!sure) return;
       this.notebook.close();
       this.laptop.close();

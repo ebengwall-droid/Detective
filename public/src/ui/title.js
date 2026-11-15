@@ -2,58 +2,115 @@
 // the Invigilator's Papers, and the closing report.
 
 import { copyDiagnostics } from './diag.js';
-import { el, add, icon, prose, setThumb } from './dom.js';
+import { el, add, icon, prose, setThumb, watchOverflow } from './dom.js';
+import { gsap, leaveTitle, lockWord, playTitle, still } from './titlefx.js';
 
 const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
 function aiLine(game) {
   const ai = game.client.ai;
   // With a server there is a key to add. Without one (the single-file and hosted builds) there is not.
-  const offline = game.client.mode === 'local' ? 'Claude cannot be reached from here, so the characters keep to their script.' : 'Scripted mode. Add an Anthropic API key to bring the characters to life.';
-  const text = ai?.live ? `Every character is played live by ${ai.label}.` : ai?.hosted ? 'Claude is not available in this view. Characters follow the script.' : offline;
+  const offline = game.client.mode === 'local' ? "Claude isn't available here, so the characters follow a script." : 'Characters follow a script. Add an Anthropic API key to have Claude play them.';
+  const text = ai?.live ? `Characters are played live by ${ai.label}.` : ai?.hosted ? "Claude isn't available here, so the characters follow a script." : offline;
   return el('div', { class: 'ai-line' }, el('span', { class: `ai-dot ${ai?.live ? 'live' : ''}` }), text);
 }
 
-/** @returns {Promise<{action: 'new'|'continue', name?: string}>} */
+/**
+ * The title screen. The room behind it is the wheelwright's shop at night.
+ * The name of the case sets itself like the letter-lock on the gate; the menu
+ * is a game's menu, and your name is asked for only when you start a case.
+ * @returns {Promise<{action: 'new'|'continue', name?: string}>}
+ */
 export function showTitle(cards, game, { hasSave, savedName }) {
   return new Promise((resolve) => {
-    const name = el('input', { class: 'field', id: 'detective-name', type: 'text', placeholder: 'Your name, Detective', maxlength: '40', autocomplete: 'off', value: savedName ?? '' });
-    name.addEventListener('keydown', (e) => {
+    const veil = el('div', { class: 'ts-veil', 'aria-hidden': 'true' });
+    const kicker = el('div', { class: 'ts-kicker', text: 'A case in the Fold' });
+    const the = lockWord('The', 'ts-the');
+    const name = lockWord('Invigilator', 'ts-name');
+    const title = el('h1', { class: 'ts-title' }, el('span', { class: 'sr-only', text: `The Fold: ${game.caseInfo.title}` }), the.word, name.word);
+    const rule = el('div', { class: 'ts-rule', 'aria-hidden': 'true' });
+    const tag = el('p', { class: 'ts-tag', text: 'A murder mystery in a hidden city of puzzle-makers.' });
+
+    const item = (label, cls, onClick) => el('button', { class: `ts-item ${cls}`, type: 'button', onClick }, el('span', { text: label }));
+    const menu = el(
+      'nav',
+      { class: 'ts-menu', 'aria-label': 'Title' },
+      hasSave ? item('Continue', 'primary ts-continue', () => finish({ action: 'continue' })) : null,
+      item('New case', `${hasSave ? '' : 'primary'} ts-new`, () => askName()),
+      item('How to play', 'ts-help', () => showHelp(cards, game)),
+    );
+    const status = aiLine(game);
+    const foot = el('div', { class: 'ts-foot' }, status, game.install?.iosHint ? el('div', { class: 'ai-line', text: 'To play full screen: tap Share, then Add to Home Screen.' }) : null);
+
+    // Your name: asked for when you start, on a slip that rises over the menu.
+    const input = el('input', { class: 'ts-input', id: 'detective-name', type: 'text', placeholder: 'Detective', maxlength: '40', autocomplete: 'off', autocapitalize: 'words', spellcheck: 'false', enterkeyhint: 'go', value: savedName ?? '' });
+    input.addEventListener('keydown', (e) => {
       e.stopPropagation();
       if (e.key === 'Enter') begin();
+      if (e.key === 'Escape') closeName();
     });
-    const finish = (value) => {
-      game.audio.unlock();
-      card.style.transition = 'opacity 0.5s';
-      card.style.opacity = '0';
-      setTimeout(() => {
-        card.remove();
-        resolve(value);
-      }, 480);
-    };
-    const begin = () => finish({ action: 'new', name: name.value.trim() || 'Detective' });
-    const card = el(
-      'section',
-      { class: 'card title', 'aria-label': `${game.caseInfo.series}: ${game.caseInfo.title}` },
-      el(
-        'div',
-        { class: 'card-inner' },
-        el('div', { class: 'title-series', text: game.caseInfo.series }),
-        el('h1', { class: 'title-name', text: game.caseInfo.title }),
-        el('p', { class: 'title-tag', text: game.caseInfo.tagline }),
-        el(
-          'div',
-          { class: 'title-form' },
-          hasSave ? el('button', { class: 'btn solid', type: 'button', text: 'Continue the case', onClick: () => finish({ action: 'continue' }) }) : null,
-          name,
-          el('button', { class: hasSave ? 'btn' : 'btn solid', type: 'button', text: hasSave ? 'Start over' : 'Begin', onClick: begin }),
-          el('button', { class: 'btn quiet small link', type: 'button', text: 'How to play', onClick: () => showHelp(cards, game) }),
-        ),
-        aiLine(game),
-        game.install?.iosHint ? el('div', { class: 'ai-line', text: 'To play full screen: Share, then Add to Home Screen.' }) : null,
-      ),
+    const sheet = el(
+      'div',
+      { class: 'ts-sheet', role: 'dialog', 'aria-label': 'Your name', hidden: true },
+      el('label', { class: 'ts-label', for: 'detective-name', text: 'Your name, Detective' }),
+      input,
+      el('div', { class: 'ts-note', text: hasSave ? 'Starting a new case replaces the one you have saved.' : 'People in the case will call you by it.' }),
+      el('div', { class: 'ts-sheet-actions' }, el('button', { class: 'btn quiet ts-back', type: 'button', text: 'Back', onClick: () => closeName() }), el('button', { class: 'btn solid brass ts-start', type: 'button', text: 'Start the case', onClick: () => begin() })),
     );
+
+    const main = el('div', { class: 'ts-main' }, kicker, title, rule, tag, menu);
+    const card = el('section', { class: 'card title ts', 'aria-label': `${game.caseInfo.series}: ${game.caseInfo.title}` }, el('div', { class: 'ts-shade', 'aria-hidden': 'true' }), main, foot, sheet, veil);
     cards.append(card);
+
+    const parts = { root: card, veil, kicker, the, name, rule, rest: [tag, ...menu.children, foot] };
+    // Fit the name to the screen once its face has loaded: as large as it will go, never wider.
+    // Measured on a loose copy of the word, so nothing on screen (a flex row, an animation) can skew it.
+    const fit = () => {
+      const pad = parseFloat(getComputedStyle(main).paddingLeft) + parseFloat(getComputedStyle(main).paddingRight);
+      const room = Math.min(main.clientWidth - pad, 980);
+      const probe = el('span', { text: 'INVIGILATOR', 'aria-hidden': 'true' });
+      Object.assign(probe.style, { position: 'absolute', left: '-9999px', top: '0', whiteSpace: 'nowrap', fontFamily: getComputedStyle(name.word).fontFamily, fontWeight: '800', fontSize: '100px', letterSpacing: '0.015em' });
+      document.body.append(probe);
+      const w = probe.getBoundingClientRect().width || 800;
+      probe.remove();
+      // Never taller than about an eighth of the screen, so a phone on its side still has room for the menu.
+      const tallest = Math.max(30, window.innerHeight * 0.13);
+      name.word.style.fontSize = `${Math.max(28, Math.min(124, tallest, Math.floor((100 * room) / (w * 1.05))))}px`;
+    };
+    fit();
+    document.fonts?.load?.('800 100px "Cinzel"').then(fit, () => {});
+    window.addEventListener('resize', fit);
+    const motion = playTitle(parts);
+    Object.assign(parts, motion);
+
+    function askName() {
+      game.audio.unlock();
+      sheet.hidden = false;
+      card.classList.add('naming');
+      gsap.fromTo(sheet, { y: 40, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: still() ? 0 : 0.5, ease: 'power3.out' });
+      if (!game.isTouch) setTimeout(() => input.focus({ preventScroll: true }), 60);
+      else input.focus({ preventScroll: true });
+    }
+    function closeName() {
+      card.classList.remove('naming');
+      gsap.to(sheet, { y: 30, autoAlpha: 0, duration: still() ? 0 : 0.3, ease: 'power2.in', onComplete: () => (sheet.hidden = true) });
+      input.blur();
+    }
+    let leaving = false;
+    async function finish(value) {
+      if (leaving) return;
+      leaving = true;
+      game.audio.unlock();
+      input.blur();
+      window.removeEventListener('resize', fit);
+      gsap.to(sheet, { autoAlpha: 0, duration: 0.25 });
+      await leaveTitle(parts);
+      card.remove();
+      resolve(value);
+    }
+    function begin() {
+      finish({ action: 'new', name: input.value.trim() || 'Detective' });
+    }
   });
 }
 
@@ -66,12 +123,12 @@ export function showHelp(cards, game) {
       ['Get around', `Look lists everyone and everything in the room: ${touch ? 'tap' : 'click'} a name and you walk straight to it. Map takes you between places.`],
       ['Examine', `Small rings of light mark what can be examined, and a ring with an arrow is a way out. ${touch ? 'Tap' : 'Click'} one. What matters is bagged as evidence. Look lights up everything in the room.`],
       ['Talk', `A ring with three dots over someone means you can talk to them. Ask anything, in your own words, ${touch ? 'tap' : 'click'} an underlined word in what they say to follow it up, or pick a suggested question. They remember. Some of them lie.`],
-      ['Break a lie', 'While talking, Show puts a piece of evidence in front of someone. That is how liars come apart. Read tells you what you notice about them, and Log is everything that was said.'],
+      ['Break a lie', 'While talking, tap Show to put a piece of evidence in front of someone. This is how you catch a lie. Read tells you what you notice about them. Log shows everything that was said.'],
       ['Papers', 'This is a puzzle game. Every puzzle you are set is kept in your notebook under Papers, with your solving tools. Type an answer; a wrong one costs nothing. Each paper has hints, and the last hint gives the answer.'],
       ['Look things up', 'The Lectern (the laptop at your desk) will teach you how any cipher or puzzle is done and where it came from. You are meant to use it, and to look things up outside the game too. It will not give you the answer.'],
       ['Notebook', 'Everything you establish is written down for you: objectives, evidence, people, leads. The Board tab is where you reason and, in the end, name the killer. Evidence goes to the lab from the Lectern.'],
-      ['Map', 'Travel between places. When a day has given you all it will, call it a night.'],
-      ['Stuck?', 'Think gives you a nudge toward the nearest loose end of the case. It costs a little off your final rating and is worth it.'],
+      ['Map', 'Travel between places. When you have done all you can in a day, end the day from the map.'],
+      ['Stuck?', 'Think gives you a hint about what to do next. It lowers your final rating a little.'],
     ];
     const close = () => {
       window.removeEventListener('keydown', onKey, true);
@@ -173,14 +230,16 @@ export function showMenu(cards, game) {
         el(
           'div',
           { class: 'card-actions' },
-          el('button', { class: 'btn solid', type: 'button', text: 'Back to the case', 'data-back': '', onClick: () => close(null) }),
           el('button', { class: 'btn', type: 'button', text: 'How to play', onClick: () => showHelp(cards, game) }),
           game.view?.ending?.text ? el('button', { class: 'btn', type: 'button', text: 'Case report', onClick: () => close('report') }) : null,
           el('button', { class: 'btn quiet', type: 'button', text: 'Start over', onClick: () => close('new') }),
         ),
+        // The way back stays in reach however far the settings scroll.
+        el('div', { class: 'card-actions sticky' }, el('button', { class: 'btn solid', type: 'button', text: 'Back to the case', 'data-back': '', onClick: () => close(null) })),
       ),
     );
     cards.append(card);
+    watchOverflow(card);
   });
 }
 
@@ -192,13 +251,14 @@ export function showLetter(cards, game, run) {
     const card = el(
       'section',
       { class: 'card veil', role: 'dialog', 'aria-label': 'A letter' },
-      el('div', { class: 'card-inner' }, el('div', { class: 'card-kicker', text: game.view.laptop?.letterKicker ?? 'By the Bellows · green ink' }), el('div', { class: 'rule' }), paper, el('div', { class: 'card-actions' }, go)),
+      el('div', { class: 'card-inner' }, el('div', { class: 'card-kicker', text: game.view.laptop?.letterKicker ?? 'By the Bellows · green ink' }), el('div', { class: 'rule' }), paper, el('div', { class: 'card-actions sticky' }, go)),
     );
     go.addEventListener('click', () => {
       card.remove();
       resolve();
     });
     cards.append(card);
+    watchOverflow(card);
     let streamed = false;
     let last = 0;
     run((soFar) => {

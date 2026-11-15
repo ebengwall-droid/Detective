@@ -1,0 +1,151 @@
+/* The opening of the game, and the other big moments: the title screen, chapter cards, place names.
+   Roman capitals (Cinzel, --epic) for anything the case itself announces; brass for what you press. */
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* --------------------------------------------------------------- the rings */
+
+.lock-word { display: inline-flex; justify-content: center; align-items: flex-start; white-space: nowrap; }
+.lock-gap { display: inline-block; width: 0.32em; }
+.lock-drum {
+  --ring: 1;
+  position: relative; display: inline-block; height: 1em; line-height: 1;
+  /* Clip above and below only: a wide cipher letter may spill sideways while it turns. */
+  clip-path: inset(-0.02em -40% -0.04em -40%);
+}
+/* Each letter sits on a ring: darker where the ring turns away from you. */
+.lock-drum::after {
+  content: ''; position: absolute; inset: -0.1em -14%; pointer-events: none; opacity: var(--ring);
+  background: linear-gradient(rgba(4, 6, 10, 0.78), rgba(4, 6, 10, 0) 32%, rgba(4, 6, 10, 0) 68%, rgba(4, 6, 10, 0.78));
+}
+.lock-size { display: block; height: 1em; line-height: 1; visibility: hidden; }
+/* A strip of no width on the ring's centre line: its letters, wide or narrow, are centred on it. */
+.lock-strip { position: absolute; left: 50%; top: 0; width: 0; display: flex; flex-direction: column; align-items: center; }
+/* Letters sit 1.35em apart on the strip, so a J or a Q's tail never shows in the window below it. */
+.lock-g { display: block; height: 1.35em; line-height: 1; text-align: center; white-space: nowrap; }
+.lock-g.lock-c { color: #7fc2b0; opacity: 0.8; }
+/* Brass, cut into the ring: solid colour with a lit upper edge and a shadowed lower one.
+   (Not gradient-clipped text: Safari can drop that from an element that is moving.) */
+.lock-g.lock-p {
+  color: #efca82;
+  text-shadow: 0 -1px 0 rgba(255, 246, 220, 0.5), 0 1px 0 rgba(96, 58, 18, 0.85), 0 2px 1px rgba(60, 34, 8, 0.45), 0 6px 22px rgba(0, 0, 0, 0.55);
+}
+
+/* ----------------------------------------------------------- title screen */
+
+.ts {
+  padding: 0; justify-content: flex-end; align-items: center; text-align: center; overflow: hidden;
+  background: none; backdrop-filter: none; -webkit-backdrop-filter: none; animation: none;
+}
+.ts-shade {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(160% 80% at 50% 108%, rgba(3, 5, 9, 0.97) 0%, rgba(3, 5, 9, 0.9) 36%, rgba(3, 5, 9, 0.62) 58%, rgba(3, 5, 9, 0) 86%),
+    linear-gradient(to bottom, rgba(3, 5, 9, 0.6), rgba(3, 5, 9, 0) 24%);
+}
+.ts-veil { position: absolute; inset: 0; z-index: 6; background: #020306; pointer-events: none; }
+.ts-main {
+  position: relative; z-index: 1; width: min(100%, 980px); margin: auto auto 0;
+  padding: 0 max(18px, var(--gutter-r, 16px)) 0 max(18px, var(--gutter-l, 16px));
+}
+.ts-kicker { font-family: var(--epic); font-weight: 600; font-size: 12px; letter-spacing: 0.42em; text-indent: 0.42em; text-transform: uppercase; color: #e9c47e; margin-bottom: 16px; text-shadow: 0 0 14px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.9); }
+.ts-title { margin: 0; font-family: var(--epic); line-height: 1; filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 42px rgba(255, 170, 60, 0.16)); }
+.ts-the { display: flex; font-size: 17px; font-weight: 700; letter-spacing: 0.5em; margin: 0 0 0.55em 0.5em; }
+.ts-the .lock-drum { margin-right: 0.5em; }
+.ts-the .lock-drum:last-child { margin-right: 0; }
+.ts-name { display: inline-flex; font-weight: 800; font-size: 46px; letter-spacing: 0.015em; }
+.ts-name .lock-drum + .lock-drum { margin-left: 0.015em; }
+.ts-rule { width: min(56%, 260px); height: 1px; margin: 20px auto 16px; transform-origin: 50% 50%; background: linear-gradient(90deg, rgba(233, 196, 126, 0), rgba(233, 196, 126, 0.85), rgba(233, 196, 126, 0)); }
+.ts-tag { max-width: 30ch; margin: 0 auto 20px; font-size: 16.5px; line-height: 1.45; color: rgba(255, 255, 255, 0.82); text-wrap: balance; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.8); }
+
+/* A game's menu: words, not boxes. The first is the one you want. */
+.ts-menu { display: flex; flex-direction: column; align-items: center; gap: 0; margin: 0 auto; }
+.ts-item {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 4px 28px;
+  border: 0; background: none; color: rgba(255, 255, 255, 0.66); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  font-family: var(--epic); font-weight: 700; font-size: 15px; letter-spacing: 0.26em; text-indent: 0.26em; text-transform: uppercase;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8); transition: color 0.25s, transform 0.2s;
+}
+.ts-item:active { transform: scale(0.96); }
+.ts-item.primary { min-height: 58px; font-size: 19px; color: #ffe2a8; }
+.ts-item.primary span { color: #f6d48e; text-shadow: 0 -1px 0 rgba(255, 246, 220, 0.4), 0 1px 0 rgba(96, 58, 18, 0.8), 0 0 18px rgba(255, 190, 100, 0.35), 0 1px 10px rgba(0, 0, 0, 0.8); }
+/* Two small brass diamonds either side of the first item. */
+.ts-item.primary::before, .ts-item.primary::after {
+  content: ''; width: 6px; height: 6px; margin: 0 16px; flex: none; transform: rotate(45deg);
+  background: linear-gradient(135deg, #fff1c8, #c88f3f); box-shadow: 0 0 10px rgba(255, 190, 100, 0.6);
+}
+.ts-item.primary::before { margin-left: 0; }
+.ts-item.primary::after { margin-right: 0; }
+.ts-item:focus-visible { outline: none; color: #fff; text-shadow: 0 0 18px rgba(255, 200, 120, 0.7); }
+@media (hover: hover) { .ts-item:hover { color: #fff; } }
+.ts-foot { position: relative; z-index: 1; padding: 10px 20px calc(16px + var(--safe-b, 0px)); }
+.ts .ai-line { margin: 2px auto 0; font-size: 12.5px; color: rgba(255, 255, 255, 0.52); max-width: 36ch; }
+
+/* Your name: a slip that rises over the menu, above the keyboard when it is up. */
+.ts-sheet {
+  position: absolute; z-index: 4; left: 0; right: 0; bottom: calc(var(--kb, 0px) + var(--safe-b, 0px) + 14px);
+  width: min(calc(100% - 28px), 460px); margin: 0 auto; padding: 22px 22px 18px; border-radius: 28px; text-align: center;
+  background: var(--glass-sheen, none), var(--glass-bg-dense, rgba(12, 16, 24, 0.86));
+  backdrop-filter: var(--glass-blur, blur(24px)); -webkit-backdrop-filter: var(--glass-blur, blur(24px));
+  box-shadow: var(--glass-rim, inset 0 0 0 1px rgba(255, 255, 255, 0.14)), var(--glass-shadow, 0 20px 60px rgba(0, 0, 0, 0.5));
+}
+.ts-label { display: block; margin-bottom: 6px; font-family: var(--epic); font-weight: 700; font-size: 12px; letter-spacing: 0.3em; text-indent: 0.3em; text-transform: uppercase; color: #e9c47e; }
+.ts-input {
+  display: block; width: 100%; padding: 8px 4px 10px; border: 0; border-bottom: 1px solid rgba(233, 196, 126, 0.5); border-radius: 0;
+  background: none; color: #fff; font-family: var(--typed, monospace); font-size: 24px; text-align: center; outline: none;
+  user-select: text; -webkit-user-select: text; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ts-input:focus { border-bottom-color: #ffd28a; box-shadow: 0 1px 0 0 #ffd28a; }
+.ts-input::placeholder { color: rgba(255, 255, 255, 0.28); }
+.ts-note { margin: 10px 0 16px; font-size: 13px; line-height: 1.4; color: rgba(255, 255, 255, 0.55); }
+.ts-sheet-actions { display: flex; gap: 10px; justify-content: center; }
+.ts-sheet-actions .btn { min-height: 50px; }
+/* (Important: the intro leaves its own opacity on these.) */
+.ts.naming .ts-menu, .ts.naming .ts-foot { opacity: 0 !important; pointer-events: none; transition: opacity 0.25s; }
+
+/* Wide screens: the same poster, a little more air. */
+@media (min-width: 760px) {
+  .ts-kicker { font-size: 13px; margin-bottom: 20px; }
+  .ts-the { font-size: 20px; }
+  .ts-tag { font-size: 18px; margin-bottom: 26px; }
+  .ts-item { font-size: 16px; }
+  .ts-item.primary { font-size: 20px; }
+  .ts-foot { padding-bottom: calc(24px + var(--safe-b, 0px)); }
+}
+/* A phone on its side: little height, so less space between things. */
+@media (max-height: 520px) {
+  .ts-kicker { margin-bottom: 8px; }
+  .ts-the { margin-bottom: 0.35em; }
+  .ts-rule { margin: 10px auto 8px; }
+  .ts-tag { margin-bottom: 8px; font-size: 15px; }
+  .ts-item { min-height: 40px; }
+  .ts-item.primary { min-height: 46px; }
+  .ts-foot { padding-top: 4px; padding-bottom: calc(8px + var(--safe-b, 0px)); }
+}
+
+/* ----------------------------------------------------- brass on the cards */
+
+/* What you press on a full-screen card is a brass plate with its name cut in it. */
+.card .btn.solid:not(.danger), .btn.solid.brass {
+  font-family: var(--epic); font-weight: 700; font-size: 14px; letter-spacing: 0.2em; text-indent: 0.2em; text-transform: uppercase;
+  color: #2a1906; border-radius: 12px;
+  background: linear-gradient(180deg, #fae3aa 0%, #e3b25d 46%, #b9822f 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 0 rgba(96, 55, 12, 0.35), 0 12px 32px -12px rgba(230, 160, 60, 0.65), 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.card .btn.solid:not(.danger):active, .btn.solid.brass:active { background: linear-gradient(180deg, #ffe9b8 0%, #ebbb68 46%, #c48b36 100%); }
+.card .btn:not(.solid) { border-radius: 12px; }
+
+/* Chapter cards driven by GSAP: their own entrance, not the stylesheet's. */
+.card.fx .card-inner > *, .card.fx .card-lines p { animation: none; }
+.card-title .word { padding-bottom: 0.06em; }
+
+/* A card's main button stays at the bottom of the screen while the text above it scrolls. */
+.card .card-actions.sticky {
+  position: sticky; bottom: calc(-36px - var(--safe-b, 0px)); z-index: 2;
+  margin: 26px calc(-1 * max(24px, var(--gutter-l, 16px))) calc(-36px - var(--safe-b, 0px));
+  padding: 26px max(24px, var(--gutter-l, 16px)) calc(22px + var(--safe-b, 0px));
+}
+/* Only when the text runs under it does the pinned button get a backing to read against. */
+.card.overflowing .card-actions.sticky { background: linear-gradient(to top, rgba(4, 6, 10, 0.96) 0%, rgba(4, 6, 10, 0.88) 58%, rgba(4, 6, 10, 0)); }
+.card .card-actions + .card-actions.sticky { margin-top: 6px; }
+.card .card-actions.sticky .btn { width: min(100%, 360px); }

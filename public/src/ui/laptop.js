@@ -87,7 +87,7 @@ export function createLaptop(panels, game) {
       add(body, el('div', { class: 'empty', text: 'LAB QUEUE EMPTY.\nNothing you are holding needs the laboratory yet.' }));
       return;
     }
-    add(body, el('div', { class: 'term-out', text: 'FORENSIC LABORATORY // SUBMISSIONS\nResults take a little time. Keep working; the lab will ring.' }));
+    add(body, el('div', { class: 'term-out', text: 'FORENSIC LABORATORY // SUBMISSIONS\nResults take a while. Keep working. The lab will call you.' }));
     for (const e of items) {
       const row = el('div', { class: 'row' }, icon(e.icon, 20), el('div', { class: 'row-main' }, el('div', { class: 'row-title', text: e.name }), el('div', { class: 'row-sub', text: e.lab.status === 'done' ? e.lab.result : e.lab.status === 'pending' ? 'In the queue.' : 'Not submitted.' })));
       if (e.lab.status === 'none') {

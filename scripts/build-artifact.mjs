@@ -30,7 +30,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outArg = process.argv.indexOf('--out');
 const outDir = path.resolve(outArg > 0 ? process.argv[outArg + 1] : path.join(root, 'dist'));
 
-const FONTS = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400..600&family=Marcellus&family=Special+Elite&display=swap';
+const FONTS = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@500..900&family=Instrument+Sans:ital,wdth,wght@0,75..100,400..700;1,75..100,400..700&family=JetBrains+Mono:wght@400..600&family=Marcellus&family=Special+Elite&display=swap';
 const TITLE = 'The Invigilator';
 
 const bundle = await build({
@@ -48,8 +48,8 @@ let js = bundle.outputFiles[0].text;
 js = js.replace(/<\/(script)/gi, '<\\/$1');
 if (js.includes('<!--')) throw new Error('bundle contains "<!--", which is not safe to inline');
 
-// The conversation screen keeps its styles in a file of its own; ship both as one sheet.
-const sheets = ['public/styles.css', 'public/talk.css'].map((f) => fs.readFileSync(path.join(root, f), 'utf8')).join('\n');
+// The conversation screen and the title keep their styles in files of their own; ship them as one sheet.
+const sheets = ['public/styles.css', 'public/talk.css', 'public/title.css'].map((f) => fs.readFileSync(path.join(root, f), 'utf8')).join('\n');
 const css = (await transform(sheets, { loader: 'css', minify: true })).code;
 
 const page = (flags) => `<div id="app"><div id="boot"><div class="lamp"></div>The Fold</div></div>

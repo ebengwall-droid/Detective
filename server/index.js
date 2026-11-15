@@ -30,6 +30,7 @@ const STATIC_ROOTS = [
   { prefix: '/vendor/three/', dir: path.join(root, 'node_modules', 'three') },
   { prefix: '/vendor/postprocessing/', dir: path.join(root, 'node_modules', 'postprocessing') },
   { prefix: '/vendor/n8ao/', dir: path.join(root, 'node_modules', 'n8ao') },
+  { prefix: '/vendor/gsap/', dir: path.join(root, 'node_modules', 'gsap') },
   { prefix: '/core/', dir: path.join(root, 'core') },
   { prefix: '/', dir: path.join(root, 'public') },
 ];

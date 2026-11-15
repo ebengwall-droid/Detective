@@ -71,10 +71,10 @@ test('the partner says what to do next, from the open objective', async () => {
   const session = await fresh();
   await session.talk({ id: 'kit' });
   const reply = (await session.say({ id: 'kit', text: 'what should I do now?' })).reply;
-  assert.match(reply.say, /gate wants a word/i);
+  assert.match(reply.say, /gate needs a word/i);
   session.npcState('marsh');
   const other = session.brain.scriptedReply(session.state, 'marsh', { text: 'what should I do now?' });
-  assert.ok(!/gate wants a word/i.test(other.say), 'nobody else is told what the detective is working on');
+  assert.ok(!/gate needs a word/i.test(other.say), 'nobody else is told what the detective is working on');
 });
 
 test('pleasantries cost no time; questions do', async () => {

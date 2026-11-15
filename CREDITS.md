@@ -59,11 +59,13 @@ Cabanilla and Yann Kervran.
 | [N8AO](https://github.com/N8python/n8ao) | ISC | Ambient occlusion |
 | [meshoptimizer](https://github.com/zeux/meshoptimizer) | MIT | Compressing models, and decoding them in the page (the plain-JavaScript decoder in `public/src/world/lib` is its reference decoder, by Jasper St. Pierre) |
 | [@anthropic-ai/sdk](https://github.com/anthropics/anthropic-sdk-typescript) | Apache-2.0 | Talking to Claude from the server |
+| [GSAP](https://gsap.com) with SplitText | [Standard no-charge licence](https://gsap.com/standard-license) | The title, chapter cards and place names in motion |
 
 Preparing the assets (not shipped with the game): FBX2glTF (BSD-3-Clause),
 glTF-Transform (MIT), sharp (Apache-2.0), esbuild (MIT).
 
 ## Type
 
-Bricolage Grotesque, Instrument Sans, JetBrains Mono, Marcellus and Special
-Elite, all under the SIL Open Font License, served by Google Fonts.
+Cinzel (titles, chapter cards and place names), Instrument Sans, JetBrains
+Mono, Marcellus and Special Elite, all under the SIL Open Font License, served
+by Google Fonts.

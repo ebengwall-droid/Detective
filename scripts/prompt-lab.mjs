@@ -75,7 +75,7 @@ const SITUATIONS = {
     },
   },
   hesper_nina: {
-    about: 'Wednesday. The detective puts the slanted name in front of Dame Hesper. She should know at once whose girl Ariadne was.',
+    about: 'Wednesday. The detective puts the hidden name in front of Dame Hesper. She should know at once whose girl Ariadne was.',
     until: (s) => s.method === 'present' && s.args.id === 'hesper',
     run: async (s, h) => s.present({ id: 'hesper', item: 'nina_sheet', text: 'This name is in every one of your late Tithes.' }, h),
   },
