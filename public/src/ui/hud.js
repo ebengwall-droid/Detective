@@ -3,6 +3,7 @@
 
 import { el, clear, icon, prose, typeInto, leave, watchOverflow } from './dom.js';
 import { announce, revealCard } from './titlefx.js';
+import { PICTURES, enlargePicture } from './guide.js';
 
 const TOAST_MS = 5200;
 
@@ -278,17 +279,23 @@ export function showThink(panels, run) {
 /**
  * A full-screen title card: act openings and other scene breaks.
  * Lines fade in one after another. Resolves when the player continues.
- * `extra` adds a second, quieter button that does something without closing the card.
+ * `pictures[i]` names pictures to draw under paragraph i (see PICTURES in guide.js); each can be tapped to see it larger.
  */
-export function showCard(cards, { kicker, title, date, lines = [], button = 'Continue', veil = false, extra = null }) {
+export function showCard(cards, { kicker, title, date, lines = [], button = 'Continue', veil = false, pictures = null }) {
   return new Promise((resolve) => {
     const go = el('button', { class: 'btn solid', type: 'button', text: button });
-    const aside = extra ? el('button', { class: 'btn', type: 'button', text: extra.label, onClick: extra.onClick }) : null;
-    const linesEl = el('div', { class: 'card-lines' }, lines.map((line, i) => el('p', { text: line, style: { animationDelay: `${0.5 + i * 1.15}s` } })));
+    const figure = (name) => {
+      const pic = PICTURES[name];
+      if (!pic) return null;
+      const svg = pic.draw();
+      const open = () => enlargePicture(svg, pic.caption, cards);
+      return el('figure', { class: 'card-fig' }, el('button', { class: 'guide-pic', type: 'button', 'aria-label': `${pic.caption} Tap to see it larger.`, onClick: open }, svg), el('figcaption', { text: pic.caption }));
+    };
+    const linesEl = el('div', { class: 'card-lines' }, lines.map((line, i) => [el('p', { text: line, style: { animationDelay: `${0.5 + i * 1.15}s` } }), (pictures?.[i] ?? []).map(figure)]));
     const card = el(
       'section',
       { class: `card ${veil ? 'veil' : ''}`, role: 'dialog', 'aria-label': title ?? 'Scene' },
-      el('div', { class: 'card-inner' }, kicker ? el('div', { class: 'card-kicker', text: kicker }) : null, title ? el('h1', { class: 'card-title', text: title }) : null, date ? el('div', { class: 'card-date', text: date }) : null, linesEl, el('div', { class: `card-actions sticky ${aside ? 'pair' : ''}` }, go, aside)),
+      el('div', { class: 'card-inner' }, kicker ? el('div', { class: 'card-kicker', text: kicker }) : null, title ? el('h1', { class: 'card-title', text: title }) : null, date ? el('div', { class: 'card-date', text: date }) : null, linesEl, el('div', { class: 'card-actions sticky' }, go)),
     );
     const done = () => {
       window.removeEventListener('keydown', onKey);
@@ -300,7 +307,7 @@ export function showCard(cards, { kicker, title, date, lines = [], button = 'Con
       }, 380);
     };
     const onKey = (e) => {
-      // Only while nothing has been opened on top of it.
+      // Only while nothing (an enlarged picture, say) has been opened on top of it.
       if (cards.lastElementChild !== card) return;
       if (e.code === 'Enter' || e.code === 'Space') {
         e.preventDefault();

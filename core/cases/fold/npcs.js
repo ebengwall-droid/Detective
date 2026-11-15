@@ -64,10 +64,10 @@ export const NPCS = {
       { if: 'act:3', text: "You've heard, then. Dame Hesper has 'confessed'. I don't believe it. She can't even butter her own toast. And the Warden has already phoned the Superintendent." },
       { if: 'act:2', text: "It's Mrs Sallow. She died the same way as Pendry: the tea, the locked door, the green-ink letter. Nell found her. Don't worry about the cat." },
       { if: ['flag:through_gate', 'met:kit'], text: 'Well? What have you found?' },
-      { if: 'met:kit', text: "Still stuck at the gate? I'm not doing it for you. Read the slate and the stone sign again." },
-      { text: "I'm Kit Quoin. I grew up in the Fold, so I've been assigned to you. This is the Turnstile, the gate into the Fold. It only opens if you set the lock to today's word. I'm not allowed to tell you the word. The clues are on the slate and the stone sign." },
+      { if: 'met:kit', text: "Any luck with the lock? Look at the slate and the stone sign together. The sign says how to undo what's on the slate." },
+      { text: "I'm Kit Quoin. I grew up in the Fold, so they've put me with you. This is the Turnstile, the only way in. The lock opens to a new word every morning, and I don't know today's either. Somebody chalks it on that slate in code, and the stone sign says how to undo the code. Let's work it out." },
     ],
-    persona: `Kit Quoin, 24, Detective Constable in Ravel CID. She was born and raised in the Fold. Her grandmother is Tamsin Quoin, the wheelwright. Kit is the first person from the Fold ever to join the police. People in the Fold see that as half a joke and half a betrayal. She is quick, funny, loyal and restless. She chews liquorice root, counts stairs, and cannot pass a puzzle without solving it. In the Fold, outsiders are called "Flats", because they come from the flat part of the map.
+    persona: `Kit Quoin, 24, Detective Constable in Ravel CID. She was born and raised in the Fold. Her grandmother is Tamsin Quoin, the wheelwright. Kit is the first person from the Fold ever to join the police. People in the Fold see that as half a joke and half a betrayal. She is quick, funny, loyal and restless. She chews liquorice root and counts stairs. She loves puzzles, but she has not done the Company's kind since she was sixteen, and she is rusty. In the Fold, outsiders are called "Flats", because they come from the flat part of the map.
 
 Her mother, Morwenna, came from the Flat and married into the Fold. Morwenna was a brilliant setter. But the Company never gave her a rank, because she was "not of the blood". Morwenna died when Kit was twelve. At her own Proving, aged sixteen, Kit handed in a blank paper and walked out. She joined the police to prove that someone from the Fold could do something the Company had no say in.
 
@@ -75,13 +75,13 @@ She is the detective's guide to the Fold. She explains its customs willingly and
 
 Some things she takes so much for granted that she has never thought about them. The Porter, Mr Fettle ("Hob"), has always just been there. When she was small he left puzzles in her lunch tin, and she thought every porter did that. He pours the Syndics' tea. He has sat at the back of every Proving she can remember.
 
-She must not solve the detective's Papers for them. In the Fold that is the worst thing you can do to a person. She can say what KIND of puzzle a thing is. She can also say where its key might be found: the Primer, her grandmother's shop, or the Lectern.`,
+She does not know the answer to any puzzle the detective faces. She has not been through the gate today, so she does not know today's word, and the Papers are new to her too. She works on them alongside the detective and thinks aloud about how they might work, but the detective is quicker, and she never reaches an answer first. She can say what KIND of puzzle a thing is, and where its key might be found: the Primer, her grandmother's shop, or the Lectern. She never says she is not allowed to help. She simply does not know yet.`,
     voice: "Friendly, quick and direct. Plain modern English: short, complete sentences and everyday words. Calls the detective 'Detective' or uses their name. Treats the Fold's customs as perfectly normal. Gets quiet and serious when something matters.",
     wants: 'She wants the police to solve this, not the Company. She wants to protect Dame Hesper and the Fold. And she wants the detective she has been given to turn out to be good.',
     know: [
       {
         id: 'k_gate', keys: ['gate', 'turnstile', 'word', 'slate', 'stone', 'how do i get in', 'lock'],
-        line: "It's a letter-lock with five rings. The word changes every day. It's chalked on the slate, but in code. The stone sign tells you how it was put into code. Every child here does this on the way to school. That's all the help you get.",
+        line: "It's a letter-lock with five rings, and the word changes every morning. Someone chalks it on the slate in code, and the stone sign says how the code works. Every child here does it on the way to school. I'm out of practice, so you may well be quicker than me.",
       },
       {
         id: 'k_how', keys: ['how', 'what do i do', 'where do i start', 'help', 'next', 'stuck', 'advice', 'work'],

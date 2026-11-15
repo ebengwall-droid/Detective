@@ -254,7 +254,7 @@ export class GameSession {
       s.finale = { turn: 0, landed: {}, stance: 'cold', log: [], convo: [], ended: null, opened: false };
     }
     for (const npc of Object.values(s.npcs)) npc.sessionOpen = false;
-    this.emit({ type: 'act', act: n, title: act.title, date: act.date, card });
+    this.emit({ type: 'act', act: n, title: act.title, date: act.date, card, pictures: n === this.case.finale.act ? null : act.pictures ?? null });
   }
 
   queueLetter(n) {
@@ -328,7 +328,7 @@ export class GameSession {
     this.state = freshState(this.case, name);
     this.events = [];
     const act = this.case.acts[1];
-    this.emit({ type: 'act', act: 1, title: act.title, date: act.date, card: act.card, first: true });
+    this.emit({ type: 'act', act: 1, title: act.title, date: act.date, card: act.card, pictures: act.pictures ?? null, first: true });
     return this.done();
   }
 

@@ -6,7 +6,6 @@ import { assets } from './world/assets.js';
 import { Audio } from './audio.js';
 import { el } from './ui/dom.js';
 import { createHud, showHere, showInspect, showThink, showCard, confirmCard } from './ui/hud.js';
-import { showGuide } from './ui/guide.js';
 import { createDialogue } from './ui/dialogue.js';
 import { createNotebook } from './ui/notebook.js';
 import { createLaptop } from './ui/laptop.js';
@@ -558,9 +557,7 @@ export class Game {
     this.hud.setVisible(false);
     await this.fade(true);
     this.audio.chord();
-    // The first card is where Ravel, the Fold and the Flat are first named: offer the pictures.
-    const extra = e.act === 1 ? { label: 'See a map first', onClick: () => showGuide(this.cards) } : null;
-    await showCard(this.cards, { kicker: ACT_KICKER[e.act] ?? '', title: e.title, date: e.date, lines: e.card, extra });
+    await showCard(this.cards, { kicker: ACT_KICKER[e.act] ?? '', title: e.title, date: e.date, lines: e.card, pictures: e.pictures });
     await this.fade(false);
     this.hud.setVisible(true);
     this.unblock('act');

@@ -326,10 +326,11 @@ const within = (x, y, b, pad = 0) => x > b.x - pad && x < b.x + b.w + pad && y >
 
 /**
  * The Fold up close: the island, its lanes and the square, the river and the Cut.
- * @param {{ places?: {n: number, at: number[]}[], names?: boolean }} [o]
- *   places: numbered markers (the guide lists them under the picture); names: lane and water names
+ * @param {{ places?: {n: number, at: number[]}[], names?: boolean, callouts?: {at: number[], text: string, x: number, y: number, anchor?: string}[] }} [o]
+ *   places: numbered markers (the guide lists them under the picture); names: lane and water names;
+ *   callouts: a red dot on a place with its name written beside it, large enough to read at a glance
  */
-export function drawFold({ places = [], names = true } = {}) {
+export function drawFold({ places = [], names = true, callouts = [] } = {}) {
   const r = rng(23);
   const svg = s('svg', { viewBox: '0 0 100 70', role: 'img', 'aria-label': 'Map of the Fold: an island with six crooked lanes and a square, the river to the north and west, and the Cut, a canal, to the south and east.' });
   svg.append(...paper(100, 70));
@@ -419,10 +420,54 @@ export function drawFold({ places = [], names = true } = {}) {
     compass(93.5, 61.5, 3.4),
   );
   for (const p of places) svg.append(marker(p.at[0], p.at[1], p.n));
+  for (const c of callouts) {
+    svg.append(
+      s('circle', { cx: c.at[0], cy: c.at[1], r: 1.5, fill: RED, stroke: PAPER, 'stroke-width': 0.5 }),
+      label(c.x, c.y, c.text, { size: 2.9, fill: RED, font: CAPS, weight: 700, anchor: c.anchor ?? 'start', spacing: 0.2 }),
+    );
+  }
   return svg;
 }
 
 // ----------------------------------------------------------------- the card
+
+/**
+ * A picture over the whole screen, wider than it, to drag around with a finger. Tap to close.
+ * @param {SVGSVGElement} svg  @param {string} caption  @param {HTMLElement} host the cards layer
+ * @returns {() => void} closes it
+ */
+export function enlargePicture(svg, caption, host) {
+  const zoom = el('div', { class: 'guide-zoom', role: 'dialog', 'aria-label': caption }, el('div', { class: 'guide-zoom-inner' }, svg.cloneNode(true)), el('div', { class: 'guide-zoom-hint', text: 'Drag to look around. Tap to close.' }));
+  const onKey = (e) => {
+    if (e.code !== 'Escape') return;
+    e.stopPropagation();
+    close();
+  };
+  const close = () => {
+    window.removeEventListener('keydown', onKey, true);
+    zoom.remove();
+  };
+  zoom.addEventListener('click', close);
+  window.addEventListener('keydown', onKey, true);
+  host.append(zoom);
+  return close;
+}
+
+/** The pictures a chapter card can show, by the names the story uses. */
+export const PICTURES = {
+  ravel: { draw: () => drawRavel(), caption: 'Ravel. The Fold is the island in red, between the river and the Cut.' },
+  crease: { draw: () => drawFoldedMap(), caption: 'Every printed map of Ravel puts the Fold in a crease of the paper and leaves it blank.' },
+  fold: {
+    draw: () =>
+      drawFold({
+        callouts: [
+          { at: [50, 9], text: 'YOU START HERE', x: 53, y: 10.2 },
+          { at: [30, 30], text: "THE CLOCKMAKER'S", x: 25, y: 36.4, anchor: 'middle' },
+        ],
+      }),
+    caption: 'The Fold: six crooked lanes and a square. You come in over the bridge at the top, through the gate.',
+  },
+};
 
 /** The places a detective knows of on the first morning, as numbered on the close-up. */
 const FIRST_PLACES = [
@@ -452,30 +497,23 @@ const WORDS = [
  */
 export function showGuide(cards) {
   return new Promise((resolve) => {
-    let zoom = null;
+    let unzoom = null;
     const close = () => {
       window.removeEventListener('keydown', onKey, true);
-      zoom?.remove();
+      unzoom?.();
       card.remove();
       resolve();
     };
     const onKey = (e) => {
-      if (e.code !== 'Escape') return;
+      // An enlarged picture closes itself first.
+      if (e.code !== 'Escape' || card.parentElement?.querySelector('.guide-zoom')) return;
       e.stopPropagation();
-      if (zoom) {
-        zoom.remove();
-        zoom = null;
-      } else close();
+      close();
     };
     window.addEventListener('keydown', onKey, true);
+    // Over the whole screen, wherever the guide has been scrolled to.
     const enlarge = (svg, caption) => {
-      zoom = el('div', { class: 'guide-zoom', role: 'dialog', 'aria-label': caption }, el('div', { class: 'guide-zoom-inner' }, svg.cloneNode(true)), el('div', { class: 'guide-zoom-hint', text: 'Drag to look around. Tap to close.' }));
-      zoom.addEventListener('click', () => {
-        zoom.remove();
-        zoom = null;
-      });
-      // Over the whole screen, wherever the guide has been scrolled to.
-      (card.parentElement ?? card).append(zoom);
+      unzoom = enlargePicture(svg, caption, card.parentElement ?? card);
     };
     const figure = (svg, title, ...text) => {
       const box = el('button', { class: 'guide-pic', type: 'button', 'aria-label': `${title}. Tap to see it larger.`, onClick: () => enlarge(svg, title) }, svg);

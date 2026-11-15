@@ -21,7 +21,7 @@ export const LOCATIONS = {
         id: 'turnstile', at: 'turnstile', label: 'The Turnstile', kind: 'use', action: 'puzzle:gate',
         views: [
           { if: 'puz:gate', text: 'The rings are set to C-A-T-C-H. That word works until midnight. Tomorrow the lock will need a new word.' },
-          { text: "An old iron turnstile. On its post is a brass lock with five rings of letters. It will not turn until the rings spell the right word. Kit won't tell you the word." },
+          { text: "An old iron turnstile. On its post is a brass lock with five rings of letters. It will not turn until the rings spell the word of the day. Neither of you knows today's word yet." },
         ],
       },
       {

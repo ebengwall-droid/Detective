@@ -63,7 +63,7 @@ export const PUZZLES = {
     ],
     ask: 'What word do you set the rings to?',
     answers: ['CATCH'],
-    solved: "C, A, T, C, H. The rings click into place and the turnstile turns.\n\n'Every seven-year-old in the Fold can do that half asleep,' says Kit. 'I won't say how long you took. Welcome to the Fold.'",
+    solved: "C, A, T, C, H. The rings click into place and the turnstile turns.\n\n'You beat me to it,' says Kit. 'Every seven-year-old in the Fold does that on the way to school, so don't let it go to your head. Welcome to the Fold.'",
     effects: [{ flag: 'through_gate' }],
     lesson: 'caesar',
     hints: [

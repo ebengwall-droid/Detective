@@ -158,7 +158,8 @@ export function revealCard(card) {
   const title = card.querySelector('.card-title');
   const date = card.querySelector('.card-date');
   const rule = card.querySelector('.rule');
-  const paras = [...card.querySelectorAll('.card-lines p, .card-text')];
+  // Paragraphs and the pictures between them, in reading order.
+  const paras = [...card.querySelectorAll('.card-lines > p, .card-lines > figure, .card-text')];
   const actions = card.querySelector('.card-actions');
   const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
   if (kicker) tl.from(SplitText.create(kicker, { type: 'chars' }).chars, { autoAlpha: 0, y: 8, duration: 0.6, stagger: 0.03 }, 0.1);
@@ -170,6 +171,11 @@ export function revealCard(card) {
   if (rule) tl.from(rule, { scaleX: 0, duration: 1.0, ease: 'power3.inOut' }, 0.55);
   let at = 0.9;
   for (const p of paras) {
+    if (p.tagName === 'FIGURE') {
+      tl.from(p, { autoAlpha: 0, y: 18, duration: 0.9 }, at);
+      at += 0.5;
+      continue;
+    }
     const lines = SplitText.create(p, { type: 'lines', mask: 'lines' }).lines;
     tl.from(lines, { yPercent: 100, autoAlpha: 0, duration: 0.8, stagger: 0.09 }, at);
     at += 0.28 + lines.length * 0.09;

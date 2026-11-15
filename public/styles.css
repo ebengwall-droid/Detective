@@ -1174,3 +1174,6 @@ button.row:active, .map-row:active { background: var(--glass-fill-2); transform:
 .map-guide + .xbtn { margin-left: 8px; }
 /* Lists in the guide read left to right; the card's own centring is for its title. */
 .guide-fig figcaption, .guide-places, .guide-note, .guide-words, .guide-h { text-align: left; }
+/* A picture on a chapter card, between its paragraphs. */
+.card-fig { margin: 4px 0 24px; text-align: left; }
+.card-fig figcaption { margin-top: 9px; font-size: 13.5px; line-height: 1.45; color: var(--text-3); }

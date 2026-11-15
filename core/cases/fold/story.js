@@ -52,6 +52,8 @@ export const ACTS = {
       "At a quarter past seven this morning, a clockmaker's apprentice could not open his master's door. It was locked from the inside. Behind it, the clockmaker Ignatius Pendry was dead.",
       'You have been sent in with Detective Constable Kit Quoin, who grew up in the Fold. First, you have to get through the gate.',
     ],
+    // Drawn by the page under the paragraph with the same index: the city, why no map shows the Fold, and the Fold itself.
+    pictures: [['ravel', 'crease'], ['fold']],
   },
   2: {
     title: 'The Map-Maker',
