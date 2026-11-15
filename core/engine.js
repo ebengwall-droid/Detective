@@ -22,7 +22,29 @@ export const RPC_METHODS = new Set([
 ]);
 export const STREAMING_METHODS = new Set(['say', 'present', 'laptopAsk', 'readLetter', 'think', 'finaleSay', 'epilogue']);
 
-const SAVE_VERSION = 4;
+const SAVE_VERSION = 5;
+
+/**
+ * Bring a save from an earlier version up to date, or return null if it cannot be.
+ * Version 5 rewrote what the characters say in plain English. A save keeps each
+ * conversation word for word, both the transcript the player reads and the
+ * history the actor is shown, so an older save would keep showing (and the actor
+ * would keep imitating) the old wording. Those are cleared and every conversation
+ * starts again with today's greeting; what the detective has learned is kept.
+ */
+function upgradeSave(state, caseData) {
+  if (!state || state.caseId !== caseData.meta.id) return null;
+  if (state.v === SAVE_VERSION) return state;
+  if (state.v !== 4) return null;
+  for (const npc of Object.values(state.npcs ?? {})) {
+    npc.log = [];
+    npc.convo = [];
+    npc.sessionOpen = false;
+    delete npc.pendingOpen;
+  }
+  state.v = SAVE_VERSION;
+  return state;
+}
 const MAX_LOG = 120;
 const MAX_CONVO = 70;
 
@@ -103,7 +125,7 @@ export class GameSession {
     this.ai = ai;
     this.brain = new Brain(caseData, ai);
     /** @type {GameState|null} */
-    this.state = state && state.v === SAVE_VERSION && state.caseId === caseData.meta.id ? state : null;
+    this.state = upgradeSave(state, caseData);
     /** @type {any[]} events produced by the action in progress */
     this.events = [];
 
@@ -435,8 +457,7 @@ export class GameSession {
   }
 
   phoneGreeting(npc, st) {
-    const first = npc.name.split(' ').slice(-1)[0];
-    return st.exchanges ? `${first}. Go on.` : `${first} here. Go on, Detective.`;
+    return st.exchanges ? 'Hello again, Detective. What do you need?' : `Hello, Detective. This is ${npc.name}. What do you need?`;
   }
 
   suggestions(id) {

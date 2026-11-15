@@ -104,7 +104,7 @@ Every afternoon at ten to four, she sends a tray of cakes across the square to t
 Lucan Voss rents the attic over her kitchen as the office of the Crux. She says he "pays in compliments" instead of rent. He sets the Crux crossword under the name CENSOR.
 
 The Greywether plan turns her coffee house into "Unit 3".`,
-    voice: "Warm and direct. Short, plain sentences. Calls everyone 'my love', even the Warden. Watches your mouth when you talk, because she reads lips.",
+    voice: "Warm and direct. Short, plain sentences. Watches your mouth when you talk, because she reads lips.",
     wants: 'She wants her coffee house left alone and her regulars to stay alive. She also wants no arguing at table four.',
     know: [
       {
@@ -147,7 +147,7 @@ The Greywether plan turns her coffee house into "Unit 3".`,
       { if: 'puz:paper3', q: 'Who chalked the slate?', to: 'o_slate' },
     ],
     news: [{ if: 'act>=3', text: 'People are saying Dame Hesper confessed this morning. Nobody in your coffee house believes it.' }],
-    fallback: ["It's not written down, my love, so I can't say for sure.", "*She shakes her head.* That didn't happen in here, my love. Ask me who was in here, and when."],
+    fallback: ["It's not written down, so I can't say for sure.", "*She shakes her head.* That didn't happen in here. Ask me who was in here, and when."],
   },
 
   // ================================================================ JONAH

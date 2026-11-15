@@ -81,7 +81,7 @@ export const PUZZLES = {
     blocks: [
       { p: "Mrs Quoin puts a brass wheel in your hand. It has two rings of letters, one inside the other. She turns the inner ring until N sits under A. Then she pushes a strip of paper across the table to you." },
       { mono: rot13('PATIENCE'), tool: 'wheel' },
-      { quote: "Thirteen places. That's halfway round. The same turn hides a message and reads it back. Go on. I'm timing you, but I won't tell you why." },
+      { quote: "I've set it thirteen places round. That's halfway, so the same setting hides a message and also reads it back. Go on, then. I'm timing you, but I won't tell you why." },
     ],
     ask: 'What does the strip say?',
     answers: ['PATIENCE'],

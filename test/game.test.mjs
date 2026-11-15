@@ -119,6 +119,24 @@ test('a save from another version or another story is ignored rather than truste
   assert.equal(new GameSession({ ai: null, state: { v: 4, caseId: 'lamplighter' } }).state, null);
 });
 
+test('a save from before the plain-English rewrite keeps its progress and starts conversations afresh', async () => {
+  const session = new GameSession({ ai: null });
+  await session.newGame({ name: 'Test' });
+  await session.talk({ id: 'kit' });
+  // As a version 4 save left it: the conversation still open, in the old wording.
+  const old = JSON.parse(JSON.stringify(session.state));
+  old.v = 4;
+  old.npcs.kit.log = [{ who: 'npc', text: "Quoin. Kit. I'm the one who's from here, so I'm the one they've given you.", step: 0 }];
+  old.npcs.kit.convo = [{ role: 'user', content: '[The detective arrives]' }, { role: 'assistant', content: '{"say": "Quoin. Kit."}' }];
+  const loaded = new GameSession({ ai: null, state: old });
+  assert.equal(loaded.state?.v, session.state.v, 'the save is brought up to date');
+  assert.ok(loaded.state.npcs.kit.met, 'what the detective has done is kept');
+  assert.deepEqual(loaded.state.npcs.kit.convo, [], 'the actor is not shown the old wording to imitate');
+  const out = await loaded.talk({ id: 'kit' });
+  assert.equal(out.talk.greeting, CASE.npcs.kit.greet.find((g) => g.if === 'met:kit').text, "today's greeting, not the saved line");
+  assert.ok(!out.talk.log.some((l) => /Quoin\. Kit\./.test(l.text)), 'the old wording is gone from the transcript');
+});
+
 test('resting too early is refused with a reason', async () => {
   const session = new GameSession({ ai: null });
   await session.newGame({ name: 'Test' });

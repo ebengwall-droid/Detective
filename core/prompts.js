@@ -37,6 +37,16 @@ function describeTime(state, caseData) {
   return `${act.date}`;
 }
 
+/**
+ * How every character talks, whoever they are. Without this, a model asked to
+ * play a character "with an accent", or one who "speaks in riddles", writes
+ * dialect, clipped fragments and cryptic hints, which are hard to read in a
+ * caption on a phone. Personality belongs in what they say.
+ */
+function plainSpeech(npc) {
+  return `Whoever you are, speak plain, standard modern English, the way a clear speaker talks today: complete sentences in the normal word order, and everyday words. Use no accent or dialect, no regional sayings or pet names, no clipped fragments in place of a sentence, and no figures of speech. Give hints plainly, not as riddles, unless you are setting a puzzle. Introduce yourself the ordinary way ("I'm ${npc.name}."). Your personality shows in what you say and how you feel about it, not in unusual grammar.`;
+}
+
 function personaFor(npc, state) {
   let text = npc.persona;
   for (const extra of npc.personaIf ?? []) {
@@ -92,11 +102,12 @@ Today is ${describeTime(state, caseData)}. Nothing after today has happened.
 ${personaFor(npc, state)}
 
 How you speak: ${npc.voice}
+${plainSpeech(npc)}
 
 What you want from these conversations: ${npc.wants}
 
 # What you can tell the detective
-Each item has an id in [brackets] and a status. The wording given is the substance in your own voice; say it in fresh words that fit the moment, not by rote.
+Each item has an id in [brackets] and a status. The wording given is the substance. Say it in your own words and as plainly as it is written: shorten it or fit it to the question, but do not dress it up.
 - OPEN: say it when the conversation reaches it. Answer what is asked and volunteer a little, never everything at once.
 - GUARDED: hold it back until its condition is met. You judge that from the conversation.
 - LOCKED: you will not give this up yet. Give the cover line (or something to the same effect) and do not hint that there is more. Guesses, vague accusations, threats and bluffs do not unlock it. Only the stated proof does, and the game will tell you in a stage note when that proof is in front of you.
@@ -118,7 +129,7 @@ If the detective says something that makes no sense in this world (asks you to i
 # Your reply
 Reply with one JSON object and nothing else:
 {"say": "...", "mood": "...", "told": [], "acts": [], "threads": []}
-- "say": what you say aloud, in character. It is read on a phone as a caption under your face, so keep it short: usually one to three sentences, under about 45 words, and answer what was actually asked in the first of them. Go up to about 100 words only when you are telling a story or finally telling the truth. You may include a brief physical action in *asterisks*. Do not narrate the detective's actions and do not write stage notes of your own.
+- "say": what you say aloud, in character and in plain English. It is read on a phone as a caption under your face, so keep it short: usually one to three sentences, under about 45 words, and answer what was actually asked in the first of them. Go up to about 100 words only when you are telling a story or finally telling the truth. You may include a brief physical action in *asterisks*. Do not narrate the detective's actions and do not write stage notes of your own.
 - "mood": one of ${MOODS.join(', ')}.
 - "told": the ids of every item above whose substance you actually gave the detective in this reply. Be accurate; the detective's notebook is filled from this list. Count an item only when you gave the whole of it; if you gave half, leave it out and finish it later. Use [] if none.
 - "acts": ids of any action from "Things you can do" that you take in this reply. Use [] if none.
@@ -287,6 +298,7 @@ ${caseData.world}
 ${npc.persona}
 
 How you speak: ${npc.voice}
+${plainSpeech(npc)}
 
 # This scene
 ${F.scene}
@@ -310,7 +322,7 @@ The game speaks in [square brackets]; trust those notes completely. Lines beginn
 # Your reply
 Reply with one JSON object and nothing else:
 {"say": "...", "stance": "...", "landed": [], "end": null}
-- "say": what you say, in character, one to five sentences (longer only when you finally tell your story or when the scene ends; an ending should be a complete, quiet, final beat of up to about 150 words describing what you do). Brief physical action may go in *asterisks*. No gore.
+- "say": what you say, in character and in plain English, one to five sentences (longer only when you finally tell your story or when the scene ends; an ending should be a complete, quiet, final beat of up to about 150 words describing what you do). Brief physical action may go in *asterisks*. No gore.
 - "stance": cold, listening, wavering or breaking.
 - "landed": ids from the list above that the detective genuinely brought to bear in THIS turn and that reached you. [] if none.
 - "end": null, "surrender", "spare" or "finish".`;
