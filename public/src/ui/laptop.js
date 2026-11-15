@@ -1,4 +1,4 @@
-// HARBORNET: the detective's laptop. Ask the records system anything in
+// The Lectern: the detective's reference desk. Ask the records system anything in
 // plain language, read what it turns up, and follow the lab queue.
 
 import { el, add, clear, icon } from './dom.js';
@@ -44,7 +44,7 @@ export function createLaptop(panels, game) {
     const v = game.view;
     if (!history.length) {
       add(body, 
-        el('div', { class: 'term-out' }, 'HARBORNET // GREYHAVEN HARBOUR POLICE\nRecords terminal. Detective Bureau login.\n\nAsk in plain words: a name, a place, an object, a number off a piece of evidence.\nWhat I find is filed under RECORDS.'),
+        el('div', { class: 'term-out' }, v.laptop.intro),
       );
     }
     for (const h of history) {
@@ -146,13 +146,13 @@ export function createLaptop(panels, game) {
         tabBar = el('div', { class: 'tabs', role: 'tablist' });
         body = el('div', { class: 'panel-body' });
         chips = el('div', { class: 'chips' });
-        input = el('input', { class: 'field', id: 'harbornet-query', type: 'text', placeholder: 'Ask HARBORNET…', autocomplete: 'off', enterkeyhint: 'search', maxlength: '200' });
+        input = el('input', { class: 'field', id: 'lectern-query', type: 'text', placeholder: game.view.laptop.placeholder, autocomplete: 'off', enterkeyhint: 'search', maxlength: '200' });
         input.addEventListener('keydown', (e) => {
           // Keep typing from reaching the game's hotkeys, but let Escape close the lid.
           e.stopPropagation();
           if (e.key === 'Escape') api.close();
         });
-        form = el('form', { class: 'term-form' }, input, el('button', { class: 'btn', type: 'submit', text: 'RUN' }));
+        form = el('form', { class: 'term-form' }, input, el('button', { class: 'btn', type: 'submit', text: 'ASK' }));
         form.addEventListener('submit', (e) => {
           e.preventDefault();
           ask();
@@ -161,7 +161,7 @@ export function createLaptop(panels, game) {
         panel = el(
           'section',
           { class: 'panel full laptop', role: 'dialog', 'aria-label': 'Laptop' },
-          el('div', { class: 'panel-head' }, icon('laptop'), el('div', { class: 'panel-title', text: 'HARBORNET' }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close laptop', 'data-back': '', onClick: () => api.close() }, icon('close'))),
+          el('div', { class: 'panel-head' }, icon('laptop'), el('div', { class: 'panel-title', text: game.view.laptop.name }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close laptop', 'data-back': '', onClick: () => api.close() }, icon('close'))),
           tabBar,
           body,
           chips,
@@ -179,6 +179,12 @@ export function createLaptop(panels, game) {
       renderTabs();
       clear(body);
       renderers[tab]();
+    },
+
+    /** Open on the question box and put a question to it. */
+    ask(text) {
+      api.open('ask');
+      ask(text);
     },
 
     close() {

@@ -71,7 +71,7 @@ const request = (extra = {}) => ({
 test('sends the request we mean to send and reads the stream as it arrives', async () => {
   seen.length = 0;
   script.push((res) => stream(res, ['{"say":"I left ', 'at six."}']));
-  const ai = createAnthropicProvider({ ...process.env, GREYHAVEN_AI: undefined });
+  const ai = createAnthropicProvider({ ...process.env, FOLD_AI: undefined });
   assert.equal(ai.describe().live, true);
   const snapshots = [];
   const out = await ai.complete(request({ onText: (soFar) => snapshots.push(soFar) }));
@@ -156,7 +156,7 @@ test('rejected credentials switch the game to its script for good', async () => 
 test('with no credentials, or switched off, there is no live AI', () => {
   const none = createAnthropicProvider({ HOME: '/nonexistent' });
   assert.equal(none.describe().live, false);
-  const off = createAnthropicProvider({ ANTHROPIC_API_KEY: 'x', GREYHAVEN_AI: 'off' });
+  const off = createAnthropicProvider({ ANTHROPIC_API_KEY: 'x', FOLD_AI: 'off' });
   assert.equal(off.describe().live, false);
   assert.equal(off.describe().label, 'Scripted');
 });

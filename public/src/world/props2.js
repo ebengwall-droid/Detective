@@ -673,7 +673,7 @@ def('globe', (g) => {
 
 // --------------------------------------------------------------- lighthouse
 
-/** The great Fresnel lens of Marrow Point light. o.lit switches the beam on. */
+/** A lighthouse's great Fresnel lens. o.lit switches the beam on. */
 def('lens', (g, o, ctx) => {
   cyl(g, 0.72, 0.8, 0.9, 'iron', 0, 0.45, 0, 16);
   cyl(g, 0.86, 0.86, 0.06, 'brassDull', 0, 0.93, 0, 20);

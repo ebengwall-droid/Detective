@@ -1,4 +1,4 @@
-/* Greyhaven: lamplight on a harbour night.
+/* The Fold: lamplight, brass and green ink.
    The room is the picture; the interface floats over it as frosted glass, and
    comes up from the bottom of the screen as sheets, the way a phone app does.
    Amber is the lamp (what to do next, what you said). Sea-green is people and
@@ -462,6 +462,8 @@ button.row:active { transform: scale(0.985); }
   padding: 20px 20px 24px; border-radius: 6px; white-space: pre-wrap; overflow-wrap: anywhere; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   background-image: linear-gradient(rgba(120, 90, 40, 0.06), rgba(120, 90, 40, 0.02));
 }
+/* A note in the Company's green ink, in a practised upright hand. */
+.paper.ink { font-family: 'Marcellus', Georgia, serif; font-size: 16px; line-height: 1.6; color: #1d4a35; background-color: #f1ead6; }
 .labbox { margin-top: 14px; padding: 14px 16px; border-radius: var(--r-md); background: var(--sea-soft); font-size: 14px; }
 .labbox .section-label { color: var(--sea); }
 
@@ -718,4 +720,83 @@ button.row:active { transform: scale(0.985); }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ------------------------------------------------------------ the Papers */
+.row.static { cursor: default; }
+.row .tier { align-self: center; }
+.tier { display: inline-flex; gap: 3px; flex: none; }
+.tier i { width: 6px; height: 6px; border-radius: 50%; background: var(--hair-2); }
+.tier i.on { background: var(--lamp); }
+
+.puzzle { min-width: 0; --green: #8fe0b0; }
+.puzzle-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.puzzle-head h3 { font-family: var(--display); font-weight: 700; font-size: 24px; letter-spacing: -0.015em; line-height: 1.15; margin: 4px 0 0; }
+.puzzle-head .tier { margin-top: 8px; }
+.puzzle p { margin: 0 0 12px; font-size: 15px; line-height: 1.5; }
+.puzzle .hand {
+  margin: 0 0 14px; padding: 2px 0 2px 14px; border-left: 2px solid rgba(143, 224, 176, 0.45);
+  font-family: 'Marcellus', Georgia, serif; font-size: 16px; line-height: 1.5; color: var(--green); white-space: pre-line;
+}
+.puzzle.fold .hand, .puzzle.hesper .hand { color: var(--lamp-2); border-left-color: rgba(255, 214, 153, 0.4); }
+.cipher {
+  margin: 0 0 14px; padding: 14px; border-radius: var(--r-md); background: var(--term-bg); border: 1px solid var(--term-line);
+  font-family: var(--mono); font-size: 14.5px; line-height: 1.7; letter-spacing: 0.06em; color: var(--term);
+  white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; -webkit-user-select: text;
+}
+.cipher.marked { font-family: 'Marcellus', Georgia, serif; font-size: 19px; letter-spacing: 0.02em; color: var(--green); text-align: center; }
+.glyphs { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 0 0 14px; padding: 14px; border-radius: var(--r-md); background: var(--term-bg); border: 1px solid var(--term-line); color: var(--green); }
+.glyph-word { display: inline-flex; gap: 3px; align-items: center; }
+.glyph-stop { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.55; align-self: flex-end; margin: 0 2px 4px; }
+.pig { display: block; }
+.pig-keys { display: flex; flex-wrap: wrap; gap: 8px; color: var(--lamp-2); }
+.pig-key text { font-family: var(--mono); font-weight: 600; }
+
+.gridfig { margin: 0 0 16px; overflow-x: auto; }
+.gridfig figcaption { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-top: 6px; }
+.lettergrid { border-collapse: collapse; font-family: var(--mono); }
+.lettergrid td { width: 34px; height: 34px; text-align: center; font-size: 15px; font-weight: 500; border: 1px solid var(--hair-2); background: rgba(236, 228, 208, 0.06); color: var(--paper); }
+.lettergrid.numbers td { width: 42px; }
+.lettergrid td.gap { background: var(--lamp-soft); color: var(--lamp); }
+.lettergrid.small td { width: 30px; height: 30px; font-size: 13px; }
+.lettergrid.headed th { width: 26px; font-size: 11px; font-weight: 500; color: var(--faint); }
+.chess { border-collapse: collapse; font-family: var(--mono); }
+.chess td { width: 34px; height: 34px; text-align: center; font-size: 15px; font-weight: 600; }
+.chess td.light { background: #d9cfb6; color: #1d1a14; }
+.chess td.dark { background: #5d6b5a; color: #f3efe2; }
+.chess th { width: 20px; height: 20px; font-size: 11px; font-weight: 500; color: var(--faint); text-align: center; }
+.plain-list { margin: 0 0 14px; padding-left: 22px; font-size: 15px; line-height: 1.5; }
+.plain-list li { margin-bottom: 6px; }
+.feeds { margin: 0 0 14px; padding-left: 26px; }
+.feeds li { display: list-item; padding: 7px 0; border-bottom: 1px solid var(--hair); font-size: 14px; }
+.feed-title { color: var(--dim); }
+.feed-answer { float: right; font-family: var(--mono); letter-spacing: 0.12em; color: var(--green); }
+.feed-answer.none { color: var(--faint); letter-spacing: 0.02em; font-family: var(--ui); font-style: italic; }
+
+.answer-form { margin: 18px 0 14px; padding: 16px; border-radius: 20px; background: var(--raise); }
+.answer-form .ask { display: block; font-weight: 600; font-size: 15px; margin-bottom: 10px; }
+.answer-row { display: flex; gap: 8px; }
+.answer-row .field { flex: 1; min-width: 0; text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--mono); }
+.answer-form .verdict { margin-top: 10px; }
+.hints { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.hint { font-size: 14px; line-height: 1.45; padding: 10px 12px; border-radius: var(--r-sm); background: var(--lamp-soft); width: 100%; box-sizing: border-box; }
+.toolbar { margin-bottom: 10px; }
+.tool { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: var(--r-md); background: var(--raise); }
+.tool-text { font-family: var(--mono); font-size: 13px; letter-spacing: 0.05em; resize: vertical; min-height: 64px; width: 100%; box-sizing: border-box; }
+.tool-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--dim); flex-wrap: wrap; }
+.tool-row input[type='range'] { flex: 1; min-width: 120px; accent-color: var(--lamp); }
+.tool-num { font-family: var(--mono); color: var(--lamp); min-width: 76px; text-align: right; }
+.tool-out { font-family: var(--mono); font-size: 14px; line-height: 1.65; letter-spacing: 0.05em; color: var(--text); padding: 12px; border-radius: var(--r-sm); background: var(--term-bg); border: 1px solid var(--term-line); overflow-wrap: anywhere; white-space: pre-wrap; min-height: 22px; user-select: text; -webkit-user-select: text; }
+.tool-note { font-size: 12.5px; }
+.primer { gap: 6px; }
+.primer-page { border-radius: var(--r-sm); background: var(--raise); }
+.primer-page summary { padding: 11px 13px; font-weight: 600; font-size: 14px; cursor: pointer; }
+.primer-body { padding: 0 13px 13px; }
+.alpha { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 4px; }
+.alpha.wide { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
+.alpha span { display: flex; flex-direction: column; align-items: center; padding: 5px 2px; border-radius: 8px; background: rgba(255, 255, 255, 0.04); font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.alpha span b { font-size: 14px; color: var(--text); }
+@media (max-width: 420px) {
+  .lettergrid td, .chess td { width: 30px; height: 30px; font-size: 14px; }
+  .lettergrid.numbers td { width: 38px; }
 }

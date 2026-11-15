@@ -13,6 +13,7 @@ import * as THREE from 'three';
 import { assets } from './assets.js';
 import { PROPS, def } from './props.js';
 import './props2.js';
+import { NESTED } from './props3.js';
 
 const WOOD = 0x7b5136;
 const WOOD_DARK = 0x6a4631;
@@ -31,7 +32,6 @@ const DRESS = {
   chair: (o) => ({ model: 'chair', fit: 'height', tint: o.mat === 'steelDark' ? 0x98a2a8 : WOOD }),
   officeChair: (o) => ({ model: 'chair_green', fit: 'height', tint: o.mat === 'leatherOxblood' ? 0xd49a8c : undefined }),
   armchair: (o) => ({ model: 'armchair', fit: 'stretch', tint: o.mat === 'leather' ? 0xa98463 : 0xbb8275 }),
-  sofa: { model: 'sofa', fit: 'stretch' },
   desk: (o) => (o.carved ? { model: 'console', fit: 'stretch', tint: 0xd9c9ba } : { model: 'desk_metal', fit: 'stretch', tint: o.mat === 'woodDark' ? 0x9a8d7e : 0xbdbdb8 }),
   table: (o) => ((o.d ?? 0.8) < 0.5 ? null : { model: 'table', fit: 'stretch', tint: o.mat === 'woodLight' ? 0xd9c7a8 : o.mat === 'wallTeak' ? 0xa87a55 : 0x8f6748 }),
   roundTable: { model: 'round_table', fit: 'stretch' },
@@ -44,13 +44,12 @@ const DRESS = {
   sconce: { model: 'sconce', fit: 'none', anchor: 'wall', bulb: [0.5, 0.3, 0.64] },
   // The ones that carry their own light are seen close; a shelf or a ceiling full of them gets the lighter model.
   lantern: (o) => ({ model: o.light === false ? 'lantern_lo' : 'lantern', fit: 'height', bulb: [0.5, 0.43, 0.5] }),
-  ceilingFan: { model: 'ceiling_fan', fit: 'width', anchor: 'ceiling', live: false, spin: true },
   clock: { model: 'wall_clock', fit: 'height', anchor: 'wall', live: false },
   laptop: { model: 'laptop', fit: 'width', live: false },
-  jerrycan: { model: 'jerrycan', fit: 'height' },
-  lifebuoy: { model: 'lifebuoy', fit: 'height', anchor: 'wall' },
-  dartboard: { model: 'dartboard', fit: 'height', anchor: 'wall', live: false },
   caseKit: { model: 'toolbox', fit: 'width' },
+  // The Fold (props3.js). A longcase clock keeps its own face, with the two minute hands; a flask keeps its cup.
+  longcase: { model: 'grandfather_clock', fit: 'stretch' },
+  flask: { model: 'thermos', fit: 'height' },
 };
 
 /** Models a list of props will want, so they can be fetched before the room is built. */
@@ -61,6 +60,8 @@ export function modelsFor(props) {
     const spec = typeof rule === 'function' ? rule(p) : rule;
     if (spec) names.add(spec.model);
     if (p.t === 'lanternCluster' || p.t === 'shelf') names.add('lantern_lo');
+    // Props that stand a model in themselves (a chess set on its table, a cake under its dome).
+    for (const name of NESTED[p.t] ?? []) names.add(name);
     if (p.t === 'model' && p.m) names.add(p.m);
   };
   for (const p of props ?? []) visit(p);
@@ -241,8 +242,9 @@ for (const [type, rule] of Object.entries(DRESS)) {
 
 /**
  * A model placed as it is: set dressing with no built counterpart.
- *   { t: 'model', m: 'radio', p: [x, z], y: 0.78, r: 20, s: 1 }
+ *   { t: 'model', m: 'kettle', p: [x, z], y: 0.78, r: 20, s: 1 }
  * Hung on a wall it takes { wall, at, y } like any other wall prop.
+ * rx / rz (degrees) lay it over before it is turned: a magnifying glass flat on a desk.
  */
 def('model', (g, o) => {
   const prop = assets.prop(o.m);
@@ -262,7 +264,12 @@ def('model', (g, o) => {
   if (!o.wall && !o.hang) model.position.set(-(minX + maxX) / 2, -minY, -(minZ + maxZ) / 2);
   if (o.wall) g.position.y = o.y ?? 1.6;
   if (o.hang) g.position.y = o.hang;
-  g.add(model);
+  if (o.rx || o.rz) {
+    const tip = new THREE.Group();
+    tip.rotation.set(((o.rx ?? 0) * Math.PI) / 180, 0, ((o.rz ?? 0) * Math.PI) / 180);
+    tip.add(model);
+    g.add(tip);
+  } else g.add(model);
   const w = maxX - minX;
   const d = maxZ - minZ;
   return { c: o.solid ? [w * (o.s ?? 1), d * (o.s ?? 1)] : null, h: 0 };

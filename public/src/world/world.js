@@ -433,7 +433,7 @@ export class World {
         ch.root.position.set(n.p[0], 0, n.p[1]);
         const baseYaw = ((n.r ?? 0) * Math.PI) / 180;
         ch.root.rotation.y = baseYaw;
-        const proxyH = n.look.pose === 'bound' ? 1.0 : n.look.pose === 'sit' ? 1.4 : 1.85;
+        const proxyH = n.look.pose === 'bound' || n.look.pose === 'slumped' ? 1.0 : n.look.pose === 'sit' ? 1.4 : 1.85;
         const proxy = new THREE.Mesh(new THREE.BoxGeometry(0.7, proxyH, 0.7), new THREE.MeshBasicMaterial({ visible: false }));
         proxy.position.set(n.p[0], proxyH / 2, n.p[1]);
         proxy.userData.pick = { type: 'npc', id: n.id };
@@ -787,7 +787,7 @@ export class World {
     for (const [id, n] of this.npcs) {
       const facing = (this.focus?.id === id && this.mode !== 'explore') || n.talking;
       const pose = n.data.look.pose;
-      const want = facing && pose !== 'sit' && pose !== 'bound' ? Math.atan2(p.x - n.pos.x, p.z - n.pos.z) : n.baseYaw;
+      const want = facing && pose !== 'sit' && pose !== 'bound' && pose !== 'slumped' ? Math.atan2(p.x - n.pos.x, p.z - n.pos.z) : n.baseYaw;
       n.yaw = lerpAngle(n.yaw, want, 1 - Math.exp(-dt * 4));
       n.ch.root.rotation.y = n.yaw;
       n.ch.update(t, dt, { lookAt: this.camera.position, talking: n.talking, mood: n.mood, engaged: this.focus?.id === n.data?.id });

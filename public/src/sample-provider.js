@@ -6,7 +6,7 @@
 // leading user turn that is kept at the top of every request.
 
 const MODEL = 'claude-opus-5-5';
-const PREFS_KEY = 'greyhaven.ai';
+const PREFS_KEY = 'fold.ai';
 /** Codes that mean "not in this view, do not ask again". */
 const GONE = new Set(['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed']);
 

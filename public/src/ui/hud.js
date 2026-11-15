@@ -14,7 +14,7 @@ export function createHud(root, game) {
     scan: tool('eye', 'Look', 'Look around: everything in the room, and a way to walk straight to it (Q)', () => game.scan()),
     think: tool('bulb', 'Think', 'Think: a nudge when you are stuck (T)', () => game.think()),
     notebook: tool('notebook', 'Notes', 'Notebook (N)', () => game.open('notebook')),
-    laptop: tool('laptop', 'Laptop', 'Laptop (L)', () => game.open('laptop')),
+    laptop: tool('laptop', 'Lectern', 'The Lectern (L)', () => game.open('laptop')),
     map: tool('map', 'Map', 'Map (M)', () => game.open('map')),
   };
   // On a phone the five tools sit along the bottom, under the thumbs; the menu keeps to a corner.

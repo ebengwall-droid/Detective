@@ -62,7 +62,7 @@ export function npcSystem(caseData, npcId, state) {
   });
   const acts = (npc.acts ?? []).map((a) => `[${a.id}] ${a.when}`);
 
-  return `You are an actor in an interactive noir detective story, "${caseData.meta.title}". You play one character and only that character. A human player is the detective questioning you. Make this person real: consistent, guarded where they would be guarded, and fair, so that a careful detective can get the truth out of them and a careless one cannot.
+  return `You are an actor in ${caseData.prompts.genre}, "${caseData.meta.title}". You play one character and only that character. A human player is the detective questioning you. Make this person real: consistent, guarded where they would be guarded, and fair, so that a careful detective can get the truth out of them and a careless one cannot.
 
 # The world
 ${caseData.world}
@@ -137,7 +137,7 @@ export function npcTurn(caseData, npcId, state, { text, shown, react }) {
   return `${notes.join('\n')}${notes.length ? '\n' : ''}DETECTIVE: "${line}"`;
 }
 
-// ------------------------------------------------------------- HARBORNET
+// ------------------------------------------------------- the reference desk
 
 export function laptopPrompt(caseData, state, query) {
   const available = Object.entries(caseData.records).filter(([, r]) => check(r.if, state));
@@ -145,20 +145,14 @@ export function laptopPrompt(caseData, state, query) {
     .map(([id, r]) => `=== ${id} | ${r.title}${r.kind === 'request' ? ' | (not a stored record: opening this SUBMITS the request described)' : ''} ===\nSearch terms: ${r.keys.join(', ')}\n${r.body}`)
     .join('\n\n');
   const ids = available.map(([id]) => id);
-  const system = `You are HARBORNET, the records terminal of the Greyhaven Harbour Police in a noir detective game. A detective types a query in plain language and you answer from the police records below. You are a database, not a colleague: terse, factual, no opinions, no theories about the case.
-
-Rules:
-- Answer ONLY from the records below. Never invent a fact, a name, a date or a record. If the records do not contain the answer, say "NO RECORD FOUND" and, if it helps, name a search term that does appear in a record title.
-- Quote the lines that answer the question; do not paste whole records.
-- Choose the records that answer the query (most relevant first, at most three) and list their ids in "open". The detective's screen will display those records in full. If nothing fits, use [].
-- A record marked as a request is not stored data. Open it only when the query is asking for the thing that request would fetch.
-- Do not mention records that are not listed here, and do not speculate about what sealed or unavailable material contains.
+  const system = `${caseData.prompts.laptop}
 
 Reply with one JSON object and nothing else:
 {"answer": "...", "open": []}
-"answer" is two to five short lines in the flat voice of a terminal.
+"answer" is ${caseData.prompts.laptopLength}.
+"open" lists the ids of the cards and records that answer the query (most relevant first, at most three); the detective's screen will display those in full. If nothing fits, use [].
 
-# RECORDS AVAILABLE TO THIS LOGIN
+# CARDS AND RECORDS AVAILABLE
 ${records}`;
   const schema = {
     type: 'object',
@@ -176,9 +170,9 @@ export function thinkPrompt(caseData, state, objective, tier) {
     .sort((a, b) => b[1].at - a[1].at)
     .slice(0, 14)
     .map(([id]) => `- ${caseData.facts[id].text}`);
-  const system = `You write the inner voice of the detective in a noir mystery game, "${caseData.meta.title}". The player has stopped to think and wants a nudge.
+  const system = `You write the inner voice of the detective in ${caseData.prompts.genre}, "${caseData.meta.title}". The player has stopped to think and wants a nudge.
 
-Write two or three sentences, first person, present tense, dry and spare, in the voice of a tired detective talking to themselves. Turn the guidance below into the detective's own thought.
+Write two or three sentences, first person, present tense, ${caseData.prompts.thinkVoice} Turn the guidance below into the detective's own thought.
 
 Rules: add no facts that are not in the notes or the guidance. Reveal no more than the guidance reveals. Name no culprit. No headings, no lists, no quotation marks around the whole thing. Plain text only.`;
   const user = `What I have established lately:\n${recent.join('\n') || '- Nothing much yet.'}\n\nThe thread I am pulling: ${objective.text}\n\nGuidance to voice (do not exceed it): ${objective.hints[tier]}`;
@@ -194,29 +188,21 @@ export function letterContext(caseData, state) {
 }
 
 export function letterPrompt(caseData, state, n) {
-  const L = caseData.director.letters[n];
+  const D = caseData.director;
+  const L = D.letters[n];
   const { did, missed } = letterContext(caseData, state);
-  const mustSay = {
-    1: 'The token\'s time is not the time of death; the detective should ask what happened at five to two and who was awake to see it. One oblique line about a light at Marrow Point and men who were paid to mind it.',
-    2: 'The detective has found 02:31. Tell them the list does not start at five to two: an old man died in this town three weeks ago and nobody lit a candle, and you lit a lamp. Do not name him. One line making clear the lamp-maker only sold you brass and glass.',
-    3: 'Tobias Fenn did not do it and must not be charged; tell the detective to look at his hands and ask him what was in the sink. This is the first time you have been angry. One light remains: they know the time, and the place is the only place.',
-  }[n];
-  const system = `You are writing a short letter for a noir detective game, "${caseData.meta.title}". The letter is from the killer the newspapers call the Lamplighter, typed on an old typewriter and left unstamped on the detective's desk inside the police station.
-
-Who the writer is (never state any of this): someone who lost everything when the ferry Calliope sank twenty years ago, who is killing the four men responsible one by one, and who is close enough to the investigation to know how the detective spends each day. Intelligent, controlled, bitter, precise. Not mad, not gloating. The writer half respects this detective.
-
-Voice: spare, exact sentences. Images of light, lamps, the sea, counting. No melodrama, no threats against the detective, no riddles for their own sake. No gore.
+  const system = `${D.writer}
 
 ${L.brief}
 
 The letter must:
-- Begin with the single line "Detective." and end with the signature line "— L."
+- Begin with the single line "${D.opens}" and end with the signature line "${D.signs}"
 - Be 90 to 150 words.
-- Show that the writer knows what the detective has actually done. Work in these true details naturally: ${did.length ? did.map((d) => `the detective ${d}`).join('; ') : 'the detective looked at the lamp before the man'}.
+- Show that the writer knows what the detective has actually done. Work in these true details naturally: ${did.length ? did.map((d) => `the detective ${d}`).join('; ') : D.didDefault}.
 ${missed.length ? `- Needle the detective for one thing left undone: they did not ${missed[0]}.` : '- Acknowledge, briefly, that the detective has been thorough.'}
-- Convey this: ${mustSay}
+- Convey this: ${L.mustSay}
 
-It must not: reveal or hint at the writer's identity, sex, job or how they get into the building; name any person who has not yet died; mention games, players or anything outside this world.
+It must not: ${D.mustNot}
 
 Output the letter text only.`;
   return { system, messages: [{ role: 'user', content: 'Write the letter.' }], effort: 'medium', maxTokens: 1200 };
@@ -225,42 +211,31 @@ Output the letter text only.`;
 // ----------------------------------------------------------------- finale
 
 export function finaleSystem(caseData, state) {
-  const vance = caseData.npcs.vance;
-  return `You are an actor in the final scene of an interactive noir detective story, "${caseData.meta.title}". You play Nora Vance. A human player is the detective.
+  const F = caseData.finale;
+  const npc = caseData.npcs[F.npc];
+  return `You are an actor in the final scene of ${caseData.prompts.genre}, "${caseData.meta.title}". You play ${npc.name}. A human player is the detective.
 
 # The world
 ${caseData.world}
 
-# Your character: Nora Vance, born Lucy Fenn
-${vance.persona}
+# Your character: ${npc.name}
+${npc.persona}
 
-How you speak: ${vance.voice}
+How you speak: ${npc.voice}
 
 # This scene
-It is ten to three in the morning on 14 October, twenty years to the night, in the lantern room at the top of Marrow Point lighthouse. Rain on sixteen panes of glass. Captain Desmond Hale sits against the parapet with rope round his chest. A lit lantern stands at his feet with a brass token on it: 03:05. A steel can of seawater is beside you. At 03:05 you mean to drown him as you drowned the others, and leave a typed confession so the town believes Hale was the Lamplighter and killed himself.
-
-The detective, your partner these four days, has just come up the stairs. You will not hurt the detective under any circumstances. There is no more cover to keep: you may speak the whole truth now, and you want to. You are not mad and not a monster. You are exhausted, clear, and very nearly finished. Part of you hoped this particular person would find you.
-
-Hale can speak. He is ashamed and does not beg. If it serves the scene you may include one short line from him inside *asterisks* as narration, but you are the one talking.
+${F.scene}
 
 # What can move you (and nothing else)
-- name: being truly seen. The detective knows you are Lucy Fenn and says so.
-- father: Tobias Fenn knew you in his shop in March and said nothing; he has confessed to the murders so that you will not hang. If you finish this he either dies in a cell for you or lives knowing it was for nothing.
-- proof: the truth about the Calliope can be made public and proved without another death (Conrad Vale's taped confession, Pell's private logbook, the unsealed inquiry exhibits).
-- hale_confessed: Hale has already admitted what he did and will say it in open court. A dead man confesses nothing.
-- left_behind: Brook answered Harrowgate's enquiry about you with "all minors accounted for", and the detective can prove you were written off.
-- frame: the plan has failed. The detective knows about the button, the logs and the forged confession; nobody will believe Hale killed himself. You hate a lie, and yours will not stand.
-- thirtyone: the detective understands what the four lights are for and does not call you mad.
+${F.levers.map((l) => `- ${l.id}: ${l.moves}`).join('\n')}
 
-What does not move you: orders, threats, your oath, the law in the abstract, pity for Hale, promises the detective cannot keep, and anything the detective claims to hold but does not. Each turn a stage note tells you which of these the detective genuinely holds. You have read the case file; you can tell a bluff, and a bluff hardens you.
+${F.unmoved}
 
 Stance: you begin "cold". When one thing genuinely lands you are "listening"; at two, "wavering"; at three or more, "breaking". A lie or a threat sends you back toward "cold".
 
 Ending. Set "end" only when the scene truly resolves:
-- "surrender": you give yourself up. Only if at least three things have landed and one of them is name or father.
-- "spare": you let Hale live, but you will not be taken; you go out through the gallery door into the storm. When about two things have landed.
-- "finish": you carry it through. When almost nothing has landed, or the detective has threatened or lied to you.
-Otherwise "end" is null and the conversation continues. When the stage note says this is the last exchange before 03:05, you must choose an ending.
+${F.endRules}
+Otherwise "end" is null and the conversation continues. When the stage note says this is the last exchange, you must choose an ending.
 
 # How the scene reaches you
 The game speaks in [square brackets]; trust those notes completely. Lines beginning DETECTIVE: are what the detective says aloud.
@@ -290,26 +265,21 @@ export function finaleSchema(caseData) {
 }
 
 export function finaleTurn(caseData, state, { text, levers, last }) {
+  const F = caseData.finale;
   const f = state.finale;
   const notes = [];
   if (f.turn === 1) {
     notes.push(`[You have just said to the detective: ${f.open}]`);
-    notes.push(state.flags.knew_vance ? '[The detective worked out who you are before coming here.]' : '[The detective did not know it was you until this moment.]');
-    if (state.verdict === 'fenn') notes.push('[Yesterday the detective had your father, Tobias Fenn, charged with your murders. He is in a cell tonight.]');
-    if (state.verdict === 'hale') notes.push('[Yesterday the detective accused Hale to the Commissioner, exactly as you intended.]');
+    for (const n of F.firstNotes) if (check(n.if, state)) notes.push(`[${n.text}]`);
   }
+  for (const n of F.everyTurn ?? []) if (check(n.if, state)) notes.push(`[${n.text}]`);
   const holds = levers.length ? levers.map((l) => `${l.id} (the detective ${l.has})`).join('; ') : 'nothing on your list';
   const landed = Object.keys(f.landed);
   notes.push(`[What the detective genuinely holds: ${holds}. Anything else they claim is a bluff.]`);
   notes.push(`[Already landed in earlier turns: ${landed.length ? landed.join(', ') : 'nothing'}.]`);
-  const left = caseData.finale.maxTurns - f.turn;
-  notes.push(last ? '[It is 03:04. This is the last exchange. You must choose an ending now.]' : `[It is ${clockFor(f.turn, caseData.finale.maxTurns)}. ${left} exchange${left === 1 ? '' : 's'} remain before 03:05.]`);
+  const left = F.maxTurns - f.turn;
+  notes.push(last ? `[${F.clock(f.turn, F.maxTurns)} This is the last exchange. You must choose an ending now.]` : `[${F.clock(f.turn, F.maxTurns)} ${left} exchange${left === 1 ? '' : 's'} remain.]`);
   return `${notes.join('\n')}\nDETECTIVE: "${text}"`;
-}
-
-function clockFor(turn, max) {
-  const minutes = 50 + Math.round((turn / max) * 14);
-  return minutes >= 60 ? `03:0${minutes - 60}` : `02:${minutes}`;
 }
 
 // --------------------------------------------------------------- epilogue
@@ -317,19 +287,10 @@ function clockFor(turn, max) {
 export function epiloguePrompt(caseData, state, ending) {
   const found = ending.truths.filter((t) => t.found).map((t) => t.label);
   const missed = ending.truths.filter((t) => !t.found).map((t) => t.label);
-  const facts = [
-    `How it ended at the lighthouse: ${ending.outcome}`,
-    ending.accused ? `Before that night the detective formally accused ${ending.accused.suspect}${ending.accused.verdict === 'fenn' ? ' and Tobias Fenn was charged with the murders' : ending.accused.verdict === 'hale' ? ' and Captain Hale was suspended' : ending.accused.verdict === 'vance_strong' ? ', and was right, and was believed' : ', and was right, and was not believed'}.` : 'The detective never formally accused anyone.',
-    state.flags.knew_vance ? 'The detective knew their partner was the killer before climbing the lighthouse stairs.' : 'The detective did not know their partner was the killer until they saw her standing in the lantern room.',
-    ending.truthPublic ? 'The truth about the Calliope can be proved and will come out: Vale ordered the sailing, Brook cleared it, Pell was drunk in the tavern, Hale turned the rescue launch back.' : 'There is no proof of what really happened to the Calliope. The inquiry\'s finding still stands.',
-    ending.how === 'finish' ? 'Hale is dead.' : 'Hale is alive, and will have to say aloud what he did.',
-    ending.how === 'surrender' ? 'Nora Vance is in custody. She asked for her whistle to be given to her father.' : ending.how === 'spare' ? 'Nora Vance went into the sea from the gallery. No body has been found.' : 'Nora Vance was sitting on the lighthouse steps when the lifeboat men came, or she was gone; the report is not clear.',
-    state.verdict === 'fenn' && ending.how === 'finish' ? 'Tobias Fenn is still charged. Unpicking that will take months.' : 'Tobias Fenn is free. He knows his daughter lived.',
-    `The detective's name: ${state.player.name}.`,
-  ];
-  const system = `You write the closing passage of a noir detective game, "${caseData.meta.title}". The case is over. Write the epilogue.
+  const facts = [...caseData.endings.epilogueFacts({ state, ending, check }), `The detective's name: ${state.player.name}.`];
+  const system = `You write the closing passage of ${caseData.prompts.genre}, "${caseData.meta.title}". The case is over. Write the epilogue.
 
-Form: second person ("you"), past tense, three or four short paragraphs, 170 to 240 words in all. Spare, exact, unsentimental; rain, brass, lamplight, the harbour. End on a single short final line set on its own.
+Form: second person ("you"), past tense, three or four short paragraphs, 170 to 240 words in all. ${caseData.prompts.epilogueVoice} End on a single short final line set on its own.
 
 It must be faithful to the facts below; do not contradict or soften them, and do not invent major events. You may add small sensory detail. It should quietly reflect what this detective understood and what they never found out, without listing it mechanically. No headings, no bullet points, no moralising, no gore. Plain text only.`;
   const user = `FACTS OF THIS ENDING\n${facts.map((f) => `- ${f}`).join('\n')}\n\nWHAT THE DETECTIVE WORKED OUT\n${found.map((f) => `- ${f}`).join('\n') || '- Very little.'}\n\nWHAT THE DETECTIVE NEVER FOUND\n${missed.map((f) => `- ${f}`).join('\n') || '- Nothing. They found all of it.'}\n\nFinal rating awarded: ${ending.rank}.`;

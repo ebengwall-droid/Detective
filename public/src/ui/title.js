@@ -1,5 +1,5 @@
 // Screens outside the investigation: title, menu and settings, how to play,
-// the Lamplighter's letters, and the closing report.
+// the Invigilator's Papers, and the closing report.
 
 import { el, add, icon, prose } from './dom.js';
 
@@ -33,7 +33,7 @@ export function showTitle(cards, game, { hasSave, savedName }) {
     const begin = () => finish({ action: 'new', name: name.value.trim() || 'Detective' });
     const card = el(
       'section',
-      { class: 'card title', 'aria-label': 'Greyhaven: The Lamplighter' },
+      { class: 'card title', 'aria-label': `${game.caseInfo.series}: ${game.caseInfo.title}` },
       el(
         'div',
         { class: 'card-inner' },
@@ -66,10 +66,11 @@ export function showHelp(cards, game) {
       ['Examine', `Glowing diamonds mark what can be examined. ${touch ? 'Tap' : 'Click'} one. What matters is bagged as evidence. Look lights up everything in the room.`],
       ['Talk', `Speech bubbles are people. Ask them anything, in your own words, or ${touch ? 'tap' : 'click'} a suggested question. They remember. Some of them lie.`],
       ['Break a lie', 'While talking, Show puts a piece of evidence in front of someone. That is how liars come apart. Observe tells you what you notice about them.'],
-      ['Notebook', 'Everything you establish is written down for you: objectives, evidence, people, leads. The Board tab is where you reason and, in the end, name the killer.'],
-      ['Laptop', 'HARBORNET answers plain questions from police records: names, places, number plates, objects. It is also where you send evidence to the lab.'],
+      ['Papers', 'This is a puzzle game. Every puzzle you are set is kept in your notebook under Papers, with your solving tools. Type an answer; a wrong one costs nothing. Each paper has hints, and the last hint gives the answer.'],
+      ['Look things up', 'The Lectern (the laptop at your desk) will teach you how any cipher or puzzle is done and where it came from. You are meant to use it, and to look things up outside the game too. It will not give you the answer.'],
+      ['Notebook', 'Everything you establish is written down for you: objectives, evidence, people, leads. The Board tab is where you reason and, in the end, name the killer. Evidence goes to the lab from the Lectern.'],
       ['Map', 'Travel between places. When a day has given you all it will, call it a night.'],
-      ['Stuck?', 'Think gives you a nudge toward the nearest loose end. It costs a little off your final rating and is worth it.'],
+      ['Stuck?', 'Think gives you a nudge toward the nearest loose end of the case. It costs a little off your final rating and is worth it.'],
     ];
     const close = () => {
       window.removeEventListener('keydown', onKey, true);
@@ -173,15 +174,15 @@ export function showMenu(cards, game) {
   });
 }
 
-/** An unstamped letter, typed out as it is read. `run(onText)` resolves to { body }. */
+/** A covering note in green ink, written out as it is read. `run(onText)` resolves to { body }. */
 export function showLetter(cards, game, run) {
   return new Promise((resolve) => {
-    const paper = el('div', { class: 'paper', style: { textAlign: 'left', minHeight: '220px' } }, el('div', { class: 'dots' }, el('i'), el('i'), el('i')));
+    const paper = el('div', { class: 'paper ink', style: { textAlign: 'left', minHeight: '220px' } }, el('div', { class: 'dots' }, el('i'), el('i'), el('i')));
     const go = el('button', { class: 'btn solid', type: 'button', text: 'Bag it', disabled: true });
     const card = el(
       'section',
       { class: 'card veil', role: 'dialog', 'aria-label': 'A letter' },
-      el('div', { class: 'card-inner' }, el('div', { class: 'card-kicker', text: 'Left on your desk · no stamp' }), el('div', { class: 'rule' }), paper, el('div', { class: 'card-actions' }, go)),
+      el('div', { class: 'card-inner' }, el('div', { class: 'card-kicker', text: game.view.laptop?.letterKicker ?? 'By the Bellows · green ink' }), el('div', { class: 'rule' }), paper, el('div', { class: 'card-actions' }, go)),
     );
     go.addEventListener('click', () => {
       card.remove();
@@ -237,7 +238,7 @@ export function showEnding(cards, game, run) {
     const card = el(
       'section',
       { class: 'card', role: 'dialog', 'aria-label': 'Epilogue' },
-      el('div', { class: 'card-inner', style: { width: 'min(100%, 640px)' } }, el('div', { class: 'card-kicker', text: '14 October' }), el('h1', { class: 'card-title', text: 'After' }), el('div', { class: 'rule' }), text, report, actions),
+      el('div', { class: 'card-inner', style: { width: 'min(100%, 640px)' } }, el('div', { class: 'card-kicker', text: 'The morning after' }), el('h1', { class: 'card-title', text: 'After' }), el('div', { class: 'rule' }), text, report, actions),
     );
     cards.append(card);
     const close = (value) => {
@@ -261,6 +262,8 @@ export function showEnding(cards, game, run) {
           el('p', { class: 'muted', style: { textAlign: 'center', margin: '0 0 18px' }, text: ending.rankLine }),
           el('div', { class: 'section-label', text: `What you uncovered · ${found} of ${ending.truths.length}` }),
           ending.truths.map((t) => el('div', { class: `truth ${t.found ? '' : 'missed'}` }, icon(t.found ? 'check' : 'close', 16), t.label)),
+          ending.puzzles ? el('div', { class: 'section-label', style: { marginTop: '16px' }, text: `Papers answered · ${ending.puzzles.solved} of ${ending.puzzles.of}` }) : null,
+          ending.puzzles ? el('p', { class: 'muted', style: { fontSize: '13px', margin: '0' }, text: [count(ending.puzzles.hints, 'hint taken', 'hints taken'), count(ending.puzzles.given, 'answer given away', 'answers given away')].join(' · ') }) : null,
           el('p', { class: 'muted', style: { fontSize: '13px', marginTop: '14px' }, text: [count(ending.stats.exchanges, 'question asked', 'questions asked'), count(ending.stats.hints, 'moment of thought', 'moments of thought'), count(ending.stats.wrong, 'wrong turn on the board', 'wrong turns on the board')].join(' · ') }),
         );
         add(actions, el('button', { class: 'btn solid', type: 'button', text: 'A new case file', onClick: () => close('new') }), el('button', { class: 'btn quiet', type: 'button', text: 'Stay a while', onClick: () => close('stay') }));

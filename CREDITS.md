@@ -1,6 +1,6 @@
 # Credits
 
-Greyhaven's story, rules, rooms and interface were written for this project.
+The Fold's story, puzzles, rules, rooms and interface were written for this project.
 The people, furniture, surfaces and the libraries that draw them are the work
 of others, used under the licences below.
 
@@ -42,14 +42,13 @@ outside the windows are from **Poly Haven**, released into the public domain
 `scripts/assets/props.json` lists each one by its Poly Haven name. CC0 asks
 for no credit; these are the artists whose work is in the game, with thanks:
 
-Amal Kumar, Aron Łyczek, Arrangemonk, Benny Weimer, Charlotte Baglioni,
-Dairon Sanchez, Dario Barresi, Derek Wight, Dimitrios Savva, Greg Zaal,
-Guillaume Monsergent, Hank Kaamura, James Ray Cock, Jenelle van Heerden, Joe
-Seabuhr, John Malcolm, Jurita Burger, Kirill Sannikov, Kuutti Siitonen, L,
-Luca B, Luis José Fernández Rodríguez, Mateusz Sadek, Monsta3D, PierreB3D,
-ProgrammerOnCoffee, Rajil Jose Macatangay, Rico Cilliers, Rob Tuytel,
-Satyaki Mandal, Sean Buckley, Sergej Majboroda, Serhii Khromov, SV Garip,
-Tina, Ulan Cabanilla and Yann Kervran.
+Amal Kumar, Aron Łyczek, Arrangemonk, Charlotte Baglioni, Dairon Sanchez,
+Dario Barresi, Dimitrios Savva, Greg Zaal, Guillaume Monsergent, James Ray
+Cock, Jenelle van Heerden, Joe Seabuhr, Jurita Burger, Kirill Sannikov,
+Kuutti Siitonen, L, Luis José Fernández Rodríguez, Mateusz Sadek, Miroslav
+Turura, Nazar Borodavka, PierreB3D, Rajil Jose Macatangay, Rico Cilliers,
+Riley Queen, Rob Tuytel, Sergej Majboroda, Serhii Khromov, SV Garip, Ulan
+Cabanilla and Yann Kervran.
 
 ## Libraries
 

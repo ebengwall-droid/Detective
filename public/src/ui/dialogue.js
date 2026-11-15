@@ -98,13 +98,13 @@ export function createDialogue(panels, game) {
       game.world.setTalking(current.id, false);
       setMood(reply.mood);
       if (reply.degraded) log.append(lineNode({ who: 'note', text: 'Claude could not be reached for this line, so it comes from the script.' }));
-      if (res.turnsLeft !== undefined && !reply.ended) turnsEl.textContent = res.turnsLeft <= 3 ? `${res.turnsLeft} exchange${res.turnsLeft === 1 ? '' : 's'} before 03:05` : '';
+      if (res.turnsLeft !== undefined && !reply.ended) turnsEl.textContent = res.turnsLeft <= 3 ? `${res.turnsLeft} exchange${res.turnsLeft === 1 ? '' : 's'} before midnight` : '';
       scrollDown();
       if (reply.ended) {
         setChips([]);
         input.disabled = true;
         sendBtn.disabled = true;
-        log.append(el('div', { class: 'line note' }, el('button', { class: 'btn small', type: 'button', text: current.finale ? 'It is over' : 'She is gone', onClick: () => api.close() })));
+        log.append(el('div', { class: 'line note' }, el('button', { class: 'btn small', type: 'button', text: current.finale ? 'It is over' : 'They have gone', onClick: () => api.close() })));
         scrollDown();
         busy = false;
         panel?.classList.remove('busy');

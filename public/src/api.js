@@ -10,14 +10,14 @@
 // Both expose the same thing: call(method, args, { onText, signal }).
 
 const STREAMING = new Set(['say', 'present', 'laptopAsk', 'readLetter', 'think', 'finaleSay', 'epilogue']);
-const SID_KEY = 'greyhaven.sid';
-const SAVE_KEY = 'greyhaven.save.v3';
+const SID_KEY = 'fold.sid';
+const SAVE_KEY = 'fold.save.v1';
 
 function store() {
   // Storage can be missing or throw (private windows, embedded previews).
   try {
     const s = window.localStorage;
-    s.getItem('greyhaven.probe');
+    s.getItem('fold.probe');
     return s;
   } catch {
     return null;

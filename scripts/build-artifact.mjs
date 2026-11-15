@@ -17,7 +17,7 @@
 //                   Opened on claude.ai, the page asks Claude to play the
 //                   cast on the viewer's own account, so no API key is
 //                   involved.
-//   greyhaven.html  the page alone. Without assets/ beside it the game draws
+//   the-fold.html  the page alone. Without assets/ beside it the game draws
 //                   its people and furniture in code instead: plainer, but it
 //                   runs from a single file opened off a disk.
 
@@ -31,7 +31,7 @@ const outArg = process.argv.indexOf('--out');
 const outDir = path.resolve(outArg > 0 ? process.argv[outArg + 1] : path.join(root, 'dist'));
 
 const FONTS = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400..600&family=Marcellus&family=Special+Elite&display=swap';
-const TITLE = 'The Lamplighter';
+const TITLE = 'The Invigilator';
 
 const bundle = await build({
   entryPoints: [path.join(root, 'public/src/main.js')],
@@ -50,10 +50,10 @@ if (js.includes('<!--')) throw new Error('bundle contains "<!--", which is not s
 
 const css = (await transform(fs.readFileSync(path.join(root, 'public/styles.css'), 'utf8'), { loader: 'css', minify: true })).code;
 
-const page = (flags) => `<div id="app"><div id="boot"><div class="lamp"></div>Greyhaven</div></div>
+const page = (flags) => `<div id="app"><div id="boot"><div class="lamp"></div>The Fold</div></div>
 <script>${flags}</script>
 <script type="module">${js}</script>`;
-const body = page("window.GREYHAVEN_MODE = 'local';");
+const body = page("window.FOLD_MODE = 'local';");
 
 // claude.ai serves only ordinary web file types beside a page, so there the models travel as JSON (see below).
 const artifact = `<title>${TITLE}</title>
@@ -62,7 +62,7 @@ const artifact = `<title>${TITLE}</title>
 <style>${css}
 /* The artifact frame already keeps the page clear of the notch and the home bar, top and bottom. */
 :root{--safe-t:0px;--safe-b:0px}</style>
-${page("window.GREYHAVEN_MODE = 'local'; window.GREYHAVEN_PACKED = true;")}
+${page("window.FOLD_MODE = 'local'; window.FOLD_PACKED = true;")}
 `;
 
 const standalone = `<!doctype html>
@@ -77,8 +77,8 @@ const standalone = `<!doctype html>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Greyhaven">
-<title>Greyhaven: ${TITLE}</title>
+<meta name="apple-mobile-web-app-title" content="The Fold">
+<title>The Fold: ${TITLE}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS}">
@@ -92,7 +92,7 @@ ${body}
 
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, 'artifact.html'), artifact);
-fs.writeFileSync(path.join(outDir, 'greyhaven.html'), standalone);
+fs.writeFileSync(path.join(outDir, 'the-fold.html'), standalone);
 
 // The installable app: the page plus what a phone needs to treat it as one.
 const appDir = path.join(outDir, 'app');
@@ -133,6 +133,6 @@ fs.writeFileSync(path.join(outDir, 'artifact-files.json'), `${JSON.stringify(pub
 const kb = (s) => `${(Buffer.byteLength(s) / 1024).toFixed(0)} KB`;
 console.log(`script ${kb(js)}, styles ${kb(css)}`);
 console.log(`wrote ${path.join(outDir, 'artifact.html')} (${kb(artifact)})`);
-console.log(`wrote ${path.join(outDir, 'greyhaven.html')} (${kb(standalone)})`);
+console.log(`wrote ${path.join(outDir, 'the-fold.html')} (${kb(standalone)})`);
 console.log(`wrote ${appDir}/ (installable app: index.html, manifest, icons, service worker, assets)`);
 console.log(`assets: ${published.length} files, ${(assetBytes / 1048576).toFixed(1)} MB beside the app; ${(hostedBytes / 1048576).toFixed(1)} MB in ${hostedDir}/ to publish beside the artifact (listed in artifact-files.json)`);

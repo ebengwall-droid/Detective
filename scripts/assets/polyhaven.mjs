@@ -32,11 +32,11 @@ const arg = (name, fallback) => {
   return i > 0 ? process.argv[i + 1] : fallback;
 };
 const flag = (name) => process.argv.includes(`--${name}`);
-const cache = path.resolve(arg('cache', path.join(os.tmpdir(), 'greyhaven-polyhaven')));
+const cache = path.resolve(arg('cache', path.join(os.tmpdir(), 'fold-polyhaven')));
 const only = arg('only', null)?.split(',');
 const all = !flag('models') && !flag('textures') && !flag('env');
 const outDir = path.join(root, 'public/assets');
-const AGENT = 'greyhaven-asset-fetch/1.0';
+const AGENT = 'fold-asset-fetch/1.0';
 
 function download(url, dest) {
   if (fs.existsSync(dest) && fs.statSync(dest).size > 0) return dest;

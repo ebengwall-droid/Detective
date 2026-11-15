@@ -8,6 +8,7 @@ import { ART } from './art.js';
 import { PROPS } from './props.js';
 import { rainGlass } from './glass.js';
 import './props2.js';
+import './props3.js';
 import './dress.js';
 
 const WALL_T = 0.16;

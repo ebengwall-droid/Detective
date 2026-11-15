@@ -5,15 +5,18 @@
 // everything starts from unlock(), called on the first tap or key press.
 
 const AMBIENCE = {
-  precinct: { rain: 0.1, cutoff: 1400, drone: 0.018, horn: true },
-  brook_house: { rain: 0.13, cutoff: 1700, drone: 0.014, horn: true },
-  morgue: { rain: 0, cutoff: 500, drone: 0.05, hum: true },
-  lamp_shop: { rain: 0.07, cutoff: 1100, drone: 0.012 },
-  tavern: { rain: 0.08, cutoff: 1200, drone: 0.016, horn: true },
-  pell_room: { rain: 0.2, cutoff: 2600, drone: 0.012, wind: 0.05, horn: true },
-  vale_yacht: { rain: 0.16, cutoff: 2000, drone: 0.02, creak: true, horn: true },
-  lighthouse: { rain: 0.3, cutoff: 4200, drone: 0.03, wind: 0.16 },
-  title: { rain: 0.1, cutoff: 1500, drone: 0.014, horn: true },
+  gatehouse: { rain: 0.24, cutoff: 3000, drone: 0.012, wind: 0.07 },
+  hall: { rain: 0.08, cutoff: 1300, drone: 0.018 },
+  clockshop: { rain: 0.1, cutoff: 1500, drone: 0.014 },
+  wheelshop: { rain: 0.07, cutoff: 1100, drone: 0.012 },
+  mortuary: { rain: 0, cutoff: 500, drone: 0.05, hum: true },
+  meridian: { rain: 0.16, cutoff: 2000, drone: 0.02, creak: true },
+  stalemate: { rain: 0.07, cutoff: 1200, drone: 0.016 },
+  crux: { rain: 0.2, cutoff: 2600, drone: 0.012, wind: 0.04 },
+  almshouse: { rain: 0.1, cutoff: 1500, drone: 0.01 },
+  repository: { rain: 0, cutoff: 600, drone: 0.04, hum: true },
+  lantern: { rain: 0.3, cutoff: 4200, drone: 0.03, wind: 0.16 },
+  title: { rain: 0.1, cutoff: 1500, drone: 0.014 },
 };
 
 // D natural minor, low to high.
@@ -142,7 +145,7 @@ export class Audio {
   }
 
   setAmbience(name) {
-    this.ambience = AMBIENCE[name] ? name : 'precinct';
+    this.ambience = AMBIENCE[name] ? name : 'hall';
     if (!this.ctx) return;
     const a = AMBIENCE[this.ambience];
     const t = this.ctx.currentTime;
@@ -229,7 +232,7 @@ export class Audio {
   }
 
   phrase() {
-    if (!this.ctx || !this.enabled || this.ambience === 'morgue') return;
+    if (!this.ctx || !this.enabled || AMBIENCE[this.ambience]?.hum) return; // no music under the cold rooms' hum
     const n = 1 + Math.floor(Math.random() * 3);
     let i = Math.floor(Math.random() * (SCALE.length - 2));
     let when = 0;

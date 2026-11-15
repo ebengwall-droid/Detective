@@ -147,7 +147,7 @@ export class Brain {
     return { say: fallback, mood: 'calm', told: [], acts: [] };
   }
 
-  // ------------------------------------------------------------ HARBORNET
+  // ------------------------------------------------------- the reference desk
 
   async laptop(state, query, hooks) {
     if (this.live) {
@@ -170,10 +170,10 @@ export class Brain {
     scored.sort((a, b) => b.score - a.score);
     const top = scored.slice(0, scored.length > 1 && scored[1].score >= scored[0].score * 0.7 ? 2 : 1);
     if (!top.length) {
-      return { answer: 'NO RECORD FOUND.\nTry a surname, a place, an object, or a number from the evidence.', open: [] };
+      return { answer: this.case.laptop.none, open: [] };
     }
     const titles = top.map((t) => `  ${t.rec.title}`).join('\n');
-    return { answer: `${top.length} RECORD${top.length > 1 ? 'S' : ''} FOUND. OPENED BELOW AND FILED UNDER RECORDS.\n${titles}`, open: top.map((t) => t.id) };
+    return { answer: `${this.case.laptop.found(top.length)}\n${titles}`, open: top.map((t) => t.id) };
   }
 
   // ---------------------------------------------------------- inner voice
@@ -191,7 +191,7 @@ export class Brain {
   async letter(state, n, hooks) {
     if (this.live) {
       const text = await this.call({ ...letterPrompt(this.case, state, n), tag: 'letter' }, hooks);
-      if (text && /L\.\s*$/.test(text.trim()) && text.length > 200) return text.trim();
+      if (text && text.trim().endsWith(this.case.director.signs) && text.length > 200) return text.trim();
     }
     const ctx = letterContext(this.case, state);
     return this.case.director.letters[n].fallback({ did: ctx.did[0], missed: ctx.missed[0] }).replace(/\n{3,}/g, '\n\n').trim();
@@ -239,7 +239,7 @@ export class Brain {
     const weight = levers.filter((l) => landed.has(l.id)).reduce((n, l) => n + l.weight, 0);
     const stance = landed.size >= 3 ? 'breaking' : landed.size === 2 ? 'wavering' : 'listening';
     // Enough has landed: she does not need to be asked again.
-    const end = weight >= 5 && (landed.has('name') || landed.has('father')) ? 'surrender' : null;
+    const end = weight >= 5 && this.case.finale.personal.some((id) => landed.has(id)) ? 'surrender' : null;
     return { say: hits.map((h) => h.l.reply).join('\n\n'), stance, landed: hits.map((h) => h.l.id), end, scripted: true };
   }
 
@@ -254,28 +254,7 @@ export class Brain {
   }
 
   scriptedEpilogue(state, ending) {
-    const paras = [];
-    if (ending.how === 'surrender') {
-      paras.push('You brought her down ninety-one steps in her own handcuffs, and she counted them aloud. At the bottom she asked what time it was. Ten past three, you said. She nodded, as if that settled something.');
-    } else if (ending.how === 'spare') {
-      paras.push('The lifeboat searched the Teeth until noon and found a police cape and nothing in it. The coxswain said the set of the tide would have taken a body south. Toward Harrowgate, he said. You did not write that down.');
-    } else {
-      paras.push('They brought the Captain down on a hatch cover at first light. Someone had put a lantern out, and nobody could say who. Four lights for four men. The Lamplighter kept her word to the minute.');
-    }
-    if (state.verdict === 'fenn' && ending.how === 'finish') {
-      paras.push('Tobias Fenn was still in a cell that morning, charged on your signature. It took the lawyers until Christmas to let him out. He never once asked who had put him there.');
-    } else {
-      paras.push("Tobias Fenn went home to Lamp Row. The sign still says '& Daughter'. Somebody saw him regilding it, slowly, with hands that would not hold still.");
-    }
-    paras.push(ending.truthPublic
-      ? 'The Ledger ran the Calliope across six columns: the tape, the logbook, the hour the police boat turned. Thirty-one names, in full, on the front page. Milo Strand did not put his own name on it.'
-      : 'The inquiry file went back in its box with a fresh seal. Officially the lamp at Marrow Point failed mechanically, and no person was culpable. You know better. Knowing is not proof.');
-    const found = ending.truths.filter((t) => t.found).length;
-    paras.push(found >= ending.truths.length - 1
-      ? 'You missed very little. That is not always a comfort.'
-      : `There were things in this case you never saw. ${ending.truths.length - found} of them, by the reckoning of the dead.`);
-    paras.push(ending.how === 'finish' ? 'It is still raining in Greyhaven.' : 'That night, for the first time in twenty years, there was a light at Marrow Point.');
-    return paras.join('\n\n');
+    return this.case.endings.scripted({ state, ending, check }).join('\n\n');
   }
 }
 

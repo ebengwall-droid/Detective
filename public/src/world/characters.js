@@ -800,7 +800,7 @@ function paintTorso(c, a, at, kind) {
  * @property {string|null} [tie]
  * @property {string|null} [scarf]
  * @property {string[]} [accessories] cane | whistle | whistleCord | clipboard | towel | notepad | badge | camera | rope | lantern
- * @property {'stand'|'sit'|'bound'|'lean'} [pose]
+ * @property {'stand'|'sit'|'bound'|'slumped'|'lean'} [pose]
  */
 
 /**
@@ -818,7 +818,7 @@ function createFigure(a = {}) {
   const root = new THREE.Group();
   const scale = a.height ?? 1;
   const build = BUILD[a.build ?? 'medium'];
-  const pose = a.pose ?? 'stand';
+  const pose = a.pose === 'slumped' ? 'bound' : (a.pose ?? 'stand');
   const fem = feminine(a);
   const coatLen = a.coat?.length ?? 'jacket';
   const coatColor = a.coat?.color ?? '#2c3138';

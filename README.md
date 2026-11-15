@@ -1,37 +1,68 @@
-# Greyhaven: The Lamplighter
+# The Fold: The Invigilator
 
-A 3D detective mystery where every character is played live by Claude.
+A 3D puzzle-mystery where every character is played live by Claude, and the
+killer teaches you to solve.
 
-![A crime scene: the study at 9 Gull Street](docs/crime-scene.jpg)
+![A clockmaker's workshop in the Fold](docs/crime-scene.jpg)
 
-Someone in a rain-soaked harbour town is drowning old men in their own
-armchairs and leaving a lit storm lantern in the window. You are the new
-detective. Walk the crime scenes, bag evidence, hear the autopsy, search
-police records on your laptop, question people in your own words, catch them
-lying, and name the killer before the fourth lantern is lit.
+There is a part of the old city of Ravel that is on no map. Six crooked lanes
+where, for six hundred years, a guild has made puzzles the way other streets
+make shoes: ciphers, locks, maps, mazes, the crossword in your Sunday paper.
+Nothing there is magic. It is all craft: brass, oak, clockwork, paper and
+ink. Its clocks run eleven minutes behind yours, its post goes by pneumatic
+tube, and you get in by solving the gate.
 
-There are three murders, eight locations, nine people to question, four acts
-and a twist. It is a few hours long.
+Somebody inside is killing the guild's governors, one a day, behind doors
+locked from the inside. Then a letter in green ink arrives for you, set out
+like an examination paper. *Candidate*, it begins.
+
+You are a detective from outside. Walk the scenes, bag evidence, hear the
+post-mortem, question twelve people in your own words, catch them out, and
+sit the Papers: seven questions from the killer that begin with a cipher a
+child of the Fold does on the way to school and end with something a master
+would sweat over. Every answer opens the case a little further.
+
+- **Twenty puzzles**, from easy to very hard: Caesar and ROT13, pigpen, the
+  Polybius square, the rail fence, Vigenère, Playfair, Bacon's cipher, a
+  knight on a chessboard, places found by latitude and longitude, bytes in a
+  machine's log, a cryptic crossword clue, names hidden in plain sight, and
+  one last puzzle made out of all the others.
+- **You are meant to look things up.** The Lectern, the guild's reference
+  machine, will teach you the real method and the real history of everything
+  in the game: who Polybius was, how the "undecipherable cipher" was broken,
+  why the word *clue* means what it does. It will not give you an answer.
+- **You earn your tools.** A cipher wheel on the first day, and more as you
+  go. They do the arithmetic; knowing which one to pick up, and what key to
+  give it, is yours.
+- Four days, eleven places, twelve people, and a twist.
+
+It is a few hours long, longer if you refuse the hints.
 
 ## What the AI does
 
 - **Every conversation is improvised.** Type anything. Each character has a
   personality, things they know, things they are hiding and conditions under
-  which they crack. They remember what you said and what you showed them.
-- **The killer writes to you.** Three unstamped letters turn up on your desk.
-  Each is written at the moment you open it, about what you actually did and
-  what you missed.
-- **The laptop understands questions.** HARBORNET, the police records
-  terminal, answers plain language: a name, a number plate, "who signed out
-  the pool car on the tenth".
+  which they give them up. They remember what you said and what you showed
+  them.
+- **The killer writes to you.** Each Paper comes with a covering note written
+  at the moment you open it, about what you actually did that day and what
+  you missed.
+- **The Lectern teaches.** Ask it how any cipher works, what lies at a
+  latitude and longitude, or who somebody in the guild is. It answers in the
+  voice of the woman it was built from. Ask it to solve your Paper and it
+  will ask you a question back.
 - **The ending is a negotiation.** The last scene is a conversation with the
   killer, with a life depending on it. What you learned decides what you can
   say that lands.
 - **The epilogue is yours.** It is written from how your case went.
 
-The story itself is fixed and fair: the same person did it every time, the
-clues are always there, and Claude cannot hand out a clue you have not
-earned. The rules of the case are code; the voices are Claude.
+What Claude does *not* do is set the puzzles. Every cipher text in the game
+is produced from its answer by code (`core/ciphers.js`), and the tests undo
+each one the way a player would, so a puzzle can never be wrong, unfair or
+different from one play to the next. The story is fixed in the same way: the
+same person did it every time, the clues are always there, and Claude cannot
+hand out a clue you have not earned. The rules are code; the voices are
+Claude.
 
 The game uses Claude Opus (`claude-opus-5-5`).
 
@@ -57,7 +88,7 @@ the game.
 The phone is the main way to play. Everything is within reach of a thumb, and
 nothing needs careful steering.
 
-![A crime scene, the Look list and a conversation on a phone](docs/phone.jpg)
+![The first room, a Paper and a conversation on a phone](docs/phone.jpg)
 
 - **Tap to go.** Tap the floor, a glowing marker or a person and you walk
   there. Drag to look around. The ring at the bottom left steers by thumb if
@@ -65,7 +96,7 @@ nothing needs careful steering.
 - **Look** lists everyone and everything in the room. Tap a name and you walk
   straight to it. With Look and the Map you can play the whole case without
   steering at all.
-- **Tools sit in a dock along the bottom**: Look, Think, Notes, Laptop, Map.
+- **Tools sit in a dock along the bottom**: Look, Think, Notes, Lectern, Map.
   Panels open as sheets from the bottom and close from the bottom.
 - **Suggested questions** are one tap. Type or dictate your own whenever you
   like.
@@ -76,7 +107,7 @@ nothing needs careful steering.
   finishing effects (ambient occlusion, bloom, depth of field, frosted
   glass). The game also steps down by itself when it sees the frame rate
   struggling.
-- Getting to the first room is about a 7 MB download on a phone, so it takes
+- Getting to the first room is about a 6 MB download on a phone, so it takes
   a few seconds on a mobile connection; each new place after that is around
   a megabyte.
 
@@ -101,8 +132,9 @@ or host the `dist/app` folder from `npm run build` (below) on any static host.
 | Examine or talk | Tap the glowing marker | Click it, or look at it and press `E` |
 | Everything in the room | **Look** | `Q` |
 | Catch a lie | In a conversation, **Show** puts evidence in front of them | The same |
-| Notebook, laptop, map | Dock along the bottom | `N`, `L`, `M` |
-| Hint | **Think** | `T` |
+| Notebook (and Papers), Lectern, map | Dock along the bottom | `N`, `L`, `M` |
+| A nudge on the case | **Think** | `T` |
+| A hint on a puzzle | In the Paper itself | The same |
 
 ### Builds without a server
 
@@ -118,11 +150,11 @@ writes to `dist/`:
   it then opens offline.
 - `artifact.html`: the same page packaged as a claude.ai artifact, with
   `artifact-files.json` listing the assets to publish beside it.
-- `greyhaven.html`: the page alone. Opened straight off a disk it cannot
+- `the-fold.html`: the page alone. Opened straight off a disk it cannot
   fetch the assets, so it draws its people and furniture in code instead:
   plainer, but it is one file.
 
-`app/` and `greyhaven.html` have no server behind them, so the characters
+`app/` and `the-fold.html` have no server behind them, so the characters
 keep to their script. As a claude.ai artifact the page asks Claude to play
 the cast on the viewer's own account, and no API key is needed.
 
@@ -134,10 +166,10 @@ Environment variables for `npm start`:
 |---|---|---|
 | `ANTHROPIC_API_KEY` | none | Brings the characters to life |
 | `PORT`, `HOST` | `3000`, `0.0.0.0` | Where to listen |
-| `GREYHAVEN_MODEL` | `claude-opus-5-5` | Use a different Claude model |
-| `GREYHAVEN_AI=off` | | Force scripted mode |
-| `GREYHAVEN_DATA` | `./data/saves` | Where saves are written |
-| `GREYHAVEN_DEBUG=1` | | Log each model call and its token use |
+| `FOLD_MODEL` | `claude-opus-5-5` | Use a different Claude model |
+| `FOLD_AI=off` | | Force scripted mode |
+| `FOLD_DATA` | `./data/saves` | Where saves are written |
+| `FOLD_DEBUG=1` | | Log each model call and its token use |
 
 ## How it is built
 
@@ -147,12 +179,13 @@ core/                 The game itself. Runs unchanged in Node and in the browser
   brain.js            Turns a game situation into a line of dialogue (Claude, or the script)
   prompts.js          Character sheets and briefs sent to Claude
   view.js             What the player is allowed to see of the state
-  cases/lamplighter/  The case: scenes, people, facts, evidence, records, story
+  ciphers.js          The classical ciphers: makes every puzzle text, and powers the solving tools
+  cases/fold/         The case: scenes, people, facts, evidence, lectures, puzzles, story
 server/               Node server: hosts the core, keeps the API key and the saves
 public/               The browser client
   assets/             Models, textures and animation, ready to load (built by scripts/assets)
   src/world/          3D: rooms, people, furniture, movement, finishing pass
-  src/ui/             HUD, conversation, notebook, laptop, map, title, ending
+  src/ui/             HUD, conversation, notebook and Papers, the Lectern, map, title, ending
   src/game.js         Ties the world and the UI to the game core
 scripts/              Playtest, browser test driver, builds
   assets/             Fetches and prepares the models, textures and animation
@@ -166,15 +199,14 @@ test/                 Tests
 - **The people** are rigged human models from Microsoft's Rocketbox avatar
   library, moved by its motion-capture clips. `world/people.js` chooses a
   clip from what someone is doing and how they feel, turns head and eyes to
-  whoever they are talking to, blinks, shapes the mouth as they speak, holds
-  an expression for each mood (42 face shapes are kept per person), and keeps
-  a hand on a cane with two-bone IK.
+  whoever they are talking to, blinks, shapes the mouth as they speak and
+  holds an expression for each mood (42 face shapes are kept per person).
 - **Furniture, lamps and props** are models from Poly Haven; **floors, walls
   and ceilings** are its photographed PBR materials; a photographed interior
   lights everything that reflects. Rooms are still laid out as data
-  (`core/cases/lamplighter/scenes.js`); `world/dress.js` puts the model for
+  (`core/cases/fold/scenes.js`); `world/dress.js` puts the model for
   each prop where the layout says, fitted to the space.
-- **The windows** look out on a photograph of a sea front at night. A pane
+- **The windows** look out on a photograph of a waterfront at night. A pane
   shows whatever lies in the direction you are looking through it, so the
   view shifts as you walk; the rain is on the glass, and each drop bends the
   lights behind it (`world/glass.js`).
@@ -182,7 +214,8 @@ test/                 Tests
   and [N8AO](https://github.com/N8python/n8ao): ambient occlusion, depth of
   field behind whoever you are talking to, bloom on lamps, filmic tone
   mapping, a light grade, vignette and grain.
-- Rain, foghorn, piano and the rest of the sound are synthesised.
+- Rain on the glass, wind on the roof, a hull creaking at its mooring, the
+  hum of the cold room and the odd phrase of piano are all synthesised.
 
 If the assets cannot be fetched the game still runs: people and furniture
 are drawn in code instead (`world/characters.js`, `world/props.js`).
@@ -220,7 +253,7 @@ is in the page.
 ### Developing
 
 ```bash
-npm test            # every ending, saves, view leaks, the server, the Claude calls
+npm test            # every puzzle undone, every ending, saves, view leaks, the server, the Claude calls
 npm run playtest    # plays the best path through the core and prints the route
 npm run dev         # server with reload
 ```
@@ -237,8 +270,8 @@ sends to Claude at a dozen points in the story, as readable text.
 and prints what it did with it. Useful for tuning a character without
 spending a token.
 
-`/dev.html?loc=precinct` is a viewer for single rooms; `?loc=stage` lines up
-the cast (`&mood=angry`, `&talk=1`, `&pose=sit`), and `?loc=models` every
-piece of furniture.
+`/dev.html?loc=hall` is a viewer for single rooms (`&people=1` stands its
+people in it); `?loc=stage` lines up the cast (`&mood=angry`, `&talk=1`,
+`&pose=sit`), and `?loc=models` every piece of furniture.
 
-**Spoilers:** `core/cases/lamplighter/` is the solution. Play first.
+**Spoilers:** `core/cases/fold/` is the solution, and `scripts/playtest.mjs` and `test/` contain every answer. Play first.

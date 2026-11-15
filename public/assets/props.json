@@ -49,22 +49,6 @@
     0.3484
    ]
   },
-  "sofa": {
-   "file": "props/sofa.glb",
-   "source": "sofa_02",
-   "bytes": 201828,
-   "tris": 2728,
-   "min": [
-    -0.9033,
-    0.0002,
-    -0.4776
-   ],
-   "max": [
-    0.9039,
-    0.7097,
-    0.34
-   ]
-  },
   "desk_metal": {
    "file": "props/desk_metal.glb",
    "source": "metal_office_desk",
@@ -241,22 +225,6 @@
     0.0478
    ]
   },
-  "ceiling_fan": {
-   "file": "props/ceiling_fan.glb",
-   "source": "ceiling_fan",
-   "bytes": 131872,
-   "tris": 4998,
-   "min": [
-    -0.7324,
-    -0.5163,
-    -0.7307
-   ],
-   "max": [
-    0.7306,
-    0,
-    0.7323
-   ]
-  },
   "wall_clock": {
    "file": "props/wall_clock.glb",
    "source": "wall_clock",
@@ -289,54 +257,6 @@
     0.244
    ]
   },
-  "jerrycan": {
-   "file": "props/jerrycan.glb",
-   "source": "metal_jerrycan",
-   "bytes": 170236,
-   "tris": 3499,
-   "min": [
-    -0.17,
-    0.0001,
-    -0.0886
-   ],
-   "max": [
-    0.18,
-    0.4549,
-    0.0831
-   ]
-  },
-  "lifebuoy": {
-   "file": "props/lifebuoy.glb",
-   "source": "lifebuoy",
-   "bytes": 169908,
-   "tris": 3500,
-   "min": [
-    -0.3903,
-    -0.4622,
-    -0.0704
-   ],
-   "max": [
-    0.3927,
-    0.379,
-    0.0844
-   ]
-  },
-  "dartboard": {
-   "file": "props/dartboard.glb",
-   "source": "dartboard",
-   "bytes": 199488,
-   "tris": 2499,
-   "min": [
-    -0.2253,
-    -0.2253,
-    0
-   ],
-   "max": [
-    0.2253,
-    0.2253,
-    0.0398
-   ]
-  },
   "toolbox": {
    "file": "props/toolbox.glb",
    "source": "metal_toolbox",
@@ -351,22 +271,6 @@
     0.2,
     0.3047,
     0.1138
-   ]
-  },
-  "books": {
-   "file": "props/books.glb",
-   "source": "book_encyclopedia_set_01",
-   "bytes": 150856,
-   "tris": 2451,
-   "min": [
-    -0.0193,
-    0,
-    -0.0621
-   ],
-   "max": [
-    0.532,
-    0.2374,
-    0.101
    ]
   },
   "kettle": {
@@ -399,38 +303,6 @@
     0.4447,
     0.3723,
     0.1323
-   ]
-  },
-  "compass": {
-   "file": "props/compass.glb",
-   "source": "seadogs_compass",
-   "bytes": 180296,
-   "tris": 2501,
-   "min": [
-    -0.0375,
-    0.0002,
-    -0.0811
-   ],
-   "max": [
-    0.0435,
-    0.0866,
-    0.063
-   ]
-  },
-  "binoculars": {
-   "file": "props/binoculars.glb",
-   "source": "binoculars",
-   "bytes": 119796,
-   "tris": 3190,
-   "min": [
-    -0.0762,
-    -0.002,
-    -0.229
-   ],
-   "max": [
-    0.0906,
-    0.0635,
-    0.0583
    ]
   },
   "microscope": {
@@ -481,22 +353,6 @@
     0.063
    ]
   },
-  "radio": {
-   "file": "props/radio.glb",
-   "source": "vintage_radio_transceiver",
-   "bytes": 551440,
-   "tris": 10040,
-   "min": [
-    -0.3287,
-    -0.0015,
-    -0.1382
-   ],
-   "max": [
-    0.2452,
-    0.3317,
-    0.2746
-   ]
-  },
   "cash_register": {
    "file": "props/cash_register.glb",
    "source": "CashRegister_01",
@@ -543,6 +399,166 @@
     0.0557,
     0.2362,
     0.0455
+   ]
+  },
+  "chess_set": {
+   "file": "props/chess_set.glb",
+   "source": "chess_set",
+   "bytes": 207520,
+   "tris": 6026,
+   "min": [
+    -0.2741,
+    0.0019,
+    -0.2741
+   ],
+   "max": [
+    0.2766,
+    0.1121,
+    0.2741
+   ]
+  },
+  "grandfather_clock": {
+   "file": "props/grandfather_clock.glb",
+   "source": "vintage_grandfather_clock_01",
+   "bytes": 192840,
+   "tris": 4996,
+   "min": [
+    -0.3128,
+    -0.0001,
+    -0.1882
+   ],
+   "max": [
+    0.3128,
+    2.1905,
+    0.2384
+   ]
+  },
+  "tea_set": {
+   "file": "props/tea_set.glb",
+   "source": "tea_set_01",
+   "bytes": 121268,
+   "tris": 5988,
+   "min": [
+    -0.4406,
+    -0.0008,
+    -0.2836
+   ],
+   "max": [
+    0.4777,
+    0.1638,
+    0.2003
+   ]
+  },
+  "thermos": {
+   "file": "props/thermos.glb",
+   "source": "plastic_thermos",
+   "bytes": 47884,
+   "tris": 2500,
+   "min": [
+    -0.0859,
+    0,
+    -0.0546
+   ],
+   "max": [
+    0.0546,
+    0.3204,
+    0.0546
+   ]
+  },
+  "cake": {
+   "file": "props/cake.glb",
+   "source": "carrot_cake",
+   "bytes": 108612,
+   "tris": 2992,
+   "min": [
+    -0.1133,
+    -0.0022,
+    -0.1145
+   ],
+   "max": [
+    0.1121,
+    0.0954,
+    0.1109
+   ]
+  },
+  "vase": {
+   "file": "props/vase.glb",
+   "source": "ceramic_vase_01",
+   "bytes": 39280,
+   "tris": 2500,
+   "min": [
+    -0.1018,
+    0.0012,
+    -0.1013
+   ],
+   "max": [
+    0.1011,
+    0.4015,
+    0.1011
+   ]
+  },
+  "bust": {
+   "file": "props/bust.glb",
+   "source": "marble_bust_01",
+   "bytes": 144412,
+   "tris": 4498,
+   "min": [
+    -0.1229,
+    0.0002,
+    -0.1446
+   ],
+   "max": [
+    0.1489,
+    0.515,
+    0.1551
+   ]
+  },
+  "magnifier": {
+   "file": "props/magnifier.glb",
+   "source": "magnifying_glass_01",
+   "bytes": 35976,
+   "tris": 1997,
+   "min": [
+    -0.066,
+    0.0001,
+    -0.0134
+   ],
+   "max": [
+    0.066,
+    0.2715,
+    0.0134
+   ]
+  },
+  "potted_plant": {
+   "file": "props/potted_plant.glb",
+   "source": "potted_plant_04",
+   "bytes": 88420,
+   "tris": 3996,
+   "min": [
+    -0.0839,
+    0.0004,
+    -0.084
+   ],
+   "max": [
+    0.0839,
+    0.2676,
+    0.1006
+   ]
+  },
+  "ladder": {
+   "file": "props/ladder.glb",
+   "source": "wooden_ladder",
+   "bytes": 69696,
+   "tris": 2499,
+   "min": [
+    -0.4848,
+    0,
+    -0.25
+   ],
+   "max": [
+    0.4743,
+    1.3349,
+    0.25
    ]
   }
  },

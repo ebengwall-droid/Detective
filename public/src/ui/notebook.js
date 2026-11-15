@@ -1,8 +1,10 @@
-// The detective's notebook: objectives, the case board (deductions and the
-// arrest), evidence, people and every lead established so far.
+// The detective's notebook: objectives, the Papers (every puzzle set so far),
+// the case board (deductions and the arrest), evidence, people and every lead
+// established so far.
 
 import { el, add, clear, icon } from './dom.js';
 import { confirmCard, showCard } from './hud.js';
+import { renderPapers } from './papers.js';
 
 const TAGS = {
   all: 'All',
@@ -11,8 +13,8 @@ const TAGS = {
   testimony: 'Testimony',
   record: 'Records',
   pattern: 'The pattern',
-  insider: 'The inside',
-  identity: 'Identity',
+  insider: 'The Hall',
+  identity: 'The name',
 };
 
 export function createNotebook(panels, game) {
@@ -21,12 +23,13 @@ export function createNotebook(panels, game) {
   let tab = 'case';
   let body;
   let tabBar;
-  const sel = { evidence: null, people: null, tag: 'all' };
+  const sel = { evidence: null, people: null, tag: 'all', puzzle: null, tool: null };
   const wrongPicks = {};
   const accuse = { suspect: null, motive: null };
 
   const tabs = [
     { id: 'case', label: 'Case', icon: 'list' },
+    { id: 'papers', label: 'Papers', icon: 'paper' },
     { id: 'board', label: 'Board', icon: 'board' },
     { id: 'evidence', label: 'Evidence', icon: 'bag' },
     { id: 'people', label: 'People', icon: 'people' },
@@ -36,7 +39,7 @@ export function createNotebook(panels, game) {
   function renderTabs() {
     const v = game.view;
     clear(tabBar);
-    const counts = { evidence: v.evidence.length, people: v.people.length, leads: v.facts.length };
+    const counts = { evidence: v.evidence.length, people: v.people.length, leads: v.facts.length, papers: (v.puzzles ?? []).filter((p) => !p.solved && !p.extra).length };
     for (const t of tabs) {
       const badge = t.id === 'board' && (v.deductions.some((d) => !d.solved) || (v.accuse && tab !== 'board'));
       add(tabBar, 
@@ -62,7 +65,7 @@ export function createNotebook(panels, game) {
       el('h3', { style: { fontFamily: 'var(--display)', fontWeight: '800', fontSize: '30px', letterSpacing: '-0.03em', lineHeight: '1.05', margin: '6px 0 18px' }, text: v.act.title }),
       el('div', { class: 'section-label', text: 'To do' }),
       open.length ? open.map((o) => el('div', { class: 'objective', text: o.text })) : el('p', { class: 'muted', text: 'Nothing pressing. Look around; something will turn up.' }),
-      el('p', { class: 'muted', style: { margin: '14px 0 22px', fontSize: '13.5px' } }, 'Stuck? Think, in the tool bar, gives you a nudge.'),
+      el('p', { class: 'muted', style: { margin: '14px 0 22px', fontSize: '13.5px' } }, 'Stuck on the case? Think, in the tool bar, gives you a nudge. Stuck on a paper? Each one has its own hints, and the Lectern will teach you the method.'),
       done.length ? el('div', { class: 'section-label', text: 'Done' }) : null,
       done.map((o) => el('div', { class: 'objective done', text: o.text })),
     );
@@ -124,7 +127,7 @@ export function createNotebook(panels, game) {
   }
 
   function renderAccuse(v) {
-    const box = el('div', { class: 'question', style: { borderColor: 'rgba(255,117,102,0.5)' } }, el('h4', { text: 'Make an arrest' }), el('p', { class: 'muted', style: { marginTop: '-4px' }, text: 'Name the Lamplighter to the Captain. You get one arrest. Whoever you name, the fourteenth still comes.' }));
+    const box = el('div', { class: 'question', style: { borderColor: 'rgba(255,117,102,0.5)' } }, el('h4', { text: 'Make an arrest' }), el('p', { class: 'muted', style: { marginTop: '-4px' }, text: v.accuse.blurb }));
     const grid = el('div', { class: 'accuse-grid' });
     for (const s of v.accuse.suspects) {
       const person = v.people.find((p) => p.id === s.id);
@@ -154,7 +157,7 @@ export function createNotebook(panels, game) {
     const go = el('button', { class: 'btn danger', type: 'button', disabled: !accuse.suspect || !accuse.motive }, icon('gavel', 18), 'Name them');
     go.addEventListener('click', async () => {
       const who = v.accuse.suspects.find((s) => s.id === accuse.suspect);
-      const sure = await confirmCard(game.cards, { title: `Name ${who.name}?`, text: 'There is no taking it back. If you are wrong, the wrong person answers for it and the Lamplighter is still out there tonight.', yes: 'Name them', no: 'Not yet' });
+      const sure = await confirmCard(game.cards, { title: `Name ${who.name}?`, text: v.accuse.warn, yes: 'Name them', no: 'Not yet' });
       if (!sure) return;
       try {
         const res = await game.call('accuse', { suspect: accuse.suspect, motive: accuse.motive, items: v.presentables.slice(0, 8).map((p) => p.id) }, {}, { deferEvents: true });
@@ -211,7 +214,7 @@ export function createNotebook(panels, game) {
 
   function evidenceDetail(e) {
     const detail = el('div', { class: 'detail' }, el('h3', { text: e.name }), el('div', { class: 'detail-desc', text: e.desc }));
-    if (e.doc) add(detail, el('div', { class: 'paper', text: e.doc }));
+    if (e.doc) add(detail, el('div', { class: e.icon === 'letter' ? 'paper ink' : 'paper', text: e.doc }));
     if (e.lab) {
       const box = el('div', { class: 'labbox' }, el('div', { class: 'section-label', text: 'Laboratory' }));
       if (e.lab.status === 'none') {
@@ -325,7 +328,7 @@ export function createNotebook(panels, game) {
     }
   }
 
-  const renderers = { case: renderCase, board: renderBoard, evidence: renderEvidence, people: renderPeople, leads: renderLeads };
+  const renderers = { case: renderCase, papers: () => renderPapers(body, game, sel, api), board: renderBoard, evidence: renderEvidence, people: renderPeople, leads: renderLeads };
 
   const api = {
     get isOpen() {
@@ -359,6 +362,12 @@ export function createNotebook(panels, game) {
       clear(body);
       renderers[tab]();
       body.scrollTop = keep;
+    },
+
+    /** Preselect one paper for the next time the Papers tab shows. */
+    selectPuzzle(id) {
+      sel.puzzle = id;
+      sel.tool = null;
     },
 
     /** Preselect one piece of evidence for the next time the Evidence tab shows. */

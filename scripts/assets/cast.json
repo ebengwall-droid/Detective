@@ -1,15 +1,54 @@
 {
   "source": "https://github.com/microsoft/Microsoft-Rocketbox (MIT)",
   "characters": {
-    "vance": { "src": "Professions/Business_Female_04", "sex": "f" },
-    "hale": { "src": "Professions/Business_Male_04", "sex": "m" },
-    "okoro": { "src": "Professions/Business_Male_05", "sex": "m" },
-    "brandt": { "src": "Professions/Police_Male_03", "sex": "m" },
-    "dray": { "src": "Adults/Female_Adult_02", "sex": "f" },
-    "carrow": { "src": "Professions/Business_Female_02", "sex": "f" },
-    "strand": { "src": "Adults/Male_Adult_07", "sex": "m" },
-    "fenn": { "src": "Adults/Male_Adult_03", "sex": "m" },
-    "ivale": { "src": "Professions/Business_Female_03", "sex": "f" }
+    "kit": {
+      "src": "Adults/Female_Adult_07",
+      "sex": "f"
+    },
+    "hob": {
+      "src": "Professions/Security_Male_01",
+      "sex": "m"
+    },
+    "hesper": {
+      "src": "Professions/Business_Female_02",
+      "sex": "f"
+    },
+    "clay": {
+      "src": "Adults/Male_Adult_03",
+      "sex": "m"
+    },
+    "jonah": {
+      "src": "Adults/Male_Adult_04",
+      "sex": "m"
+    },
+    "quoin": {
+      "src": "Adults/Female_Adult_09",
+      "sex": "f"
+    },
+    "marsh": {
+      "src": "Professions/Medical_Female_02",
+      "sex": "f"
+    },
+    "dolores": {
+      "src": "Professions/Medical_Female_01",
+      "sex": "f"
+    },
+    "ottilie": {
+      "src": "Professions/Chef_Female_01",
+      "sex": "f"
+    },
+    "nell": {
+      "src": "Adults/Female_Adult_04",
+      "sex": "f"
+    },
+    "wilf": {
+      "src": "Adults/Male_Adult_02",
+      "sex": "m"
+    },
+    "voss": {
+      "src": "Adults/Male_Adult_13",
+      "sex": "m"
+    }
   },
   "animations": {
     "f": {

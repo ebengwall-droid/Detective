@@ -638,8 +638,8 @@ def('ceilingFan', (g, o, ctx) => {
 });
 
 /**
- * The storm lantern: the killer's signature and the game's emblem.
- * o.lit, o.light, o.tag (brass ferry token on the handle), o.s scale
+ * A storm lantern.
+ * o.lit, o.light, o.tag (a brass tally on the handle), o.s scale
  */
 def('lantern', (g, o, ctx) => {
   const L = group(g);
@@ -757,7 +757,7 @@ def('laptop', (g, o) => {
   const lid = group(g, 0, 0.016, -0.12);
   lid.rotation.x = -0.3;
   box(lid, 0.34, 0.23, 0.012, 'steelDark', 0, 0.115, 0);
-  const screen = artMaterial('screen', 512, 320, (c, w, h) => ART.screen(c, w, h), { basic: true });
+  const screen = artMaterial('lecternScreen', 512, 340, (c, w, h) => ART.lecternScreen(c, w, h), { basic: true });
   plane(lid, 0.31, 0.2, screen, 0, 0.118, 0.0075, { unitUv: true, dyn: true });
   return { c: null, h: 0.25 };
 });

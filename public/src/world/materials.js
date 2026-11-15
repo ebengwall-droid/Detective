@@ -43,6 +43,22 @@ export function canvasTexture(key, size, draw, opts = {}) {
   return tex;
 }
 
+/** How much the painted textures are holding, for the developer console and the test driver. */
+export function textureStats() {
+  let pixels = 0;
+  let art = 0;
+  let artPixels = 0;
+  for (const [key, tex] of textures) {
+    const px = (tex.image?.width ?? 0) * (tex.image?.height ?? 0);
+    pixels += px;
+    if (key.startsWith('art:')) {
+      art++;
+      artPixels += px;
+    }
+  }
+  return { textures: textures.size, megabytes: +((pixels * 4) / 1048576).toFixed(1), art, artMegabytes: +((artPixels * 4) / 1048576).toFixed(1), materials: materials.size };
+}
+
 function speckle(ctx, s, rnd, count, alpha, light = true, dark = true) {
   for (let i = 0; i < count; i++) {
     const x = rnd() * s;

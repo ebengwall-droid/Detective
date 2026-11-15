@@ -11,9 +11,9 @@ import { createNotebook } from './ui/notebook.js';
 import { createLaptop } from './ui/laptop.js';
 import { createMap } from './ui/map.js';
 import { showTitle, showMenu, showHelp, showLetter, showEnding } from './ui/title.js';
-import { SCENES } from '../../core/cases/lamplighter/scenes.js';
+import { SCENES } from '../../core/cases/fold/scenes.js';
 
-const SETTINGS_KEY = 'greyhaven.settings';
+const SETTINGS_KEY = 'fold.settings';
 const ACT_KICKER = { 1: 'Part one', 2: 'Part two', 3: 'Part three', 4: 'Part four' };
 /** Panels that may be swapped for one another; anything else on screen must finish first. */
 const PANELS = new Set(['notebook', 'laptop', 'map']);
@@ -42,7 +42,7 @@ export class Game {
     this.root = root;
     this.client = client;
     this.opts = opts;
-    this.caseInfo = client.caseInfo ?? { title: 'The Lamplighter', series: 'Greyhaven', tagline: '' };
+    this.caseInfo = client.caseInfo ?? { title: 'The Invigilator', series: 'The Fold', tagline: '' };
     /** Home-screen install, where the browser offers it (see main.js). */
     this.install = opts.install ?? null;
     this.settings = loadSettings();
@@ -116,8 +116,8 @@ export class Game {
     this.hud.setTouch(this.isTouch);
     this.wire();
 
-    // The lamp shop, slowly, behind the title.
-    const shop = SCENES.lamp_shop;
+    // The wheelwright's shop, slowly, behind the title.
+    const shop = SCENES.wheelshop ?? Object.values(SCENES)[0];
     this.world.loadLocation({ id: 'title', sceneVersion: 0, scene: { ...shop, props: shop.props.filter((p) => !p.if) }, hotspots: [], npcs: [] });
     this.world.titleShot({ x: 0.6, z: 2.6, yaw: 18 });
     this.world.start();
@@ -279,7 +279,7 @@ export class Game {
   armBack() {
     if (!this.opts.backButton || this.backArmed || !this.started) return;
     try {
-      history.pushState({ greyhaven: 'layer' }, '');
+      history.pushState({ fold: 'layer' }, '');
       this.backArmed = true;
     } catch {
       /* history is not ours to use here */
@@ -467,7 +467,7 @@ export class Game {
         hud.toast({ kind: 'alert', iconName: 'phone', title: 'Message', text: e.text });
         break;
       case 'letter':
-        hud.toast({ kind: 'alert', iconName: 'letter', title: 'At the precinct', text: e.text });
+        hud.toast({ kind: 'alert', iconName: 'letter', title: 'By the Bellows', text: e.text });
         break;
       case 'lab':
         this.audio.sting();
@@ -483,6 +483,12 @@ export class Game {
         break;
       case 'record':
         if (!this.laptop.isOpen) this.unseen.laptop = true;
+        break;
+      case 'puzzle':
+        if (e.opened && !e.secret) {
+          this.unseen.notebook = true;
+          hud.toast({ kind: 'alert', iconName: 'paper', title: 'A new paper', text: e.title, onClick: () => this.openPuzzle(e.id) });
+        }
         break;
       case 'arrive':
         hud.subtitle(e.text, 7000);
@@ -532,6 +538,18 @@ export class Game {
     }
     this.updateCover();
     this.hud.setView(this.view);
+  }
+
+  /** Open the notebook at one paper. */
+  openPuzzle(id) {
+    this.notebook.selectPuzzle(id);
+    this.open('notebook', 'papers');
+  }
+
+  /** Put a question to the Lectern, from anywhere. */
+  askLectern(query) {
+    this.open('laptop', 'ask');
+    this.laptop.ask(query);
   }
 
   openEvidence(id) {
@@ -613,12 +631,21 @@ export class Game {
       } else if (res.action === 'laptop' || res.action === 'board' || res.action === 'map') {
         next = res.action;
       } else {
+        // An object that is itself a puzzle: read it, then sit down to it.
+        const pid = typeof res.action === 'string' && res.action.startsWith('puzzle:') ? res.action.slice(7) : null;
+        const paper = pid ? this.view.puzzles.find((p) => p.id === pid) : null;
         if (res.text) {
           this.audio.click();
           const taken = res.taken.map((tid) => this.view.evidence.find((e) => e.id === tid)).filter(Boolean);
           const more = this.view.location.hotspots.some((h) => !h.done && h.kind !== 'exit');
-          const choice = await showInspect(this.panels, { title: res.title, text: res.text, taken, actions: more ? [{ id: 'look', label: 'What else is here?' }] : [] });
+          const actions = [];
+          if (paper && !paper.solved) actions.push({ id: 'paper', label: 'Work on it' });
+          if (more) actions.push({ id: 'look', label: 'What else is here?' });
+          const choice = await showInspect(this.panels, { title: res.title, text: res.text, taken, actions });
           if (choice === 'look') next = 'look';
+          else if (choice === 'paper') next = `puzzle:${pid}`;
+        } else if (paper && !paper.solved) {
+          next = `puzzle:${pid}`;
         }
         if (res.letter) {
           await showLetter(this.cards, this, (onText) => this.call('readLetter', {}, { onText }, { deferEvents: true }).then((r) => r.letter));
@@ -633,6 +660,7 @@ export class Game {
     }
     this.unblock('inspect');
     if (next === 'look') this.scan();
+    else if (next?.startsWith('puzzle:')) this.openPuzzle(next.slice(7));
     else if (next) this.open(next === 'board' ? 'notebook' : next, next === 'board' ? 'board' : undefined);
     this.flushEvents();
   }

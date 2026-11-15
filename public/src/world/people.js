@@ -159,7 +159,9 @@ export function createPerson(look) {
   const src = assets.person(look.model);
   if (!src) return null;
   prepare(src.model);
-  const pose = look.pose ?? 'stand';
+  // 'slumped' sits on the floor like 'bound', but with the hands left free.
+  const tied = look.pose === 'bound';
+  const pose = look.pose === 'slumped' ? 'bound' : (look.pose ?? 'stand');
   const seated = pose === 'sit' || pose === 'bound';
   const root = new THREE.Group();
   const rig = SkeletonUtils.clone(src.model.scene);
@@ -461,7 +463,7 @@ export function createPerson(look) {
         held.R = { at: top.clone().add(new THREE.Vector3(-0.012, 0.045, -0.035)), pole: new THREE.Vector3(-0.5, -0.2, -1) };
       }
     }
-    if (pose === 'bound') {
+    if (tied) {
       // Wrists together behind the back of the chair.
       const hips = local(bones.pelvis);
       held.L = { at: new THREE.Vector3(0.045, hips.y + 0.1, hips.z - 0.2), pole: new THREE.Vector3(1, 0.1, -0.6) };
@@ -596,6 +598,10 @@ export function createPerson(look) {
     mixer.uncacheRoot(rig);
     for (const g of made) g.dispose();
     blob.geometry.dispose();
+    // Each skinned part keeps its bones in a small texture of its own; give those back too.
+    rig.traverse((o) => {
+      if (o.isSkinnedMesh) o.skeleton?.dispose();
+    });
   }
 
   return { root, update, headHeight: eyeHeight, setAccessories, dispose };

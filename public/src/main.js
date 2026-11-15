@@ -65,16 +65,16 @@ if (topLevel && 'serviceWorker' in navigator && /^https?:$/.test(location.protoc
 
 async function main() {
   if (!webglWorks()) {
-    fail('Greyhaven is a 3D game and needs WebGL, which this browser has turned off or does not support. Try a current version of Chrome, Safari, Edge or Firefox.');
+    fail('This is a 3D game and needs WebGL, which this browser has turned off or does not support. Try a current version of Chrome, Safari, Edge or Firefox.');
     return;
   }
-  // The hosted single-file build sets GREYHAVEN_MODE = 'local'; ?mode= is for testing.
-  const mode = host.GREYHAVEN_MODE ?? params.get('mode') ?? 'auto';
+  // The hosted single-file build sets FOLD_MODE = 'local'; ?mode= is for testing.
+  const mode = host.FOLD_MODE ?? params.get('mode') ?? 'auto';
   const client = await connect({ mode });
   // Modelled people, furniture and materials live beside the page. Without them (a single
   // file opened from disk, say) the game draws everything in code instead. ?real=0 forces that.
-  assets.packed = !!host.GREYHAVEN_PACKED;
-  if (params.get('real') !== '0') await assets.init(host.GREYHAVEN_ASSETS ?? 'assets/');
+  assets.packed = !!host.FOLD_PACKED;
+  if (params.get('real') !== '0') await assets.init(host.FOLD_ASSETS ?? 'assets/');
   const game = new Game(root, client, {
     quality: params.get('quality') ?? undefined,
     noAutoQuality: params.has('quality'),
@@ -88,5 +88,5 @@ async function main() {
 
 main().catch((err) => {
   console.error(err);
-  fail(`Greyhaven could not start. ${err?.message ?? ''}`);
+  fail(`The game could not start. ${err?.message ?? ''}`);
 });

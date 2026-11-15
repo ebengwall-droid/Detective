@@ -1,7 +1,7 @@
 {
-  "name": "greyhaven-detective",
+  "name": "the-fold",
   "version": "0.1.0",
-  "description": "Greyhaven — a 3D noir detective game where every character is played by Claude and the case reacts to how you investigate.",
+  "description": "The Fold — a 3D puzzle-mystery where every character is played by Claude, the killer sets you examination papers, and the case reacts to how you investigate.",
   "type": "module",
   "private": true,
   "engines": {

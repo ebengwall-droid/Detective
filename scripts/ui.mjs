@@ -5,7 +5,7 @@
 //                                      [--still] [--dpr N] [--w N --h N]
 //
 //   --local        run the game core in the page (?mode=local) instead of on the server
-//   --url          open this page instead of the dev server, e.g. file:///.../dist/greyhaven.html
+//   --url          open this page instead of the dev server, e.g. file:///.../dist/the-fold.html
 //   --fake-claude  pretend to be the claude.ai host: the page finds a `claude.use('sample')`
 //                  that streams canned replies ("deny" makes it refuse, as a viewer might)
 //   --still        ask for reduced motion, so panels are in place when a screenshot is taken
@@ -31,11 +31,11 @@ const arg = (name, fallback) => {
 const flag = (name) => process.argv.includes(`--${name}`);
 
 function startServer(extraEnv = {}) {
-  const data = fs.mkdtempSync(path.join(os.tmpdir(), 'greyhaven-'));
+  const data = fs.mkdtempSync(path.join(os.tmpdir(), 'fold-'));
   const port = 4100 + Math.floor(Math.random() * 800);
   const child = spawn(process.execPath, ['server/index.js'], {
     cwd: root,
-    env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', GREYHAVEN_AI: 'off', GREYHAVEN_DATA: data, GREYHAVEN_DEBUG: '1', ...extraEnv },
+    env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', FOLD_AI: 'off', FOLD_DATA: data, FOLD_DEBUG: '1', ...extraEnv },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   return new Promise((resolve, reject) => {
@@ -106,7 +106,7 @@ async function main() {
   const local = flag('local');
   const { chromium } = require('playwright');
   const url = arg('url', null);
-  const server = url ? null : await startServer(local ? { GREYHAVEN_SERVE_CORE: '1' } : {});
+  const server = url ? null : await startServer(local ? { FOLD_SERVE_CORE: '1' } : {});
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const context = await browser.newContext({
     viewport: { width: Number(arg('w', mobile ? 390 : 1100)), height: Number(arg('h', mobile ? 780 : 620)) },

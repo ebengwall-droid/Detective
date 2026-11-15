@@ -88,7 +88,7 @@ export function buildView(state, caseData, ai) {
         look: lookFor(npc, place, s),
         here,
         where: place?.loc ? caseData.locations[place.loc].name : null,
-        phone: !!npc.phone && !!place?.loc && !here && s.act < 4,
+        phone: !!npc.phone && !!place?.loc && !here && s.act < caseData.finale.act,
         notes: factsAbout(id, s, caseData),
         exchanges: st.exchanges,
       });
@@ -149,13 +149,49 @@ export function buildView(state, caseData, ai) {
     .filter(([id, l]) => s.unlocked[id] && l.map)
     .map(([id, l]) => ({ id, name: l.name, sub: l.sub, at: l.map, here: s.location === id || caseData.locations[s.location].parent === id, visited: (s.visited[id] ?? 0) > 0 }));
 
+  // Puzzles the detective has come across: what the panel shows, and nothing about an answer not yet given.
+  const feeds = (caseData.feeds ?? []).map((pid, i) => {
+    const st = s.puzzles[pid];
+    const def = caseData.puzzles[pid];
+    return { n: i + 1, title: def.title, answer: st?.solved !== undefined ? def.answers[0] : null };
+  });
+  const puzzles = Object.entries(caseData.puzzles)
+    .filter(([id]) => s.puzzles[id]?.open !== undefined)
+    .map(([id, def]) => {
+      const st = s.puzzles[id];
+      const solved = st.solved !== undefined;
+      return {
+        id,
+        title: def.title,
+        setter: def.setter,
+        tier: def.tier,
+        extra: !!def.extra,
+        secret: !!def.secret,
+        feed: def.feed ?? null,
+        blocks: def.blocks.map((b) => (b.feeds ? { feeds } : b)),
+        ask: def.ask,
+        solved,
+        answer: solved ? def.answers[0] : null,
+        note: solved ? def.solved : null,
+        attempts: st.attempts,
+        hints: def.hints.slice(0, st.hints),
+        hintsLeft: def.hints.length - st.hints,
+        lesson: def.lesson ? caseData.records[`l_${def.lesson}`]?.title.replace(/^Lecture · /, '') ?? null : null,
+        at: st.solved ?? st.open,
+      };
+    })
+    .sort((a, b) => Number(a.solved) - Number(b.solved) || b.at - a.at);
+  const tools = Object.entries(caseData.tools ?? {})
+    .filter(([, t]) => check(t.if, s))
+    .map(([id, t]) => ({ id, name: t.name, desc: t.desc }));
+
   const act = caseData.acts[s.act];
   const restDef = s.flags.accused ? null : caseData.rest[s.act];
   const canAccuse = check(caseData.accuse.if, s) && !s.flags.accused;
   const f = s.finale;
 
   return {
-    case: { title: caseData.meta.title, series: caseData.meta.series, tagline: caseData.meta.tagline },
+    case: { title: caseData.meta.title, series: caseData.meta.series, tagline: caseData.meta.tagline, killer: caseData.meta.killerName },
     player: s.player,
     act: { n: s.act, title: act.title, date: act.date },
     steps: s.steps,
@@ -176,10 +212,16 @@ export function buildView(state, caseData, ai) {
       ? {
           suspects: caseData.accuse.suspects.filter((id) => s.npcs[id]?.met).map((id) => ({ id, name: caseData.npcs[id].name, short: caseData.npcs[id].short })),
           motives: caseData.accuse.motives,
+          blurb: caseData.accuse.blurb,
+          warn: caseData.accuse.warn,
         }
       : null,
     accusation: s.accusation ? { suspect: caseData.npcs[s.accusation.suspect].name, verdict: s.accusation.verdict } : null,
-    finale: f ? { active: s.location === 'lighthouse' && !f.ended, turn: f.turn, maxTurns: caseData.finale.maxTurns, ended: f.ended } : null,
+    finale: f ? { active: s.location === caseData.finale.location && !f.ended, turn: f.turn, maxTurns: caseData.finale.maxTurns, ended: f.ended } : null,
+    puzzles,
+    tools,
+    laptop: caseData.laptop.ui,
+    hub: caseData.start.hub,
     ending: s.ending,
     notes: s.notes ?? '',
     ai,

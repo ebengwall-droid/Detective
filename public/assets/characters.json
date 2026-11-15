@@ -1,75 +1,36 @@
 {
   "characters": {
-    "vance": {
-      "file": "characters/vance.glb",
-      "bytes": 541904,
+    "kit": {
+      "file": "characters/kit.glb",
+      "bytes": 956232,
       "lite": {
-        "file": "characters/vance.m.glb",
-        "bytes": 298752
+        "file": "characters/kit.m.glb",
+        "bytes": 389088
       },
       "sex": "f",
-      "source": "Professions/Business_Female_04",
-      "tris": 8270,
+      "source": "Adults/Female_Adult_07",
+      "tris": 8308,
       "shapes": 42,
       "hip": 0.9233
     },
-    "hale": {
-      "file": "characters/hale.glb",
-      "bytes": 523792,
+    "hob": {
+      "file": "characters/hob.glb",
+      "bytes": 570560,
       "lite": {
-        "file": "characters/hale.m.glb",
-        "bytes": 246328
+        "file": "characters/hob.m.glb",
+        "bytes": 301112
       },
       "sex": "m",
-      "source": "Professions/Business_Male_04",
-      "tris": 7326,
+      "source": "Professions/Security_Male_01",
+      "tris": 9515,
       "shapes": 42,
       "hip": 0.8952
     },
-    "okoro": {
-      "file": "characters/okoro.glb",
-      "bytes": 426424,
-      "lite": {
-        "file": "characters/okoro.m.glb",
-        "bytes": 236692
-      },
-      "sex": "m",
-      "source": "Professions/Business_Male_05",
-      "tris": 7164,
-      "shapes": 42,
-      "hip": 0.8952
-    },
-    "brandt": {
-      "file": "characters/brandt.glb",
-      "bytes": 659512,
-      "lite": {
-        "file": "characters/brandt.m.glb",
-        "bytes": 376652
-      },
-      "sex": "m",
-      "source": "Professions/Police_Male_03",
-      "tris": 12445,
-      "shapes": 42,
-      "hip": 0.8952
-    },
-    "dray": {
-      "file": "characters/dray.glb",
-      "bytes": 885436,
-      "lite": {
-        "file": "characters/dray.m.glb",
-        "bytes": 363540
-      },
-      "sex": "f",
-      "source": "Adults/Female_Adult_02",
-      "tris": 8940,
-      "shapes": 42,
-      "hip": 0.9233
-    },
-    "carrow": {
-      "file": "characters/carrow.glb",
+    "hesper": {
+      "file": "characters/hesper.glb",
       "bytes": 1267532,
       "lite": {
-        "file": "characters/carrow.m.glb",
+        "file": "characters/hesper.m.glb",
         "bytes": 470796
       },
       "sex": "f",
@@ -78,24 +39,11 @@
       "shapes": 42,
       "hip": 0.9233
     },
-    "strand": {
-      "file": "characters/strand.glb",
-      "bytes": 708492,
-      "lite": {
-        "file": "characters/strand.m.glb",
-        "bytes": 309976
-      },
-      "sex": "m",
-      "source": "Adults/Male_Adult_07",
-      "tris": 7588,
-      "shapes": 42,
-      "hip": 0.8952
-    },
-    "fenn": {
-      "file": "characters/fenn.glb",
+    "clay": {
+      "file": "characters/clay.glb",
       "bytes": 1014072,
       "lite": {
-        "file": "characters/fenn.m.glb",
+        "file": "characters/clay.m.glb",
         "bytes": 368996
       },
       "sex": "m",
@@ -104,18 +52,109 @@
       "shapes": 42,
       "hip": 0.8952
     },
-    "ivale": {
-      "file": "characters/ivale.glb",
-      "bytes": 708464,
+    "jonah": {
+      "file": "characters/jonah.glb",
+      "bytes": 960832,
       "lite": {
-        "file": "characters/ivale.m.glb",
-        "bytes": 341416
+        "file": "characters/jonah.m.glb",
+        "bytes": 394060
+      },
+      "sex": "m",
+      "source": "Adults/Male_Adult_04",
+      "tris": 8684,
+      "shapes": 42,
+      "hip": 0.8952
+    },
+    "quoin": {
+      "file": "characters/quoin.glb",
+      "bytes": 946076,
+      "lite": {
+        "file": "characters/quoin.m.glb",
+        "bytes": 388676
       },
       "sex": "f",
-      "source": "Professions/Business_Female_03",
-      "tris": 8438,
+      "source": "Adults/Female_Adult_09",
+      "tris": 9032,
       "shapes": 42,
       "hip": 0.9233
+    },
+    "marsh": {
+      "file": "characters/marsh.glb",
+      "bytes": 574968,
+      "lite": {
+        "file": "characters/marsh.m.glb",
+        "bytes": 326600
+      },
+      "sex": "f",
+      "source": "Professions/Medical_Female_02",
+      "tris": 9264,
+      "shapes": 42,
+      "hip": 0.9233
+    },
+    "dolores": {
+      "file": "characters/dolores.glb",
+      "bytes": 692468,
+      "lite": {
+        "file": "characters/dolores.m.glb",
+        "bytes": 341964
+      },
+      "sex": "f",
+      "source": "Professions/Medical_Female_01",
+      "tris": 8328,
+      "shapes": 42,
+      "hip": 0.9233
+    },
+    "ottilie": {
+      "file": "characters/ottilie.glb",
+      "bytes": 446972,
+      "lite": {
+        "file": "characters/ottilie.m.glb",
+        "bytes": 263724
+      },
+      "sex": "f",
+      "source": "Professions/Chef_Female_01",
+      "tris": 7460,
+      "shapes": 42,
+      "hip": 0.9233
+    },
+    "nell": {
+      "file": "characters/nell.glb",
+      "bytes": 929388,
+      "lite": {
+        "file": "characters/nell.m.glb",
+        "bytes": 415728
+      },
+      "sex": "f",
+      "source": "Adults/Female_Adult_04",
+      "tris": 9284,
+      "shapes": 42,
+      "hip": 0.9233
+    },
+    "wilf": {
+      "file": "characters/wilf.glb",
+      "bytes": 724448,
+      "lite": {
+        "file": "characters/wilf.m.glb",
+        "bytes": 329728
+      },
+      "sex": "m",
+      "source": "Adults/Male_Adult_02",
+      "tris": 7312,
+      "shapes": 42,
+      "hip": 0.8952
+    },
+    "voss": {
+      "file": "characters/voss.glb",
+      "bytes": 565300,
+      "lite": {
+        "file": "characters/voss.m.glb",
+        "bytes": 253836
+      },
+      "sex": "m",
+      "source": "Adults/Male_Adult_13",
+      "tris": 6710,
+      "shapes": 42,
+      "hip": 0.8952
     }
   },
   "anims": {

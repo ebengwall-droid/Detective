@@ -16,11 +16,6 @@
       "tris": 5600,
       "tex": 1024
     },
-    "sofa": {
-      "src": "sofa_02",
-      "tris": 3000,
-      "tex": 1024
-    },
     "desk_metal": {
       "src": "metal_office_desk",
       "tris": 7000,
@@ -78,11 +73,6 @@
       "tris": 4500,
       "tex": 512
     },
-    "ceiling_fan": {
-      "src": "ceiling_fan",
-      "tris": 5000,
-      "tex": 512
-    },
     "wall_clock": {
       "src": "wall_clock",
       "tris": 2500,
@@ -93,32 +83,10 @@
       "tris": 5000,
       "tex": 512
     },
-    "jerrycan": {
-      "src": "metal_jerrycan",
-      "tris": 3500,
-      "tex": 512
-    },
-    "lifebuoy": {
-      "src": "lifebuoy",
-      "tris": 3500,
-      "tex": 512
-    },
-    "dartboard": {
-      "src": "dartboard",
-      "tris": 2500,
-      "tex": 512
-    },
     "toolbox": {
       "src": "metal_toolbox",
       "tris": 4000,
       "tex": 512
-    },
-    "books": {
-      "src": "book_encyclopedia_set_01",
-      "tris": 2500,
-      "tex": 512,
-      "error": 0.1,
-      "smooth": true
     },
     "kettle": {
       "src": "vintage_electric_kettle",
@@ -128,16 +96,6 @@
     "boots": {
       "src": "rubber_boots",
       "tris": 3500,
-      "tex": 512
-    },
-    "compass": {
-      "src": "seadogs_compass",
-      "tris": 2500,
-      "tex": 512
-    },
-    "binoculars": {
-      "src": "binoculars",
-      "tris": 3000,
       "tex": 512
     },
     "microscope": {
@@ -155,13 +113,6 @@
       "tris": 4000,
       "tex": 512
     },
-    "radio": {
-      "src": "vintage_radio_transceiver",
-      "tris": 5000,
-      "tex": 512,
-      "error": 0.08,
-      "smooth": true
-    },
     "cash_register": {
       "src": "CashRegister_01",
       "tris": 5000,
@@ -177,6 +128,58 @@
       "tris": 900,
       "tex": 256,
       "error": 0.08
+    },
+    "chess_set": {
+      "src": "chess_set",
+      "tris": 6000,
+      "tex": 256,
+      "error": 0.06
+    },
+    "grandfather_clock": {
+      "src": "vintage_grandfather_clock_01",
+      "tris": 5000,
+      "tex": 512
+    },
+    "tea_set": {
+      "src": "tea_set_01",
+      "tris": 6000,
+      "tex": 512,
+      "error": 0.05
+    },
+    "thermos": {
+      "src": "plastic_thermos",
+      "tris": 2500,
+      "tex": 256
+    },
+    "cake": {
+      "src": "carrot_cake",
+      "tris": 3000,
+      "tex": 256
+    },
+    "vase": {
+      "src": "ceramic_vase_01",
+      "tris": 2500,
+      "tex": 256
+    },
+    "bust": {
+      "src": "marble_bust_01",
+      "tris": 4500,
+      "tex": 512
+    },
+    "magnifier": {
+      "src": "magnifying_glass_01",
+      "tris": 2000,
+      "tex": 256
+    },
+    "potted_plant": {
+      "src": "potted_plant_04",
+      "tris": 4000,
+      "tex": 256
+    },
+    "ladder": {
+      "src": "wooden_ladder",
+      "tris": 2500,
+      "tex": 256
     }
   },
   "textures": {

@@ -51,7 +51,7 @@ if (!src || !fs.existsSync(path.join(src, AVATARS))) {
 }
 const only = arg('only', null)?.split(',');
 const outDir = path.join(root, 'public/assets');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'greyhaven-chars-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'fold-chars-'));
 const FBX2GLTF = path.join(root, 'node_modules/fbx2gltf/bin', process.platform === 'darwin' ? 'Darwin' : process.platform === 'win32' ? 'Windows_NT' : 'Linux', process.platform === 'win32' ? 'FBX2glTF.exe' : 'FBX2glTF');
 fs.chmodSync(FBX2GLTF, 0o755);
 
@@ -156,13 +156,18 @@ async function roughness(file, size) {
   return sharp(out, { raw: { width: size, height: size, channels: 3 } }).webp({ quality: 80, effort: 5 }).toBuffer();
 }
 
-/** A material "m156_equipment" takes "m156_equipment_color.tga" and its companions. */
+/**
+ * A material "m156_equipment" takes "m156_equipment_color.tga" and its companions.
+ * Where an avatar comes in several colourings the material carries the letter of
+ * the one in use ("f110_a_head") and its pictures end in it ("f110_head_color_a.tga").
+ */
 function findTexture(dir, stem, kind) {
   const files = fs.readdirSync(dir);
-  const [code, part] = [stem.slice(0, stem.indexOf('_')), stem.slice(stem.indexOf('_') + 1)];
+  const [, code, variant, part] = /^([a-z]+\d*)_(?:([a-z])_)?(.+)$/.exec(stem) ?? [null, stem, null, stem];
   const lower = (f) => f.toLowerCase();
   const hit =
-    files.find((f) => lower(f) === `${stem}_${kind}.tga`) ??
+    files.find((f) => lower(f) === `${code}_${part}_${kind}.tga`) ??
+    (variant ? files.find((f) => lower(f) === `${code}_${part}_${kind}_${variant}.tga`) : undefined) ??
     files.find((f) => lower(f).endsWith(`_${part}_${kind}.tga`)) ??
     // One or two of the library's materials are misspelt ("equpiment"): go by how the name starts.
     files.find((f) => lower(f).startsWith(`${code}_${part.slice(0, 3)}`) && lower(f).endsWith(`_${kind}.tga`));
@@ -189,7 +194,7 @@ async function buildCharacter(id, spec) {
   for (const prim of mesh.listPrimitives()) {
     const material = prim.getMaterial();
     const stem = material.getName().toLowerCase(); // e.g. f020_head, m156_equipment, f015_glasses
-    const kind = stem.replace(/^[a-z]\d+_/, '');
+    const kind = stem.replace(/^[a-z]\d+_/, '').replace(/^[a-z]_/, ''); // "f110_a_head" is a head
     const part = kind === 'opacity' ? 'hair' : kind;
     prim.setAttribute('COLOR_0', null);
     report.tris += prim.getIndices().getCount() / 3;

@@ -1,19 +1,20 @@
-// Scene viewer for layout work: /dev.html?loc=precinct&x=0&z=3&yaw=0&pitch=0
+// Scene viewer for layout work: /dev.html?loc=hall&x=0&z=3&yaw=0&pitch=0&people=1
 // Not part of the game; it only builds a location and lets you look around.
 
 import * as THREE from 'three';
-import { SCENES } from '/core/cases/lamplighter/scenes.js';
+import * as fold from '/core/cases/fold/scenes.js';
 import { buildScene } from './world/builder.js';
 import { buildEnvironment, useSurfaces } from './world/materials.js';
 import { createCharacter } from './world/characters.js';
-import { LOOKS } from '/core/cases/lamplighter/looks.js';
+import { LOOKS } from '/core/cases/fold/looks.js';
 import { check } from '/core/conditions.js';
 import { assets } from './world/assets.js';
 import { modelsFor } from './world/dress.js';
 import { setNightView } from './world/glass.js';
 
 const params = new URLSearchParams(location.search);
-const locId = params.get('loc') ?? 'precinct';
+const { SCENES } = fold;
+const locId = params.get('loc') ?? 'hall';
 const STAGE = {
   size: [12, 7],
   height: 3,
@@ -30,6 +31,21 @@ const rawSpec = locId === 'stage' || locId === 'models' ? STAGE : SCENES[locId];
 // Evaluate conditional props against a stand-in game state (?act=2).
 const fakeState = { act: Number(params.get('act') ?? 2), facts: {}, evidence: {}, flags: {}, deductions: {}, records: {}, beats: {}, visited: {}, examined: {}, npcs: {}, marks: {}, jobsDone: {}, steps: 0 };
 const spec = rawSpec && { ...rawSpec, props: (rawSpec.props ?? []).filter((p) => check(p.if, fakeState)) };
+/**
+ * Who stands where: ?people=kit:1.2:0.4:30,voss:0.5:-1:90:sit places people one by one (id:x:z:facing[:pose]);
+ * ?people=1 puts the room's own people where its layout says they go (PLACES in scenes.js).
+ */
+function placed() {
+  const asked = params.get('people') ?? '';
+  if (!asked) return [];
+  if (asked.includes(':')) {
+    return asked.split(',').map((item) => {
+      const [id, x, z, r, pose] = item.split(':');
+      return { id, p: [Number(x), Number(z)], r: Number(r ?? 0), pose };
+    }).filter((s) => LOOKS[s.id]);
+  }
+  return Object.entries(fold.PLACES?.[locId] ?? {}).map(([id, w]) => ({ id, ...w })).filter((s) => LOOKS[s.id]);
+}
 const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('c'));
 const info = document.getElementById('info');
 
@@ -44,7 +60,8 @@ async function main() {
   } catch {}
   // Modelled people, unless ?real=0 asks for the code-drawn ones.
   if (params.get('real') !== '0' && (await assets.init('/assets/'))) {
-    await assets.loadPeople(Object.keys(LOOKS));
+    // Only the people who will be shown: the whole cast on the stage, those placed in a room by ?people=.
+    await assets.loadPeople(locId === 'stage' ? Object.keys(LOOKS) : placed().map((s) => s.id));
     await assets.loadProps(modelsFor(spec.props));
     if (await assets.loadSurfaces()) useSurfaces((name) => assets.surface(name));
     const night = await assets.loadNight();
@@ -110,13 +127,8 @@ async function main() {
       }
     });
   } else if (params.get('people')) {
-    const samples = [
-      { p: [-2.2, -2.4], r: 160, a: LOOKS.vance },
-      { p: [5.2, -4.1], r: 0, a: LOOKS.hale },
-      { p: [0.8, 2.4], r: 200, a: LOOKS.okoro },
-    ];
-    for (const s of samples) {
-      const ch = createCharacter(s.a);
+    for (const s of placed()) {
+      const ch = createCharacter({ ...LOOKS[s.id], ...(s.pose ? { pose: s.pose } : {}) });
       ch.root.position.set(s.p[0], 0, s.p[1]);
       ch.root.rotation.y = (s.r * Math.PI) / 180;
       scene.add(ch.root);

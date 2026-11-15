@@ -1,4 +1,4 @@
-// Plays The Lamplighter from first briefing to epilogue through the game
+// Plays The Invigilator from the Turnstile to the epilogue through the game
 // core, with no AI and no browser, and checks the case can actually be solved.
 //
 //   node scripts/playtest.mjs            golden path (best ending)
@@ -6,7 +6,8 @@
 //   node scripts/playtest.mjs --record f  also write every action to f as JSON
 //                                         (the browser tests replay it)
 //
-// It is also the fastest way to read the whole story in order.
+// It is also the fastest way to read the whole story in order. It contains
+// every answer: do not read it if you mean to play.
 
 import fs from 'node:fs';
 import { GameSession, assertCaseValid } from '../core/engine.js';
@@ -32,6 +33,8 @@ const has = {
   fact: (id) => id in session.state.facts,
   ev: (id) => id in session.state.evidence,
   ded: (id) => !!session.state.deductions[id]?.solved,
+  puz: (id) => session.state.puzzles[id]?.solved !== undefined,
+  open: (id) => session.state.puzzles[id]?.open !== undefined,
   flag: (id) => !!session.state.flags[id],
   unlocked: (id) => !!session.state.unlocked[id],
 };
@@ -47,6 +50,7 @@ async function act(method, args = {}) {
     else if (e.type === 'notify' || e.type === 'letter') note(`    ! ${e.text}`);
     else if (e.type === 'lab') note(`    + lab: ${e.result}`);
     else if (e.type === 'deduction') note(`    ? new question: ${e.q}`);
+    else if (e.type === 'puzzle' && e.opened) note(`    ? new puzzle: ${e.title}`);
   }
   return last;
 }
@@ -58,10 +62,10 @@ async function go(to) {
 async function look(...ids) {
   for (const id of ids) {
     const r = await act('examine', { id });
-    note(`  [${r.title}] ${r.text.split('\n')[0].slice(0, 110)}`);
+    note(`  [${r.title}] ${String(r.text).split('\n')[0].slice(0, 110)}`);
     if (r.letter) {
       const l = await act('readLetter');
-      note(`  LETTER ${l.letter.n}:\n${l.letter.body.split('\n').map((x) => '      ' + x).join('\n')}`);
+      note(`  PAPER ${l.letter.n}:\n${l.letter.body.split('\n').map((x) => '      ' + x).join('\n')}`);
     }
   }
 }
@@ -76,17 +80,26 @@ async function talk(id, ...lines) {
 }
 async function ask(query) {
   const r = await act('laptopAsk', { query });
-  note(`  HARBORNET "${query}" -> ${r.opened.join(', ') || '(nothing)'}`);
+  note(`  LECTERN "${query}" -> ${r.opened.join(', ') || '(nothing)'}`);
   return r;
 }
 async function deduce(id, option) {
   const r = await act('deduce', { id, option });
   note(`  DEDUCE ${id}=${option}: ${r.ok ? 'YES' : 'no'} — ${r.text.slice(0, 100)}`);
+  expect(r.ok, `deduction ${id} should accept ${option}`);
+  return r;
+}
+async function solve(id, answer) {
+  expect(has.open(id), `puzzle ${id} should be open by now`);
+  if (!has.open(id)) return null;
+  const r = await act('solve', { id, answer });
+  note(`  SOLVE ${id} = ${answer}: ${r.ok ? 'YES' : `no — ${r.text}`}`);
+  expect(r.ok, `puzzle ${id} should accept ${answer}`);
   return r;
 }
 async function wait(n) {
   // Burn steps by doing harmless things, the way a player would wander.
-  for (let i = 0; i < n; i++) await act('laptopAsk', { query: 'tide tables' });
+  for (let i = 0; i < n; i++) await act('laptopAsk', { query: 'the weather on the Cut' });
 }
 
 async function main() {
@@ -94,184 +107,185 @@ async function main() {
   session = new GameSession({ ai: null });
   await act('newGame', { name: 'Playtest' });
 
-  // ----------------------------------------------------------- ACT ONE
-  await talk('vance', 'Where do I start?');
-  await talk('hale', 'What do we know so far?');
-  await look('petrel_photo', 'vance_typewriter', 'evidence_shelves');
-  expect(has.fact('hale_cox') && has.fact('corvin_e'), 'precinct observations');
-  await act('observe', { id: 'vance' });
-  expect(has.fact('vance_whistle_chain'), 'observing Vance in act 1 shows the chain');
+  // ------------------------------------------------------------ MONDAY
+  expect(session.state.location === 'gatehouse', 'the game begins at the Turnstile');
+  await talk('kit', 'How does the gate work?', 'What is this place?');
+  await look('slate', 'stone', 'notice', 'turnstile');
+  const miss = await act('solve', { id: 'gate', answer: 'fdwfk' });
+  expect(!miss.ok && session.state.puzzles.gate.attempts === 1, 'a wrong word does not open the gate');
+  const h1 = await act('hint', { id: 'gate' });
+  expect(h1.tier === 1 && !h1.last, 'the first hint is a nudge');
+  await solve('gate', 'catch');
+  expect(has.unlocked('hall') && has.unlocked('clockshop') && has.unlocked('mortuary'), 'the gate opens the Fold');
 
-  await go('brook_house');
-  await look('armchair', 'lantern_brook', 'stain', 'basin', 'grate', 'desk_brook', 'phone_brook', 'ship_model', 'chart_wall', 'bureau', 'garden_door');
-  expect(has.ev('lantern_brook') && has.ev('token_0155') && has.ev('burnt_letter') && has.ev('cashbox'), 'Gull Street evidence collected');
-  expect(has.unlocked('lamp_shop'), 'lamp shop unlocked by the lantern');
-  await talk('brandt', 'Who found him?', 'Any sign of forced entry?', 'Did the neighbours see anything?', 'Who has keys to this scene?');
-  expect(has.ev('canvass_report'), 'Brandt hands over the canvass report');
-  await talk('dray', 'What time did you leave last night?');
-  expect(!has.fact('harbour_police_voice'), 'Dray must not crack without proof');
-  await talk('dray', { show: 'canvass_report' }, 'What did the caller look like?', 'Was there a car?');
-  expect(has.fact('harbour_police_voice') && has.fact('cape_can') && has.fact('plate_7k4'), "Dray's full testimony");
+  await go('clockshop');
+  await look('bench', 'door_pendry', 'window_bars', 'cup_pendry', 'tube_pendry', 'notepad', 'clocks', 'lodger', 'certificate', 'ledger_pendry', 'stove_pendry');
+  expect(has.ev('cup_pendry') && has.ev('paper_pendry'), "Pendry's cup and Paper collected");
+  expect(has.fact('locked_inside') && has.fact('pendry_paper') && has.fact('certificate_sole'), 'the workshop tells its story');
+  expect(has.open('lock'), 'the word on the doors is an open question from the first day');
+  await talk('wilf', 'Tell me about this morning.', 'Did he always lock himself in?', 'What about his tea?', 'Who looks after the lock?', 'What is the chess-player?');
+  expect(has.fact('locks_oiled'), 'Wilf says who oiled the lock');
+  await talk('kit', 'Where do I start?', 'Who are the Syndics?');
 
-  await go('morgue');
-  await talk('okoro', 'How did Brook die?', 'When did he die?', 'Why was there no struggle?', 'Where did the water come from?', 'Who would know how to use Morvane?');
-  await look('report_brook', 'table_brook');
-  expect(has.fact('brook_drowned_seawater') && has.fact('sedative_morvane') && has.fact('water_red_lead'), 'autopsy facts');
+  await go('wheelshop');
+  await talk('quoin', 'Did you hear anything on Monday night?', "How do you change a letter-lock's word?");
+  await look('fitting', 'wall_party', 'kit_photo', 'wheels', 'quoin_ledger');
+  await solve('fitting', 'Patience');
+  expect(has.flag('tool_wheel'), 'the fitting earns the Wheel');
+  expect(!has.fact('ariadne_fettle'), 'the fitting ledger keeps its secret until you know what to look for');
 
-  await go('precinct');
-  await act('labSubmit', { id: 'burnt_letter' });
-  await act('labSubmit', { id: 'cashbox' });
-  await ask('What is this brass token from Vale Lines?');
-  expect(has.fact('calliope_known'), 'laptop identifies the token');
-  expect(has.unlocked('tavern'), 'tavern unlocked');
-  await ask('Tobias Fenn');
-  await ask('Fenn custody record Eastgate');
-  expect(has.fact('fenn_custody'), 'Fenn alibi findable on day one');
-  await look('inbox');
+  await go('mortuary');
+  await talk('marsh', 'What killed him?', 'When did he take it?', 'Could he have been saved?', 'What happened to his hands?');
+  await look('slab', 'report', 'samples');
+  expect(has.fact('foxglove') && has.fact('drank_at_four') && has.ev('autopsy_pendry'), 'the post-mortem');
 
-  await go('lamp_shop');
-  await look('lantern_rack', 'workbench', 'punches', 'token_jar', 'ledger', 'photo_lucy', 'counter');
-  await act('observe', { id: 'fenn' });
-  await talk('fenn', 'This lantern is one of yours.', 'Tell me about your family.', 'Who bought four lanterns in March?', { show: 'lantern_brook' });
-  expect(has.fact('buyer_woman') && has.fact('swallowtail_fenn') && has.fact('lucy_photo'), 'lamp shop facts');
+  await go('hall');
+  await look('my_desk', 'lodge', 'keyboard', 'tea_table', 'hall_clock', 'back_chair', 'tithe_wall', 'portrait_hesper', 'portraits', 'clay_desk', 'clay_safe', 'strongbox');
+  await talk('hob', 'How are the keys kept?', 'Who looks after the letter-locks?', "Who pours the Syndics' tea?", 'Who sits at the back of the Proving?');
+  expect(has.fact('tea_porter') && has.fact('hob_invigilates'), 'the Porter answers plainly what he is plainly asked');
+  await talk('clay', 'Who signs for Dame Hesper?', 'Tell me about the sale.');
+  expect(has.unlocked('almshouse') && has.unlocked('stalemate') && has.unlocked('repository'), 'the rest of the Fold opens');
+  await act('labSubmit', { id: 'cup_pendry' });
+  expect(has.flag('letter_waiting'), 'Paper I has come');
+  await look('tube');
+  expect(has.ev('paper_1') && has.open('paper1a') && has.open('paper1b') && has.open('bellows'), 'Paper I and its questions');
+  await solve('paper1a', 'the Lorimer Legacy');
+  await solve('paper1b', 'Warden');
+  await look('exchange');
+  await solve('bellows', 'held since noon');
+  await deduce('locked', 'remote');
+  await ask('How does a Caesar cipher work?');
+  await solve('tithe_square', '1514');
+  await solve('tithe_fifteen', 'impossible');
 
-  await go('tavern');
-  await look('plaque', 'lifebuoy', 'stairs');
-  await talk('carrow', 'Tell me about the memorial.', 'What do you know about Tobias Fenn?', 'Tell me about Lucy Fenn.');
-  await talk('strand', 'You named him the Lamplighter.', 'What happened at the Calliope inquiry?', 'Can I see your copy of the timeline?', 'Tell me about the letters.', 'Show me the second letter you held back.');
-  expect(has.ev('inquiry_timeline') && has.ev('letter_strand'), 'Strand trades the timeline and the second letter');
-  expect(has.fact('four_lights'), 'four lights');
+  const early = await act('rest');
+  expect(early.ok, 'Monday can end once the scene, the doctor and the Hall are done');
 
-  expect(session.state.act === 1, 'still day one until the player rests');
-  expect(has.ev('letter_1') || session.state.letters.length > 0, 'first letter was delivered in act 1');
-  expect(last.view.rest?.can, 'resting is allowed at the end of day one');
-  await act('rest');
-  expect(session.state.act === 2, `act 2 should have begun (act=${session.state.act})`);
+  // ----------------------------------------------------------- TUESDAY
+  expect(session.state.act === 2 && session.state.location === 'hall', 'Tuesday begins at your desk');
+  await go('meridian');
+  await look('bunk_sallow', 'door_sallow', 'tube_sallow', 'flask', 'chart_table', 'log_sallow', 'riddle_book', 'atlas', 'sextant');
+  expect(has.ev('paper_sallow') && has.fact('masterplan') && !has.ev('escrow_letter'), 'the Meridian, before the Paper');
+  await talk('nell', 'You found her?', 'Who crossed the Cut that night?', 'A towel.');
+  await act('labSubmit', { id: 'flask_sallow' });
 
-  // ----------------------------------------------------------- ACT TWO
-  await go('precinct');
-  await look('inbox');
-  await act('observe', { id: 'vance' });
-  expect(has.fact('vance_whistle_cord'), "Vance's chain is gone in act 2");
-  await go('vale_yacht');
-  await look('body_vale', 'lantern_vale', 'glasses', 'chain_link', 'phone_vale', 'safe', 'galley', 'wet_prints', 'chart_table');
-  await talk('brandt', 'What happened here?', 'What was it about Gull Street? The seal?');
-  expect(has.fact('seal_broken'), 'Brandt reports the broken seal');
-  await talk('ivale', 'When did you last see your husband?', 'Was he afraid of anyone?', 'Who had visited him lately? The police?', 'What was in the safe?');
-  expect(has.fact('hale_visited_yacht'), 'Isolde gives up the Hale visit');
-  expect(!has.ev('vale_tape'), 'Isolde keeps the tape until shown the dust');
-  await talk('ivale', { show: 'safe_dust' });
-  expect(has.ev('vale_tape'), 'Isolde hands over the tape');
+  await go('stalemate');
+  await talk('ottilie', 'Who was here on Monday night?', "Who pours the Syndics' tea?", 'Who is upstairs?');
+  await look('score_book', 'noticeboard', 'domino_table', 'chess_tables', 'draw_cake', 'piano', 'slate_board', 'stairs_crux');
+  expect(session.state.location === 'stalemate', 'the stairs to the Crux are not yet your business');
 
-  await deduce('pattern', 'tod');
-  await deduce('pattern', 'calliope');
-  await deduce('first', 'pell');
-  expect(has.ded('pattern') && has.ded('first'), 'pattern and first light solved');
+  await go('repository');
+  await talk('jonah', 'What exactly is the Lectern?', 'Could the Engine have set the Papers?', 'What do you think of the sale?');
+  expect(has.fact('not_engine'), 'Jonah clears his machine');
+  await look('waste_basket', 'early_case');
 
-  await go('tavern');
-  await talk('carrow', 'Who was Ambrose Pell?', 'How was Pell before he died?', "I need to see Pell's room. Give me the key.");
-  expect(has.flag('pell_key'), 'Bess gives the key');
-  await look('stairs');
-  expect(session.state.location === 'pell_room', 'stairs lead to Pell\'s room');
-  await look('tin_bath', 'lantern_pell', 'can_ring', 'bed', 'floorboard', 'table_pell');
-  expect(has.ev('token_0110') && has.ev('pell_logbook') && has.ev('ampoule_cap'), "Pell's room evidence");
-  await look('exit');
-  expect(session.state.location === 'tavern', 'back down to the tavern');
-  await talk('carrow', { show: 'pell_logbook' }, 'And Sergeant Hale? The Petrel?');
-  expect(has.fact('pell_was_drinking') && has.fact('hale_turned_round'), "Bess's confession");
+  await go('almshouse');
+  await talk('dolores', 'How is she, really?', 'Who visits her?');
+  await look('hesper_table', 'garden_window', 'visitors_book', 'photo_hall', 'night_latch', 'bookshelf_hesper', 'tea_tray');
+  await talk('dolores', 'Who finishes her crossword?', 'Who cut the foxgloves?');
+  await talk('hesper', "What is the four o'clock problem?", 'Do you know they are selling your work?');
+  await act('observe', { id: 'hesper' });
+  expect(has.fact('night_visitor') && has.fact('bed_planted') && has.fact('dame_tremor'), 'the Almshouse');
 
-  await go('morgue');
-  await talk('okoro', 'What about Vale?', 'Can you retest Ambrose Pell?');
-  await look('report_brook');
+  await go('hall');
+  expect(has.flag('letter_waiting'), 'Paper II has come');
+  await look('tube');
+  await solve('paper2a', 'money');
+  await solve('paper2b', 'sextant');
+  await solve('tithe_bridges', 'South Bank');
+  await go('meridian');
+  await look('atlas', 'sextant');
+  expect(has.ev('escrow_letter') && has.ev('capacity_report'), 'what Sallow hid');
+  await deduce('sold', 'syndics');
+  await go('hall');
+  await talk('clay', { show: 'escrow_letter' }, 'You are one of two left.');
+  expect(has.fact('clay_admits_money'), 'the Warden admits the fee');
+  expect((await act('rest')).ok, 'Tuesday ends');
 
-  await go('precinct');
-  await act('labSubmit', { id: 'ampoule_cap' });
-  await act('labSubmit', { id: 'chain_link' });
-  await act('labSubmit', { id: 'letter_strand' });
-  await ask('marina gate log Customs Quay');
-  await ask('plate 7K4');
-  expect(has.fact('pool_car'), 'pool car traced');
-  await ask('Morvane');
-  await look('drug_locker');
-  expect(has.ev('drug_page'), 'drug log found');
-  await ask('sealed inquiry file access log');
-  await ask('terminal B-12');
-  await ask('where was Hale on 19 September dinner');
-  expect(has.fact('archive_log') && has.fact('b12_vance') && has.fact('hale_dinner'), 'archive trail');
-  await deduce('fourth', 'hale');
-  expect(has.ded('fourth'), 'fourth light solved');
+  // --------------------------------------------------------- WEDNESDAY
+  expect(session.state.act === 3, 'Wednesday');
+  await talk('kit', "The Dame's confession?", 'Who pours the tea?');
+  await talk('hob', 'Do you see Dame Hesper?');
+  expect(has.flag('letter_waiting'), 'Paper III has come');
+  await look('tube');
+  const before = session.state.steps;
+  await solve('paper3', 'stalemate');
+  await go('stalemate');
+  await look('slate_board');
+  await solve('slate', 'Censor');
+  await look('stairs_crux');
+  expect(session.state.location === 'crux', 'the stairs lead up to the Crux');
+  await look('door_voss');
+  expect(has.flag('voss_alive'), `Voss is reached in time (${session.state.steps - before} steps after the Paper)`);
+  await talk('voss', 'What happened tonight?', 'What did the four of you do?', 'The letter on your spike?', 'Who is the Invigilator?');
+  await look('tube_voss', 'spike', 'voss_desk', 'flask_voss', 'typewriter_voss', 'voss_chair');
+  expect(has.fact('voss_confesses') && has.ev('spiked_letter'), 'one of the four says it aloud');
+  await act('labSubmit', { id: 'spiked_letter' });
 
-  await go('tavern');
-  await talk('strand', { show: 'marina_log' }, 'Did you photograph it?');
-  expect(has.ev('strand_photo'), 'Strand hands over the photograph');
+  await go('repository');
+  await look('vitrines', 'server', 'rolls');
+  await solve('nina', 'ARIADNE');
+  expect(has.ev('nina_sheet'), 'the slanted name is something you can show people');
+  await solve('ascii', 'lodge');
+  await talk('jonah', { show: 'nina_sheet' });
+  expect(has.fact('two_hands'), 'Jonah produces his memo');
+  await look('jonah_desk', 'rolls');
+  expect(has.ev('stylometry_memo') && has.fact('not_in_rolls'), 'the memo and the Rolls');
 
-  await go('brook_house');
-  await look('garden_door', 'tunic_button');
-  expect(has.ev('tunic_button'), 'planted button found');
+  await go('hall');
+  await look('strongbox', 'register');
+  await solve('lock', 'ariadne');
+  await act('labSubmit', { id: 'lock_pendry' });
+  await talk('hob', "Open the Warden's safe for me.");
+  expect(has.ev('faircopy_books'), 'the Porter opens the safe');
+  await act('labSubmit', { id: 'faircopy_books' });
+  await talk('clay', 'What is in your safe?');
 
-  await go('vale_yacht');
-  await talk('brandt', { show: 'tunic_button' });
-  expect(has.fact('button_planted'), 'Brandt confirms the button was planted');
-  await deduce('insider', 'police');
-  expect(has.ded('insider'), 'insider solved');
+  await go('almshouse');
+  await talk('hesper', 'Did you set the Papers?', { show: 'nina_sheet' }, 'Does he still come to see you?', 'Did you ever write down that it was his work?');
+  expect(has.fact('dame_names_hob') && has.fact('ariadne_fettle') && has.fact('dame_asks'), 'Dame Hesper knows whose girl Ariadne was');
+  expect(has.open('cryptic'), 'and gives her clue');
+  await solve('cryptic', 'portrait');
+  await go('hall');
+  await look('portrait_hesper');
+  expect(has.ev('codicil') && has.fact('codicil'), 'the Codicil was behind her');
 
-  await go('morgue');
-  await talk('okoro', 'Is it the same water in all three?');
-  expect(has.fact('pell_retest'), 'Pell retest came back');
-
-  expect(session.state.act === 2, 'still day two until the player rests');
-  await act('rest');
-  expect(session.state.act === 3, `act 3 should have begun (act=${session.state.act})`);
-
-  // --------------------------------------------------------- ACT THREE
-  await go('precinct');
-  await look('inbox');
-  expect(!last.view.location.npcs.some((n) => n.id === 'vance'), 'Vance is out at the start of act 3');
-  await talk('fenn', 'Tell me how you killed them.', 'How did you get out to the yacht?');
-  expect(has.fact('confession_wrong'), 'the confession has holes');
-  await deduce('confession', 'shield');
-  await look('vance_desk');
-  expect(has.ev('drawer_contents'), "Vance's drawer opened while she is out");
-  await look('hale_tunic');
-  await talk('hale', { show: 'tunic_button' }, { show: 'burnt_letter' }, 'You commanded the Petrel that night.', 'Did you get a token?', 'Unseal the inquiry file.');
-  expect(has.fact('hale_admits') && has.ev('token_hale') && has.flag('unsealed'), 'Hale confesses, shows his token, unseals the file');
-  await ask('unsealed inquiry evidence radio log');
-  expect(has.fact('sealed_truth'), 'sealed exhibits read');
-  await deduce('frame', 'framed');
-  expect(has.ded('frame'), 'frame solved');
-  await ask('Calliope casualty list Lucy Fenn remains');
-  await ask('was an unidentified child found down the coast at Harrowgate');
-  await go('lamp_shop');
-  await look('newspaper');
-  expect(has.fact('fenn_newspaper'), 'ringed newspaper found');
-  await go('precinct');
+  await deduce('confession', 'proud');
+  await deduce('hand', 'third');
+  await deduce('invisible', 'porter');
+  await deduce('author', 'copyist');
   await wait(6);
-  expect(has.ev('infirmary_record'), 'Harrowgate replied');
-  await talk('fenn', { show: 'infirmary_record' });
-  expect(has.fact('fenn_knows'), 'Fenn tells the truth');
+  expect(has.fact('hand_match') && has.fact('changed_at_service') && has.fact('letter_same_hand'), 'the lab reports');
 
-  const acc = await act('accuse', { suspect: 'vance', motive: 'justice', items: ['infirmary_record', 'drawer_contents'] });
-  note(`  ACCUSE -> ${acc.verdict}: ${acc.text}`);
-  expect(acc.verdict === 'vance_strong', `accusation should be strong (got ${acc.verdict})`);
-  expect(session.state.act === 4, 'act 4 begins after the accusation');
+  const accused = await act('accuse', { suspect: 'hob', motive: 'author', items: ['faircopy_books', 'nina_sheet', 'codicil'] });
+  expect(accused.verdict === 'hob_strong' && accused.final, `naming the Porter with proof is believed (got ${accused.verdict})`);
 
-  // ---------------------------------------------------------- ACT FOUR
-  await go('lighthouse');
-  const open = await act('talk', { id: 'vance' });
-  note(`  Vance: ${open.talk.greeting}`);
+  // ---------------------------------------------------------- THURSDAY
+  expect(session.state.act === 4 && has.ev('key_144'), 'the night of the Proving');
+  expect(!has.unlocked('lantern'), 'nobody has told you where');
+  await look('tube');
+  await solve('paper4', 'tuition');
+  await solve('bacon', 'Ariadne');
+  await solve('meta', 'Lantern');
+  expect(has.unlocked('lantern'), 'the seven answers give the place');
+  await go('lantern');
+  await look('orrery', 'proving_desk', 'hob_clock', 'grille_lock');
+  await solve('grille', 'ARIADNE');
+  let out = await act('talk', { id: 'hob' });
+  expect(out.talk.finale, 'talking to the Porter in the Lantern is the finale');
+  note(`  ${out.talk.greeting}`);
   let end = null;
   for (let i = 0; i < 8 && !end; i++) {
-    const chips = last.talk?.suggestions ?? last.suggestions ?? [];
-    const line = chips[0] ?? 'Put the can down.';
-    const r = await act('finaleSay', { text: line });
-    note(`  > ${line}\n  Vance (${r.reply.mood}): ${r.reply.say}`);
-    if (r.reply.ended) end = r.ending;
+    const chip = (out.talk?.suggestions ?? out.suggestions ?? [])[0];
+    out = await act('finaleSay', { text: chip ?? 'Put the clock down.' });
+    note(`  > ${chip}\n  ${out.reply.say}`);
+    if (out.reply.ended) end = out.ending;
   }
   expect(end?.how === 'surrender', `best path should end in surrender (got ${end?.how})`);
   const epi = await act('epilogue');
   note(`\n${epi.ending.text}\n`);
   console.log(`\nEnding: ${end?.how} · score ${end?.score} · rank "${end?.rank}" · ${session.state.steps} steps`);
-  console.log(`Truths: ${end?.truths.filter((t) => t.found).length}/${end?.truths.length}`);
+  console.log(`Truths: ${end?.truths.filter((t) => t.found).length}/${end?.truths.length} · puzzles ${end?.puzzles.solved}/${end?.puzzles.of}`);
   const facts = Object.keys(session.state.facts).length;
   const total = Object.keys(session.case.facts).length;
   console.log(`Facts found: ${facts}/${total}`);

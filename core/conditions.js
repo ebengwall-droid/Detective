@@ -4,6 +4,7 @@
 //   true / false
 //   'fact:x'  'ev:x'  'flag:x'  'ded:x'  'rec:x'  'lab:x' (result back)  'sent:x' (submitted)  'beat:x'
 //   'visited:loc'  'examined:hotspot'  'met:npc'  'told:npc.item'  'shown:npc.ev'
+//   'puz:x' (puzzle solved)  'puzopen:x' (puzzle open to the detective)  'job:x' (a requested job has come back)
 //   'act:2'  'act>=2'  'act<=3'      (prefix any of these with ! to negate)
 //   [a, b, c]                         all of
 //   { any: [...] }  { all: [...] }  { not: c }  { min: n, of: [...] }
@@ -70,6 +71,8 @@ function checkAtom(atom, s) {
       return !!s.npcs[npc]?.shown?.[ev];
     }
     case 'job': return !!s.jobsDone[id];
+    case 'puz': return s.puzzles?.[id]?.solved !== undefined;
+    case 'puzopen': return s.puzzles?.[id]?.open !== undefined;
     default: throw new Error(`Unknown condition kind: ${atom}`);
   }
 }

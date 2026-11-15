@@ -88,7 +88,7 @@ const loader = new GLTFLoader();
 loader.setMeshoptDecoder(decoder);
 loader.register((parser) => {
   parser.textureLoader = pictureLoader;
-  return { name: 'GREYHAVEN_pictures' };
+  return { name: 'FOLD_pictures' };
 });
 const pictures = new THREE.TextureLoader();
 /** @type {Map<string, {d: THREE.Texture, n: THREE.Texture|null, r: THREE.Texture|null, metres: number}>} */

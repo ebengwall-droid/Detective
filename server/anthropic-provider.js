@@ -2,7 +2,7 @@
 // through the official Anthropic SDK.
 //
 // Choices made here:
-// - Model: Claude Opus 5.5 unless GREYHAVEN_MODEL says otherwise.
+// - Model: Claude Opus 5.5 unless FOLD_MODEL says otherwise.
 // - Thinking is always on for this model; `effort` is the latency/depth dial.
 //   Dialogue runs at "low" so characters answer in a couple of seconds.
 // - Replies are streamed, and constrained to a JSON schema (structured
@@ -40,11 +40,11 @@ function credentialsPresent(env) {
 }
 
 export function createAnthropicProvider(env = process.env) {
-  const model = env.GREYHAVEN_MODEL || DEFAULT_MODEL;
-  const debug = !!env.GREYHAVEN_DEBUG;
-  let live = env.GREYHAVEN_AI !== 'off' && credentialsPresent(env);
-  let reason = live ? null : env.GREYHAVEN_AI === 'off' ? 'AI switched off (GREYHAVEN_AI=off)' : 'no Anthropic credentials found';
-  let useFallbacks = env.GREYHAVEN_FALLBACKS !== 'off';
+  const model = env.FOLD_MODEL || DEFAULT_MODEL;
+  const debug = !!env.FOLD_DEBUG;
+  let live = env.FOLD_AI !== 'off' && credentialsPresent(env);
+  let reason = live ? null : env.FOLD_AI === 'off' ? 'AI switched off (FOLD_AI=off)' : 'no Anthropic credentials found';
+  let useFallbacks = env.FOLD_FALLBACKS !== 'off';
   /** @type {Anthropic | null} */
   let client = null;
 
@@ -103,7 +103,7 @@ export function createAnthropicProvider(env = process.env) {
         if (err instanceof Anthropic.NotFoundError) {
           live = false;
           reason = `model "${model}" is not available to this account`;
-          console.error(`\n  Model "${model}" is not available to this account. Falling back to scripted mode.\n  Set GREYHAVEN_MODEL to a model you can use and restart.\n`);
+          console.error(`\n  Model "${model}" is not available to this account. Falling back to scripted mode.\n  Set FOLD_MODEL to a model you can use and restart.\n`);
           throw err;
         }
         if (err instanceof Anthropic.BadRequestError && useFallbacks) {

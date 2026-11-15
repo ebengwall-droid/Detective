@@ -6,21 +6,22 @@
 // ({ onText, signal }) and resolves to plain JSON, so the transport between
 // client and session can be a function call or an HTTP request.
 
-import { CASE, validateCase } from './cases/lamplighter/index.js';
+import { CASE, validateCase } from './cases/fold/index.js';
 import { check } from './conditions.js';
 import { buildView, npcPlace, presentables } from './view.js';
 import { Brain } from './brain.js';
 import { itemUnlocked } from './prompts.js';
 import { clone, clamp, sanitizePlayerText, GameError, hashString } from './util.js';
+import { normalise } from './ciphers.js';
 
 export const RPC_METHODS = new Set([
   'newGame', 'view', 'travel', 'examine', 'observe', 'talk', 'say', 'present',
   'laptopAsk', 'labSubmit', 'readLetter', 'deduce', 'accuse', 'think', 'rest',
-  'finaleSay', 'epilogue', 'note',
+  'finaleSay', 'epilogue', 'note', 'solve', 'hint',
 ]);
 export const STREAMING_METHODS = new Set(['say', 'present', 'laptopAsk', 'readLetter', 'think', 'finaleSay', 'epilogue']);
 
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
 const MAX_LOG = 120;
 const MAX_CONVO = 70;
 
@@ -43,6 +44,7 @@ const MAX_CONVO = 70;
  * @property {Record<string, any>} npcs
  * @property {Record<string, number>} records
  * @property {Record<string, {solved?: number, attempts: number}>} deductions
+ * @property {Record<string, {open?: number, solved?: number, attempts: number, hints: number}>} puzzles
  * @property {Record<string, {seen?: number, done?: number}>} objectives
  * @property {{id: string, due: number, effects: any[], notify?: string}[]} jobs
  * @property {Record<string, number>} jobsDone
@@ -61,9 +63,9 @@ function freshState(caseData, name) {
     player: { name: sanitizePlayerText(name, 40) || 'Detective' },
     act: 1,
     steps: 0,
-    location: 'precinct',
+    location: caseData.start.location,
     unlocked: {},
-    visited: { precinct: 1 },
+    visited: { [caseData.start.location]: 1 },
     examined: {},
     evidence: {},
     facts: {},
@@ -73,6 +75,7 @@ function freshState(caseData, name) {
     npcs: {},
     records: {},
     deductions: {},
+    puzzles: {},
     objectives: {},
     jobs: [],
     jobsDone: {},
@@ -85,7 +88,7 @@ function freshState(caseData, name) {
     finale: null,
     ending: null,
     arrived: {},
-    stats: { hints: 0, wrong: 0, wrongAccusations: 0, exchanges: 0, started: Date.now() },
+    stats: { hints: 0, wrong: 0, wrongAccusations: 0, exchanges: 0, misses: 0, puzzleHints: 0, spoiled: 0, started: Date.now() },
   };
   return s;
 }
@@ -220,7 +223,7 @@ export class GameSession {
     s.marks[`act${n}`] = s.steps;
     const act = this.case.acts[n];
     let card = act.card;
-    if (n === 4) {
+    if (n === this.case.finale.act) {
       const key = cardKey === '$verdict' ? s.verdict : cardKey;
       card = this.case.act4Cards[key] ?? this.case.act4Cards.timeout;
       s.finale = { turn: 0, landed: {}, stance: 'cold', log: [], convo: [], ended: null, opened: false };
@@ -234,7 +237,7 @@ export class GameSession {
     if (s.letters.some((l) => l.n === n)) return;
     s.letters.push({ n, at: s.steps, read: false });
     s.flags.letter_waiting = true;
-    this.emit({ type: 'letter', n, text: 'Something has been left on your desk at the precinct.' });
+    this.emit({ type: 'letter', n, text: this.case.director.arrives });
   }
 
   /** Run jobs, story beats, objectives and deductions until nothing changes. */
@@ -285,6 +288,13 @@ export class GameSession {
         this.emit({ type: 'deduction', id, q: d.q });
       }
     }
+    for (const [id, p] of Object.entries(this.case.puzzles)) {
+      const st = (s.puzzles[id] ??= { attempts: 0, hints: 0 });
+      if (st.open === undefined && check(p.if, s)) {
+        st.open = s.steps;
+        if (s.steps > 0) this.emit({ type: 'puzzle', id, title: p.title, opened: true, secret: !!p.secret });
+      }
+    }
   }
 
   // ------------------------------------------------------------- actions
@@ -306,7 +316,8 @@ export class GameSession {
     const s = this.requireState();
     const loc = this.case.locations[to];
     if (!loc || !s.unlocked[to]) throw new GameError('You have no reason to go there yet.');
-    if (s.location === 'lighthouse' && s.act >= 4 && !s.flags.finale_done) throw new GameError('Not now. Not while there are two people in this room and one lantern.');
+    const F = this.case.finale;
+    if (s.location === F.location && s.act >= F.act && !s.flags.finale_done) throw new GameError(F.stay);
     if (to === s.location) return this.done();
     const rest = this.case.rest[s.act];
     if (rest && s.steps - (s.marks[`act${s.act}`] ?? 0) >= rest.auto && check(rest.if, s)) {
@@ -386,10 +397,10 @@ export class GameSession {
     const npc = this.case.npcs[id];
     const st = this.npcState(id);
     const place = npcPlace(npc, s);
-    if (s.act >= 4 && id === 'vance' && s.location === 'lighthouse') return this.openFinale();
+    if (this.atFinale(id)) return this.openFinale();
     const here = place?.loc === s.location;
     if (!here) {
-      if (!(phone && npc.phone && st.met && place?.loc && s.act < 4)) throw new GameError(place?.loc ? 'They are not here.' : `${npc.name} is not answering.`);
+      if (!(phone && npc.phone && st.met && place?.loc && s.act < this.case.finale.act)) throw new GameError(place?.loc ? 'They are not here.' : `${npc.name} is not answering.`);
     }
     let greeting = null;
     if (!st.sessionOpen) {
@@ -451,7 +462,7 @@ export class GameSession {
     const st = this.npcState(id);
     if (!st.sessionOpen) throw new GameError('Start the conversation first.');
     if (!text && !shown) throw new GameError('Say something.');
-    if (s.act >= 4 && id === 'vance' && s.location === 'lighthouse') return this.finaleSay({ text }, hooks);
+    if (this.atFinale(id)) return this.finaleSay({ text }, hooks);
 
     s.steps += 1;
     s.stats.exchanges += 1;
@@ -503,7 +514,7 @@ export class GameSession {
     }
     st.pendingOpen = null;
 
-    const left = st.acts.leave !== undefined && id === 'vance';
+    const left = (npc.acts ?? []).some((a) => a.ends && st.acts[a.id] !== undefined);
     return this.done({
       reply: { say: reply.say, mood: st.mood, degraded: !!reply.degraded, ended: left },
       suggestions: left ? [] : this.suggestions(id),
@@ -513,7 +524,7 @@ export class GameSession {
   async laptopAsk({ query } = {}, hooks = {}) {
     const s = this.requireState();
     const q = sanitizePlayerText(query, 300);
-    if (!q) throw new GameError('Type a question for HARBORNET.');
+    if (!q) throw new GameError(this.case.laptop.empty);
     s.steps += 1;
     this.log('laptop', { q });
     const result = await this.brain.laptop(s, q, hooks);
@@ -554,7 +565,7 @@ export class GameSession {
     if (!letter) throw new GameError('The tray is empty.');
     const body = await this.brain.letter(s, letter.n, hooks);
     letter.read = true;
-    const id = `letter_${letter.n}`;
+    const id = `${this.case.director.prefix}_${letter.n}`;
     s.custom[id] = this.case.letterEvidence(letter.n, body);
     if (!s.letters.some((l) => !l.read)) delete s.flags.letter_waiting;
     s.steps += 1;
@@ -593,32 +604,25 @@ export class GameSession {
     if (!check(A.if, s) || s.flags.accused) throw new GameError('This is not the moment.');
     if (!A.suspects.includes(suspect) || !this.npcState(suspect).met) throw new GameError('Choose someone you have met.');
     const pillars = A.pillars.filter((p) => check(p.if, s));
-    let verdict = 'rejected';
-    if (suspect === 'vance') {
-      const ids = new Set(pillars.map((p) => p.id));
-      const strong = pillars.length >= 3 || ids.has('drawer') || (ids.has('identity') && pillars.length >= 2);
-      verdict = strong ? 'vance_strong' : 'vance_weak';
-    } else if (suspect === 'fenn') {
-      verdict = 'fenn';
-    } else if (suspect === 'hale') {
-      verdict = A.halePillars.filter((c) => check(c, s)).length >= 2 ? 'hale' : 'hale_weak';
-    }
+    // The case decides what an accusation is worth; the engine only keeps the books.
+    const { verdict, final, right = false, flags = [] } = A.judge({ suspect, pillars, state: s, check });
     s.steps += 1;
     s.accusation = { suspect, motive, items: items.slice(0, 8), verdict, at: s.steps, pillars: pillars.map((p) => p.id) };
     this.log('accuse', { suspect, verdict });
-    const final = verdict !== 'rejected' && verdict !== 'hale_weak';
     if (final) {
       s.flags.accused = true;
       s.verdict = verdict;
-      if (suspect === 'vance') s.flags.knew_vance = true;
+      for (const f of flags) s.flags[f] = true;
+      if (right) s.flags.knew_killer = true;
       else s.stats.wrongAccusations += 1;
     } else {
       s.stats.wrongAccusations += 1;
     }
-    return this.done({ verdict, final, text: A.replies[verdict], speaker: suspect === 'hale' ? 'The Commissioner' : 'Captain Hale' });
+    const reply = A.replies[verdict];
+    return this.done({ verdict, final, text: reply.text, speaker: reply.who });
   }
 
-  /** End the day. The next act begins the following morning at the precinct. */
+  /** End the day. The next act begins the following morning at the detective's desk. */
   async rest({ forced = false } = {}) {
     const s = this.requireState();
     const r = this.case.rest[s.act];
@@ -627,8 +631,9 @@ export class GameSession {
     this.log('rest', { act: s.act, forced });
     s.steps += 1;
     this.changeAct(s.act + 1, r.card);
-    s.location = 'precinct';
-    s.visited.precinct = (s.visited.precinct ?? 0) + 1;
+    const hub = this.case.start.hub;
+    s.location = hub;
+    s.visited[hub] = (s.visited[hub] ?? 0) + 1;
     return this.done({ ok: true });
   }
 
@@ -646,7 +651,60 @@ export class GameSession {
     return this.done({ text, objective: target.text });
   }
 
+  // ------------------------------------------------------------- puzzles
+
+  puzzleState(id) {
+    const s = this.requireState();
+    const def = this.case.puzzles[id];
+    const st = s.puzzles[id];
+    if (!def || st?.open === undefined) throw new GameError('You have not come across that yet.');
+    return { def, st };
+  }
+
+  /** Offer an answer to an open puzzle. A wrong one costs a little time and nothing else. */
+  async solve({ id, answer } = {}) {
+    const s = this.requireState();
+    const { def, st } = this.puzzleState(id);
+    if (st.solved !== undefined) return this.done({ ok: true, text: def.solved, answer: def.answers[0] });
+    const given = normalise(sanitizePlayerText(answer, 80));
+    if (!given) throw new GameError('Write an answer first.');
+    s.steps += 1;
+    if (def.answers.some((a) => normalise(a) === given)) {
+      st.solved = s.steps;
+      this.log('solve', { id });
+      for (const f of def.facts ?? []) this.addFact(f, `puz:${id}`);
+      this.applyEffects(def.effects, `puz:${id}`);
+      this.emit({ type: 'puzzle', id, title: def.title, solved: true });
+      return this.done({ ok: true, text: def.solved, answer: def.answers[0] });
+    }
+    st.attempts += 1;
+    s.stats.misses += 1;
+    const near = (def.near ?? []).find((n) => n.match.some((m) => normalise(m) === given));
+    return this.done({ ok: false, text: near?.say ?? this.case.puzzleMiss[st.attempts % this.case.puzzleMiss.length] });
+  }
+
+  /** The next hint for a puzzle. The last one gives the answer, and the report says so. */
+  async hint({ id } = {}) {
+    const s = this.requireState();
+    const { def, st } = this.puzzleState(id);
+    if (st.solved !== undefined) return this.done({ text: def.solved, last: true, tier: st.hints });
+    const tier = Math.min(st.hints, def.hints.length - 1);
+    if (st.hints < def.hints.length) {
+      st.hints += 1;
+      s.stats.puzzleHints += 1;
+      s.steps += 1;
+      if (st.hints === def.hints.length) s.stats.spoiled += 1;
+    }
+    return this.done({ text: def.hints[tier], tier: tier + 1, of: def.hints.length, last: tier === def.hints.length - 1 });
+  }
+
   // -------------------------------------------------------------- finale
+
+  atFinale(id) {
+    const s = this.requireState();
+    const F = this.case.finale;
+    return s.act >= F.act && id === F.npc && s.location === F.location;
+  }
 
   finaleLevers() {
     const s = this.requireState();
@@ -657,15 +715,15 @@ export class GameSession {
     const s = this.requireState();
     const F = this.case.finale;
     const f = s.finale;
-    this.npcState('vance').met = true;
+    this.npcState(F.npc).met = true;
     if (!f.opened) {
       f.opened = true;
-      const knew = !!s.flags.knew_vance || !!s.facts.infirmary || !!s.facts.fenn_knows || !!s.facts.drawer;
-      if (knew) s.flags.knew_vance = true;
+      const knew = !!s.flags.knew_killer || check(F.knewIf, s);
+      if (knew) s.flags.knew_killer = true;
       f.open = knew ? F.open.knew : F.open.blind;
       f.log.push({ who: 'npc', text: f.open });
     }
-    return this.done({ talk: { id: 'vance', name: 'Nora Vance', short: 'The Lamplighter', finale: true, greeting: f.log.length === 1 ? f.open : null, mood: f.stance, log: f.log.slice(-40), suggestions: this.finaleChips() } });
+    return this.done({ talk: { id: F.npc, name: this.case.npcs[F.npc].name, short: F.title, finale: true, greeting: f.log.length === 1 ? f.open : null, mood: f.stance, log: f.log.slice(-40), suggestions: this.finaleChips() } });
   }
 
   finaleChips() {
@@ -678,7 +736,7 @@ export class GameSession {
     const s = this.requireState();
     const F = this.case.finale;
     const f = s.finale;
-    if (!f?.opened || s.location !== 'lighthouse') throw new GameError('There is nobody to say it to.');
+    if (!f?.opened || s.location !== F.location) throw new GameError('There is nobody to say it to.');
     if (f.ended) throw new GameError('It is over.');
     const line = sanitizePlayerText(text);
     if (!line) throw new GameError('Say something.');
@@ -693,13 +751,15 @@ export class GameSession {
       if (levers.some((l) => l.id === id)) f.landed[id] ??= f.turn;
     }
     const weight = levers.filter((l) => f.landed[l.id]).reduce((n, l) => n + l.weight, 0);
-    const personal = !!(f.landed.name || f.landed.father);
+    const personal = F.personal.some((id) => f.landed[id]);
     let end = reply.end ?? null;
     // The model proposes an ending; the rules decide whether it has been earned.
     if (end === 'surrender' && !(weight >= 5 && personal)) end = weight >= 3 ? 'spare' : null;
     if (end === 'spare' && weight < 3) end = null;
     if (end === 'finish' && !last && f.turn < 3) end = null;
     if (last && !end) end = weight >= 5 && personal ? 'surrender' : weight >= 3 ? 'spare' : 'finish';
+    // Whoever has already been got out of danger cannot be lost by losing the argument.
+    if (end === 'finish' && check(F.safeIf, s)) end = 'spare';
 
     f.stance = reply.stance ?? f.stance;
     let say = reply.say;
@@ -710,7 +770,7 @@ export class GameSession {
     if (end) {
       f.ended = end;
       s.flags.finale_done = true;
-      if (end !== 'finish') s.flags.light_relit = true;
+      this.applyEffects(F.onEnd?.[end], 'finale');
       s.ending = this.computeEnding(end);
       this.emit({ type: 'ended', how: end });
       this.log('finale', { end });
@@ -728,14 +788,15 @@ export class GameSession {
     const E = this.case.endings;
     const truths = E.truths.map((t) => ({ id: t.id, label: t.label, found: check(t.if, s) }));
     const found = truths.filter((t) => t.found).length;
-    let score = (found / truths.length) * 62;
-    score += how === 'surrender' ? 22 : how === 'spare' ? 13 : 0;
-    const v = s.verdict;
-    if (v === 'vance_strong') score += 16;
-    else if (v === 'vance_weak' || s.flags.vance_exposed) score += 10;
-    else if (v === 'fenn' || v === 'hale') score -= 6;
-    score -= Math.min(8, s.stats.hints);
-    score -= Math.min(6, s.stats.wrong);
+    let score = (found / truths.length) * 60;
+    score += E.bonus.how[how] ?? 0;
+    score += E.bonus.verdict[s.verdict] ?? (s.flags.knew_killer ? E.bonus.knew : 0);
+    // Puzzles: every one solved counts for a little; hints and given-away answers count against.
+    const all = Object.entries(this.case.puzzles);
+    const solved = all.filter(([id]) => s.puzzles[id]?.solved !== undefined).length;
+    score += (solved / all.length) * 12;
+    score -= Math.min(8, s.stats.hints + s.stats.puzzleHints * 0.5);
+    score -= Math.min(6, s.stats.wrong + s.stats.spoiled);
     score = Math.round(clamp(score, 0, 100));
     const rank = [...E.ranks].reverse().find((r) => score >= r.min);
     return {
@@ -746,9 +807,8 @@ export class GameSession {
       rank: rank.title,
       rankLine: rank.line,
       accused: s.accusation ? { suspect: this.case.npcs[s.accusation.suspect].name, verdict: s.accusation.verdict } : null,
-      haleAlive: how !== 'finish',
-      fennCleared: v !== 'fenn' || how !== 'finish' ? how !== 'finish' || v !== 'fenn' : false,
-      truthPublic: !!(s.evidence.vale_tape || s.facts.sealed_truth || (s.facts.hale_admits && how !== 'finish')),
+      puzzles: { solved, of: all.length, hints: s.stats.puzzleHints, given: s.stats.spoiled },
+      ...E.extra({ state: s, how, check }),
       stats: { steps: s.steps, hints: s.stats.hints, wrong: s.stats.wrong, exchanges: s.stats.exchanges },
       text: null,
     };

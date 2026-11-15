@@ -1,4 +1,4 @@
-// The harbour chart: where you can go, and the way to end the day.
+// The map of the Fold: where you can go, and the way to end the day.
 
 import { el, icon } from './dom.js';
 import { confirmCard } from './hud.js';
@@ -11,37 +11,50 @@ function svg(tag, attrs = {}, ...children) {
   return node;
 }
 
-/** Draw Greyhaven: land along the top and west, the harbour, Marrow Point and the Teeth. */
+/**
+ * Draw the Fold: an island between the river and the Cut, with the crease of the page running
+ * down the middle of it. No printed map shows this; the detective has drawn it for themselves.
+ */
 function chart() {
   const g = svg('g');
+  const island = 'M12 21 L50 14 L88 26 L81 55 L52 66 L11 60 Z';
   g.append(
-    svg('rect', { x: 0, y: 0, width: 100, height: 70, fill: '#08141f' }),
-    // Depth contours.
-    ...[0, 1, 2, 3].map((i) => svg('path', { d: `M ${28 + i * 5} 70 C ${40 + i * 4} ${52 - i * 2}, ${58 + i * 3} ${46 + i * 3}, 100 ${34 + i * 7}`, fill: 'none', stroke: '#16303f', 'stroke-width': 0.25, 'stroke-dasharray': '1.2 1.2' })),
-    // Land.
-    svg('path', {
-      d: 'M0 0 H100 V20 C90 26 84 14 72 22 C64 36 52 34 49 26 C44 36 40 44 44 56 C38 60 30 58 26 66 L18 70 H0 Z',
-      fill: '#16212c',
-      stroke: '#3d4f60',
-      'stroke-width': 0.4,
-    }),
-    // Marrow Point spit.
-    svg('path', { d: 'M72 22 C78 36 84 50 88 60 C84 52 78 36 76 21 Z', fill: '#16212c', stroke: '#3d4f60', 'stroke-width': 0.4 }),
-    // Quays.
-    ...[[44, 50, 9, 1.2], [47, 54, 12, 1.2], [44.5, 56, 1.2, 5]].map(([x, y, w, h]) => svg('rect', { x, y, width: w, height: h, fill: '#223040', stroke: '#3d4f60', 'stroke-width': 0.2 })),
-    // The Teeth.
-    ...[[91, 64], [93, 66.5], [89.5, 67], [94.5, 63.5], [92, 68.5]].map(([x, y]) => svg('path', { d: `M${x} ${y} l1 -1.6 l1 1.6 z`, fill: '#4d5d6d' })),
-    // Streets, faintly.
-    ...['M10 12 L40 28', 'M20 6 L30 44', 'M40 8 L62 20', 'M8 34 L34 46', 'M30 44 L44 50'].map((d) => svg('path', { d, fill: 'none', stroke: '#243343', 'stroke-width': 0.35 })),
+    svg('rect', { x: 0, y: 0, width: 100, height: 70, fill: '#0d1822' }),
+    // Streets of the Flat, faintly, running off the edge.
+    ...['M0 6 L40 2', 'M60 0 L100 12', 'M92 0 L96 70', 'M0 44 L6 70', 'M70 70 L100 52', 'M20 70 L44 68', 'M4 0 L8 18'].map((d) => svg('path', { d, fill: 'none', stroke: '#1b2a38', 'stroke-width': 0.4 })),
+    // Water: the river to the north and west, the Cut to the south and east.
+    svg('path', { d: island, fill: 'none', stroke: '#0c2a3c', 'stroke-width': 9, 'stroke-linejoin': 'round' }),
+    svg('path', { d: island, fill: 'none', stroke: '#143a50', 'stroke-width': 0.3, 'stroke-linejoin': 'round', 'stroke-dasharray': '1.4 1.4' }),
+    // The island.
+    svg('path', { d: island, fill: '#1a2530', stroke: '#465a6c', 'stroke-width': 0.4, 'stroke-linejoin': 'round' }),
+    // Six crooked lanes and a square.
+    ...['M50 15 L49 30', 'M22 25 L44 34', 'M18 44 L44 40', 'M30 60 L46 42', 'M56 40 L82 32', 'M56 44 L72 58', 'M50 44 L52 64'].map((d) => svg('path', { d, fill: 'none', stroke: '#33475a', 'stroke-width': 0.5, 'stroke-linecap': 'round' })),
+    svg('rect', { x: 44.5, y: 31.5, width: 11, height: 11, rx: 0.8, fill: '#223141', stroke: '#465a6c', 'stroke-width': 0.3 }),
+    // Bridges, and the ferry chain across the Cut.
+    ...['M50 8.5 L50 15.5', 'M88 26 L93 21', 'M12 21 L6 17'].map((d) => svg('path', { d, fill: 'none', stroke: '#8796a6', 'stroke-width': 0.7 })),
+    svg('path', { d: 'M66 61 L70 68', fill: 'none', stroke: '#8796a6', 'stroke-width': 0.35, 'stroke-dasharray': '0.8 0.8' }),
+    // The crease of the page, which is why nobody finds the place.
+    svg('rect', { x: 0, y: 0, width: 50, height: 70, fill: '#ffffff', opacity: 0.018 }),
+    svg('path', { d: 'M50 0 L50 70', stroke: '#000', 'stroke-width': 0.9, opacity: 0.35 }),
+    svg('path', { d: 'M50.6 0 L50.6 70', stroke: '#fff', 'stroke-width': 0.25, opacity: 0.12 }),
   );
   const label = (x, y, text, size = 2.1, fill = '#66778a', spacing = 0.35) => {
     const t = svg('text', { class: 'map-label', x, y, 'font-size': size * 0.82, fill, 'letter-spacing': spacing });
     t.textContent = text;
     return t;
   };
-  g.append(label(6, 5.5, 'GREYHAVEN', 3.2, '#8796a6', 0.9), label(60, 44, 'THE HARBOUR', 2, '#34617a', 0.6), label(78, 46, 'MARROW POINT', 1.7, '#66778a'), label(86, 60, 'THE TEETH', 1.5, '#66778a'), label(6, 62, 'TO HARROWGATE ↓', 1.5, '#34617a'));
+  g.append(
+    label(4, 6, 'THE FOLD', 3.2, '#8796a6', 0.9),
+    label(4, 9.2, 'as told, not as printed', 1.4, '#55687a', 0.2),
+    label(70, 9, 'THE FLAT', 2, '#55687a', 0.7),
+    label(16, 16.5, 'THE RIVER', 1.5, '#3a7691', 0.6),
+    label(76, 63, 'THE CUT', 1.5, '#3a7691', 0.6),
+    label(20, 28, 'NONESUCH ROW', 1.3, '#66778a'),
+    label(56, 30.5, 'PROVING SQUARE', 1.3, '#66778a'),
+    label(51.5, 12, 'TURNAGAIN LANE', 1.2, '#66778a'),
+  );
   // Compass rose.
-  const rose = svg('g', { transform: 'translate(90 9)' });
+  const rose = svg('g', { transform: 'translate(91 60)' });
   rose.append(svg('circle', { r: 4.2, fill: 'none', stroke: '#3d4f60', 'stroke-width': 0.25 }));
   for (let i = 0; i < 8; i++) {
     const a = (i * Math.PI) / 4;
@@ -64,7 +77,7 @@ export function createMap(panels, game) {
       game.hud.toast({ kind: 'alert', iconName: 'moon', title: 'Not yet', text: v.rest.why });
       return;
     }
-    const ok = await confirmCard(game.cards, { title: 'Call it a night?', text: v.rest.warn, yes: 'Go home', no: 'Keep working' });
+    const ok = await confirmCard(game.cards, { title: 'Call it a night?', text: v.rest.warn, yes: 'Last ferry', no: 'Keep working' });
     if (!ok) return;
     api.close();
     game.rest();
@@ -84,7 +97,7 @@ export function createMap(panels, game) {
       api.close(true);
       const v = game.view;
       game.unseen.map = false;
-      const root = svg('svg', { viewBox: '0 0 100 70', preserveAspectRatio: 'xMidYMid meet', role: 'img', 'aria-label': 'Map of Greyhaven' });
+      const root = svg('svg', { viewBox: '0 0 100 70', preserveAspectRatio: 'xMidYMid meet', role: 'img', 'aria-label': 'Map of the Fold' });
       root.append(chart());
       for (const loc of v.map) {
         const [x, y] = loc.at;
@@ -124,7 +137,7 @@ export function createMap(panels, game) {
       panel = el(
         'section',
         { class: 'panel full', role: 'dialog', 'aria-label': 'Map' },
-        el('div', { class: 'panel-head' }, icon('map'), el('div', { class: 'panel-title', text: 'Greyhaven' }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close map', 'data-back': '', onClick: () => api.close() }, icon('close'))),
+        el('div', { class: 'panel-head' }, icon('map'), el('div', { class: 'panel-title', text: 'The Fold' }), el('button', { class: 'xbtn', type: 'button', 'aria-label': 'Close map', 'data-back': '', onClick: () => api.close() }, icon('close'))),
         el('div', { class: 'map-body' }, el('div', { class: 'map-wrap' }, root), list),
         el('div', { class: 'map-foot' }, el('div', { class: 'muted', text: `${v.act.date}. Choose a place to go there.` }), restBtn, el('button', { class: 'btn quiet phone-only', type: 'button', onClick: () => api.close() }, icon('back', 18), 'Back to the room')),
       );

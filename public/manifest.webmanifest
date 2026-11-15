@@ -1,7 +1,7 @@
 {
-  "name": "Greyhaven: The Lamplighter",
-  "short_name": "Greyhaven",
-  "description": "A 3D detective mystery where every character is played by Claude.",
+  "name": "The Fold: The Invigilator",
+  "short_name": "The Fold",
+  "description": "A 3D puzzle-mystery in a hidden quarter of puzzle-makers, where every character is played by Claude.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

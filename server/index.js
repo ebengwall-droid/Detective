@@ -1,4 +1,4 @@
-// Greyhaven server: serves the client and hosts the game core.
+// Game server: serves the client and hosts the game core.
 //
 // The browser is a thin client in this mode. Every player action is an RPC to
 // the GameSession living here, so the case file (who did it, who is lying)
@@ -7,17 +7,17 @@
 // Environment:
 //   PORT, HOST               where to listen (default 0.0.0.0:3000)
 //   ANTHROPIC_API_KEY        brings the characters to life (see README)
-//   GREYHAVEN_MODEL          model override
-//   GREYHAVEN_AI=off         force scripted mode
-//   GREYHAVEN_DATA           where saves are written (default ./data/saves)
-//   GREYHAVEN_SERVE_CORE=1   also serve the case file, for testing ?mode=local
+//   FOLD_MODEL          model override
+//   FOLD_AI=off         force scripted mode
+//   FOLD_DATA           where saves are written (default ./data/saves)
+//   FOLD_SERVE_CORE=1   also serve the case file, for testing ?mode=local
 
 import http from 'node:http';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { GameSession, RPC_METHODS, STREAMING_METHODS, assertCaseValid } from '../core/engine.js';
-import { META } from '../core/cases/lamplighter/story.js';
+import { META } from '../core/cases/fold/story.js';
 import { createAnthropicProvider } from './anthropic-provider.js';
 import { SaveStore } from './store.js';
 
@@ -36,8 +36,8 @@ const STATIC_ROOTS = [
 
 // The only parts of the case the page needs: set dressing and faces. The rest
 // (the story, the facts, who is lying) is not served unless asked for.
-const CORE_PUBLIC = new Set(['/core/cases/lamplighter/scenes.js', '/core/cases/lamplighter/looks.js', '/core/conditions.js']);
-const SERVE_CORE = process.env.GREYHAVEN_SERVE_CORE === '1';
+const CORE_PUBLIC = new Set(['/core/cases/fold/scenes.js', '/core/cases/fold/looks.js', '/core/conditions.js', '/core/ciphers.js']);
+const SERVE_CORE = process.env.FOLD_SERVE_CORE === '1';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -59,7 +59,7 @@ const MIME = {
 
 assertCaseValid();
 const ai = createAnthropicProvider();
-const store = new SaveStore(process.env.GREYHAVEN_DATA ? path.resolve(process.env.GREYHAVEN_DATA) : path.join(root, 'data', 'saves'));
+const store = new SaveStore(process.env.FOLD_DATA ? path.resolve(process.env.FOLD_DATA) : path.join(root, 'data', 'saves'));
 
 /** Live sessions, keyed by save id. @type {Map<string, GameSession>} */
 const sessions = new Map();
@@ -128,7 +128,7 @@ async function handleRpc(req, res) {
     if (res.writableEnded) return;
     // The player closed the tab or walked away mid-reply: stop paying for it.
     abort.abort();
-    if (process.env.GREYHAVEN_DEBUG) console.warn(`[rpc ${method}] client went away before the reply finished`);
+    if (process.env.FOLD_DEBUG) console.warn(`[rpc ${method}] client went away before the reply finished`);
   });
 
   if (streaming) {
@@ -236,7 +236,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, HOST, () => {
   const info = ai.describe();
-  console.log(`\n  GREYHAVEN — The Lamplighter`);
+  console.log(`\n  THE FOLD — The Invigilator`);
   console.log(`  http://localhost:${PORT}\n`);
   console.log(
     info.live
