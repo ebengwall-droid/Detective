@@ -138,9 +138,13 @@ export function buildScene(spec, quality = {}) {
           varying vec3 vView;
           varying float vDown;
           void main() {
-            float facing = abs(dot(normalize(vNormal), normalize(vView)));
+            // Clamp before pow(). With multisampling, a pixel on the cone's rim can be shaded from a point just
+            // outside the cone, where vDown runs a little past 0..1. On Apple GPUs pow() of a negative number is
+            // NaN, and the blurs that follow spread that one pixel into a black block across the screen.
+            float down = clamp(vDown, 0.0, 1.0);
+            float facing = clamp(abs(dot(normalize(vNormal), normalize(vView))), 0.0, 1.0);
             float body = pow(facing, 1.7);
-            float fall = pow(1.0 - vDown, 1.5) * smoothstep(0.0, 0.06, vDown);
+            float fall = pow(1.0 - down, 1.5) * smoothstep(0.0, 0.06, down);
             gl_FragColor = vec4(tint * strength * body * fall, 1.0);
           }`,
         transparent: true,
@@ -427,7 +431,8 @@ export function buildScene(spec, quality = {}) {
         varying float vAlpha;
         void main() {
           float d = length(gl_PointCoord - 0.5);
-          gl_FragColor = vec4(vec3(1.0, 0.9, 0.74) * smoothstep(0.5, 0.0, d) * vAlpha * 0.2, 1.0);
+          // (smoothstep with its edges reversed is undefined in GLSL, so the fade is written the defined way round.)
+          gl_FragColor = vec4(vec3(1.0, 0.9, 0.74) * (1.0 - smoothstep(0.0, 0.5, d)) * vAlpha * 0.2, 1.0);
         }`,
       transparent: true,
       depthWrite: false,

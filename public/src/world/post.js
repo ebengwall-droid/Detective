@@ -2,6 +2,7 @@
 //
 // The room is drawn into a high-range, anti-aliased buffer, then:
 //   ambient occlusion  corners, the undersides of furniture, where things meet the floor (N8AO)
+//   a guard            every pixel made a real number no brighter than BRIGHTEST, before anything blurs
 //   depth of field     the room falls out of focus behind whoever you are talking to
 //   bloom              lamps and flames glow
 //   the film look      filmic tone curve, a grade (cool shadows, warm light), vignette and grain
@@ -28,6 +29,50 @@ import {
   VignetteEffect,
 } from 'postprocessing';
 import { N8AOPostPass } from 'n8ao';
+
+/** The brightest a pixel of the room may be, in the buffer's own units (a lamp's glass is about 2 to 8). */
+const BRIGHTEST = '64.0';
+
+// A NaN (not a number) has every exponent bit set and some fraction bit set; an
+// infinity has the exponent bits set and no fraction bits. Both are tested on the
+// bits, because a shader compiler may assume floats are always numbers and drop
+// an isnan() test.
+
+/**
+ * The guard. One NaN or infinity anywhere in the room is spread by the blurs
+ * that follow (depth of field, then bloom's chain of smaller and smaller
+ * copies) into a black rectangle over much of the screen. This runs after the
+ * room and its occlusion are drawn and before anything is blurred: a NaN
+ * becomes one black pixel on its own, and nothing is brighter than BRIGHTEST.
+ * SRC blending, because the default mix(input, output, 1.0) would multiply the
+ * bad input by zero, which is still NaN.
+ */
+class FiniteEffect extends Effect {
+  constructor() {
+    super(
+      'FiniteEffect',
+      `void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
+        bvec4 bad = greaterThan(floatBitsToUint(inputColor) & 0x7fffffffu, uvec4(0x7f800000u));
+        vec4 c = mix(inputColor, vec4(0.0, 0.0, 0.0, 1.0), bad);
+        outputColor = vec4(clamp(c.rgb, 0.0, ${BRIGHTEST}), clamp(c.a, 0.0, 1.0));
+      }`,
+      { blendFunction: BlendFunction.SRC },
+    );
+  }
+}
+
+// The same guard in every ordinary material, at the point where its colour is
+// final. A shiny surface near a lamp, seen at a glancing angle, can come out
+// brighter than the 65504 a half-float buffer holds, and is then stored as
+// infinity. Capped here it keeps its glow, instead of reaching the guard pass
+// as a bad pixel (the occlusion pass turns an infinity into NaN).
+const FINAL_COLOUR = 'gl_FragColor = vec4( outgoingLight, diffuseColor.a );';
+if (THREE.ShaderChunk.opaque_fragment.includes(FINAL_COLOUR)) {
+  THREE.ShaderChunk.opaque_fragment = THREE.ShaderChunk.opaque_fragment.replace(
+    FINAL_COLOUR,
+    `outgoingLight = mix( clamp( outgoingLight, 0.0, ${BRIGHTEST} ), vec3( 0.0 ), greaterThan( floatBitsToUint( outgoingLight ) & 0x7fffffffu, uvec3( 0x7f800000u ) ) );\n${FINAL_COLOUR}`,
+  );
+}
 
 /**
  * The grade: how the picture is printed. Shadows lean cool and highlights
@@ -108,6 +153,7 @@ export class Post {
       composer.addPass(ao);
       this.ao = ao;
     }
+    composer.addPass(new EffectPass(camera, new FiniteEffect()));
 
     if (this.features.dof) {
       this.dof = new DepthOfFieldEffect(camera, { focusDistance: 2, focusRange: 1.6, bokehScale: 0, resolutionScale: 0.5 });
