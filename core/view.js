@@ -195,7 +195,7 @@ export function buildView(state, caseData, ai) {
     player: s.player,
     act: { n: s.act, title: act.title, date: act.date },
     steps: s.steps,
-    location: { id: s.location, name: locDef.name, sub: locDef.sub, parent: locDef.parent ?? null, scene, sceneVersion: version, hotspots, npcs: npcsHere },
+    location: { id: s.location, name: locDef.name, sub: locDef.sub, about: locDef.arrive ?? null, parent: locDef.parent ?? null, scene, sceneVersion: version, hotspots, npcs: npcsHere },
     map,
     evidence,
     presentables: presentables(s, caseData),

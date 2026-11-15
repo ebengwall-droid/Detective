@@ -5,7 +5,7 @@ import { World, STEP_DOWN } from './world/world.js';
 import { assets } from './world/assets.js';
 import { Audio } from './audio.js';
 import { el } from './ui/dom.js';
-import { createHud, showHere, showInspect, showThink, showCard, confirmCard } from './ui/hud.js';
+import { createHud, showHere, showInspect, showThink, showCard, confirmCard, showArrival } from './ui/hud.js';
 import { createDialogue } from './ui/dialogue.js';
 import { createNotebook } from './ui/notebook.js';
 import { createLaptop } from './ui/laptop.js';
@@ -474,6 +474,9 @@ export class Game {
         if (e.type === 'act') {
           if (this.dialogue.isOpen) held.push(e);
           else await this.showAct(e);
+        } else if (e.type === 'arrive') {
+          // Read before anything else is said about the place.
+          await this.showArrival(e.text);
         } else if (e.type === 'unlock') {
           places.push(e.name);
         } else {
@@ -544,12 +547,26 @@ export class Game {
           hud.toast({ kind: 'alert', iconName: 'paper', title: 'A new paper', text: e.title, onClick: () => this.openPuzzle(e.id) });
         }
         break;
-      case 'arrive':
-        hud.subtitle(e.text, 7000);
-        break;
       default:
         break;
     }
+  }
+
+  /** What you see on arriving, on a card that waits for you. */
+  async showArrival(text) {
+    const loc = this.view?.location;
+    this.block('arrive');
+    try {
+      await showArrival(this.panels, { name: loc?.name ?? '', sub: loc?.sub ?? '', text });
+    } finally {
+      this.unblock('arrive');
+    }
+  }
+
+  /** The place's name at the top of the screen, tapped: what you saw on arriving, again. */
+  aboutHere() {
+    const about = this.view?.location?.about;
+    if (about && this.free) this.showArrival(about);
   }
 
   async showAct(e) {

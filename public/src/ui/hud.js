@@ -25,24 +25,21 @@ export function createHud(root, game) {
   const objective = el('button', { class: 'hud-objective', type: 'button', onClick: () => game.open('notebook', 'case') }, el('span'));
   const reticle = el('div', { class: 'reticle' });
   const prompt = el('button', { class: 'hud-prompt', type: 'button', hidden: true, onClick: () => game.useTarget() }, el('span', { class: 'verb' }), el('span', { class: 'what' }), el('kbd', { text: 'E' }));
-  const subtitle = el('div', { class: 'hud-subtitle', role: 'status' });
   const coach = el('div', { class: 'hud-coach', role: 'status' });
 
   const hud = el(
     'div',
     { id: 'hud', class: 'off' },
-    el('header', { class: 'hud-top' }, el('div', { class: 'hud-place' }, name, sub), objective),
+    el('header', { class: 'hud-top' }, el('div', { class: 'hud-place', role: 'button', tabindex: '0', 'aria-label': 'About this place', onClick: () => game.aboutHere() }, name, sub), objective),
     menu,
     el('nav', { class: 'hud-tools', 'aria-label': 'Tools' }, Object.values(tools)),
     reticle,
-    subtitle,
     coach,
     prompt,
   );
   const toasts = el('div', { id: 'toasts', 'aria-live': 'polite' });
   root.append(hud, toasts);
 
-  let subtitleTimer = 0;
   let coachTimer = 0;
   let touch = false;
 
@@ -97,13 +94,6 @@ export function createHud(root, game) {
       prompt.children[0].textContent = t.verb;
       prompt.children[0].hidden = !t.verb;
       prompt.children[1].textContent = t.label;
-    },
-
-    subtitle(text, ms = 6000) {
-      clearTimeout(subtitleTimer);
-      subtitle.textContent = text;
-      subtitle.classList.add('on');
-      subtitleTimer = setTimeout(() => subtitle.classList.remove('on'), ms);
     },
 
     /** A one-off instruction in the middle of the screen. html is trusted (our own copy). */
@@ -234,6 +224,37 @@ export function showInspect(panels, { title, text, taken = [], actions = [] }) {
     const panel = el('section', { class: 'panel inspect', role: 'dialog', 'aria-label': title }, el('div', { class: 'panel-head' }, el('div', { class: 'panel-title', text: title })), body, foot);
     panels.append(panel);
     typeInto(body, text, { cps: 140 });
+    setTimeout(() => window.addEventListener('keydown', onKey), 150);
+  });
+}
+
+/**
+ * Arriving somewhere for the first time: the place's name and address, then what you see,
+ * on solid glass, for as long as you need. The name at the top of the screen brings it back.
+ */
+export function showArrival(panels, { name, sub, text }) {
+  return new Promise((resolve) => {
+    const body = el('div', { class: 'panel-body' });
+    const close = () => {
+      leave(panel);
+      window.removeEventListener('keydown', onKey);
+      resolve();
+    };
+    const onKey = (e) => {
+      if (e.code === 'Escape' || e.code === 'Enter' || e.code === 'Space' || e.code === 'KeyE') {
+        e.preventDefault();
+        close();
+      }
+    };
+    const panel = el(
+      'section',
+      { class: 'panel inspect arrival', role: 'dialog', 'aria-label': name },
+      el('div', { class: 'arrival-head' }, sub ? el('div', { class: 'arrival-kicker', text: sub }) : null, el('div', { class: 'arrival-name', text: name })),
+      body,
+      el('div', { class: 'inspect-foot' }, el('div', { class: 'inspect-actions' }, el('button', { class: 'btn small solid', type: 'button', text: 'Continue', 'data-back': '', onClick: close }))),
+    );
+    panels.append(panel);
+    typeInto(body, text, { cps: 120 });
     setTimeout(() => window.addEventListener('keydown', onKey), 150);
   });
 }

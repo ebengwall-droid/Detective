@@ -323,13 +323,6 @@ kbd {
 .hud-prompt.done .what { color: var(--text-2); }
 .hud-prompt.done .verb { color: var(--text-2); }
 
-.hud-subtitle {
-  position: absolute; left: 50%; bottom: calc(var(--bar) + 82px + var(--safe-b)); transform: translateX(-50%);
-  width: min(92vw, 640px); text-align: center; font-size: 18px; font-weight: 500; line-height: 1.4; text-wrap: balance;
-  color: var(--text-1); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7), 0 1px 14px #000, 0 0 30px rgba(0, 0, 0, 0.6); opacity: 0; pointer-events: none !important;
-}
-#hud > .hud-subtitle { transition: opacity 0.6s; }
-.hud-subtitle.on { opacity: 1; }
 
 .hud-coach {
   position: absolute; left: 50%; top: 34%; transform: translateX(-50%);
@@ -1065,7 +1058,6 @@ button.row:active, .map-row:active { background: var(--glass-fill-2); transform:
 @media (max-width: 640px) {
   #hud > .hud-tools { left: var(--gutter-l); right: var(--gutter-r); transform: none; grid-auto-flow: row; grid-template-columns: repeat(5, 1fr); max-width: 400px; margin: 0 auto; }
   /* Clear of the joystick ring. */
-  .hud-subtitle { bottom: calc(var(--bar) + 222px + var(--safe-b)); }
   .inspect { max-height: 66%; }
   .around { max-height: 78%; }
   .phone-only { display: flex !important; }
@@ -1177,3 +1169,9 @@ button.row:active, .map-row:active { background: var(--glass-fill-2); transform:
 /* A picture on a chapter card, between its paragraphs. */
 .card-fig { margin: 4px 0 24px; text-align: left; }
 .card-fig figcaption { margin-top: 9px; font-size: 13.5px; line-height: 1.45; color: var(--text-3); }
+/* Arriving somewhere (hud.showArrival): the address, then the place's name in the title face. */
+.arrival .arrival-head { flex: none; padding: 22px 24px 2px; }
+.arrival-kicker { font-size: 11.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--lamp-2); }
+.arrival-name { margin-top: 6px; font-family: var(--epic); font-weight: 700; font-size: 24px; line-height: 1.15; letter-spacing: 0.03em; color: #f6e3bb; text-wrap: balance; }
+/* The place's name at the top of the screen can be tapped to read its description again. */
+.hud-top > .hud-place { pointer-events: auto; cursor: pointer; -webkit-tap-highlight-color: transparent; }
