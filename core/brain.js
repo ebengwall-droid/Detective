@@ -86,8 +86,8 @@ export class Brain {
 
   // ----------------------------------------------------------- characters
 
-  async npcReply(state, id, { text, shown, react }, hooks) {
-    const turn = npcTurn(this.case, id, state, { text, shown, react });
+  async npcReply(state, id, { text, shown, react, help = null }, hooks) {
+    const turn = npcTurn(this.case, id, state, { text, shown, react, help });
     const st = state.npcs[id];
     if (this.live) {
       const raw = await this.call(
@@ -116,7 +116,7 @@ export class Brain {
         };
       }
     }
-    const scripted = this.scriptedReply(state, id, { text, shown, react });
+    const scripted = this.scriptedReply(state, id, { text, shown, react, help });
     // Keep the transcript the model will see next time consistent.
     const raw = JSON.stringify({ say: scripted.say, mood: scripted.mood, told: scripted.told, acts: scripted.acts, threads: [] });
     return { ...scripted, turn, raw, degraded: !!this.ai?.describe?.().live, why: this.why() };
@@ -135,7 +135,7 @@ export class Brain {
    * do I do); whatever they know that the words are about; and only then the
    * admission that they cannot help.
    */
-  scriptedReply(state, id, { text, shown, react }) {
+  scriptedReply(state, id, { text, shown, react, help = null }) {
     const npc = this.case.npcs[id];
     const st = state.npcs[id];
     const fallback = npc.fallback[st.exchanges % npc.fallback.length];
@@ -187,9 +187,10 @@ export class Brain {
     // A plain remark gets a plain answer, unless the words are clearly about something ("hello, who pours the tea?").
     const intent = intentOf(text);
     const small = npc.small ?? {};
-    if (intent && (bestScore < 3 || intent === 'accuse')) {
+    // Asked for help, a guide helps, even if the words also touch on something she knows.
+    if (intent && (bestScore < 3 || intent === 'accuse' || (intent === 'next' && help))) {
       let line = small[intent];
-      if (intent === 'next' && npc.guide) line = this.guidance(state) ?? line;
+      if (intent === 'next' && npc.guide) line = this.guidance(state, help) ?? line;
       if (Array.isArray(line)) line = line[st.exchanges % line.length];
       if (typeof line === 'string' && line.startsWith('@')) {
         const item = npc.know.find((k) => k.id === line.slice(1));
@@ -209,11 +210,13 @@ export class Brain {
   }
 
   /** What the detective's partner says to "what should I do?": the freshest open objective, in plain words. */
-  guidance(state) {
+  /** What a guide says when asked for help: the hint the engine has taken, or the first hint for the newest thread. */
+  guidance(state, help = null) {
+    const lead = this.case.prompts?.guideLead ?? ['If it were me?', "Here's what I'd do."];
+    if (help) return `${lead[state.steps % lead.length]} ${help.hint}`;
     const open = this.case.objectives.filter((o) => state.objectives[o.id]?.seen !== undefined && state.objectives[o.id]?.done === undefined);
     const target = open.sort((a, b) => state.objectives[b.id].seen - state.objectives[a.id].seen)[0];
     if (!target) return null;
-    const lead = this.case.prompts?.guideLead ?? ['If it were me?', "Here's what I'd do."];
     return `${lead[state.steps % lead.length]} ${target.hints?.[0] ?? target.text}`;
   }
 

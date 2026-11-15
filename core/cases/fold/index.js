@@ -264,6 +264,7 @@ export function validateCase(c = CASE) {
     for (const f of p.facts ?? []) checkFact(f, where);
     checkEffects(p.effects, where);
     if (p.lesson && !c.records[`l_${p.lesson}`]) problems.push(`${where}: no lecture "l_${p.lesson}"`);
+    if (p.leadsTo && !c.locations[p.leadsTo]) problems.push(`${where}: leads to an unknown place "${p.leadsTo}"`);
   }
   c.feeds.forEach((pid, i) => {
     if (c.puzzles[pid]?.feed !== i + 1) problems.push(`feeds: "${pid}" is not question ${i + 1}`);

@@ -12,7 +12,7 @@ import { buildView, npcPlace, presentables } from './view.js';
 import { Brain } from './brain.js';
 import { itemUnlocked } from './prompts.js';
 import { clone, clamp, sanitizePlayerText, GameError, hashString } from './util.js';
-import { openLeads, threadsIn } from './talk.js';
+import { openLeads, threadsIn, intentOf } from './talk.js';
 import { normalise } from './ciphers.js';
 
 export const RPC_METHODS = new Set([
@@ -465,9 +465,12 @@ export class GameSession {
     const npc = this.case.npcs[id];
     const st = this.npcState(id);
     // Questions still worth asking: not asked in those words, and not already answered some other way.
-    return openLeads(npc, st, s)
-      .slice(0, 4)
+    const chips = openLeads(npc, st, s)
+      .slice(0, npc.guide ? 3 : 4)
       .map((a) => a.q);
+    // A guide can always be asked for help, and the help goes a step further each time.
+    if (npc.guide && this.newestObjective()) chips.push(this.case.prompts.guideAsk ?? "I'm stuck. Any ideas?");
+    return chips;
   }
 
   async say({ id, text } = {}, hooks = {}) {
@@ -508,7 +511,10 @@ export class GameSession {
     if (text) st.log.push({ who: 'you', text, step: s.steps });
     this.log('say', { id });
 
-    const reply = await this.brain.npcReply(s, id, { text, shown, react }, hooks);
+    // Asked for help, a guide passes on the next hint for the newest thread: a little more each time.
+    const taken = npc.guide && text && !shown && intentOf(text) === 'next' ? this.takeHint() : null;
+    const help = taken ? { objective: taken.target.text, hint: taken.target.hints[taken.tier] } : null;
+    const reply = await this.brain.npcReply(s, id, { text, shown, react, help }, hooks);
 
     // Credit what was told. Hard gates are enforced here, not left to the model.
     const told = new Set(reply.told ?? []);
@@ -672,18 +678,34 @@ export class GameSession {
     return this.done({ ok: true });
   }
 
-  /** The detective's own inner voice: a hint toward the nearest open objective. */
-  async think(_args = {}, hooks = {}) {
+  /** The thread the detective opened most recently and has not finished, if any. */
+  newestObjective() {
     const s = this.requireState();
     const open = this.case.objectives.filter((o) => s.objectives[o.id]?.seen !== undefined && s.objectives[o.id]?.done === undefined);
-    // Prefer the most recently opened thread; fall back to the oldest.
-    const target = open.sort((a, b) => (s.objectives[b.id].seen - s.objectives[a.id].seen))[0];
-    if (!target) return this.done({ text: 'Nothing nags at you. For once.', objective: null });
+    return open.sort((a, b) => s.objectives[b.id].seen - s.objectives[a.id].seen)[0] ?? null;
+  }
+
+  /**
+   * The next hint for the newest open thread: each time one is taken, the next is more
+   * specific. Thinking and asking the guide share the ladder, and both count as a hint.
+   * @returns {{ target: any, tier: number }|null}
+   */
+  takeHint() {
+    const s = this.requireState();
+    const target = this.newestObjective();
+    if (!target?.hints?.length) return null;
     const tier = clamp(s.hints[target.id] ?? 0, 0, target.hints.length - 1);
     s.hints[target.id] = (s.hints[target.id] ?? 0) + 1;
     s.stats.hints += 1;
-    const text = await this.brain.think(s, target, tier, hooks);
-    return this.done({ text, objective: target.text });
+    return { target, tier };
+  }
+
+  /** The detective's own inner voice: a hint toward the nearest open objective. */
+  async think(_args = {}, hooks = {}) {
+    const got = this.takeHint();
+    if (!got) return this.done({ text: 'Nothing nags at you. For once.', objective: null });
+    const text = await this.brain.think(this.requireState(), got.target, got.tier, hooks);
+    return this.done({ text, objective: got.target.text });
   }
 
   // ------------------------------------------------------------- puzzles
@@ -710,6 +732,12 @@ export class GameSession {
       for (const f of def.facts ?? []) this.addFact(f, `puz:${id}`);
       this.applyEffects(def.effects, `puz:${id}`);
       this.emit({ type: 'puzzle', id, title: def.title, solved: true });
+      // Some puzzles are a way in (the gate): solving one takes you through.
+      if (def.leadsTo) {
+        s.unlocked[def.leadsTo] = true;
+        const res = await this.travel({ to: def.leadsTo });
+        return { ...res, ok: true, text: def.solved, answer: def.answers[0], travelled: def.leadsTo };
+      }
       return this.done({ ok: true, text: def.solved, answer: def.answers[0] });
     }
     st.attempts += 1;

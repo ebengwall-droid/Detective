@@ -317,8 +317,10 @@ function puzzleView(p, game, sel, api) {
         if (res.ok) {
           game.audio.sting();
           game.buzz?.(24);
-          await showCard(game.cards, { kicker: p.title, title: res.answer, lines: res.text.split('\n\n'), veil: true });
-          api.refresh();
+          // A puzzle that is a way in (the gate) has already taken you through: the new place is behind the card.
+          await showCard(game.cards, { kicker: p.title, title: res.answer, lines: res.text.split('\n\n'), veil: true, button: res.travelled ? 'Go through' : 'Continue' });
+          if (res.travelled) api.close();
+          else api.refresh();
           game.flushEvents();
           return;
         }

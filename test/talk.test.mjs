@@ -77,6 +77,30 @@ test('the partner says what to do next, from the open objective', async () => {
   assert.ok(!/gate needs a word/i.test(other.say), 'nobody else is told what the detective is working on');
 });
 
+test('asked again, the partner helps a step further, and it counts as a hint', async () => {
+  const session = await fresh();
+  const open = await session.talk({ id: 'kit' });
+  assert.ok(open.talk.suggestions.includes("I'm stuck. Any ideas?"), 'she can always be asked for help');
+  const gate = CASE.objectives.find((o) => o.id === 'o_gate');
+  const first = (await session.say({ id: 'kit', text: "I'm stuck. Any ideas?" })).reply;
+  const second = (await session.say({ id: 'kit', text: 'any more clues? what now?' })).reply;
+  assert.ok(first.say.includes(gate.hints[0]), `first: ${first.say}`);
+  assert.ok(second.say.includes(gate.hints[1]), `second: ${second.say}`);
+  assert.equal(session.state.stats.hints, 2);
+  // Live, the same hint reaches the actor as a stage note to pass on in her own words.
+  const turn = (await import('../core/prompts.js')).npcTurn(CASE, 'kit', session.state, { text: 'help', help: { objective: gate.text, hint: gate.hints[1] } });
+  assert.ok(turn.includes(gate.hints[1]) && /asking you for help/.test(turn));
+});
+
+test('solving the gate takes you through it, with Kit, to the clockmaker\'s', async () => {
+  const session = await fresh();
+  const out = await session.solve({ id: 'gate', answer: 'catch' });
+  assert.ok(out.ok);
+  assert.equal(out.travelled, 'clockshop');
+  assert.equal(session.state.location, 'clockshop');
+  assert.ok(out.view.location.npcs.some((n) => n.id === 'kit'), 'Kit comes too');
+});
+
 test('pleasantries cost no time; questions do', async () => {
   const session = await fresh();
   await session.talk({ id: 'kit' });

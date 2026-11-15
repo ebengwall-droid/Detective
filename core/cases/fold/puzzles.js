@@ -63,8 +63,10 @@ export const PUZZLES = {
     ],
     ask: 'What word do you set the rings to?',
     answers: ['CATCH'],
-    solved: "C, A, T, C, H. The rings click into place and the turnstile turns.\n\n'You beat me to it,' says Kit. 'Every seven-year-old in the Fold does that on the way to school, so don't let it go to your head. Welcome to the Fold.'",
+    solved: "C, A, T, C, H. The rings click into place and the turnstile turns.\n\n'You beat me to it,' says Kit. 'Every seven-year-old in the Fold does that on the way to school, so don't let it go to your head. Welcome to the Fold.'\n\nYou push through the turnstile. Kit takes you down Nonesuch Row to the clockmaker's shop.",
     effects: [{ flag: 'through_gate' }],
+    // Solving it takes you through: you and Kit go straight to the scene.
+    leadsTo: 'clockshop',
     lesson: 'caesar',
     hints: [
       'The letters on the slate are not the word itself. The stone tells you what to do with them.',

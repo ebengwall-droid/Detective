@@ -69,7 +69,7 @@ function guideNotes(caseData, npc, state) {
     .map((o) => `- ${o.text}. (${o.hints?.[0] ?? ''})`);
   return `
 # What the detective is working on
-You are their guide here, so if they ask what to do, where to go or say they are stuck, steer them to the first of these as a colleague would, in your own words. Point; do not solve. Never give the answer to a puzzle or a Paper.
+You are their guide here. If they ask what to do, where to go or say they are stuck, help them like a good partner: steer them to the first of these, in your own words. When they ask for help, a stage note tells you what would help them now; each time they ask, it goes a step further. Say where to look or what to try. You do not know the answers to puzzles or Papers, so never give one.
 ${lines.join('\n')}
 `;
 }
@@ -151,7 +151,7 @@ export function npcSchema(caseData, npcId, state) {
 }
 
 /** The user turn for one exchange: stage notes, then the detective's line. */
-export function npcTurn(caseData, npcId, state, { text, shown, react }) {
+export function npcTurn(caseData, npcId, state, { text, shown, react, help = null }) {
   const npc = caseData.npcs[npcId];
   const st = state.npcs[npcId];
   const notes = [];
@@ -168,6 +168,9 @@ export function npcTurn(caseData, npcId, state, { text, shown, react }) {
     notes.push(`[The detective puts an item in front of you. ${shown.name.toUpperCase()}: ${shown.desc}]`);
     if (react?.note) notes.push(`[Direction: ${react.note}]`);
     else if (!react) notes.push('[Direction: this item means nothing particular to you. React as your character would to being shown it.]');
+  }
+  if (help) {
+    notes.push(`[The detective is asking you for help with: ${help.objective}. What would help them now: ${help.hint} Tell them this in your own words, the way a partner thinks a problem through out loud: say what to look at or what to try. Do not give the answer to any puzzle.]`);
   }
   const line = text || (shown ? 'What can you tell me about this?' : '');
   return `${notes.join('\n')}${notes.length ? '\n' : ''}DETECTIVE: "${line}"`;
