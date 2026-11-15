@@ -328,4 +328,24 @@ export class Audio {
   typeKey() {
     this.noiseBurst({ gain: 0.05, freq: 1800 + Math.random() * 600, q: 3, decay: 0.035 });
   }
+
+  /** A ring or a wheel clicking round one notch. Quick turns are a ratchet, not a roar. */
+  tick() {
+    const now = performance.now();
+    if (now - (this.lastTick ?? 0) < 38) return;
+    this.lastTick = now;
+    this.noiseBurst({ gain: 0.035, freq: 3400 + Math.random() * 500, q: 5, decay: 0.018 });
+  }
+
+  /** The bolt that does not move. */
+  clunk() {
+    this.noiseBurst({ gain: 0.09, freq: 300, q: 1.2, decay: 0.12, type: 'lowpass' });
+    this.tone(92, { gain: 0.05, decay: 0.16, wet: 0.15 });
+  }
+
+  /** A bolt sliding back. */
+  bolt() {
+    this.noiseBurst({ gain: 0.06, freq: 1400, q: 1.5, decay: 0.22 });
+    this.tone(196, { gain: 0.04, decay: 0.3, when: 0.18, wet: 0.3 });
+  }
 }

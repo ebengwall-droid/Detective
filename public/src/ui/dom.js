@@ -16,7 +16,10 @@ export function el(tag, props = {}, ...children) {
     else if (key === 'text') node.textContent = value;
     else if (key === 'html') node.innerHTML = value;
     else if (key === 'dataset') Object.assign(node.dataset, value);
-    else if (key === 'style' && typeof value === 'object') Object.assign(node.style, value);
+    else if (key === 'style' && typeof value === 'object') {
+      // Custom properties (--n) are only taken through setProperty.
+      for (const [k, v] of Object.entries(value)) k.startsWith('--') ? node.style.setProperty(k, v) : (node.style[k] = v);
+    }
     else if (key.startsWith('on') && typeof value === 'function') node.addEventListener(key.slice(2).toLowerCase(), value);
     else if (value === true) node.setAttribute(key, '');
     else node.setAttribute(key, String(value));
@@ -140,6 +143,9 @@ const P = {
   mute: '<path d="M4.500 9.500h3l4.500-4v13l-4.500-4h-3z"/><path d="m16 9.500 5 5M21 9.500l-5 5"/>',
   gavel: '<path d="m13.500 4.500 6 6M10.500 7.500l6 6M12 6l-6.500 6.500 3 3L15 9M8 15.500l-4.500 4.500M13 20.500h8"/>',
   help: '<circle cx="12" cy="12" r="8.500"/><path d="M9.500 9.500a2.500 2.500 0 1 1 3.500 2.300c-.700.400-1 1-1 1.700M12 16.800v.2"/>',
+  keyboard: '<rect x="2.500" y="6" width="19" height="12" rx="2"/><path d="M6 9.500h.01M9.300 9.500h.01M12.600 9.500h.01M15.900 9.500h.01M6 12.500h.01M18 9.500h.01M9.300 12.500h.01M12.600 12.500h.01M15.900 12.500h.01M18 12.500h.01M8 15.200h8"/>',
+  undo: '<path d="M8 6.500 4 10.500l4 4"/><path d="M4.500 10.500h9a5.500 5.500 0 0 1 0 11H11"/>',
+  reset: '<path d="M4.500 12a7.500 7.500 0 1 0 2.200-5.300"/><path d="M4.500 4.500v4h4"/>',
 };
 
 /** Inline SVG icon. */

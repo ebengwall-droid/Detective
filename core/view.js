@@ -170,6 +170,9 @@ export function buildView(state, caseData, ai) {
         feed: def.feed ?? null,
         blocks: def.blocks.map((b) => (b.feeds ? { feeds } : b)),
         ask: def.ask,
+        // How it is handled on the stage: what kind of object it is, and the one line that says what to do.
+        goal: def.goal ?? null,
+        stage: def.stage ?? null,
         // A letter-lock is answered by turning its rings: how many, and what they read to begin with.
         lock: def.lock ?? null,
         solved,

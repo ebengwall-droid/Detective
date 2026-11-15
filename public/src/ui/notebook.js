@@ -25,7 +25,7 @@ export function createNotebook(panels, game) {
   let tabBar;
   /** True only while a page is being turned to, so that it can arrive a line at a time. */
   let arriving = false;
-  const sel = { evidence: null, people: null, tag: 'all', puzzle: null, tool: null };
+  const sel = { evidence: null, people: null, tag: 'all' };
   const wrongPicks = {};
   const accuse = { suspect: null, motive: null };
 
@@ -332,7 +332,7 @@ export function createNotebook(panels, game) {
     }
   }
 
-  const renderers = { case: renderCase, papers: () => renderPapers(body, game, sel, api), board: renderBoard, evidence: renderEvidence, people: renderPeople, leads: renderLeads };
+  const renderers = { case: renderCase, papers: () => renderPapers(body, game), board: renderBoard, evidence: renderEvidence, people: renderPeople, leads: renderLeads };
 
   const api = {
     get isOpen() {
@@ -370,12 +370,6 @@ export function createNotebook(panels, game) {
       clear(body);
       renderers[tab]();
       body.scrollTop = keep;
-    },
-
-    /** Preselect one paper for the next time the Papers tab shows. */
-    selectPuzzle(id) {
-      sel.puzzle = id;
-      sel.tool = null;
     },
 
     /** Preselect one piece of evidence for the next time the Evidence tab shows. */

@@ -64,7 +64,7 @@ To make the key:
 Each letter is drawn as the lines around its cell, plus the dot if it has one.
 A is in the top left cell. Its lines are on the right and below, so A is a backwards L. E is in the middle, so E is a closed square. S is a V shape.
 The Freemasons used it for their records in the eighteenth century. So it is often called the masonic cipher, though some versions are older.
-It looks mysterious, but it is no stronger than Caesar's cipher. Each sign always means the same letter. The key is in your Primer.`,
+It looks mysterious, but it is no stronger than Caesar's cipher. Each sign always means the same letter. The key is four frames: two grids and two crosses, the second of each with dots.`,
   },
   l_polybius: {
     title: 'Lecture · The five-by-five square',

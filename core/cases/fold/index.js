@@ -18,6 +18,7 @@ for (const [id, npc] of Object.entries(NPCS)) npc.small = SMALL[id] ?? {};
 NPCS.kit.guide = true;
 
 /** The kinds of written thing the page can draw for a view's `figure`. */
+const STAGE_KINDS = ['lock', 'wheel', 'fence', 'keyed', 'pairs', 'codes', 'pigpen', 'bacon', 'knight', 'column', 'grids', 'clue', 'magic', 'bridges', 'slide', 'places', 'write'];
 const FIGURE_KINDS = ['blotter', 'slate', 'stone', 'board', 'card', 'certificate', 'ledger', 'plate', 'newsprint', 'typed', 'label', 'plan'];
 
 // A lecture should always be found by its own title.
@@ -274,6 +275,18 @@ export function validateCase(c = CASE) {
     // A lock answered with rings needs as many rings as its word has letters.
     if (p.lock && p.answers.some((ans) => ans.replace(/[^A-Za-z]/g, '').length !== p.lock.rings)) problems.push(`${where}: a ${p.lock.rings}-ring lock with an answer of another length`);
     if (p.lock?.start && p.lock.start.length !== p.lock.rings) problems.push(`${where}: the lock starts with ${p.lock.start.length} letters on ${p.lock.rings} rings`);
+    // Every puzzle is handled on the stage as some object, with one line saying what to do.
+    if (!p.goal) problems.push(`${where}: no goal line for the stage`);
+    if (!STAGE_KINDS.includes(p.stage?.kind)) problems.push(`${where}: a stage of an unknown kind "${p.stage?.kind}"`);
+    if (p.stage?.kind === 'lock' && !p.lock) problems.push(`${where}: shown as a lock, but has no rings`);
+    for (const f of p.stage?.clues ?? []) if (!FIGURE_KINDS.includes(f.kind)) problems.push(`${where}: a clue picture of an unknown kind "${f.kind}"`);
+    const rings = p.stage?.give?.rings;
+    if (rings && p.answers[0].replace(/[^A-Za-z]/g, '').length !== rings) problems.push(`${where}: answered on ${rings} rings, but "${p.answers[0]}" is another length`);
+    if (p.stage?.kind === 'bridges') {
+      const ends = new Set(p.stage.bridges.flat());
+      if (![...ends].every((e) => p.stage.names?.[e])) problems.push(`${where}: a bridge to a place with no name`);
+      if (!ends.has(p.stage.end)) problems.push(`${where}: the walk ends somewhere no bridge reaches`);
+    }
   }
   c.feeds.forEach((pid, i) => {
     if (c.puzzles[pid]?.feed !== i + 1) problems.push(`feeds: "${pid}" is not question ${i + 1}`);

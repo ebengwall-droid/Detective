@@ -25,6 +25,11 @@ of the case.
   knight on a chessboard, places found by latitude and longitude, bytes in a
   machine's log, a cryptic crossword clue, names hidden in plain sight, and
   one last puzzle made out of all the others.
+- **Every puzzle is a thing you handle.** Tap the turnstile and its lock is in
+  your hands: turn the brass rings to the word. Turn a cipher wheel until a
+  message reads, tap codes against their key, hop a knight across a chalked
+  board, walk seven bridges, slide fifteen tiles. One line says what to do;
+  the story and the hints wait behind a button.
 - **You are meant to look things up.** The Lectern, the guild's reference
   machine, will teach you the real method and the real history of everything
   in the game: who Polybius was, how the "undecipherable cipher" was broken,
@@ -151,7 +156,8 @@ or host the `dist/app` folder from `npm run build` (below) on any static host.
 | Catch a lie | In a conversation, **Show** puts evidence in front of them | The same |
 | Notebook (and Papers), Lectern, map | Dock along the bottom | `N`, `L`, `M` |
 | A nudge on the case | **Think** | `T` |
-| A hint on a puzzle | In the Paper itself | The same |
+| Work a puzzle | Tap the thing (a lock, a slate); swipe rings, turn the wheel, tap codes | Arrow keys turn a ring or the wheel; type letters onto rings |
+| A hint on a puzzle | The bulb on the puzzle | The same |
 
 ### Builds without a server
 
@@ -203,14 +209,14 @@ core/                 The game itself. Runs unchanged in Node and in the browser
   brain.js            Turns a game situation into a line of dialogue (Claude, or the script)
   prompts.js          Character sheets and briefs sent to Claude
   view.js             What the player is allowed to see of the state
-  ciphers.js          The classical ciphers: makes every puzzle text, and powers the solving tools
+  ciphers.js          The classical ciphers: makes every puzzle text, and powers the puzzles' moving parts
   talk.js             Understanding the detective without a model: small talk, subjects, threads
   cases/fold/         The case: scenes, people, facts, evidence, lectures, puzzles, story
 server/               Node server: hosts the core, keeps the API key and the saves
 public/               The browser client
   assets/             Models, textures and animation, ready to load (built by scripts/assets)
   src/world/          3D: rooms, people, furniture, movement, finishing pass
-  src/ui/             HUD, conversation, notebook and Papers, the Lectern, map, title, ending
+  src/ui/             HUD, conversation, notebook, the puzzle stage (stage*.js), the Lectern, map, title, ending
   styles.css          The interface: glass over the room
   talk.css            The conversation screen
   src/game.js         Ties the world and the UI to the game core

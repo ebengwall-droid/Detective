@@ -200,7 +200,7 @@ export const LOCATIONS = {
       {
         id: 'door_pendry', at: 'door_pendry', label: 'The door and its lock', kind: 'look',
         views: [{
-          text: "A heavy oak door with iron straps. The constables took it off its hinges while Wilf watched. On the inside is a Company letter-lock with seven brass rings. They read P-E-N-D-R-Y-S, his own word.\n\nPendry locked himself in to work every night for thirty years. On Sunday night, his own word did not open the lock.\n\nThe lock has been taken to the evidence chest at the Hall.",
+          text: "A heavy oak door with iron straps. The constables took it off its hinges while Wilf watched. On the inside is a Company letter-lock with seven brass rings. They read P-E-N-D-R-Y-S, his own word.\n\nPendry locked himself in to work every night for thirty years. On Sunday night, his own word did not open the lock.\n\nThe constables are taking the lock to the evidence chest at the Hall.",
           facts: ['locked_inside'],
           // Its lock is a puzzle of its own: the card offers to try it.
           action: 'puzzle:lock',

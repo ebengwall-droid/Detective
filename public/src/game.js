@@ -10,6 +10,7 @@ import { createDialogue } from './ui/dialogue.js';
 import { createNotebook } from './ui/notebook.js';
 import { createLaptop } from './ui/laptop.js';
 import { createMap } from './ui/map.js';
+import { openStage } from './ui/stage.js';
 import { showTitle, showMenu, showHelp, showLetter, showEnding } from './ui/title.js';
 import { SCENES } from '../../core/cases/fold/scenes.js';
 
@@ -17,6 +18,12 @@ const SETTINGS_KEY = 'fold.settings';
 const ACT_KICKER = { 1: 'Part one', 2: 'Part two', 3: 'Part three', 4: 'Part four' };
 /** Panels that may be swapped for one another; anything else on screen must finish first. */
 const PANELS = new Set(['notebook', 'laptop', 'map']);
+
+/** 'A Tithe: the Seven Bridges' is offered as 'the Seven Bridges'. */
+const shortTitle = (title) => {
+  const t = title.includes(': ') ? title.split(': ').pop() : title;
+  return t.charAt(0).toLowerCase() === t.charAt(0) ? t : t.replace(/^The /, 'the ');
+};
 const FADE_MS = 470;
 
 function loadSettings() {
@@ -626,9 +633,32 @@ export class Game {
   }
 
   /** Open the notebook at one paper. */
-  openPuzzle(id) {
-    this.notebook.selectPuzzle(id);
-    this.open('notebook', 'papers');
+  /**
+   * Pick a puzzle up: it opens close up, as the thing itself, to be handled.
+   * @param {string} id
+   * @param {{ intro?: string|null }} [opts]  what examining the thing said, kept behind its ? button
+   */
+  async openPuzzle(id, { intro = null } = {}) {
+    if (this.blockers.has('stage') || !this.started) return;
+    if (!this.view.puzzles.some((p) => p.id === id)) return;
+    // Chosen from the notebook: the notebook comes back afterwards, where it was.
+    const back = this.notebook.isOpen ? 'notebook' : null;
+    this.notebook.close();
+    this.laptop.close();
+    this.map.close();
+    this.block('stage');
+    this.audio.click();
+    let then = null;
+    try {
+      then = await openStage(this.panels, this, id, { intro });
+    } finally {
+      this.unblock('stage');
+    }
+    // No need to announce the puzzle that was just in your hands.
+    this.queue = this.queue.filter((e) => !(e.type === 'puzzle' && e.id === id));
+    this.flushEvents();
+    if (then?.lectern) this.askLectern(then.lectern);
+    else if (back && !this.queue.length) this.open('notebook', 'papers');
   }
 
   /** Put a question to the Lectern, from anywhere. */
@@ -756,6 +786,7 @@ export class Game {
     const leaving = spot?.action === 'travel';
     this.block('inspect');
     let next = null;
+    let intro = null;
     try {
       if (leaving) {
         this.hud.setVisible(false);
@@ -767,21 +798,24 @@ export class Game {
       } else if (res.action === 'laptop' || res.action === 'board' || res.action === 'map') {
         next = res.action;
       } else {
-        // An object that is itself a puzzle: read it, then sit down to it.
         const pid = typeof res.action === 'string' && res.action.startsWith('puzzle:') ? res.action.slice(7) : null;
         const paper = pid ? this.view.puzzles.find((p) => p.id === pid) : null;
-        if (res.text) {
+        if (paper && !paper.solved) {
+          // An object that is itself a puzzle (a lock, a slate, a wheel) is picked up straight away.
+          // What the card would have said waits behind the puzzle's ? button.
+          next = `puzzle:${pid}`;
+          intro = res.text || null;
+        } else if (res.text) {
           this.audio.click();
           const taken = res.taken.map((tid) => this.view.evidence.find((e) => e.id === tid)).filter(Boolean);
           const more = this.view.location.hotspots.some((h) => !h.done && h.kind !== 'exit');
-          const actions = [];
-          if (paper && !paper.solved) actions.push({ id: 'paper', label: paper.lock ? 'Try the lock' : 'Work on it' });
+          // Puzzles this look turned up (the Wall of Tithes has three) can be picked up from here.
+          const found = this.queue.filter((e) => e.type === 'puzzle' && e.opened && !e.secret).map((e) => this.view.puzzles.find((p) => p.id === e.id)).filter((p) => p && !p.solved);
+          const actions = found.slice(0, 3).map((p) => ({ id: `puzzle:${p.id}`, label: `Try ${shortTitle(p.title)}` }));
           if (more) actions.push({ id: 'look', label: 'What else is here?' });
           const choice = await showInspect(this.panels, { title: res.title, text: res.text, figure: res.figure, taken, actions });
           if (choice === 'look') next = 'look';
-          else if (choice === 'paper') next = `puzzle:${pid}`;
-        } else if (paper && !paper.solved) {
-          next = `puzzle:${pid}`;
+          else if (choice?.startsWith('puzzle:')) next = choice;
         }
         if (res.letter) {
           await showLetter(this.cards, this, (onText) => this.call('readLetter', {}, { onText }, { deferEvents: true }).then((r) => r.letter));
@@ -796,7 +830,10 @@ export class Game {
     }
     this.unblock('inspect');
     if (next === 'look') this.scan();
-    else if (next?.startsWith('puzzle:')) this.openPuzzle(next.slice(7));
+    else if (next?.startsWith('puzzle:')) {
+      this.openPuzzle(next.slice(7), { intro });
+      return;
+    }
     else if (next) this.open(next === 'board' ? 'notebook' : next, next === 'board' ? 'board' : undefined);
     this.flushEvents();
   }
@@ -896,11 +933,9 @@ export class Game {
     if (this.settings.coached) return;
     const tap = this.isTouch ? 'Tap' : 'Click';
     const steps = [
-      this.isTouch
-        ? '<b>Tap</b> where you want to go and you will walk there. <b>Drag</b> to look around. The ring on the left steers by thumb.'
-        : '<b>Click</b> where you want to go, or walk with <b>W A S D</b>. <b>Drag</b> to look around.',
-      `<b>Rings of light</b> mark what you can examine; a ring with <b>three dots</b> is someone to talk to. ${tap} one. Your partner is waiting by the gate.`,
-      `Lost? <b>Look</b> lists everyone and everything in the room. ${tap} a name and you walk straight to it.`,
+      this.isTouch ? '<b>Tap</b> to walk there. <b>Drag</b> to look around.' : '<b>Click</b> to walk there, or use <b>W A S D</b>. <b>Drag</b> to look around.',
+      `${tap} a <b>ring of light</b> to use it. <b>Three dots</b>: someone to talk to.`,
+      `Lost? <b>Look</b> shows everything here.`,
     ];
     steps.forEach((html, i) => {
       setTimeout(() => {
