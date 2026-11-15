@@ -197,6 +197,7 @@ export function validateCase(c = CASE) {
       else if (typeof line === 'string' && line.startsWith('@') && !npc.know.some((k) => k.id === line.slice(1))) problems.push(`${where}: small talk "${kind}" points at unknown item ${line}`);
     }
     if (!npc.guide && !npc.small?.next) problems.push(`${where}: no answer to "what should I do?"`);
+    for (const g of npc.greet ?? []) for (const t of g.tells ?? []) if (!npc.know.some((k) => k.id === t)) problems.push(`${where}: a greeting tells unknown item "${t}"`);
     const beats = npc.small?.beat ?? [];
     if (!beats.length) problems.push(`${where}: nothing to do while thinking`);
     for (const b of beats) if (!/^\*[^*]+\*$/.test(b)) problems.push(`${where}: a thinking beat must be one stage direction: ${b}`);

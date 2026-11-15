@@ -435,6 +435,15 @@ export class GameSession {
       st.pendingOpen = { greeting, phone: phone && !here };
       st.log.push({ who: 'npc', text: greeting, step: s.steps });
       trim(st.log, MAX_LOG);
+      // A witness who comes straight out with it: what the greeting tells is told.
+      if (g?.tells && !(phone && !here)) {
+        for (const item of npc.know) {
+          if (!g.tells.includes(item.id) || !itemUnlocked(item, st, s) || st.told[item.id] !== undefined) continue;
+          st.told[item.id] = s.steps;
+          for (const f of item.facts ?? []) this.addFact(f, `npc:${id}`);
+          this.applyEffects(item.effects, `npc:${id}`);
+        }
+      }
     }
     const firstMeeting = !st.met;
     st.met = true;

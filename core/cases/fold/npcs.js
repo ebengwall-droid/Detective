@@ -527,9 +527,9 @@ Treatment: He could have been saved. There is a specific antidote (digoxin-speci
     greet: [
       { if: 'act>=2', text: "Mrs Sallow as well. I wound all the clocks this morning. All forty-one. I didn't know what else to do." },
       { if: 'met:wilf', text: "Do you need something else? I can show you anything. Just not the bench." },
-      { text: "I'm Wilf Tandy. I'm his apprentice. I was, I mean. I come in at quarter past seven to light the stove. He's always up and already working. But this morning the door wouldn't open. He always opens it." },
+      { text: "I'm Wilf, his apprentice. I found him. I came in at quarter past seven and the door wouldn't open, not even with his word. The constables took it off its hinges. He was at his bench with his head down.", tells: ['w_found'] },
     ],
-    persona: `Wilf Tandy, 17, third-year apprentice to Ignatius Pendry. He lives with his mother across the Cut. He is shy and hard-working, and he is shaken, because he found the body. He was fond of Pendry, even though the old man was difficult. He loves the automaton, "the Lodger", and can explain exactly how its hidden-man trick works.
+    persona: `Wilf Tandy, 17, third-year apprentice to Ignatius Pendry. He lives with his mother across the Cut. He is shy and hard-working, and he is shaken, because he found the body. He wants to help, so he comes straight out with what he knows. He was fond of Pendry, even though the old man was difficult. He loves the automaton, "the Lodger", and can explain exactly how its hidden-man trick works.
 
 Here is what he knows. Pendry locked himself into the workshop every night at about seven to work, and let himself out in the morning. His lock word was PENDRYS. Wilf was not supposed to know that.
 
@@ -538,36 +538,37 @@ In Proving week the shop works on Sundays. On Sunday Pendry went to the Syndics'
 On Saturday morning the Porter, Mr Fettle, came with his oil-can and did the letter-lock, as he does every October. He took ten minutes. Wilf made him a cup of tea, and he drank it standing up.
 
 Wilf left at six on Sunday. He was at home all night. He came in on Monday at a quarter past seven and found that the door would not open.`,
-    voice: "Shy and nervous. Short, simple, complete sentences. He hesitates, then says too much at once. Calls Pendry 'the master'. Cheers up when talking about clocks and machines.",
+    voice: "Shy and shaken, but he answers straight away and to the point, in short, simple sentences. Calls Pendry 'the master'. Cheers up when talking about clocks and machines.",
+    forthcoming: true,
     wants: "He wants to be useful and not be blamed. He wants someone to tell him what will happen to the clocks.",
     know: [
       {
         id: 'w_found', keys: ['found', 'morning', 'what happened', 'door', 'open', 'quarter past'],
-        line: "Quarter past seven. I knocked. Then I set his word on the outside rings, and it didn't open. I thought I'd got it wrong, but I never get it wrong. I ran for the constable. They took the door off its hinges. He was at the bench with his head down. I thought he was asleep until I saw his hands.",
+        line: "I came in at quarter past seven. I set his word on the outside rings, and the door still wouldn't open. I ran for the constables, and they took it off its hinges. He was at his bench with his head down. I thought he was asleep until I saw his hands.",
         facts: ['wilf_found'],
       },
       {
         id: 'w_lockin', keys: ['lock', 'locked', 'every night', 'word', 'pendrys', 'himself in'],
-        line: "He locks himself in at seven, every night. He has for thirty years, so nobody sees the work before the Proving. His word is PENDRYS. I'm not meant to know that. It's always been PENDRYS. It was still PENDRYS on Friday.",
+        line: "PENDRYS. It had been for years, and it still was on Friday. He locked himself in with it at seven every night to work. I'm not meant to know it.",
         facts: ['word_was_pendrys'],
       },
       {
         id: 'w_tea', keys: ['tea', 'cup', 'tray', 'four', 'hall'],
-        line: "He goes to the Hall at four for the Syndics' tea. He brings the last cup back with him on the tray. On Sunday he came in at half past. He said the tea was stewed, too strong. He always says that. He drank it anyway.",
+        line: "On Sunday he went to the Syndics' tea at the Hall at four, like always, and came back at half past with his last cup on the tray. He said it was stewed, too strong. He drank it anyway.",
         facts: ['hall_tea'],
       },
       {
         id: 'w_fettle', keys: ['oil', 'oiled', 'service', 'saturday', 'fettle', 'porter', 'who looks after', 'lock was changed', 'pin'],
-        line: "Mr Fettle did the lock on Saturday. He does everybody's every October, before the Proving. He brought an oil-can and a little pin. He took ten minutes. I made him tea and he drank it standing up. He said the escapement on the regulator clock needed looking at. He was right, too, and he's only the Porter.",
+        line: "Mr Fettle, the Porter. He oiled and re-pinned it on Saturday, the way he does everybody's every October. He was here ten minutes with an oil-can and a little pin. He even spotted a fault in the regulator clock, and he's only the Porter.",
         facts: ['locks_oiled'],
       },
       {
         id: 'w_grey', keys: ['greywether', 'london', 'sale', 'money', 'sons', 'shop', 'future', 'provided'],
-        line: "A man came from London in September, from Greywether. They shut the door on me. After that the master kept saying the shop was provided for, and I wasn't to worry. There aren't any Sons. I don't know what happens to me now.",
+        line: "A man from Greywether in London came in September. After that the master kept saying the shop was provided for. There aren't any Sons. I don't know what happens to me now.",
       },
       {
         id: 'w_lodger', keys: ['lodger', 'automaton', 'chess', 'turk', 'machine', 'man inside'],
-        line: "The Lodger! He built it from the old plans. The first one was made in 1770. It toured the royal courts of Europe and beat everybody at chess. People wrote books about how a machine could think. It couldn't. There's a sliding seat inside. When you open the left door, the man slides right. When you open the right door, he slides left. All the cogs are just for show. There was always a man inside.",
+        line: "The Lodger. The master built it from the plans of a famous chess machine from 1770. That one couldn't really think: a man hid inside it, and slid from side to side as people opened the doors. The cogs were only for show.",
         facts: ['lodger_trick'],
       },
     ],
@@ -578,10 +579,10 @@ Wilf left at six on Sunday. He was at home all night. He came in on Monday at a 
     acts: [],
     ask: [
       { q: 'Tell me about this morning.', to: 'w_found' },
-      { q: 'Did he always lock himself in?', to: 'w_lockin' },
-      { q: 'What about his tea?', to: 'w_tea' },
-      { if: 'fact:locked_inside', q: 'Who looks after the lock?', to: 'w_fettle' },
-      { q: 'What is the chess-player?', to: 'w_lodger' },
+      { q: 'What was his lock word?', to: 'w_lockin' },
+      { q: 'Did he eat or drink anything?', to: 'w_tea' },
+      { q: 'Who looks after the lock?', to: 'w_fettle' },
+      { q: 'What is the chess machine?', to: 'w_lodger' },
     ],
     news: [{ if: 'act>=2', text: 'Mrs Sallow the map-maker has been found dead on her boat, the same way as your master.' }],
     fallback: ["I don't know, sorry. I only know about the clocks.", "Sorry, I couldn't say."],

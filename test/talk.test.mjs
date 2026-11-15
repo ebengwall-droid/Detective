@@ -92,6 +92,17 @@ test('asked again, the partner helps a step further, and it counts as a hint', a
   assert.ok(turn.includes(gate.hints[1]) && /asking you for help/.test(turn));
 });
 
+test('the apprentice comes straight out with what happened', async () => {
+  const session = await fresh();
+  await session.solve({ id: 'gate', answer: 'catch' });
+  const out = await session.talk({ id: 'wilf' });
+  assert.match(out.talk.greeting, /door wouldn't open/);
+  assert.ok(session.state.facts.wilf_found, 'his account is in the notebook without being asked for');
+  assert.ok(!out.talk.suggestions.includes('Tell me about this morning.'), 'and is not asked for again');
+  assert.ok(out.talk.suggestions.includes('Who looks after the lock?'));
+  assert.match(npcSystem(CASE, 'wilf', session.state), /tell all of it at once/);
+});
+
 test('solving the gate takes you through it, with Kit, to the clockmaker\'s', async () => {
   const session = await fresh();
   const out = await session.solve({ id: 'gate', answer: 'catch' });
