@@ -287,3 +287,25 @@ export function seeded(seed) {
 
 /** What a typed answer is compared as: capitals and digits only. */
 export const normalise = (text) => up(text).replace(/[^A-Z0-9]/g, '');
+
+/**
+ * Mark a guess at a word, letter by letter, the way the newspaper word games do:
+ * G for the right letter in the right place, Y for a letter that is in the word
+ * somewhere else (counted no more times than it appears), and . for neither.
+ */
+export function markLetters(guess, target) {
+  const g = String(guess);
+  const t = String(target);
+  const out = new Array(g.length).fill('.');
+  const left = {};
+  for (let i = 0; i < t.length; i++) {
+    if (g[i] === t[i]) out[i] = 'G';
+    else left[t[i]] = (left[t[i]] ?? 0) + 1;
+  }
+  for (let i = 0; i < g.length; i++) {
+    if (out[i] === 'G' || !left[g[i]]) continue;
+    out[i] = 'Y';
+    left[g[i]] -= 1;
+  }
+  return out.join('');
+}

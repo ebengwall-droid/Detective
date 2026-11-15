@@ -68,7 +68,7 @@ export function buildView(state, caseData, ai) {
       const v = h.views[index];
       const done = s.examined[`${h.id}#${index}`] !== undefined && !v?.repeat;
       const fresh = !!v && !done && !!(v.text || v.action || h.action);
-      return { id: h.id, at: h.at ?? null, p: h.p ?? null, size: h.size ?? null, label: h.label, kind: h.kind, done: !fresh, action: typeof (v?.action ?? h.action) === 'string' ? (v?.action ?? h.action) : v?.action?.travel ? 'travel' : null };
+      return { id: h.id, at: h.at ?? null, p: h.p ?? null, size: h.size ?? null, label: h.label, kind: h.kind, surface: h.surface ?? null, done: !fresh, action: typeof (v?.action ?? h.action) === 'string' ? (v?.action ?? h.action) : v?.action?.travel ? 'travel' : null };
     });
 
   const npcsHere = [];
@@ -155,6 +155,14 @@ export function buildView(state, caseData, ai) {
     const def = caseData.puzzles[pid];
     return { n: i + 1, title: def.title, answer: st?.solved !== undefined ? def.answers[0] : null };
   });
+  /** 'Setters' Hall: Your desk' for a hotspot id. */
+  const placeOf = (hid) => {
+    for (const l of Object.values(caseData.locations)) {
+      const h = (l.hotspots ?? []).find((x) => x.id === hid);
+      if (h) return `${l.name}: ${h.label}`;
+    }
+    return null;
+  };
   const puzzles = Object.entries(caseData.puzzles)
     .filter(([id]) => s.puzzles[id]?.open !== undefined)
     .map(([id, def]) => {
@@ -173,6 +181,9 @@ export function buildView(state, caseData, ai) {
         // How it is handled on the stage: what kind of object it is, and the one line that says what to do.
         goal: def.goal ?? null,
         stage: def.stage ?? null,
+        // Where it lies: the objects that pick it up, and the place to say in the notebook.
+        on: def.at ?? [],
+        where: placeOf(def.at?.[0]),
         // A letter-lock is answered by turning its rings: how many, and what they read to begin with.
         lock: def.lock ?? null,
         solved,

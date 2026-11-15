@@ -11,6 +11,8 @@ import { letterLock, makeRing, ringRow } from './lock.js';
 import { sv, monoOf, glide, shake, wait, still, interlinear, letterStrip, assigner, flash, stepper, keyTiles } from './stage-parts.js';
 import { caesar, frequencies, unRailFence, vigenere, playfair, playfairSquare, lettersOf, isKnightMove, square as squareOf } from '../../../core/ciphers.js';
 import { drawWorld, project } from './world-map.js';
+import { collar, chart, instruments } from './stage-kinds2.js';
+import { sun, ferry, garden, grid, chess, wordgame, order, pendulum, piano } from './stage-kinds3.js';
 
 const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const mod = (a, n) => ((a % n) + n) % n;
@@ -1054,4 +1056,4 @@ function places(ctx) {
   return { node: el('div', { class: 'stage-places' }, el('div', { class: 'world' }, map), el('div', { class: 'place-list' }, cards), row.node), focus: () => {} };
 }
 
-export const KINDS = { lock, write, wheel, fence, keyed, pairs, codes, pigpen, bacon, knight, column, grids, clue, magic, bridges, slide, places };
+export const KINDS = { lock, write, wheel, fence, keyed, pairs, codes, pigpen, bacon, knight, column, grids, clue, magic, bridges, slide, places, collar, chart, instruments, sun, ferry, garden, grid, chess, wordgame, order, pendulum, piano };

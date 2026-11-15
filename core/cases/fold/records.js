@@ -169,6 +169,110 @@ To read them:
 1. If a code starts with 4, its second digit is the letter's place in the alphabet. 41 is A, the 1st letter. 4C is L, the 12th letter, because C means twelve.
 2. If a code starts with 5, add sixteen to its second digit. 50 is P, the 16th letter. 5A is Z, the 26th letter.`,
   },
+  l_binary: {
+    title: 'Lecture · Counting in holes',
+    kind: 'lecture',
+    keys: ['binary', 'base two', 'holes', 'punched', 'punch card', 'punched card', 'collar', 'jacquard', 'hollerith', 'leibniz', 'bits', 'twenty-four hour', 'carrier'],
+    body: `COUNTING IN HOLES
+We count in tens: each place in a number is worth ten times the place to its right. Binary counts in twos: each place is worth twice the place to its right.
+Reading from the right, the places are worth 1, 2, 4, 8, 16, 32 and so on. Each place is either used or not: a hole or no hole, 1 or 0.
+Example: holes in the places worth 16 and 4, and none in the others, make 16 + 4 = 20. Written in binary, that is 10100.
+The philosopher Gottfried Leibniz published an account of binary arithmetic in 1703.
+Holes stored patterns long before computers did. Around 1804 Joseph-Marie Jacquard built a loom that wove its patterns from a chain of punched cards. In 1890 Herman Hollerith counted the American census with punched cards and machines that read them. His company later became part of IBM.
+A clock of twenty-four hours is read like a railway timetable: 12 is noon, 20 is eight in the evening, and 0 is midnight.`,
+  },
+  l_charts: {
+    title: 'Lecture · Reading a chart',
+    kind: 'lecture',
+    keys: ['chart', 'graph', 'log', 'data', 'heat map', 'heatmap', 'bar chart', 'pie chart', 'nightingale', 'john snow', 'cholera', 'william playfair', 'night log', 'terminal'],
+    body: `READING A CHART
+A chart turns a long list of numbers into a picture, so the eye finds the pattern before the mind does.
+William Playfair, a Scottish engineer, drew the first bar charts and line graphs in 1786, and the first pie chart in 1801. He was not the Playfair of the cipher: that was Lyon Playfair, a chemist, born in 1818.
+In 1854 the doctor John Snow marked every death from cholera in one part of London on a street map. The deaths crowded around one water pump, in Broad Street. The pump's handle was taken off.
+In 1858 Florence Nightingale drew her "rose" diagrams. They showed that more soldiers in the Crimean War died of disease than of their wounds.
+To read a log drawn as a grid: find the column for the hour you care about, and look down it for the darkest squares. Then check what was actually asked for, because the busiest square is not always the one you want.`,
+  },
+  l_navigation: {
+    title: 'Lecture · Finding your latitude',
+    kind: 'lecture',
+    keys: ['sextant', 'octant', 'quadrant', 'astrolabe', 'latitude', 'navigator', 'navigation', 'noon sight', 'noon sun', 'arc', 'instrument', 'hadley', 'campbell'],
+    body: `THE NOON SIGHT
+At noon the sun is at its highest. Measure how high it stands above the horizon, look up the sun's position for that day in a table, and you have your latitude: how far north or south of the equator you are.
+Sailors measured that height with brass instruments named for how much of a circle their arc is.
+An astrolabe is a whole circle. Astronomers used them for more than a thousand years.
+A quadrant is a quarter of a circle: ninety degrees.
+An octant is an eighth: forty-five degrees. John Hadley showed one to the Royal Society in 1731. It uses two mirrors, so it can measure angles twice the size of its own arc.
+A sextant is a sixth: sixty degrees, so it measures up to 120. In 1757 John Campbell, a captain in the Royal Navy, had the first one made. Ships still carry one, in case everything electric fails.
+The names are Latin: quadrans means a quarter, sextans a sixth, and octans an eighth.`,
+  },
+  l_alcuin: {
+    title: 'Lecture · The river crossing',
+    kind: 'lecture',
+    keys: ['river crossing', 'fox goose', 'goose', 'wolf goat cabbage', 'ferry', 'ferryman', 'alcuin', 'york', 'riddle', 'crossing puzzle'],
+    body: `THE RIVER CROSSING
+A traveller must take a wolf, a goat and a basket of cabbages across a river. The boat holds the traveller and one thing more. Left alone, the wolf eats the goat, and the goat eats the cabbages.
+Alcuin of York, a scholar at the court of Charlemagne, set this problem around the year 800 in a book called "Problems to Sharpen the Young". It is among the oldest puzzles written down in Europe.
+The trick is to notice that one thing is in both dangerous pairs, and that the boat may carry something back as well as over.
+Other crossings in the same book have jealous husbands, and a hedgehog family. Later versions, with missionaries and cannibals, are still used to teach computers to plan.`,
+  },
+  l_logic: {
+    title: 'Lecture · Logic grids',
+    kind: 'lecture',
+    keys: ['logic', 'logic grid', 'grid puzzle', 'einstein', 'zebra', 'deduction', 'four o\'clock problem', 'whose cup', 'cups', 'tick and cross'],
+    body: `LOGIC GRIDS
+A logic grid sorts a few people and a few things using nothing but clues. Write the people down the side and the things across the top. Put a cross in every square a clue rules out, and a tick where you are certain. Each tick lets you cross out the rest of its row and its column.
+The most famous is the Zebra Puzzle, printed in the magazine Life International in 1962: five houses, five owners, fifteen clues, and the question of who owns the zebra. It is often said to be by Albert Einstein, but nobody has found any sign that it was.
+Begin with the clue that is certain, not the clue that is long.`,
+  },
+  l_smothered: {
+    title: 'Lecture · The smothered mate',
+    kind: 'lecture',
+    keys: ['smothered', 'smothered mate', 'checkmate', 'mate in one', 'greco', 'philidor', 'adjourned', 'adjournment', 'chess problem', 'knight check'],
+    body: `THE SMOTHERED MATE
+Checkmate is when the king is attacked and has no way out: he cannot move, the attacker cannot be taken, and nothing can be put in the way.
+In a smothered mate the king cannot move because his own pieces fill every square around him, and a knight gives check. A knight's check can never be blocked, because the knight jumps.
+The Italian player Gioachino Greco printed smothered mates around 1620. The best known, called Philidor's Legacy, gives up the queen to force a rook into the king's last free square, then mates with the knight.
+Until the 1990s long games were adjourned: a player sealed their next move in an envelope, and the game was finished another day. Chess computers ended the custom, because anyone could have a machine study the position overnight.`,
+  },
+  l_wordgames: {
+    title: 'Lecture · Guess-the-word games',
+    kind: 'lecture',
+    keys: ['word game', 'guess the word', 'six letters', 'five letters', 'green', 'gold', 'mastermind', 'jotto', 'lingo', 'bulls and cows', 'crux six'],
+    body: `GUESS-THE-WORD GAMES
+In these games you guess a hidden word, and each guess tells you which letters are in the right place, which are in the word but misplaced, and which are not in it at all.
+The idea is old. Bulls and Cows, played with numbers on paper, goes back at least a century. A word version called Jotto was sold in 1955. The board game Mastermind, with coloured pegs, came out in 1970, and the television quiz Lingo began in 1987. In 2021 a free daily version on the internet, with green and yellow squares, was played by millions.
+A good first guess uses common letters. In English the commonest are E, A, R, I, O, T, N and S. After that, use every colour: keep the greens where they are, move the golds, and never use a grey letter again.`,
+  },
+  l_dates: {
+    title: 'Lecture · Pegs for history',
+    kind: 'lecture',
+    keys: ['dates', 'history', 'timeline', 'order of events', 'which came first', 'history board', 'novice test', 'pegs'],
+    body: `PEGS FOR HISTORY
+Nobody remembers every date. Historians and quiz-setters keep a few as pegs, and hang everything else between them.
+Some English pegs: the Battle of Hastings, 1066. Magna Carta, 1215. The Black Death, 1348. The Spanish Armada, 1588. The Battle of Waterloo, 1815. The first passenger railway, 1830.
+Then ask of anything else: before or after the peg? A printed book needs the printing press. A letter with a stamp needs the post office to sell stamps. A play about a king needs the playwright to be alive.
+Most mistakes in putting things in order come from two events that feel far apart but are close, or feel close but are centuries apart.`,
+  },
+  l_pendulum: {
+    title: 'Lecture · The pendulum',
+    kind: 'lecture',
+    keys: ['pendulum', 'bob', 'swing', 'galileo', 'huygens', 'period', 'regulator', 'losing time', 'gaining time', 'clock loses'],
+    body: `THE PENDULUM
+A pendulum's swing takes the same time whether it swings wide or narrow, as long as the swing is not too wide. A heavy bob and a light one, on the same length of rod, keep the same time.
+Only the length matters. A longer pendulum swings more slowly. To make a clock run slower, a clockmaker lowers the bob; to make it run faster, raises it. A pendulum that beats once a second is just under a metre long.
+Galileo Galilei is said to have noticed this as a young man in Pisa, timing a swinging lamp in the cathedral against his own pulse. Christiaan Huygens built the first pendulum clock in 1656. It kept time many times better than any clock before it.`,
+  },
+  l_notes: {
+    title: 'Lecture · Reading music',
+    kind: 'lecture',
+    keys: ['music', 'notes', 'staff', 'stave', 'treble clef', 'piano', 'keys', 'sharp', 'flat', 'face', 'every good boy', 'fur elise', 'für elise', 'beethoven', 'tune'],
+    body: `READING MUSIC
+Music is written on five lines, called a staff or stave. The higher a note sits, the higher it sounds.
+With a treble clef at the start, the five lines from the bottom are E, G, B, D and F: "Every Good Boy Deserves Fruit". The four spaces between them, from the bottom, spell FACE.
+On a piano the white keys run from A to G and start again. The black keys come in twos and threes. C is the white key just left of each pair of black keys.
+A sharp sign before a note means the key just above it, usually a black key: D sharp is the black key between D and E.
+The A above middle C sounds at 440 vibrations a second, and every orchestra tunes to it.`,
+  },
   l_atlas: {
     title: 'Lecture · Latitude, longitude and an island that is not there',
     kind: 'lecture',
@@ -384,7 +488,7 @@ A pneumatic post sends messages through pipes. The message goes inside a capsule
 London had the first one in 1853, between the telegraph office and the Stock Exchange. Paris ran four hundred kilometres of tubes under its streets until 1984. Prague's system worked until a flood in 2002.
 The Fold's system, the Bellows, was laid in 1867 and has never been turned off. Every building has an outlet. All the tubes meet at the exchange in the lobby of Setters' Hall.
 Beside the exchange is the hold-rack. A carrier placed in one of its cradles waits there until the dial on that cradle runs down. Then clockwork sends it on. The hold-rack was built so that members could send each other birthday puzzles at exactly the right hour.
-As each carrier passes the exchange, holes are punched in its collar. They give row and column numbers in the five-by-five square.`,
+As each carrier passes the exchange, holes are punched in its brass collar: the hour it went in, and the hour it came out, counted in binary.`,
   },
   l_letterlock: {
     title: 'Lecture · Letter-locks',

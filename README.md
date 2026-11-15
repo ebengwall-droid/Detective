@@ -20,16 +20,20 @@ of the case.
 
 ![A clockmaker's workshop in the Fold](docs/crime-scene.jpg)
 
-- **Twenty puzzles**, from easy to very hard: Caesar and ROT13, pigpen, the
-  Polybius square, the rail fence, Vigenère, Playfair, Bacon's cipher, a
-  knight on a chessboard, places found by latitude and longitude, bytes in a
-  machine's log, a cryptic crossword clue, names hidden in plain sight, and
-  one last puzzle made out of all the others.
-- **Every puzzle is a thing you handle.** Tap the turnstile and its lock is in
-  your hands: turn the brass rings to the word. Turn a cipher wheel until a
-  message reads, tap codes against their key, hop a knight across a chalked
-  board, walk seven bridges, slide fifteen tiles. One line says what to do;
-  the story and the hints wait behind a button.
+- **Twenty-nine puzzles, and most are not ciphers.** The killer's Papers keep
+  the classic codes (Caesar, pigpen, Vigenère, Playfair, Bacon's cipher), but
+  the Fold is full of other kinds: binary holes punched in a brass collar, a
+  night log read like a data chart, navigation instruments measured by their
+  arcs, the Fold's longitude worked out from its clocks, Alcuin of York's river
+  crossing, medicines matched to the plants they come from, a logic grid of
+  whose tea cup is whose, an adjourned chess game with one winning move, the
+  local paper's six-letter word game, history put in order, pendulums timed
+  against each other, a tune to play on the piano and name, a magic square,
+  Euler's bridges, and a tray of fifteen tiles that cannot be solved.
+- **Every puzzle is a thing in a room.** Tap the turnstile and its lock is in
+  your hands; tap the tea table, the Hall clock or the piano and that puzzle
+  opens. Papers wait on your desk. One line says what to do; the story and the
+  hints wait behind a button. The notebook only says where each one is.
 - **You are meant to look things up.** The Lectern, the guild's reference
   machine, will teach you the real method and the real history of everything
   in the game: who Polybius was, how the "undecipherable cipher" was broken,

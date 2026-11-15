@@ -17,18 +17,18 @@
 //            { board }    a chessboard of letters with a list of squares
 //            { list }     numbered lines
 //            { marked }   a sentence in two kinds of letter
-// ask      the question above the answer box
+// at       the objects in the rooms it lies on (hotspot ids): tapping one picks it up
+// ask      the question it asks
 // answers  what is accepted (compared in capitals, letters and digits only)
 // near     kind words for an answer that is on the way
 // feed     its place, 1 to 7, among the Invigilator's questions (the last Paper needs them in order)
 // hints    from a nudge to the answer; the last one always gives it away
 
-import { caesar, rot13, polybius, railFence, vigenere, playfair, baconHide, hexOf, knightBoard, seeded } from '../../ciphers.js';
+import { caesar, rot13, vigenere, playfair, baconHide, knightBoard, seeded } from '../../ciphers.js';
 
 const PAPER_1 =
   'CANDIDATE. THE CIPHER HERE IS THE ONE ON THE GATE, EXCEPT THE NUMBER, WHICH I KEEP. A PATIENT PERSON NEEDS ONLY TWENTY-FIVE ATTEMPTS. A CLEVERER ONE SEEKS THE LETTER SEEN MOST AND NAMES IT E. IGNATIUS PENDRY SIGNED A SHEET HE NEVER ONCE READ. SEE IT IN HIS SHOP. TELL ME THE NAME THE BUYERS GIVE THE THING THEY ARE BUYING.';
 const PAPER_1B = 'SHE CANNOT SIGN FOR HERSELF NOW. SOMEONE SIGNS FOR HER. FIND OUT WHO. GIVE ME HIS OFFICE, NOT HIS NAME.';
-const PAPER_2B = 'WHAT DOES A NAVIGATOR HOLD TO THE NOON SUN TO FIND HER LATITUDE';
 const PAPER_3 =
   'TONIGHT THE PROBLEM ON THE SLATE AT THE STALEMATE IS MINE. SOLVE IT BEFORE THE HALL STRIKES TWELVE AND YOU MAY KEEP THE THIRD OF THEM. WRITE ME WHERE YOU ARE GOING.';
 const PAPER_4 =
@@ -58,6 +58,8 @@ export const PUZZLES = {
   // ------------------------------------------------------------ the Fold's own
   gate: {
     title: 'The Turnstile',
+    // Where it is: tap this in the room to pick it up.
+    at: ['turnstile'],
     setter: 'fold',
     tier: 1,
     if: true,
@@ -87,6 +89,8 @@ export const PUZZLES = {
   },
   fitting: {
     title: 'The Fitting',
+    // Where it is: tap this in the room to pick it up.
+    at: ['fitting'],
     setter: 'fold',
     tier: 1,
     if: 'met:quoin',
@@ -112,56 +116,79 @@ export const PUZZLES = {
   bellows: {
     title: 'The Carrier',
     setter: 'fold',
+    // Where it is: tap this in the room to pick it up.
+    at: ['exchange'],
     tier: 2,
     if: 'ev:paper_1',
     blocks: [
-      { p: 'Every carrier that passes through the exchange gets holes punched in its brass collar. They record where it has been and what was done with it. The code is the old five-by-five square: two digits for each letter, row first, then column. I and J share a cell.' },
-      { p: 'The collar of the carrier that brought you Paper I reads:' },
-      { mono: polybius('HELD SINCE NOON') },
+      { p: 'Every carrier that passes through the exchange has holes punched in its brass collar: one row for the hour it went in, one for the hour it came out, on a clock of twenty-four hours.' },
+      { p: 'Each hole is worth twice the one to its right, and the last is worth 1. Add up the holes in a row to get its hour.' },
+      { p: 'The carrier that brought you Paper I came out at your desk at eight in the evening: 20:00.' },
     ],
-    ask: 'What does the collar say? (three words)',
-    goal: 'Tap a pair of numbers, then its letter in the square. Row first, then column.',
-    stage: { kind: 'pairs' },
-    answers: ['HELD SINCE NOON'],
-    near: [{ match: ['HELD', 'NOON', 'HELDNOON', 'SINCENOON'], say: 'That is only part of it. Read every pair of digits.' }],
-    solved: "HELD SINCE NOON.\n\nThe Paper reached your desk at eight in the evening. But it was put into the exchange at midday. It waited eight hours in the hold-rack until the clockwork sent it on. So whoever sent it could have been anywhere at eight o'clock.\n\nThe same is true of whoever sent Ignatius Pendry his Paper.",
+    ask: 'At what hour was it put in?',
+    answers: ['HELD SINCE NOON', 'NOON', '12', '1200', '12 00', 'MIDDAY', 'TWELVE', '12 NOON', 'TWELVE NOON', '12PM', '12 PM'],
+    near: [
+      { match: ['20', '2000', '20 00', '8', '8PM', 'EIGHT'], say: 'That is when it came out, at your desk. Read the other row.' },
+      { match: ['0', '00', '0000', '24', 'MIDNIGHT'], say: 'Midnight would be no holes at all. Count the holes again.' },
+    ],
+    solved: "Twelve o'clock: noon. The carrier was HELD SINCE NOON.\n\nThe Paper reached your desk at eight in the evening. But it was put into the exchange at midday. It waited eight hours in the hold-rack until the clockwork sent it on. So whoever sent it could have been anywhere at eight o'clock.\n\nThe same is true of whoever sent Ignatius Pendry his Paper.",
     facts: ['held_carrier'],
-    lesson: 'polybius',
+    lesson: 'binary',
     hints: [
-      'Each pair of digits is one letter. The first digit is the row of a five-by-five alphabet square. The second digit is the column.',
-      'Write the alphabet in five rows of five letters, leaving out J. Then 23 means row two, column three.',
-      '23 is H, 15 is E, 31 is L, 14 is D. Carry on.',
-      'HELD SINCE NOON.',
+      'There are two rows of holes. You know one hour already: it came out at eight in the evening, which is 20 on a clock of twenty-four hours.',
+      'From the right, the holes are worth 1, 2, 4, 8 and 16. The OUT row has holes at 16 and 4: 20. Now add up the IN row.',
+      'The IN row has holes at 8 and 4.',
+      '8 and 4 make 12: it went in at noon. HELD SINCE NOON.',
     ],
+    goal: 'Add up the holes in each row. Then set the dial to the hour it went in.',
+    // Holes in the collar, as binary from the 16s down to the 1s: IN at 12, OUT at 20.
+    stage: { kind: 'collar', rows: [{ label: 'IN', holes: '01100' }, { label: 'OUT', holes: '10100' }] },
   },
   ascii: {
     title: 'The Night Log',
     setter: 'fold',
+    // Where it is: tap this in the room to pick it up.
+    at: ['server'],
     tier: 3,
     if: 'examined:server',
     blocks: [
-      { p: "The Engine keeps a log of who has used it, and from which terminal. Jonah set it to print the terminal names as raw computer codes. 'The Syndics kept asking for the log,' he says. 'I wanted them to have to work for it.'" },
-      { p: 'One terminal has been used nearly every night since March, between two and four in the morning. Every request is the same: PLAY LECTURE 1987, and a number.' },
-      { mono: `TERMINAL  ${hexOf('LODGE')}` },
+      { p: "The Engine keeps a log of who uses it, from which terminal, and when. Jonah has drawn the log since March as a chart: one row for each terminal, one column for each hour of the night. 'The Syndics kept asking for the log,' he says. 'So I gave them a picture. Nobody has looked at it.'" },
+      { p: 'Somebody has used the Engine nearly every night since March, between two and four in the morning. Every request is the same: PLAY LECTURE 1987, and a number.' },
     ],
     ask: 'Which terminal is it?',
-    goal: 'Tap a code, then find it on the code card.',
-    stage: { kind: 'codes' },
     answers: ['LODGE', 'THE LODGE', 'PORTERS LODGE', 'THE PORTERS LODGE'],
-    solved: "4C 4F 44 47 45. L, O, D, G, E.\n\nNearly every night, somebody sits in the Porter's Lodge and asks the machine to read Dame Hesper's old lectures aloud. They never ask about ciphers, or about foxglove. They only want to hear her voice, saying what she said in 1987.",
+    near: [{ match: ['REPOSITORY', 'THE REPOSITORY'], say: "That is Jonah's own terminal. Look at what it asks for at that hour." }],
+    solved: "The terminal in the Porter's Lodge.\n\nNearly every night, somebody sits in the Porter's Lodge and asks the machine to read Dame Hesper's old lectures aloud. They never ask about ciphers, or about foxglove. They only want to hear her voice, saying what she said in 1987.",
     facts: ['lodge_nights'],
-    lesson: 'ascii',
+    lesson: 'charts',
     hints: [
-      'These are computer codes written in hexadecimal. That is base sixteen, where A to F stand for ten to fifteen.',
-      'Each pair is the code of one character. In ASCII the capital letters run from 41 (A) to 5A (Z).',
-      '4C is the twelfth letter. 4F is the fifteenth. 44 is the fourth.',
-      'LODGE. The terminal in the Porter\'s Lodge.',
+      'Each row is a terminal and each column an hour of the night. The darker a square, the more nights that terminal was used in that hour.',
+      'Find the columns from two to four in the morning. More than one terminal is busy then, so tap the squares and read what was asked for.',
+      "The Repository is busy at that hour too, but it is only Jonah's backups. The other row asks for PLAY LECTURE 1987 every time.",
+      "The LODGE: the terminal in the Porter's Lodge.",
     ],
+    goal: 'Tap the squares to see what was asked for, and when. Then tap the terminal.',
+    // Each terminal: [from hour, to hour, nights since March, what it asked for].
+    stage: {
+      kind: 'chart',
+      from: 18,
+      hours: 12,
+      rows: [
+        { name: 'HALL', busy: [[18, 20, 46, 'WHO IS ON DUTY TONIGHT']] },
+        { name: 'PARLOUR', busy: [[19, 22, 61, 'DRAFT: HEADS OF TERMS']] },
+        { name: 'CRUX', busy: [[21, 24, 88, 'SEARCH: GREYWETHER']] },
+        { name: 'ALMSHOUSE', busy: [[20, 21, 15, "READ ALOUD: TODAY'S CLUES"]] },
+        { name: 'REPOSITORY', busy: [[0, 2, 120, 'RUN: STYLOMETRY'], [2, 4, 34, 'BACK UP EVERYTHING']] },
+        { name: 'LODGE', busy: [[2, 4, 214, 'PLAY LECTURE 1987']] },
+      ],
+    },
   },
 
   // ------------------------------------------------- the Invigilator's Papers
   paper1a: {
     title: 'Paper I, Question 1',
+    // Where it is: tap this in the room to pick it up.
+    at: ['my_desk'],
     setter: 'invigilator',
     tier: 2,
     feed: 1,
@@ -189,6 +216,8 @@ export const PUZZLES = {
   },
   paper1b: {
     title: 'Paper I, Question 2',
+    // Where it is: tap this in the room to pick it up.
+    at: ['my_desk'],
     setter: 'invigilator',
     tier: 2,
     feed: 2,
@@ -217,6 +246,8 @@ export const PUZZLES = {
   },
   paper2a: {
     title: 'Paper II, Question 3',
+    // Where it is: tap this in the room to pick it up.
+    at: ['my_desk'],
     setter: 'invigilator',
     tier: 3,
     feed: 3,
@@ -251,30 +282,35 @@ export const PUZZLES = {
   paper2b: {
     title: 'Paper II, Question 4',
     setter: 'invigilator',
+    // Where it is: tap this in the room to pick it up.
+    at: ['my_desk'],
     tier: 3,
     feed: 4,
     if: 'ev:paper_2',
     blocks: [
-      { quote: 'This is written on a fence of three rails, in a zigzag. The Spartans wound theirs round a stick. It is the same idea.' },
-      { mono: railFence(PAPER_2B, 3).match(/.{1,5}/g).join(' '), tool: 'fence' },
+      { quote: 'She drew the world for a living, but she crossed it with brass. A navigator holds one of these up to the sun at noon and reads her latitude from its arc. Hers is the one whose arc is a sixth of a circle.' },
+      { p: 'Under the question, five instruments are drawn to scale in green ink. None of them is named.' },
     ],
-    ask: 'The message asks about an instrument. What is it? (one word)',
-    goal: 'Set the number of rails, then read along the zigzag.',
-    stage: { kind: 'fence', give: { rings: 7 } },
+    ask: 'Which instrument is hers? (one word)',
     answers: ['SEXTANT', 'A SEXTANT', 'THE SEXTANT'],
-    near: [{ match: ['OCTANT', 'QUADRANT', 'ASTROLABE'], say: 'Close. That is a related instrument. She had the later kind, whose arc is a sixth of a circle.' }],
-    solved: "WHAT DOES A NAVIGATOR HOLD TO THE NOON SUN TO FIND HER LATITUDE.\n\nA sextant. There is one in its box aboard the Meridian. Marguerite Sallow never kept anything just for decoration. That box is worth a look.",
+    near: [{ match: ['OCTANT', 'QUADRANT', 'ASTROLABE', 'PROTRACTOR', 'GRAPHOMETER'], say: 'That is a real instrument, but measure its arc. Hers is a sixth of a circle.' }],
+    solved: "SEXTANT. Its arc is sixty degrees, a sixth of a circle, and sextans is Latin for a sixth.\n\nA navigator holds a sextant up to the noon sun to find her latitude. There is one in its box aboard the Meridian. Marguerite Sallow never kept anything just for decoration. That box is worth a look.",
     facts: ['sextant_clue'],
-    lesson: 'transposition',
+    lesson: 'navigation',
     hints: [
-      'No letter has been swapped for another. All the letters are there, but in the wrong order.',
-      'The message was written in a zigzag over three lines: down, up, down. The cipher text is the top line, then the middle line, then the bottom line. Set the fence to three rails and read along the zigzag.',
-      'Three rails. It reads: WHAT DOES A NAVIGATOR HOLD TO THE NOON SUN TO FIND HER LATITUDE.',
+      'Tap each instrument to measure its arc. A whole circle is 360 degrees.',
+      'A sixth of 360 degrees is 60 degrees. Find the instrument with that arc.',
+      'The names come from Latin fractions: a quadrant is a quarter of a circle, an octant an eighth. Sextans means a sixth.',
       'A SEXTANT.',
     ],
+    goal: 'Tap each instrument to measure its arc. Then name hers.',
+    // Arcs in degrees, as drawn on the sheet, left to right.
+    stage: { kind: 'instruments', arcs: [180, 45, 360, 60, 90], give: { rings: 7 } },
   },
   paper3: {
     title: 'Paper III, Question 5',
+    // Where it is: tap this in the room to pick it up.
+    at: ['my_desk'],
     setter: 'invigilator',
     tier: 4,
     feed: 5,
@@ -301,6 +337,8 @@ export const PUZZLES = {
   },
   slate: {
     title: 'The Slate, Question 6',
+    // Where it is: tap this in the room to pick it up.
+    at: ['slate_board'],
     setter: 'invigilator',
     tier: 4,
     feed: 6,
@@ -331,6 +369,8 @@ export const PUZZLES = {
   },
   paper4: {
     title: 'Paper IV, Question 7',
+    // Where it is: tap this in the room to pick it up.
+    at: ['my_desk'],
     setter: 'invigilator',
     tier: 5,
     feed: 7,
@@ -355,6 +395,8 @@ export const PUZZLES = {
   },
   meta: {
     title: 'The Order of the Papers',
+    // Where it is: tap this in the room to pick it up.
+    at: ['my_desk'],
     setter: 'invigilator',
     tier: 5,
     if: 'puz:paper4',
@@ -381,6 +423,8 @@ export const PUZZLES = {
   // -------------------------------------------------------- the deeper things
   nina: {
     title: 'The Late Tithes',
+    // Where it is: tap this in the room to pick it up.
+    at: ['vitrines'],
     setter: 'hesper',
     tier: 4,
     if: 'examined:vitrines',
@@ -408,6 +452,8 @@ export const PUZZLES = {
   },
   lock: {
     title: 'The Word on the Doors',
+    // Where it is: tap this in the room to pick it up.
+    at: ['door_pendry', 'strongbox'],
     setter: 'invigilator',
     tier: 5,
     if: 'examined:door_pendry',
@@ -435,6 +481,8 @@ export const PUZZLES = {
   },
   cryptic: {
     title: "The Dame's Clue",
+    // Where it is: tap this in the room to pick it up.
+    at: ['hesper_table'],
     setter: 'hesper',
     tier: 4,
     if: 'flag:dame_clue',
@@ -458,6 +506,8 @@ export const PUZZLES = {
   },
   grille: {
     title: 'The Grille',
+    // Where it is: tap this in the room to pick it up.
+    at: ['grille_lock'],
     setter: 'invigilator',
     tier: 5,
     if: 'visited:lantern',
@@ -484,6 +534,8 @@ export const PUZZLES = {
   },
   bacon: {
     title: 'The Epigraph',
+    // Where it is: tap this in the room to pick it up.
+    at: ['my_desk'],
     setter: 'invigilator',
     tier: 5,
     secret: true,
@@ -510,6 +562,8 @@ export const PUZZLES = {
   // ------------------------------------------------- the Wall of Tithes (extra)
   tithe_square: {
     title: 'A Tithe: the Engraver\'s Square',
+    // Where it is: tap this in the room to pick it up.
+    at: ['tithe_wall'],
     setter: 'fold',
     tier: 2,
     extra: true,
@@ -535,6 +589,8 @@ export const PUZZLES = {
   },
   tithe_bridges: {
     title: 'A Tithe: the Seven Bridges',
+    // Where it is: tap this in the room to pick it up.
+    at: ['tithe_wall'],
     setter: 'fold',
     tier: 3,
     extra: true,
@@ -574,6 +630,8 @@ export const PUZZLES = {
   },
   tithe_fifteen: {
     title: 'A Tithe: the Hundred Guineas',
+    // Where it is: tap this in the room to pick it up.
+    at: ['tithe_wall'],
     setter: 'fold',
     tier: 3,
     extra: true,
@@ -597,6 +655,291 @@ export const PUZZLES = {
       'Here one pair is out of order, which is an odd number. The solved tray has none, which is even. No series of slides can get from one to the other.',
       'It is IMPOSSIBLE.',
     ],
+  },
+
+  // ------------------------------------------------- around the Fold (extra)
+  // Not ciphers: puzzles about the world, found on things in the rooms.
+  suntime: {
+    title: 'The Hall Clock',
+    setter: 'fold',
+    at: ['hall_clock'],
+    tier: 1,
+    extra: true,
+    if: 'examined:hall_clock',
+    blocks: [
+      { p: 'The Hall clock has two minute hands. The black hand keeps Fold Time. The red one keeps Greenwich time, eleven minutes ahead.' },
+      { quote: "Before the railways, every town kept its own noon: the moment the sun was highest over it. The sun crosses one degree of longitude every four minutes. That's all you need. — Kit" },
+    ],
+    ask: 'How many degrees west of Greenwich is the Fold?',
+    answers: ['2.75', '2 3/4', '2 AND 3/4', 'TWO AND THREE QUARTERS', '2.75 DEGREES', '2.75 W', '2.75 WEST', '2 3/4 DEGREES'],
+    near: [{ match: ['11', '44', '3', '2.5', '2', '4'], say: 'Not quite. Four minutes for every degree: how many degrees make eleven minutes?' }],
+    solved: "Two and three-quarter degrees west of Greenwich: eleven minutes, at four minutes a degree.\n\nThat puts the Fold a little west of Bristol, whose clock on the Exchange still has two minute hands, one for London and one for Bristol. Until the railways came, every town in England kept the noon its own sun gave it. The Fold is the last place that never changed.",
+    lesson: 'time',
+    hints: [
+      'Drag the Fold along the line of longitude and watch the two minute hands.',
+      'The sun takes four minutes to cross one degree of longitude. The Fold is eleven minutes behind Greenwich.',
+      'Eleven minutes, divided by four minutes a degree.',
+      '2.75 degrees west: two and three-quarters.',
+    ],
+    goal: 'Drag the Fold west until its black hand is eleven minutes behind the red.',
+    stage: { kind: 'sun', behind: 11, step: 0.25, west: 6 },
+  },
+  ferry: {
+    title: "Nell's First Riddle",
+    setter: 'fold',
+    at: ['riddle_book'],
+    tier: 2,
+    extra: true,
+    if: 'examined:riddle_book',
+    blocks: [
+      { p: "Pasted inside the cover of Nell's riddle-book is the first riddle she ever asked, copied out in her mother's hand. Nell asks it of every child who crosses for the first time." },
+      { quote: 'A ferryman must take a fox, a goose and a sack of corn over the Cut. The boat holds him and one thing more. Left alone together, the fox eats the goose, and the goose eats the corn. How does he take all three across?' },
+    ],
+    ask: 'What must go across first?',
+    answers: ['GOOSE', 'THE GOOSE', 'A GOOSE'],
+    near: [{ match: ['FOX', 'THE FOX', 'CORN', 'THE CORN', 'SACK', 'THE SACK'], say: 'Then the two left behind are alone together. Try again.' }],
+    solved: "The goose goes first, and the goose comes back. Goose over. Back alone. Fox over, and bring the goose back. Corn over. Back alone. Goose over. Seven crossings.\n\nAlcuin of York set this riddle around the year 800, in a book of puzzles 'to sharpen the young'. It is one of the oldest puzzles in Europe. His version had a wolf, a goat and a basket of cabbages.\n\n'Most children get it on the third try,' says Nell. 'The quick ones ask why he doesn't just take the fox home.'",
+    lesson: 'alcuin',
+    hints: [
+      'Only two pairs are dangerous when left alone. One thing is in both of them, and the other two are safe together.',
+      'The goose is in both dangerous pairs. It has to go first.',
+      'You are allowed to bring something back with you.',
+      'Goose over; back alone; fox over; goose back; corn over; back alone; goose over. The GOOSE goes first.',
+    ],
+    goal: 'Tap things to put them in the boat, then row. Never leave the wrong two alone.',
+    stage: { kind: 'ferry', items: ['fox', 'goose', 'corn'], eats: [['fox', 'goose'], ['goose', 'corn']] },
+  },
+  physic: {
+    title: 'The Physic Garden',
+    setter: 'hesper',
+    at: ['garden_window'],
+    tier: 2,
+    extra: true,
+    if: 'examined:garden_window',
+    blocks: [
+      { p: 'The Physic Garden has grown medicines for the Company since 1673. Its beds are labelled in Latin.' },
+      { p: "Pinned beside the window is a card in Dame Hesper's hand, from when she taught the nurses' children: five beds, and five medicines that come from them. Somebody has cut the card into strips." },
+    ],
+    ask: 'Which medicine comes from which bed?',
+    // The medicines, bed by bed, in the order the beds lie: willow, poppy, foxglove, nightshade, yew.
+    answers: ['ASPIRIN MORPHINE DIGITOXIN ATROPINE PACLITAXEL'],
+    solved: "Willow bark gives salicin, from which aspirin was made in 1897. The opium poppy gives morphine. Foxglove gives digitoxin, which slows and steadies a failing heart. Deadly nightshade gives atropine, named after Atropos, the Fate who cuts the thread of every life. Yew gives paclitaxel, a medicine for cancer, found in 1971.\n\nEvery one of them is a poison at the wrong dose. The bed right under Dame Hesper's window is the foxgloves.",
+    facts: ['physic_foxglove'],
+    lesson: 'foxglove',
+    hints: [
+      'The Latin names give most of it away. Look for a medicine whose name sounds like the plant.',
+      'Salix is willow, and aspirin began as salicylic acid. Atropa gives atropine. Digitalis gives digitoxin.',
+      'Papaver somniferum, the poppy that brings sleep, gives morphine. Taxus, the yew, gives paclitaxel.',
+      'Bed by bed: aspirin, morphine, digitoxin, atropine, paclitaxel.',
+    ],
+    goal: 'Tap a jar, then the bed its medicine comes from.',
+    stage: {
+      kind: 'garden',
+      beds: [
+        { id: 'SALIX', latin: 'Salix alba', name: 'white willow', plant: 'willow' },
+        { id: 'PAPAVER', latin: 'Papaver somniferum', name: 'opium poppy', plant: 'poppy' },
+        { id: 'DIGITALIS', latin: 'Digitalis purpurea', name: 'foxglove', plant: 'foxglove' },
+        { id: 'ATROPA', latin: 'Atropa belladonna', name: 'deadly nightshade', plant: 'nightshade' },
+        { id: 'TAXUS', latin: 'Taxus baccata', name: 'yew', plant: 'yew' },
+      ],
+      jars: [
+        { id: 'DIGITOXIN', use: 'slows and steadies the heart' },
+        { id: 'ASPIRIN', use: 'for pain and fever' },
+        { id: 'PACLITAXEL', use: 'against some cancers' },
+        { id: 'MORPHINE', use: 'for the worst pain' },
+        { id: 'ATROPINE', use: 'widens the pupil' },
+      ],
+    },
+  },
+  cups: {
+    title: "The Four O'Clock Problem",
+    setter: 'hesper',
+    at: ['tea_table'],
+    tier: 3,
+    extra: true,
+    if: 'examined:tea_table',
+    blocks: [
+      { p: "Dame Hesper laid the Syndics' cups as a puzzle, and they have been laid her way ever since. Under the tray is her card, in faded ink:" },
+      { quote: "1. Nobody drinks from the cup of their own trade.\n2. The Warden's cup tells the time.\n3. The map-maker drinks from a grid.\n4. The clockmaker never drinks from a cup that points north.\n— H.L." },
+      { p: 'Two of the cups are turned upside down, for the two who have died.' },
+    ],
+    ask: 'Whose cup is whose?',
+    answers: ['PENDRY ARMS SALLOW CROSSWORD VOSS COMPASS CLAY CLOCK'],
+    solved: "Pendry drank from the coat of arms. Sallow from the crossword grid. Voss from the compass rose. The Warden from the clock face.\n\nNot one of them drinks from the cup that suits their trade. It was Dame Hesper's joke, and it has outlived her memory of making it. A stranger would pick every cup wrong. Only someone who sat at that table, or laid it every day, would know whose cup was whose.",
+    facts: ['cups_secret'],
+    lesson: 'logic',
+    hints: [
+      'Tap a square once for a cross, twice for a tick. Start with the clue that is certain.',
+      "The Warden's cup tells the time: the clock face. The map-maker drinks from a grid: the crossword.",
+      'That leaves the compass rose and the coat of arms for Pendry and Voss. The compass rose points north.',
+      'Pendry: arms. Sallow: crossword. Voss: compass. Clay: clock.',
+    ],
+    goal: 'Mark the grid from the four clues until every Syndic has one cup.',
+    stage: {
+      kind: 'grid',
+      rows: [
+        { id: 'PENDRY', label: 'Pendry', sub: 'clockmaker' },
+        { id: 'SALLOW', label: 'Sallow', sub: 'map-maker' },
+        { id: 'VOSS', label: 'Voss', sub: 'editor' },
+        { id: 'CLAY', label: 'Clay', sub: 'Warden' },
+      ],
+      cols: [
+        { id: 'CLOCK', label: 'Clock face', cup: 'clock' },
+        { id: 'COMPASS', label: 'Compass rose', cup: 'compass' },
+        { id: 'CROSSWORD', label: 'Crossword', cup: 'crossword' },
+        { id: 'ARMS', label: 'Coat of arms', cup: 'arms' },
+      ],
+      down: ['ARMS', 'CROSSWORD'],
+    },
+  },
+  adjourned: {
+    title: 'Adjourned, 1987',
+    setter: 'hesper',
+    at: ['chess_tables'],
+    tier: 3,
+    extra: true,
+    if: 'examined:chess_tables',
+    blocks: [
+      { p: "On this table a game has stood unfinished since 1987, with a card: 'Adjourned. H.L. to move.' H.L. is Hesper Lorimer, and she had the white pieces. In thirty-eight years, nobody has touched a piece." },
+      { quote: "She could have finished it in one move. Everybody knows that, and nobody knows why she didn't. — Ottilie" },
+    ],
+    ask: "What was White's winning move?",
+    answers: ['NF7', 'NF7 MATE', 'KNIGHT TO F7', 'KNIGHT F7', 'NH6 F7', 'NH6F7'],
+    near: [
+      { match: ['NXG8', 'NG8'], say: 'The knight takes the rook, and the king takes the knight.' },
+      { match: ['QD3', 'QG4', 'QE2', 'QC2', 'QH5'], say: "A good-looking move, but it is not check, and Black's queen is waiting." },
+    ],
+    solved: "Knight to f7. Checkmate.\n\nThe black king cannot move: his own rook and his own pawns stand on every square he could run to, and nothing can take the knight or come between them. It is a smothered mate. Players have admired it since Gioachino Greco printed one around 1620.\n\nOttilie says Dame Hesper looked at the board for a long time, put on her coat, wrote the card, and never came back to it. 'She said the game was over, and that was enough.'",
+    lesson: 'smothered',
+    hints: [
+      'Look at the black king. Every square next to him is filled by his own pieces.',
+      'A king who cannot move only needs a check that cannot be blocked or answered. A knight\'s check cannot be blocked.',
+      'Which square would let the knight attack h8?',
+      'Knight to f7: Nf7, a smothered mate.',
+    ],
+    goal: "Tap a white piece, then where it goes. Find the move that ends it.",
+    // The adjourned position, white pieces in capitals, from the top of the board (rank 8) down.
+    stage: { kind: 'chess', fen: 'r5rk/pb4pp/1p5N/8/3q4/1P6/P4PPP/3Q1RK1', side: 'w' },
+  },
+  cruxword: {
+    title: 'The Crux Six',
+    setter: 'fold',
+    at: ['noticeboard'],
+    tier: 2,
+    extra: true,
+    if: 'examined:noticeboard',
+    blocks: [
+      { p: "On the back page of the Crux, beside the crossword, is the Fold's favourite daily game: guess the six-letter word in six tries. A letter in the right place turns green. A letter that is in the word, but somewhere else, turns gold. Ottilie keeps a pencil on a string beside it." },
+    ],
+    ask: "What is today's word?",
+    answers: ['TEACUP'],
+    // A wrong guess is marked letter by letter, as the game in the paper does, and costs nothing.
+    feedback: 'letters',
+    solved: "TEACUP.\n\nOttilie fills in the squares in pencil, so the next person can rub them out. 'Tomorrow's will be easier,' she says. 'It always is on a Friday.'",
+    lesson: 'wordgames',
+    hints: [
+      'Start with a word that uses common letters, such as E, A, T and R. Every colour tells you something.',
+      'Green letters stay where they are. Gold ones belong somewhere else in the word. Grey ones are not in it at all.',
+      "Think of the Hall at four o'clock.",
+      'TEACUP.',
+    ],
+    goal: 'Type a six-letter word and press Enter. Six tries.',
+    stage: { kind: 'wordgame', length: 6, tries: 6 },
+  },
+  wardens: {
+    title: 'The History Board',
+    setter: 'fold',
+    at: ['portraits'],
+    tier: 3,
+    extra: true,
+    if: 'examined:portraits',
+    blocks: [
+      { p: "Every Novice's first test, by tradition: six brass plates from the history board under the Wardens' portraits. Each gives the pen-name of a famous member, and the year they joined, told only by what the world was doing that year. Put them back in order, oldest first." },
+    ],
+    ask: 'Put the plates in order, oldest first.',
+    answers: ['SOLVER'],
+    solved: "S, O, L, V, E, R: SOLVER, the rank every Novice is working for.\n\nGutenberg printed his Bible around 1455. Columbus crossed the Atlantic in 1492. Shakespeare died in 1616. London burned in 1666. The American colonies declared their independence in 1776. The Penny Black, the first postage stamp, was issued in 1840.",
+    lesson: 'dates',
+    hints: [
+      'Tap one plate, then another, to swap them. Read the first letters down the side when you think you have it.',
+      'The printing press comes first, and the postage stamp last.',
+      'Columbus comes second, Shakespeare third and the Great Fire fourth.',
+      'Gutenberg, Columbus, Shakespeare, the Great Fire, American independence, the Penny Black: SOLVER.',
+    ],
+    goal: 'Tap two plates to swap them. Put them in order, oldest first.',
+    stage: {
+      kind: 'order',
+      items: [
+        { id: 'R', name: 'ROOK', text: 'joined the year the Penny Black, the first postage stamp, was issued' },
+        { id: 'L', name: 'LAPWING', text: 'joined the year Shakespeare died' },
+        { id: 'S', name: 'SEXTON', text: 'joined the year Gutenberg printed his Bible' },
+        { id: 'E', name: 'EMBER', text: 'joined the year the American colonies declared independence' },
+        { id: 'O', name: 'OSPREY', text: 'joined the year Columbus first crossed the Atlantic' },
+        { id: 'V', name: 'VERGER', text: 'joined the year of the Great Fire of London' },
+      ],
+    },
+  },
+  pendulum: {
+    title: "Pendry's Last Job",
+    setter: 'fold',
+    at: ['clocks'],
+    tier: 3,
+    extra: true,
+    if: 'examined:clocks',
+    blocks: [
+      { p: "Five pendulum clocks of the same make stand together at the end of the wall, waiting for their owners. A job card in Pendry's writing is tucked behind them: 'One of these loses six minutes an hour. The owner says somebody moved its bob. Find it.'" },
+    ],
+    ask: 'Which clock has been tampered with?',
+    answers: ['4', 'FOUR', 'CLOCK 4', 'CLOCK FOUR', 'NUMBER 4', 'NO 4'],
+    near: [
+      { match: ['1', 'ONE', 'CLOCK 1'], say: 'Its bob is heavier, but weight makes no difference to the swing. Time it.' },
+      { match: ['2', 'TWO', 'CLOCK 2'], say: 'It swings wider, but a wider swing takes the same time. Time it.' },
+    ],
+    solved: "Clock 4. Somebody slid its bob down the rod. A longer pendulum swings more slowly, so the clock loses time.\n\nIts neighbours have a heavier bob and a wider swing, and they keep perfect time: neither weight nor width matters, only length. Galileo is said to have noticed this as a student in Pisa, timing a swinging lamp in the cathedral against his own pulse.\n\nOn the back of the card, Pendry had already written: '4. Bob down 2 cm. Raise it.' He finished every job.",
+    lesson: 'pendulum',
+    hints: [
+      'Tap Count, and watch how many times each pendulum swings in the same time.',
+      'A heavier bob or a wider swing makes no difference to how long a swing takes. Only the length does.',
+      'One of them swings fewer times than the rest. Its bob has been lowered.',
+      'Clock 4.',
+    ],
+    goal: 'Tap Count and see which pendulum falls behind. Then tap that clock.',
+    // Each clock: how heavy its bob looks, how wide it swings, and how long one swing takes (seconds).
+    stage: { kind: 'pendulum', seconds: 12, clocks: [{ bob: 1.35, swing: 1, period: 1 }, { bob: 0.95, swing: 1.6, period: 1 }, { bob: 1, swing: 1, period: 1 }, { bob: 1, swing: 0.95, period: 1.11 }, { bob: 0.7, swing: 1.15, period: 1 }] },
+  },
+  piano: {
+    title: 'If You Can Solve It, Play It',
+    setter: 'fold',
+    at: ['piano'],
+    tier: 2,
+    extra: true,
+    if: 'examined:piano',
+    blocks: [
+      { p: 'The sheet on the stand is one line of music, with no title. A sign on the lid says: IF YOU CAN SOLVE IT YOU CAN PLAY IT.' },
+      { quote: 'Play it, then tell me what it is. Half the Fold gets it in five notes. — Ottilie' },
+    ],
+    ask: 'What is the tune?',
+    answers: ['FUR ELISE', 'FÜR ELISE', 'FUER ELISE', 'FOR ELISE'],
+    near: [{ match: ['BEETHOVEN', 'LUDWIG VAN BEETHOVEN'], say: 'Right composer. Now the name of the piece.' }],
+    solved: "Für Elise, by Beethoven, written around 1810.\n\nNobody is sure who Elise was. The music was found and printed in 1867, forty years after he died, and the name on it may have been misread. It has been played since by more beginners, music boxes and telephones than anything else he wrote.\n\nOttilie nods. 'Free coffee,' she says. 'That's the rule.'",
+    lesson: 'notes',
+    hints: [
+      'The lines of the staff, from the bottom, are E, G, B, D and F. The spaces between them spell FACE.',
+      'The first note is the E in the top space. The next one, with a sharp sign, is D sharp: the black key just below E.',
+      'E, D sharp, E, D sharp, E, B, D, C, A.',
+      'It is Für Elise, by Beethoven.',
+    ],
+    goal: 'Find each note on the keys and play the line. Then say what it is.',
+    stage: {
+      kind: 'piano',
+      notes: ['E5', 'D#5', 'E5', 'D#5', 'E5', 'B4', 'D5', 'C5', 'A4'],
+      choices: [
+        { label: 'Ode to Joy', value: 'ODE TO JOY' },
+        { label: 'Für Elise', value: 'FUR ELISE' },
+        { label: 'The Entertainer', value: 'THE ENTERTAINER' },
+        { label: 'Greensleeves', value: 'GREENSLEEVES' },
+      ],
+    },
   },
 };
 

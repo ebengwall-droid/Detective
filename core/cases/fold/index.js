@@ -18,7 +18,7 @@ for (const [id, npc] of Object.entries(NPCS)) npc.small = SMALL[id] ?? {};
 NPCS.kit.guide = true;
 
 /** The kinds of written thing the page can draw for a view's `figure`. */
-const STAGE_KINDS = ['lock', 'wheel', 'fence', 'keyed', 'pairs', 'codes', 'pigpen', 'bacon', 'knight', 'column', 'grids', 'clue', 'magic', 'bridges', 'slide', 'places', 'write'];
+const STAGE_KINDS = ['lock', 'wheel', 'fence', 'keyed', 'pairs', 'codes', 'pigpen', 'bacon', 'knight', 'column', 'grids', 'clue', 'magic', 'bridges', 'slide', 'places', 'write', 'collar', 'chart', 'instruments', 'sun', 'ferry', 'garden', 'grid', 'chess', 'wordgame', 'order', 'pendulum', 'piano'];
 const FIGURE_KINDS = ['blotter', 'slate', 'stone', 'board', 'card', 'certificate', 'ledger', 'plate', 'newsprint', 'typed', 'label', 'plan'];
 
 // A lecture should always be found by its own title.
@@ -275,6 +275,9 @@ export function validateCase(c = CASE) {
     // A lock answered with rings needs as many rings as its word has letters.
     if (p.lock && p.answers.some((ans) => ans.replace(/[^A-Za-z]/g, '').length !== p.lock.rings)) problems.push(`${where}: a ${p.lock.rings}-ring lock with an answer of another length`);
     if (p.lock?.start && p.lock.start.length !== p.lock.rings) problems.push(`${where}: the lock starts with ${p.lock.start.length} letters on ${p.lock.rings} rings`);
+    // Every puzzle lies on something in a room, and is picked up by tapping it.
+    if (!p.at?.length) problems.push(`${where}: lies on nothing in any room`);
+    for (const at of p.at ?? []) if (!hotspotIds.has(at)) problems.push(`${where}: lies on an unknown object "${at}"`);
     // Every puzzle is handled on the stage as some object, with one line saying what to do.
     if (!p.goal) problems.push(`${where}: no goal line for the stage`);
     if (!STAGE_KINDS.includes(p.stage?.kind)) problems.push(`${where}: a stage of an unknown kind "${p.stage?.kind}"`);

@@ -652,11 +652,12 @@ export const LAPTOP_HINTS = [
   { if: 'ev:paper_1', q: 'The pigpen cipher', done: 'rec:l_pigpen' },
   { if: 'ev:paper_1', q: 'Who signs for Dame Hesper Lorimer?', done: 'rec:court_order' },
   { if: 'ev:paper_1', q: 'How do I break a cipher by counting letters?', done: 'rec:l_frequency' },
-  { if: 'ev:paper_1', q: 'The five-by-five square', done: 'rec:l_polybius' },
+  { if: 'ev:paper_1', q: 'How do I read holes as numbers?', done: 'rec:l_binary' },
   { if: 'fact:lodger_trick', q: 'The chess automaton of 1770', done: 'rec:l_turk' },
   { if: 'fact:fold_time', q: 'Why is the Fold eleven minutes slow?', done: 'rec:l_time' },
   { if: 'ev:paper_2', q: 'What lies at 0° N, 0° E?', done: 'rec:l_atlas' },
-  { if: 'ev:paper_2', q: 'The rail fence and the scytale', done: 'rec:l_transposition' },
+  { if: 'ev:paper_2', q: 'How did sailors find their latitude?', done: 'rec:l_navigation' },
+  { if: 'examined:server', q: 'How do I read a chart?', done: 'rec:l_charts' },
   { if: 'act>=2', q: 'Marguerite Sallow', done: 'rec:sallow_bio' },
   { if: 'fact:masterplan', q: 'Greywether', done: 'rec:greywether' },
   { if: 'ev:paper_3', q: 'The Vigenère cipher', done: 'rec:l_vigenere' },
@@ -671,6 +672,13 @@ export const LAPTOP_HINTS = [
   { if: 'ev:paper_4', q: "Bacon's two-letter cipher", done: 'rec:l_bacon' },
   { if: 'examined:tithe_wall', q: 'The fifteen puzzle', done: 'rec:l_fifteen' },
   { if: 'examined:tithe_wall', q: 'The seven bridges of Königsberg', done: 'rec:l_bridges' },
+  { if: 'examined:riddle_book', q: 'The oldest river-crossing riddle', done: 'rec:l_alcuin' },
+  { if: 'examined:tea_table', q: 'How do logic grids work?', done: 'rec:l_logic' },
+  { if: 'examined:chess_tables', q: 'What is a smothered mate?', done: 'rec:l_smothered' },
+  { if: 'examined:clocks', q: 'Why does a pendulum keep time?', done: 'rec:l_pendulum' },
+  { if: 'examined:piano', q: 'How do I read music?', done: 'rec:l_notes' },
+  { if: 'examined:noticeboard', q: 'Guess-the-word games', done: 'rec:l_wordgames' },
+  { if: 'examined:portraits', q: 'How do I put history in order?', done: 'rec:l_dates' },
 ];
 
 /** What the reference desk says when it has nothing, and how it presents itself. */
@@ -751,7 +759,7 @@ Look things up. That is not cheating. It is how all learning works. Start with t
     },
     2: {
       brief: 'This is the covering note for Paper II, after the death of Marguerite Sallow. The tone is cooler. Two of the four candidates have failed. The detective is improving, and the writer says so in one short line, as a teacher would.',
-      mustSay: "For thirty years the second candidate drew maps of the whole world, but she never looked closely at any of it. The detective should stop asking where anyone was at midnight: it is the wrong question, and by now they know why. This paper is about geography and an old soldiers' trick. The detective should follow whatever the first answer tells them to follow. One line: two candidates are left, and the writer takes no pleasure in counting them.",
+      mustSay: "For thirty years the second candidate drew maps of the whole world, but she never looked closely at any of it. The detective should stop asking where anyone was at midnight: it is the wrong question, and by now they know why. This paper is about geography, and the brass a sailor steers by. The detective should follow whatever the first answer tells them to follow. One line: two candidates are left, and the writer takes no pleasure in counting them.",
       fallback: (ctx) => `Candidate.
 
 Paper I: a fair pass. ${ctx.did ? `I also notice that you ${ctx.did}.` : 'You work more quickly than they do.'}
@@ -761,7 +769,7 @@ For thirty years Marguerite Sallow drew maps of the whole world. She never looke
 
 Stop asking where anyone was at midnight. It is the wrong question, and I think you know why by now.
 
-This paper is about geography, and about a trick that soldiers used before Rome was built. When the first answer tells you to follow something, follow it.
+This paper is about geography, and about the brass a sailor steers by. When the first answer tells you to follow something, follow it.
 
 Two candidates are left. I take no pleasure in counting them.
 

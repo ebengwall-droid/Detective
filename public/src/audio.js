@@ -343,6 +343,13 @@ export class Audio {
     this.tone(92, { gain: 0.05, decay: 0.16, wet: 0.15 });
   }
 
+  /** A piano note: a struck string, bright at first, then fading. */
+  piano(freq) {
+    this.tone(freq, { type: 'triangle', gain: 0.07, attack: 0.004, decay: 1.4, wet: 0.3 });
+    this.tone(freq * 2, { type: 'sine', gain: 0.018, attack: 0.004, decay: 0.7, wet: 0.3 });
+    this.tone(freq * 3, { type: 'sine', gain: 0.006, attack: 0.004, decay: 0.35, wet: 0.2 });
+  }
+
   /** A bolt sliding back. */
   bolt() {
     this.noiseBurst({ gain: 0.06, freq: 1400, q: 1.5, decay: 0.22 });

@@ -13,7 +13,7 @@ import { Brain } from './brain.js';
 import { itemUnlocked } from './prompts.js';
 import { clone, clamp, sanitizePlayerText, GameError, hashString } from './util.js';
 import { openLeads, threadsIn, intentOf } from './talk.js';
-import { normalise } from './ciphers.js';
+import { normalise, markLetters } from './ciphers.js';
 
 export const RPC_METHODS = new Set([
   'newGame', 'view', 'travel', 'examine', 'observe', 'talk', 'say', 'present',
@@ -749,6 +749,13 @@ export class GameSession {
       }
       return this.done({ ok: true, text: def.solved, answer: def.answers[0] });
     }
+    // A word game marks a wrong guess letter by letter, as the game in the paper does, and it costs nothing.
+    if (def.feedback === 'letters') {
+      const target = normalise(def.answers[0]);
+      if (given.length !== target.length) return this.done({ ok: false, text: `Today's word has ${target.length} letters.` });
+      st.attempts += 1;
+      return this.done({ ok: false, pattern: markLetters(given, target), text: '' });
+    }
     st.attempts += 1;
     s.stats.misses += 1;
     const near = (def.near ?? []).find((n) => n.match.some((m) => normalise(m) === given));
@@ -863,10 +870,14 @@ export class GameSession {
     let score = (found / truths.length) * 60;
     score += E.bonus.how[how] ?? 0;
     score += E.bonus.verdict[s.verdict] ?? (s.flags.knew_killer ? E.bonus.knew : 0);
-    // Puzzles: every one solved counts for a little; hints and given-away answers count against.
+    // Puzzles: every one on the case counts for a little, and the ones around the Fold are a bonus on top;
+    // hints and given-away answers count against.
     const all = Object.entries(this.case.puzzles);
-    const solved = all.filter(([id]) => s.puzzles[id]?.solved !== undefined).length;
-    score += (solved / all.length) * 12;
+    const main = all.filter(([, p]) => !p.extra);
+    const extra = all.filter(([, p]) => p.extra);
+    const solvedIn = (list) => list.filter(([id]) => s.puzzles[id]?.solved !== undefined).length;
+    const solved = solvedIn(main);
+    score += (solved / main.length) * 10 + (extra.length ? (solvedIn(extra) / extra.length) * 2 : 0);
     score -= Math.min(8, s.stats.hints + s.stats.puzzleHints * 0.5);
     score -= Math.min(6, s.stats.wrong + s.stats.spoiled);
     score = Math.round(clamp(score, 0, 100));
@@ -879,7 +890,7 @@ export class GameSession {
       rank: rank.title,
       rankLine: rank.line,
       accused: s.accusation ? { suspect: this.case.npcs[s.accusation.suspect].name, verdict: s.accusation.verdict } : null,
-      puzzles: { solved, of: all.length, hints: s.stats.puzzleHints, given: s.stats.spoiled },
+      puzzles: { solved, of: main.length, extra: { solved: solvedIn(extra), of: extra.length }, hints: s.stats.puzzleHints, given: s.stats.spoiled },
       ...E.extra({ state: s, how, check }),
       stats: { steps: s.steps, hints: s.stats.hints, wrong: s.stats.wrong, exchanges: s.stats.exchanges },
       text: null,

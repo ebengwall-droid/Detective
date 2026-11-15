@@ -148,3 +148,170 @@ test('five places on the map, one ring each, spell the answer', () => {
     for (const line of list) assert.match(line, /[\d.]+°\s*[NS],\s*[\d.]+°\s*[EW]/, `${id}: every place has its coordinates`);
   }
 });
+
+// ------------------------------------------------------------------ puzzles about the world
+
+test('the Hall clock: the minutes behind, at four minutes a degree, is the answer', () => {
+  const { behind, step } = PUZZLES.suntime.stage;
+  const deg = behind / 4;
+  assert.equal(deg % step, 0, 'the answer lies on a step of the slider');
+  assert.ok(accepted('suntime', String(deg)));
+});
+
+test("Nell's ferry: every way across begins with the answer", () => {
+  const { items, eats } = PUZZLES.ferry.stage;
+  const firsts = new Set();
+  const safe = (bank) => !eats.some(([a, b]) => bank.includes(a) && bank.includes(b));
+  // A state: which bank each thing is on, and where the boat is. Search every way across.
+  const seen = new Set();
+  const queue = [{ side: Object.fromEntries(items.map((i) => [i, 0])), boat: 0, first: null }];
+  while (queue.length) {
+    const st = queue.shift();
+    const key = JSON.stringify([st.side, st.boat, st.first]);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (items.every((i) => st.side[i] === 1)) {
+      firsts.add(st.first);
+      continue;
+    }
+    for (const cargo of [null, ...items.filter((i) => st.side[i] === st.boat)]) {
+      const side = { ...st.side };
+      if (cargo) side[cargo] = 1 - st.boat;
+      const left = items.filter((i) => side[i] === st.boat);
+      if (!safe(left)) continue;
+      queue.push({ side, boat: 1 - st.boat, first: st.first ?? cargo });
+    }
+  }
+  assert.deepEqual([...firsts], ['goose']);
+  assert.ok(accepted('ferry', 'GOOSE'));
+});
+
+test('the Physic Garden: each jar on its own bed is the answer', () => {
+  const { beds, jars } = PUZZLES.physic.stage;
+  assert.equal(beds.length, jars.length);
+  const answer = PUZZLES.physic.answers[0].split(' ');
+  assert.equal(answer.length, beds.length, 'one medicine for each bed, in the order the beds lie');
+  assert.deepEqual(new Set(answer), new Set(jars.map((j) => j.id)));
+  assert.equal(answer[beds.findIndex((b) => b.id === 'DIGITALIS')], 'DIGITOXIN');
+  // Whatever is handed in has to survive the game's limit on an answer's length.
+  for (const p of Object.values(PUZZLES)) for (const a of p.answers) assert.ok(a.length <= 80, `${p.title}: an answer longer than the game takes`);
+});
+
+test("the four o'clock problem has one solution, and the upside-down cups belong to the dead", () => {
+  const { rows, cols, down } = PUZZLES.cups.stage;
+  const own = { PENDRY: 'CLOCK', SALLOW: 'COMPASS', VOSS: 'CROSSWORD', CLAY: 'ARMS' };
+  const perms = (xs) => (xs.length ? xs.flatMap((x, i) => perms([...xs.slice(0, i), ...xs.slice(i + 1)]).map((p) => [x, ...p])) : [[]]);
+  const ok = perms(cols.map((c) => c.id)).filter((p) => {
+    const cup = Object.fromEntries(rows.map((r, i) => [r.id, p[i]]));
+    return rows.every((r) => cup[r.id] !== own[r.id]) && cup.CLAY === 'CLOCK' && cup.SALLOW === 'CROSSWORD' && cup.PENDRY !== 'COMPASS';
+  });
+  assert.equal(ok.length, 1);
+  const answer = rows.map((r, i) => `${r.id} ${ok[0][i]}`).join(' ');
+  assert.ok(accepted('cups', answer));
+  assert.deepEqual(new Set(down), new Set([ok[0][0], ok[0][1]]), 'Pendry and Sallow, who have died');
+});
+
+test("Dame Hesper's adjourned game: the answer is checkmate, and the only one", () => {
+  const { fen } = PUZZLES.adjourned.stage;
+  const board = fen.split('/').map((row) => [...row].flatMap((ch) => (/\d/.test(ch) ? Array(Number(ch)).fill(null) : [ch])));
+  const white = (p) => !!p && p === p.toUpperCase();
+  const black = (p) => !!p && p === p.toLowerCase();
+  const inside = (r, f) => r >= 0 && r < 8 && f >= 0 && f < 8;
+  const moves = (b, r, f) => {
+    const p = b[r][f];
+    const own = white(p) ? white : black;
+    const out = [];
+    const t = p.toLowerCase();
+    const ray = (dr, df, far) => {
+      for (let rr = r + dr, ff = f + df; inside(rr, ff); rr += dr, ff += df) {
+        if (own(b[rr][ff])) break;
+        out.push([rr, ff]);
+        if (b[rr][ff] || !far) break;
+      }
+    };
+    if (t === 'p') {
+      const d = white(p) ? -1 : 1;
+      if (inside(r + d, f) && !b[r + d][f]) out.push([r + d, f]);
+      for (const df of [-1, 1]) if (inside(r + d, f + df) && b[r + d][f + df] && !own(b[r + d][f + df])) out.push([r + d, f + df]);
+    } else if (t === 'n') {
+      for (const [dr, df] of [[1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]]) if (inside(r + dr, f + df) && !own(b[r + dr][f + df])) out.push([r + dr, f + df]);
+    } else {
+      const st = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+      const dg = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+      for (const [dr, df] of t === 'r' ? st : t === 'b' ? dg : [...st, ...dg]) ray(dr, df, t !== 'k');
+    }
+    return out;
+  };
+  const attacked = (b, r, f, byWhite) => b.some((row, rr) => row.some((p, ff) => p && white(p) === byWhite && (p.toLowerCase() === 'p' ? rr + (white(p) ? -1 : 1) === r && Math.abs(ff - f) === 1 : moves(b, rr, ff).some(([a, c]) => a === r && c === f))));
+  const play = (b, [r, f], [r2, f2]) => {
+    const nb = b.map((row) => [...row]);
+    nb[r2][f2] = nb[r][f];
+    nb[r][f] = null;
+    return nb;
+  };
+  const kingAt = (b, k) => {
+    for (let r = 0; r < 8; r++) for (let f = 0; f < 8; f++) if (b[r][f] === k) return [r, f];
+    return null;
+  };
+  const blackCanEscape = (b) => {
+    for (let r = 0; r < 8; r++)
+      for (let f = 0; f < 8; f++)
+        if (black(b[r][f]))
+          for (const to of moves(b, r, f)) {
+            const nb = play(b, [r, f], to);
+            const [kr, kf] = kingAt(nb, 'k');
+            if (!attacked(nb, kr, kf, true)) return true;
+          }
+    return false;
+  };
+  const mates = [];
+  for (let r = 0; r < 8; r++)
+    for (let f = 0; f < 8; f++)
+      if (white(board[r][f]))
+        for (const to of moves(board, r, f)) {
+          const nb = play(board, [r, f], to);
+          const [wr, wf] = kingAt(nb, 'K');
+          if (attacked(nb, wr, wf, false)) continue;
+          const [kr, kf] = kingAt(nb, 'k');
+          if (attacked(nb, kr, kf, true) && !blackCanEscape(nb)) mates.push(`${board[r][f].toUpperCase()}${String.fromCharCode(97 + to[1])}${8 - to[0]}`);
+        }
+  assert.deepEqual(mates, ['Nf7']);
+  assert.ok(accepted('adjourned', 'Nf7'));
+});
+
+test('the Crux Six: the word fits the board, and a guess is marked letter by letter', () => {
+  const { length } = PUZZLES.cruxword.stage;
+  assert.equal(C.lettersOf(PUZZLES.cruxword.answers[0]).length, length);
+  assert.equal(PUZZLES.cruxword.feedback, 'letters');
+  assert.equal(C.markLetters('TEACUP', 'TEACUP'), 'GGGGGG');
+  assert.equal(C.markLetters('EEEEEE', 'TEACUP'), '.G....');
+});
+
+test('the history board, put in order of the years, spells the answer', () => {
+  const year = { S: 1455, O: 1492, L: 1616, V: 1666, E: 1776, R: 1840 };
+  const items = [...PUZZLES.wardens.stage.items].sort((a, b) => year[a.id] - year[b.id]);
+  assert.ok(accepted('wardens', items.map((i) => i.id).join('')));
+  assert.notEqual(PUZZLES.wardens.stage.items.map((i) => i.id).join(''), 'SOLVER', 'it does not start solved');
+});
+
+test("Pendry's clocks: exactly one swings at a different rate, and it is the answer", () => {
+  const { clocks } = PUZZLES.pendulum.stage;
+  const odd = clocks.map((c, i) => [c, i]).filter(([c]) => c.period !== 1);
+  assert.equal(odd.length, 1);
+  assert.ok(accepted('pendulum', String(odd[0][1] + 1)));
+  // The decoys differ in weight and width only.
+  assert.ok(clocks.some((c) => c.bob !== 1 && c.period === 1) && clocks.some((c) => c.swing !== 1 && c.period === 1));
+});
+
+test('the piano: the line is the opening of Für Elise, and only that choice is right', () => {
+  const { notes, choices } = PUZZLES.piano.stage;
+  assert.deepEqual(notes, ['E5', 'D#5', 'E5', 'D#5', 'E5', 'B4', 'D5', 'C5', 'A4']);
+  assert.deepEqual(choices.filter((c) => accepted('piano', c.value)).map((c) => c.label), ['Für Elise']);
+});
+
+test('the collar, the log and the instruments', () => {
+  const rows = PUZZLES.bellows.stage.rows;
+  assert.ok(accepted('bellows', String(parseInt(rows.find((r) => r.label === 'IN').holes, 2))));
+  assert.ok(PUZZLES.ascii.stage.rows.some((r) => accepted('ascii', r.name)));
+  assert.equal(PUZZLES.paper2b.stage.give.rings, 7);
+});

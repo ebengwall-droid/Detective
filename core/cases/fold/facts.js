@@ -43,6 +43,7 @@ export const FACTS = {
   locks_oiled: { tag: 'insider', key: true, text: "On Saturday the Syndics' letter-locks were oiled and re-pinned, as they are every October before the Proving. This included Pendry's, Sallow's, Voss's, the Warden's and the Lantern grille. It is written in the Porter's daybook." },
   pins_open: { tag: 'insider', text: "A setting-pin can change a letter-lock's word in a minute. The pins hang on open hooks in the Porter's Lodge, a yard from the tea table. Anyone could take one." },
   own_cups: { tag: 'insider', text: "Each Syndic has their own cup at the four o'clock tea. Anyone who knew the cups could poison one person and nobody else." },
+  cups_secret: { tag: 'insider', text: "The Syndics' cups do not match their trades: Dame Hesper laid them as a puzzle. A stranger would pick every cup wrong. Only someone who sat at that table, or laid it every day, knew whose cup was whose." },
   tea_porter: { tag: 'insider', about: ['hob'], key: true, text: "The Porter has set out and poured the Syndics' tea for forty years. Nobody watches him do it. Several people had to stop and think before they could say who does it." },
   rack_wound: { tag: 'insider', about: ['hob'], text: "Anyone can leave a carrier in the hold-rack at the Bellows exchange, to be sent at a later time. The rack runs on clockwork, and the Porter winds it on Mondays." },
   held_carrier: { tag: 'pattern', key: true, text: 'Paper I was put in the hold-rack at noon, and the clockwork sent it at eight. Whoever sent the Papers could have been anywhere when they arrived.' },

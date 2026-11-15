@@ -345,7 +345,7 @@ export function showEnding(cards, game, run) {
           el('p', { class: 'report-line', text: ending.rankLine }),
           el('div', { class: 'section-label', text: `What you uncovered · ${found} of ${ending.truths.length}` }),
           ending.truths.map((t) => el('div', { class: `truth ${t.found ? '' : 'missed'}` }, icon(t.found ? 'check' : 'close', 16), t.label)),
-          ending.puzzles ? el('div', { class: 'section-label', text: `Papers answered · ${ending.puzzles.solved} of ${ending.puzzles.of}` }) : null,
+          ending.puzzles ? el('div', { class: 'section-label', text: `Puzzles on the case · ${ending.puzzles.solved} of ${ending.puzzles.of}${ending.puzzles.extra?.of ? ` · around the Fold · ${ending.puzzles.extra.solved} of ${ending.puzzles.extra.of}` : ''}` }) : null,
           ending.puzzles ? el('p', { class: 'note', text: [count(ending.puzzles.hints, 'hint taken', 'hints taken'), count(ending.puzzles.given, 'answer given away', 'answers given away')].join(' · ') }) : null,
           el('p', { class: 'note', text: [count(ending.stats.exchanges, 'question asked', 'questions asked'), count(ending.stats.hints, 'moment of thought', 'moments of thought'), count(ending.stats.wrong, 'wrong turn on the board', 'wrong turns on the board')].join(' · ') }),
         );

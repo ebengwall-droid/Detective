@@ -31,7 +31,7 @@ export function createNotebook(panels, game) {
 
   const tabs = [
     { id: 'case', label: 'Case', icon: 'list' },
-    { id: 'papers', label: 'Papers', icon: 'paper' },
+    { id: 'papers', label: 'Puzzles', icon: 'paper' },
     { id: 'board', label: 'Board', icon: 'board' },
     { id: 'evidence', label: 'Evidence', icon: 'bag' },
     { id: 'people', label: 'People', icon: 'people' },
@@ -69,7 +69,7 @@ export function createNotebook(panels, game) {
       el('h3', { class: 'case-title', text: v.act.title }),
       el('div', { class: 'section-label', text: 'To do' }),
       open.length ? open.map((o) => el('div', { class: 'objective', text: o.text })) : el('p', { class: 'muted', text: 'Nothing to do right now. Look around the room.' }),
-      el('p', { class: 'note case-note' }, 'Stuck on the case? Think, in the tool bar, gives you a nudge. Stuck on a paper? Each one has its own hints, and the Lectern will teach you the method.'),
+      el('p', { class: 'note case-note' }, 'Stuck on the case? Think, in the tool bar, gives you a nudge. Stuck on a puzzle? Each one has its own hints, and the Lectern will teach you the method.'),
       done.length ? el('div', { class: 'section-label', text: 'Done' }) : null,
       done.map((o) => el('div', { class: 'objective done', text: o.text })),
     );

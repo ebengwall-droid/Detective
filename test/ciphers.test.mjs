@@ -30,7 +30,11 @@ test('each cipher undoes itself', () => {
 test('the gate, the fitting and the carrier', () => {
   assert.equal(C.caesar(mono('gate'), -3), 'CATCH');
   assert.equal(C.rot13(mono('fitting')), 'PATIENCE');
-  assert.equal(C.normalise(C.unPolybius(mono('bellows'))), answerOf('bellows'));
+  // The collar is punched in binary: OUT reads 20, as the story says; IN reads the hour the dial is set to.
+  const rows = Object.fromEntries(PUZZLES.bellows.stage.rows.map((r) => [r.label, parseInt(r.holes, 2)]));
+  assert.equal(rows.OUT, 20);
+  assert.ok(PUZZLES.bellows.answers.some((a) => C.normalise(a) === String(rows.IN)), 'setting the dial to the IN hour is an answer');
+  assert.ok(PUZZLES.bellows.answers.map(C.normalise).includes('HELDSINCENOON'));
 });
 
 test('Paper I really is a Caesar cipher whose commonest letter is E', () => {
@@ -51,11 +55,13 @@ test('Paper I, question two, is in letters the pigpen can draw', () => {
   assert.ok(/^[A-Z .,]+$/.test(text));
 });
 
-test('Paper II: five real places, and a fence of three rails', () => {
+test('Paper II: five real places, and one instrument whose arc is a sixth of a circle', () => {
   assert.equal(['Mecca', 'Oslo', 'Null Island', 'Everest', 'York'].map((p) => p[0]).join(''), answerOf('paper2a'));
   assert.equal(PUZZLES.paper2a.blocks.find((b) => b.list).list.length, 5);
-  const plain = C.unRailFence(mono('paper2b'), 3);
-  assert.equal(plain, 'WHATDOESANAVIGATORHOLDTOTHENOONSUNTOFINDHERLATITUDE');
+  const arcs = PUZZLES.paper2b.stage.arcs;
+  assert.equal(arcs.filter((a) => a === 360 / 6).length, 1, 'exactly one sixth of a circle');
+  assert.equal(new Set(arcs).size, arcs.length, 'no two instruments alike');
+  assert.equal(answerOf('paper2b'), 'SEXTANT');
 });
 
 test('Paper III opens to her pen-name and to nothing else nearby', () => {
@@ -104,7 +110,12 @@ test('the epigraph hides the same name in its capitals', () => {
 });
 
 test('the night log, the square, the bridges and the tray', () => {
-  assert.equal(C.unHex(mono('ascii').replace('TERMINAL', '').trim()), 'LODGE');
+  // The night log: only one terminal asks for the lecture between two and four, and it is the answer.
+  const log = PUZZLES.ascii.stage.rows;
+  const lecture = log.filter((r) => r.busy.some(([from, to, , asked]) => from <= 2 && to >= 4 && /LECTURE 1987/.test(asked)));
+  assert.equal(lecture.length, 1);
+  assert.equal(lecture[0].name, answerOf('ascii'));
+  assert.ok(log.filter((r) => r.busy.some(([from, to]) => from < 4 && to > 2)).length > 1, 'another terminal is busy then too');
   // Durer's square: every line makes 34 once the two gaps are filled.
   const rows = PUZZLES.tithe_square.blocks.find((b) => b.grid).grid.map((r) => r.trim().split(/\s+/).map((n) => (n === '?' ? null : Number(n))));
   rows[3][1] = 15;

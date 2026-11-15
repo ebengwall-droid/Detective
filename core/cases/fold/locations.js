@@ -6,7 +6,7 @@
 // pays out its facts / evidence / effects once.
 //
 // kind: look | take | use | exit   (drives the icon and the verb on screen)
-// action: 'laptop' | 'board' | 'puzzle:<id>' | { travel: '<location>' }
+// action: 'laptop' | 'board' | { travel: '<location>' }   (a puzzle names the object it lies on, by `at`)
 
 export const LOCATIONS = {
   // ------------------------------------------------------------ gatehouse
@@ -18,7 +18,7 @@ export const LOCATIONS = {
     arrive: 'Turnagain Lane ends at a small stone gatehouse, about the size of a bus shelter. Your phone has no signal here, and its map shows the wrong street.',
     hotspots: [
       {
-        id: 'turnstile', at: 'turnstile', label: 'The Turnstile', kind: 'use', action: 'puzzle:gate',
+        id: 'turnstile', at: 'turnstile', label: 'The Turnstile', kind: 'use',
         views: [
           { if: ['puz:gate', '!visited:clockshop'], text: "The rings are still set to C-A-T-C-H, and the turnstile turns. You go through, and Kit takes you down Nonesuch Row to the clockmaker's shop.", action: { travel: 'clockshop' } },
           { if: 'puz:gate', text: 'The rings are still set to C-A-T-C-H, and the turnstile turns. You go through into the Fold.', action: { travel: 'hall' } },
@@ -66,7 +66,7 @@ export const LOCATIONS = {
         ],
       },
       {
-        id: 'my_desk', at: 'my_desk', label: 'Your desk', kind: 'look',
+        id: 'my_desk', at: 'my_desk', label: 'Your desk', kind: 'look', surface: 'desk',
         views: [{ figure: {kind: "card", hand: "type", text: "MIND THE TIME.", alt: "A small card on the desk: MIND THE TIME."}, text: "The Scrutineers' desk. The Company has lent it to the police until the case is over. Someone has set out a blotter, a pen, a clean cup and saucer, and a small card: MIND THE TIME. You did not see who did it." }],
       },
       {
@@ -120,7 +120,7 @@ export const LOCATIONS = {
         ],
       },
       {
-        id: 'exchange', at: 'exchange', label: 'The Bellows exchange', kind: 'use', action: 'puzzle:bellows',
+        id: 'exchange', at: 'exchange', label: 'The Bellows exchange', kind: 'use',
         views: [
           { if: 'puz:bellows', figure: {kind: "plate", lines: ["WOUND MONDAYS.", "R.F."], alt: "A small brass plate on the clockwork: WOUND MONDAYS. R.F."}, text: "The collar said HELD SINCE NOON. Anyone can put a carrier in the hold-rack and set the dial. The clockwork sends it on later. A small brass plate on the clockwork reads: WOUND MONDAYS. R.F.", facts: ['rack_wound'] },
           {
@@ -132,7 +132,7 @@ export const LOCATIONS = {
         ],
       },
       {
-        id: 'tithe_wall', at: 'tithe_wall', label: 'The Wall of Tithes', kind: 'look',
+        id: 'tithe_wall', at: 'tithe_wall', label: 'The Wall of Tithes', kind: 'look', surface: 'wall',
         views: [{
           text: "Every member owes the Company one new puzzle a year, called a Tithe. Here they are: four hundred sheets, pinned from the floor to far above your head. There are mazes, ciphers, chess problems, and a knitting pattern that is said to be a joke. At the very top, behind glass, is a tray of numbered tiles.\n\nThree of the puzzles have hung here for a very long time, and nobody has taken them down. You could try them.",
           facts: ['tithe_custom'],
@@ -173,7 +173,7 @@ export const LOCATIONS = {
         ],
       },
       {
-        id: 'strongbox', at: 'strongbox', label: 'Evidence chest', kind: 'use', action: 'puzzle:lock',
+        id: 'strongbox', at: 'strongbox', label: 'Evidence chest', kind: 'use',
         views: [
           { if: 'puz:lock', text: "Pendry's lock is open. The rings read A, R, I, A, D, N, E. The lock was oiled recently, and carefully.", ev: ['lock_pendry'] },
           { if: 'examined:door_pendry', text: "The iron-bound chest the Company has lent for evidence. Inside, with a tag on it, is the letter-lock from Ignatius Pendry's door. Its seven brass rings still read his own word. The lock was oiled recently, and carefully.", ev: ['lock_pendry'] },
@@ -202,8 +202,6 @@ export const LOCATIONS = {
         views: [{
           text: "A heavy oak door with iron straps. The constables took it off its hinges while Wilf watched. On the inside is a Company letter-lock with seven brass rings. They read P-E-N-D-R-Y-S, his own word.\n\nPendry locked himself in to work every night for thirty years. On Sunday night, his own word did not open the lock.\n\nThe constables are taking the lock to the evidence chest at the Hall.",
           facts: ['locked_inside'],
-          // Its lock is a puzzle of its own: the card offers to try it.
-          action: 'puzzle:lock',
         }],
       },
       {
@@ -274,7 +272,7 @@ export const LOCATIONS = {
     arrive: "Quoin & Daughter, wheelwrights, at 5 Nonesuch Row. They make cipher wheels here, not cartwheels. Brass and boxwood discs the size of saucers hang on the walls. Each has two rings of letters, and they turn slightly in the draught.",
     hotspots: [
       {
-        id: 'fitting', at: 'fitting', label: 'The fitting bench', kind: 'use', action: 'puzzle:fitting',
+        id: 'fitting', at: 'fitting', label: 'The fitting bench', kind: 'use',
         views: [
           { if: 'puz:fitting', text: "The green cloth has been brushed and the tray put away. Your brass wheel is in your pocket. It is heavier than it looks." },
           { text: "A counter covered in green cloth, with a velvet tray of cipher wheels on it. Each wheel has two rings of letters, one turning inside the other. Every child in the Fold is fitted for a wheel at the age of seven. You are a lot older, and Mrs Quoin has told you so." },
@@ -444,7 +442,7 @@ export const LOCATIONS = {
     arrive: "The Stalemate, a coffee house for puzzlers. It smells of coffee and chalk dust, and you can hear chess pieces clicking. There is a piano, but nobody is playing it. Every table has a game board set into it. Nobody looks up when you come in.",
     hotspots: [
       {
-        id: 'slate_board', at: 'slate_board', label: 'The slate', kind: 'use', action: 'puzzle:slate',
+        id: 'slate_board', at: 'slate_board', label: 'The slate', kind: 'use',
         views: [
           { if: 'puz:slate', figure: {kind: "slate", chess: true, lines: ["CANDIDATE THREE", "SETS AS CENSOR."], alt: "The Stalemate slate: CANDIDATE THREE SETS AS CENSOR."}, text: 'CANDIDATE THREE SETS AS CENSOR. Ottilie has not wiped it off. She says she wants to study the handwriting a while longer.' },
           { if: 'puz:paper3', text: "Tonight's problem is not a chess problem. A letter is chalked on every square of the board. Under it is one line of chess notation, in a small, upright hand." },
@@ -614,7 +612,7 @@ export const LOCATIONS = {
         views: [{ text: "An oak reading desk on a stand, with a glowing screen set into its sloping top. This is the Lorimer Engine, a machine built from Dame Hesper's life's work. Ask it anything, and it answers in her voice." }],
       },
       {
-        id: 'vitrines', at: 'vitrines', label: 'The Late Tithes', kind: 'use', action: 'puzzle:nina',
+        id: 'vitrines', at: 'vitrines', label: 'The Late Tithes', kind: 'use',
         views: [
           { if: 'puz:nina', text: 'A, R, I, A, D, N, E runs corner to corner through every one of them. Now you cannot stop seeing it. In twelve years, nobody else seems to have noticed.' },
           { figure: {kind: "label", lines: ["THE LATE TITHES OF", "DAME HESPER LORIMER", "2012 to 2023", "'The crown of the Lorimer Legacy.'"], alt: "The label on the glass cases."}, text: "A row of brightly lit glass cases. THE LATE TITHES OF DAME HESPER LORIMER, 2012 to 2023. 'The crown of the Lorimer Legacy.' Each Tithe is a square of seven answers, filled in by the winner of that year's Proving. Beside each is a fair copy of the clues, a clean handwritten copy in a small, upright hand." },
@@ -632,7 +630,7 @@ export const LOCATIONS = {
         ],
       },
       {
-        id: 'server', at: 'server', label: 'The Engine', kind: 'use', action: 'puzzle:ascii',
+        id: 'server', at: 'server', label: 'The Engine', kind: 'use',
         views: [
           { if: 'puz:ascii', text: "The terminal is LODGE, in the Porter's Lodge. Most nights since March, from two till four, someone there has typed PLAY LECTURE 1987. The machine reads to anyone who asks." },
           { text: "Two black cabinets with green lights, blowing out warm air. This is the machine behind the oak Lectern. A log scrolls past on a small screen. Jonah says the Engine has never written an exam question for anyone: 'It's a reference desk. People keep forgetting that.'", facts: ['engine_log'] },
@@ -667,7 +665,7 @@ export const LOCATIONS = {
     arrive: "You climb a hundred and three stairs, and a ladder at the top. The Lantern is a round glass room on the roof of the Hall. In the middle turns the Founder's Orrery, a brass model of the planets. Below you, the whole of Ravel is lit up in the rain.",
     hotspots: [
       {
-        id: 'grille_lock', at: 'grille_lock', label: 'The lock on the grille', kind: 'use', action: 'puzzle:grille',
+        id: 'grille_lock', at: 'grille_lock', label: 'The lock on the grille', kind: 'use',
         views: [
           { if: 'puz:grille', text: 'The gate is open. The rings read A-R-I-A-D-N-E. Nobody will change them now.' },
           { text: "The Orrery stands inside an iron grille. The grille's gate is locked with a seven-ring letter-lock. The Warden is trapped inside." },

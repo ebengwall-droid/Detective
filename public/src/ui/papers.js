@@ -1,7 +1,7 @@
-// The Papers: every puzzle the detective has come across, in the notebook.
-// Choosing one picks it up on the stage (ui/stage.js), where it is solved by
-// handling it. The game core decides what is open and what is solved; nothing
-// here knows an answer.
+// The puzzles the detective has come across, listed in the notebook with
+// where each one lies. A puzzle is never worked here: it is picked up by
+// tapping the thing it lies on, in its room (ui/stage.js). The game core
+// decides what is open and what is solved; nothing here knows an answer.
 
 import { el, add, icon } from './dom.js';
 
@@ -9,7 +9,7 @@ const GROUPS = [
   ['invigilator', "The Invigilator's Papers"],
   ['fold', "The Fold's own"],
   ['hesper', 'Dame Hesper'],
-  ['extra', 'From the Wall of Tithes'],
+  ['extra', 'Around the Fold'],
 ];
 
 const tierDots = (n) => el('span', { class: 'tier', title: `Difficulty ${n} of 5`, 'aria-label': `Difficulty ${n} of 5` }, [1, 2, 3, 4, 5].map((i) => el('i', { class: i <= n ? 'on' : '' })));
@@ -27,7 +27,7 @@ export function renderPapers(body, game) {
     return;
   }
   const open = puzzles.filter((p) => !p.solved);
-  add(body, el('p', { class: 'muted papers-count' }, open.length ? `${open.length} unanswered. Tap one to pick it up.` : 'Nothing unanswered. For now.'));
+  add(body, el('p', { class: 'muted papers-count' }, open.length ? `${open.length} unanswered. Each one waits where you found it: go there and tap it.` : 'Nothing unanswered. For now.'));
   for (const [key, label] of GROUPS) {
     const list = puzzles.filter((p) => (key === 'extra' ? p.extra : !p.extra && p.setter === key));
     if (!list.length) continue;
@@ -39,10 +39,10 @@ export function renderPapers(body, game) {
         { class: 'list' },
         list.map((p) =>
           el(
-            'button',
-            { class: `row paper-row ${p.solved ? 'answered' : ''} ${key}`, type: 'button', onClick: () => game.openPuzzle(p.id) },
-            icon(p.solved ? 'check' : 'paper', 20),
-            el('div', { class: 'row-main' }, el('div', { class: 'row-title', text: p.title }), el('div', { class: 'row-sub' }, p.solved ? `Answered: ${p.answer}` : p.goal ?? p.ask)),
+            'div',
+            { class: `row static paper-row ${p.solved ? 'answered' : ''} ${key}` },
+            icon(p.solved ? 'check' : 'pin', 20),
+            el('div', { class: 'row-main' }, el('div', { class: 'row-title', text: p.title }), el('div', { class: 'row-sub' }, p.solved ? `Answered: ${p.answer}` : p.where ?? '')),
             tierDots(p.tier),
           ),
         ),
