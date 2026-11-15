@@ -464,7 +464,7 @@ Treatment: He could have been saved. There is a specific antidote (digoxin-speci
     know: [
       {
         id: 'm_cause', keys: ['cause', 'how did he die', 'what killed', 'poison', 'heart', 'foxglove', 'digitalis', 'natural'],
-        line: "Foxglove poisoning. The plant is called Digitalis. Its heart poisons were in his blood at about four times the dose that would kill a horse. It wasn't tablets. There's leaf in his stomach. Somebody brewed the plant, and he drank it in his tea. The Warden can call it a heart attack if he likes. His heart did stop. It stopped because somebody poisoned him.",
+        line: "Foxglove poisoning. The plant is called Digitalis. Its heart poisons were in his blood at about four times a deadly dose. It wasn't tablets. There's leaf in his stomach. Somebody brewed the plant, and he drank it in his tea. The Warden can call it a heart attack if he likes. His heart did stop. It stopped because somebody poisoned him.",
         facts: ['foxglove'],
       },
       {

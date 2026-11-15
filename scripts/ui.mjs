@@ -1,6 +1,6 @@
 // Development helper: drive the real game in headless Chromium.
 //
-//   node scripts/ui.mjs <scenario.mjs> [--mobile] [--out <dir>] [--local] [--quality low|medium|high]
+//   node scripts/ui.mjs <scenario.mjs> [--mobile] [--out <dir>] [--local] [--quality low|lean|medium|high|auto]
 //                                      [--url <page>] [--fake-claude [deny]] [--server-log]
 //                                      [--still] [--dpr N] [--w N --h N] [--flaky N]
 //
@@ -167,7 +167,9 @@ async function main() {
     else await page.mouse.click(x, y);
   };
 
-  const query = new URLSearchParams({ quality: arg('quality', 'low') });
+  // --quality auto leaves the choice to the game, as a player's first visit does.
+  const quality = arg('quality', 'low');
+  const query = new URLSearchParams(quality === 'auto' ? {} : { quality });
   if (local) query.set('mode', 'local');
   if (flag('fake-claude')) await page.addInitScript(fakeClaude, arg('fake-claude', 'allow'));
   let failed = false;

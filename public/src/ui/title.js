@@ -7,6 +7,18 @@ import { gsap, leaveTitle, lockWord, playTitle, still } from './titlefx.js';
 
 const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
+/**
+ * Each published version is made for one kind of device. Opened on the other
+ * kind, it says so, and links to the right one when it knows where that is.
+ */
+function deviceLine(game) {
+  const wrong = game.device === 'mobile' ? !game.touchScreen : game.device === 'web' ? game.touchScreen : false;
+  if (!wrong) return null;
+  const [made, better, other] = game.device === 'mobile' ? ['phones', 'On a computer', 'web version'] : ['computers', 'On a phone or tablet', 'mobile version'];
+  const link = game.otherVersion ? el('a', { class: 'ts-link', href: game.otherVersion, target: '_blank', rel: 'noopener', text: `Open the ${other}` }) : null;
+  return el('div', { class: 'ai-line ts-device' }, el('span', { text: `This version is made for ${made}. ${better}, the ${other} works better. ` }), link);
+}
+
 function aiLine(game) {
   const ai = game.client.ai;
   // With a server there is a key to add. Without one (the single-file and hosted builds) there is not.
@@ -40,7 +52,7 @@ export function showTitle(cards, game, { hasSave, savedName }) {
       item('How to play', 'ts-help', () => showHelp(cards, game)),
     );
     const status = aiLine(game);
-    const foot = el('div', { class: 'ts-foot' }, status, game.install?.iosHint ? el('div', { class: 'ai-line', text: 'To play full screen: tap Share, then Add to Home Screen.' }) : null);
+    const foot = el('div', { class: 'ts-foot' }, status, deviceLine(game), game.install?.iosHint ? el('div', { class: 'ai-line', text: 'To play full screen: tap Share, then Add to Home Screen.' }) : null);
 
     // Your name: asked for when you start, on a slip that rises over the menu.
     const input = el('input', { class: 'ts-input', id: 'detective-name', type: 'text', placeholder: 'Detective', maxlength: '40', autocomplete: 'off', autocapitalize: 'words', spellcheck: 'false', enterkeyhint: 'go', value: savedName ?? '' });
@@ -123,7 +135,7 @@ export function showHelp(cards, game) {
       ['Get around', `Look lists everyone and everything in the room: ${touch ? 'tap' : 'click'} a name and you walk straight to it. Map takes you between places.`],
       ['Examine', `Small rings of light mark what can be examined, and a ring with an arrow is a way out. ${touch ? 'Tap' : 'Click'} one. What matters is bagged as evidence. Look lights up everything in the room.`],
       ['Talk', `A ring with three dots over someone means you can talk to them. Ask anything, in your own words, ${touch ? 'tap' : 'click'} an underlined word in what they say to follow it up, or pick a suggested question. They remember. Some of them lie.`],
-      ['Break a lie', 'While talking, tap Show to put a piece of evidence in front of someone. This is how you catch a lie. Read tells you what you notice about them. Log shows everything that was said.'],
+      ['Break a lie', `While talking, ${touch ? 'tap' : 'click'} Show to put a piece of evidence in front of someone. This is how you catch a lie. Read tells you what you notice about them. Log shows everything that was said.`],
       ['Papers', 'This is a puzzle game. Every puzzle you are set is kept in your notebook under Papers, with your solving tools. Type an answer; a wrong one costs nothing. Each paper has hints, and the last hint gives the answer.'],
       ['Look things up', 'The Lectern (the laptop at your desk) will teach you how any cipher or puzzle is done and where it came from. You are meant to use it, and to look things up outside the game too. It will not give you the answer.'],
       ['Notebook', 'Everything you establish is written down for you: objectives, evidence, people, leads. The Board tab is where you reason and, in the end, name the killer. Evidence goes to the lab from the Lectern.'],

@@ -2,16 +2,21 @@
 // effects libraries, the game core, the case and the styles in one HTML file,
 // with the models, textures and motion clips in an assets/ folder beside it.
 //
-//   node scripts/build-artifact.mjs [--out dist]
+//   node scripts/build-artifact.mjs [--out dist] [--mobile-url <url>] [--web-url <url>]
+//
+// With the two published addresses, each version can point a visitor on the
+// wrong kind of device to the other one.
 //
 // Writes:
 //   app/            the game as an installable web app: index.html, assets/,
 //                   the manifest, icons and service worker. Host the folder
 //                   anywhere and "Add to Home Screen" gives a full-screen app
 //                   that also opens offline. Characters follow their script.
-//   artifact.html   the same page as a claude.ai artifact body (no <html>,
-//                   <head> or <body>; the host supplies those), to be
-//                   published with the files in artifact-files/ (listed in
+//   artifact-mobile.html, artifact-web.html
+//                   the game as claude.ai artifact bodies (no <html>, <head>
+//                   or <body>; the host supplies those), one made for phones
+//                   and tablets and one for computers. Each is published with
+//                   the files in artifact-files/ (listed in
 //                   artifact-files.json; models are wrapped in JSON there,
 //                   because that host serves only ordinary web file types).
 //                   Opened on claude.ai, the page asks Claude to play the
@@ -29,6 +34,12 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outArg = process.argv.indexOf('--out');
 const outDir = path.resolve(outArg > 0 ? process.argv[outArg + 1] : path.join(root, 'dist'));
+const argOf = (name) => {
+  const i = process.argv.indexOf(`--${name}`);
+  return i > 0 ? process.argv[i + 1] : '';
+};
+const URLS = { mobile: argOf('mobile-url'), web: argOf('web-url') };
+for (const u of Object.values(URLS)) if (u && !/^https:\/\/[\w.-]+\/[\w/.-]*$/.test(u)) throw new Error(`not a plain https address: ${u}`);
 
 const FONTS = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@500..900&family=Instrument+Sans:ital,wdth,wght@0,75..100,400..700;1,75..100,400..700&family=JetBrains+Mono:wght@400..600&family=Marcellus&family=Special+Elite&display=swap';
 const TITLE = 'The Invigilator';
@@ -58,14 +69,20 @@ const page = (flags) => `<div id="app"><div id="boot"><div class="lamp"></div>Th
 const body = page("window.FOLD_MODE = 'local';");
 
 // claude.ai serves only ordinary web file types beside a page, so there the models travel as JSON (see below).
-const artifact = `<title>${TITLE}</title>
+// Two versions of the same game: FOLD_DEVICE sets it up for phones ('mobile') or computers ('web');
+// FOLD_OTHER is where the other version lives, for a visitor on the wrong kind of device.
+const artifact = (device, name) => {
+  const other = URLS[device === 'mobile' ? 'web' : 'mobile'];
+  return `<title>${TITLE} (${name})</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="${FONTS}">
 <style>${css}
 /* The artifact frame already keeps the page clear of the notch and the home bar, top and bottom. */
 :root{--safe-t:0px;--safe-b:0px}</style>
-${page("window.FOLD_MODE = 'local'; window.FOLD_PACKED = true;")}
+${page(`window.FOLD_MODE = 'local'; window.FOLD_PACKED = true; window.FOLD_DEVICE = '${device}';${other ? ` window.FOLD_OTHER = ${JSON.stringify(other)};` : ''}`)}
 `;
+};
+const artifacts = { 'artifact-mobile.html': artifact('mobile', 'Mobile'), 'artifact-web.html': artifact('web', 'Web') };
 
 const standalone = `<!doctype html>
 <html lang="en">
@@ -93,7 +110,8 @@ ${body}
 `;
 
 fs.mkdirSync(outDir, { recursive: true });
-fs.writeFileSync(path.join(outDir, 'artifact.html'), artifact);
+for (const [file, html] of Object.entries(artifacts)) fs.writeFileSync(path.join(outDir, file), html);
+fs.rmSync(path.join(outDir, 'artifact.html'), { force: true });
 fs.writeFileSync(path.join(outDir, 'the-fold.html'), standalone);
 
 // The installable app: the page plus what a phone needs to treat it as one.
@@ -134,7 +152,7 @@ if (fs.existsSync(assetsDir)) {
 fs.writeFileSync(path.join(outDir, 'artifact-files.json'), `${JSON.stringify(published.sort(), null, 1)}\n`);
 const kb = (s) => `${(Buffer.byteLength(s) / 1024).toFixed(0)} KB`;
 console.log(`script ${kb(js)}, styles ${kb(css)}`);
-console.log(`wrote ${path.join(outDir, 'artifact.html')} (${kb(artifact)})`);
+for (const [file, html] of Object.entries(artifacts)) console.log(`wrote ${path.join(outDir, file)} (${kb(html)})`);
 console.log(`wrote ${path.join(outDir, 'the-fold.html')} (${kb(standalone)})`);
 console.log(`wrote ${appDir}/ (installable app: index.html, manifest, icons, service worker, assets)`);
 console.log(`assets: ${published.length} files, ${(assetBytes / 1048576).toFixed(1)} MB beside the app; ${(hostedBytes / 1048576).toFixed(1)} MB in ${hostedDir}/ to publish beside the artifact (listed in artifact-files.json)`);

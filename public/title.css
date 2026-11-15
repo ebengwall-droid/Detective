@@ -80,6 +80,8 @@
 @media (hover: hover) { .ts-item:hover { color: #fff; } }
 .ts-foot { position: relative; z-index: 1; padding: 10px 20px calc(16px + var(--safe-b, 0px)); }
 .ts .ai-line { margin: 2px auto 0; font-size: 12.5px; color: rgba(255, 255, 255, 0.52); max-width: 36ch; }
+.ts .ts-device { display: block; margin-top: 8px; max-width: 40ch; line-height: 1.45; }
+.ts-link { color: #e9c47e; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 
 /* Your name: a slip that rises over the menu, above the keyboard when it is up. */
 .ts-sheet {

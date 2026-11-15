@@ -63,7 +63,19 @@ export class Game {
     this.backArmed = false;
     this.queue = [];
     this.flushing = false;
-    this.isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+    /**
+     * Which version of the game this page is. The two published versions are
+     * each set up for one kind of device: 'mobile' for phones and tablets,
+     * 'web' for computers. 'auto' (the development server, the stand-alone
+     * page and the installable app) decides from the device.
+     */
+    this.device = window.FOLD_DEVICE === 'mobile' || window.FOLD_DEVICE === 'web' ? window.FOLD_DEVICE : 'auto';
+    /** A screen you touch rather than point at: a phone or a tablet. */
+    this.touchScreen = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+    // The mobile version always has the touch interface. (Its controls also work with a mouse.)
+    this.isTouch = this.device === 'mobile' || this.touchScreen;
+    /** Where the other version lives, when this one is open on the wrong kind of device. */
+    this.otherVersion = typeof window.FOLD_OTHER === 'string' && /^https:\/\//.test(window.FOLD_OTHER) ? window.FOLD_OTHER : null;
     this.target = null;
 
     this.canvas = el('canvas', { id: 'view', tabindex: '-1', 'aria-label': 'The scene' });
@@ -115,7 +127,9 @@ export class Game {
     } catch {
       /* fonts are a nicety */
     }
-    const auto = this.isTouch || window.innerWidth < 900 ? 'medium' : 'high';
+    // The graphics a device starts at (it steps down by itself if frames run slow). The web version
+    // gives a computer the full picture, whatever the window's size; phones and tablets start lighter.
+    const auto = this.device === 'web' ? (this.touchScreen ? 'medium' : 'high') : this.isTouch || window.innerWidth < 900 ? 'medium' : 'high';
     const quality = this.opts.quality ?? (this.settings.quality === 'auto' ? auto : this.settings.quality);
     this.world.init({ quality, brightness: this.settings.bright });
     this.world.noAutoQuality = !!this.opts.noAutoQuality || this.settings.quality !== 'auto';
@@ -674,7 +688,7 @@ export class Game {
     const info = r?.info ?? {};
     const got = assets.status();
     const lines = [
-      `${document.title}`,
+      `${document.title} (version: ${this.device})`,
       `screen ${window.innerWidth}x${window.innerHeight} @${window.devicePixelRatio ?? 1}, ${this.isTouch ? 'touch' : 'pointer'}, drawing at ${r ? r.getPixelRatio().toFixed(2) : '?'}x`,
       `graphics ${w.quality}${this.settings.quality === 'auto' ? ' (auto)' : ' (chosen)'}, finishing pass ${w.post ? 'on' : 'OFF'}, about ${Math.round(1 / Math.max(0.004, w.lastDt ?? 0.016))} fps`,
       `gpu ${String(gpu).slice(0, 90)} (WebGL${gl && typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext ? '2' : '1'})`,

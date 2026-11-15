@@ -165,8 +165,15 @@ writes to `dist/`:
   with the models, textures and animation (about 25 MB), a manifest, icons
   and a service worker. Host the folder anywhere and add it to a home screen;
   it then opens offline.
-- `artifact.html`: the same page packaged as a claude.ai artifact, with
-  `artifact-files.json` listing the assets to publish beside it.
+- `artifact-mobile.html` and `artifact-web.html`: the game packaged as two
+  claude.ai artifacts from the same code. The mobile version is set up for
+  phones and tablets: touch controls always, lighter graphics and smaller
+  textures to start with. The web version is set up for computers: mouse
+  and keyboard, full graphics and textures. `artifact-files.json` lists the
+  assets to publish beside either. Build with
+  `npm run build -- --mobile-url <url> --web-url <url>` once both are
+  published, and each version links to the other when it is opened on the
+  wrong kind of device.
 - `the-fold.html`: the page alone. Opened straight off a disk it cannot
   fetch the assets, so it draws its people and furniture in code instead:
   plainer, but it is one file.
