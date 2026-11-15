@@ -20,6 +20,7 @@ export const LOCATIONS = {
       {
         id: 'turnstile', at: 'turnstile', label: 'The Turnstile', kind: 'use', action: 'puzzle:gate',
         views: [
+          { if: ['puz:gate', '!visited:clockshop'], text: "The rings are still set to C-A-T-C-H, and the turnstile turns. You go through, and Kit takes you down Nonesuch Row to the clockmaker's shop.", action: { travel: 'clockshop' } },
           { if: 'puz:gate', text: 'The rings are still set to C-A-T-C-H, and the turnstile turns. You go through into the Fold.', action: { travel: 'hall' } },
           { text: "An old iron turnstile. On its post is a brass lock with five rings of letters. It will not turn until the rings spell the word of the day. Neither of you knows today's word yet." },
         ],
