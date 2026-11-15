@@ -382,6 +382,23 @@ kbd {
 #app:has(.dialogue.talk) .toast-text { display: none; }
 #app:has(.dialogue.talk) .toast:nth-child(n + 3) { display: none; }
 @keyframes toast-out { to { opacity: 0; transform: translateY(-8px) scale(0.96); } }
+/* One card for everything an action turned up: a line each, read at a glance (hud.digest). */
+.toast.digest { flex-direction: column; align-items: stretch; gap: 6px; width: 100%; padding: 11px 16px 12px; border-radius: 22px; }
+.digest-head { display: flex; align-items: center; gap: 8px; }
+.digest-title { font-size: 14px; font-weight: 700; letter-spacing: 0.01em; }
+.digest-count { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; display: inline-grid; place-items: center; font-size: 12px; font-weight: 700; color: #1a1206; background: var(--lamp); }
+.digest-rows { display: flex; flex-direction: column; gap: 4px; }
+.digest-row { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13.5px; line-height: 1.3; }
+.digest-row .ico { flex: none; color: var(--lamp-2); }
+.digest-label { flex: none; font-weight: 650; color: var(--text-1); }
+.digest-text { min-width: 0; flex: 1; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.digest-more { font-size: 12.5px; color: var(--text-3); padding-left: 24px; }
+/* A single notice is one line of text, too: the notebook has the whole of it. */
+.toast-text { -webkit-line-clamp: 1; }
+/* In a conversation the card shrinks to a pill like the others: its title and how many. */
+#app:has(.dialogue.talk) .toast.digest { flex-direction: row; align-items: center; width: auto; padding: 5px 12px 5px 14px; }
+#app:has(.dialogue.talk) .digest-rows, #app:has(.dialogue.talk) .digest-more { display: none; }
+#app:has(.dialogue.talk) .digest-title { font-size: 13px; }
 
 /* ----------------------------------------------------------------- glass
    The material, for anything that wants it: class "glass" (a sheet), with

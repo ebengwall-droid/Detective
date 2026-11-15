@@ -125,6 +125,38 @@ export function createHud(root, game) {
       setTimeout(remove, TOAST_MS);
     },
 
+    /**
+     * Everything one action turned up, on one card: a line each, no more. Several notices at once
+     * covered the room; this is read at a glance, and the notebook has the rest.
+     * @param {{ title?: string, items: {iconName: string, label: string, text: string}[], onClick?: () => void }} o
+     */
+    digest({ title = 'Notebook updated', items, onClick }) {
+      const shown = items.slice(0, 4);
+      const more = items.length - shown.length;
+      const node = el(
+        'button',
+        { class: 'toast digest', type: 'button', 'aria-label': `${title}: ${items.map((i) => `${i.label}, ${i.text}`).join('; ')}` },
+        el('div', { class: 'digest-head' }, el('span', { class: 'digest-title', text: title }), el('span', { class: 'digest-count', text: String(items.length) })),
+        el(
+          'div',
+          { class: 'digest-rows' },
+          shown.map((it) => el('div', { class: 'digest-row' }, icon(it.iconName, 16), el('span', { class: 'digest-label', text: it.label }), el('span', { class: 'digest-text', text: it.text }))),
+        ),
+        more > 0 ? el('div', { class: 'digest-more', text: `and ${more} more in your notebook` }) : null,
+      );
+      const remove = () => {
+        node.classList.add('out');
+        setTimeout(() => node.remove(), 280);
+      };
+      node.addEventListener('click', () => {
+        remove();
+        onClick?.();
+      });
+      toasts.append(node);
+      while (toasts.children.length > 3) toasts.firstElementChild.remove();
+      setTimeout(remove, TOAST_MS + 1800);
+    },
+
     clearToasts() {
       clear(toasts);
     },

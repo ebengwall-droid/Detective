@@ -465,10 +465,9 @@ export class Game {
     if (this.flushing) return;
     this.flushing = true;
     try {
-      const facts = [];
       const held = [];
-      /** New places on the map, said once together rather than one notice each. */
-      const places = [];
+      /** What this action turned up, said once together: one line each, on one card. */
+      const news = { facts: [], places: [], items: [] };
       while (this.queue.length) {
         const e = this.queue.shift();
         if (e.type === 'act') {
@@ -477,26 +476,11 @@ export class Game {
         } else if (e.type === 'arrive') {
           // Read before anything else is said about the place.
           await this.showArrival(e.text);
-        } else if (e.type === 'unlock') {
-          places.push(e.name);
         } else {
-          this.present(e, facts);
+          this.present(e, news);
         }
       }
-      if (places.length) {
-        this.unseen.map = true;
-        const list = places.length === 1 ? places[0] : `${places.slice(0, -1).join(', ')} and ${places[places.length - 1]}`;
-        this.hud.toast({ kind: 'alert', iconName: 'pin', title: places.length === 1 ? 'New place on the map' : `${places.length} new places on the map`, text: list, onClick: () => this.open('map') });
-      }
-      if (facts.length) {
-        this.audio.lead();
-        const more = facts.length > 2 ? facts.length - 1 : 0;
-        const shown = more ? facts.slice(0, 1) : facts;
-        for (const f of shown) {
-          this.hud.toast({ kind: 'lead', iconName: 'star', title: more ? `New lead, and ${more} more` : 'New lead', text: f.text, onClick: () => this.open('notebook', 'leads') });
-        }
-        if (!this.notebook.isOpen) this.unseen.notebook = true;
-      }
+      this.announce(news);
       this.queue.push(...held);
       if (this.view) this.hud.setView(this.view);
     } finally {
@@ -504,48 +488,78 @@ export class Game {
     }
   }
 
-  present(e, facts) {
-    const hud = this.hud;
+  /**
+   * Say what an action turned up. One thing is one slim notice; several are one card with a line
+   * each (Evidence, Lead, Done, Question, Map, Paper, Lab), never a stack of notices over the room.
+   * Tapping it opens the notebook where the most useful of them is.
+   */
+  announce({ facts, places, items }) {
+    const rows = [...items];
+    if (places.length) {
+      this.unseen.map = true;
+      const list = places.length === 1 ? places[0] : `${places.slice(0, -1).join(', ')} and ${places[places.length - 1]}`;
+      rows.push({ iconName: 'pin', label: places.length === 1 ? 'New place' : `${places.length} new places`, title: places.length === 1 ? 'New place on the map' : `${places.length} new places on the map`, text: list, rank: 4, open: () => this.open('map') });
+    }
+    if (facts.length) {
+      this.audio.lead();
+      if (!this.notebook.isOpen) this.unseen.notebook = true;
+      // The first sentence is enough to know what it is; the notebook has the rest.
+      const first = facts[0].text.split(/(?<=[.!?])\s/)[0];
+      rows.push({ iconName: 'star', kind: 'lead', label: facts.length === 1 ? 'Lead' : `${facts.length} leads`, title: facts.length === 1 ? 'New lead' : `${facts.length} new leads`, text: first, rank: 2, open: () => this.open('notebook', 'leads') });
+    }
+    if (!rows.length) return;
+    if (rows.length === 1) {
+      const [r] = rows;
+      this.hud.toast({ kind: r.kind ?? 'alert', iconName: r.iconName, title: r.title, text: r.text, onClick: r.open });
+      return;
+    }
+    // Most telling first: a question for the board, then evidence and leads, then the rest.
+    rows.sort((a, b) => a.rank - b.rank);
+    this.hud.digest({ items: rows, onClick: rows.find((r) => r.open)?.open });
+  }
+
+  present(e, news) {
+    const add = (row) => news.items.push(row);
     switch (e.type) {
       case 'fact':
-        facts.push(e);
+        news.facts.push(e);
+        break;
+      case 'unlock':
+        news.places.push(e.name);
         break;
       case 'evidence':
         this.audio.sting();
         this.buzz(18);
-        hud.toast({ iconName: e.icon ?? 'bag', title: 'Evidence bagged', text: e.hasLab ? `${e.name}. The lab could look at this.` : e.name, onClick: () => this.openEvidence(e.id) });
         if (!this.notebook.isOpen) this.unseen.notebook = true;
-        break;
-      case 'unlock':
-        this.unseen.map = true;
-        hud.toast({ kind: 'alert', iconName: 'pin', title: 'New place on the map', text: e.name, onClick: () => this.open('map') });
-        break;
-      case 'notify':
-        hud.toast({ kind: 'alert', iconName: 'phone', title: 'Message', text: e.text });
-        break;
-      case 'letter':
-        hud.toast({ kind: 'alert', iconName: 'letter', title: 'By the Bellows', text: e.text });
+        add({ iconName: e.icon ?? 'bag', label: 'Evidence', title: 'Evidence bagged', text: e.hasLab ? `${e.name}. The lab could look at this.` : e.name, rank: 1, open: () => this.openEvidence(e.id) });
         break;
       case 'lab':
         this.audio.sting();
-        hud.toast({ iconName: 'flask', title: 'Lab result', text: `${e.name}: ${e.result}`, onClick: () => this.openEvidence(e.id) });
         if (!this.notebook.isOpen) this.unseen.notebook = true;
+        add({ iconName: 'flask', label: 'Lab', title: 'Lab result', text: `${e.name}: ${e.result}`, rank: 1, open: () => this.openEvidence(e.id) });
         break;
       case 'objective':
-        if (e.done) hud.toast({ kind: 'lead', iconName: 'check', title: 'Done', text: e.text });
+        if (e.done) add({ iconName: 'check', kind: 'lead', label: 'Done', title: 'Done', text: e.text, rank: 5 });
         break;
       case 'deduction':
         this.unseen.notebook = true;
-        hud.toast({ kind: 'alert', iconName: 'board', title: 'A question for your case board', text: e.q, onClick: () => this.open('notebook', 'board') });
-        break;
-      case 'record':
-        if (!this.laptop.isOpen) this.unseen.laptop = true;
+        add({ iconName: 'board', label: 'Question', title: 'A question for your case board', text: e.q, rank: 0, open: () => this.open('notebook', 'board') });
         break;
       case 'puzzle':
         if (e.opened && !e.secret) {
           this.unseen.notebook = true;
-          hud.toast({ kind: 'alert', iconName: 'paper', title: 'A new paper', text: e.title, onClick: () => this.openPuzzle(e.id) });
+          add({ iconName: 'paper', label: 'Paper', title: 'A new paper', text: e.title, rank: 1, open: () => this.openPuzzle(e.id) });
         }
+        break;
+      case 'record':
+        if (!this.laptop.isOpen) this.unseen.laptop = true;
+        break;
+      // Messages are read in full, so they keep a notice of their own.
+      case 'notify':
+        this.hud.toast({ kind: 'alert', iconName: 'phone', title: 'Message', text: e.text });
+        break;
+      case 'letter':
+        this.hud.toast({ kind: 'alert', iconName: 'letter', title: 'By the Bellows', text: e.text });
         break;
       default:
         break;
