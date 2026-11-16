@@ -131,7 +131,7 @@ export const PUZZLES = {
       { match: ['20', '2000', '20 00', '8', '8PM', 'EIGHT'], say: 'That is when it came out, at your desk. Read the other row.' },
       { match: ['0', '00', '0000', '24', 'MIDNIGHT'], say: 'Midnight would be no holes at all. Count the holes again.' },
     ],
-    solved: "Twelve o'clock: noon. The carrier was HELD SINCE NOON.\n\nThe Paper reached your desk at eight in the evening. But it was put into the exchange at midday. It waited eight hours in the hold-rack until the clockwork sent it on. So whoever sent it could have been anywhere at eight o'clock.\n\nThe same is true of whoever sent Ignatius Pendry his Paper.",
+    solved: "It went in at 12:00, noon. The carrier was HELD SINCE NOON.\n\nIt came out at your desk at 20:00, eight in the evening. So the Paper sat waiting in the exchange for eight hours before it was sent to you.\n\nThat means the sender did not have to be anywhere near the Hall at eight o'clock. They could post it at noon and walk away. Pendry's Paper could have been sent in the same way.",
     facts: ['held_carrier'],
     lesson: 'binary',
     hints: [
@@ -157,18 +157,19 @@ export const PUZZLES = {
     ],
     ask: 'Which terminal is it?',
     answers: ['LODGE', 'THE LODGE', 'PORTERS LODGE', 'THE PORTERS LODGE'],
-    near: [{ match: ['REPOSITORY', 'THE REPOSITORY'], say: "That is Jonah's own terminal. Look at what it asks for at that hour." }],
-    solved: "The terminal in the Porter's Lodge.\n\nNearly every night, somebody sits in the Porter's Lodge and asks the machine to read Dame Hesper's old lectures aloud. They never ask about ciphers, or about foxglove. They only want to hear her voice, saying what she said in 1987.",
+    near: [{ match: ['REPOSITORY', 'THE REPOSITORY'], say: "That is Jonah's own terminal. Check the hours: between two and four in the morning it was used on only a few nights." }],
+    solved: "The Lodge: the terminal in the Porter's Lodge.\n\nAlmost every night since March, between two and four in the morning, somebody in the Lodge has asked the machine to play Dame Hesper's old lectures from 1987. Nothing else, ever. They only want to hear her voice.",
     facts: ['lodge_nights'],
     lesson: 'charts',
     hints: [
-      'Each row is a terminal and each column an hour of the night. The darker a square, the more nights that terminal was used in that hour.',
-      'Find the columns from two to four in the morning. More than one terminal is busy then, so tap the squares and read what was asked for.',
-      "The Repository is busy at that hour too, but it is only Jonah's backups. The other row asks for PLAY LECTURE 1987 every time.",
+      'Each row is a terminal and each column is an hour of the night. The brighter a square, the more nights that terminal was used at that hour.',
+      'Find the columns for two and three in the morning. Two terminals were used then. Tap their squares to see on how many nights.',
+      'The Repository was used then on only 34 nights. Its darkest squares are earlier, from midnight to two. The other terminal was used on 214 nights.',
       "The LODGE: the terminal in the Porter's Lodge.",
     ],
-    goal: 'Tap the squares to see what was asked for, and when. Then tap the terminal.',
-    // Each terminal: [from hour, to hour, nights since March, what it asked for].
+    goal: 'Brighter squares mean more nights. Tap the terminal used from 2 to 4 in the morning, nearly every night.',
+    // Each terminal: [from hour, to hour, nights since March, what it asked for]. The chart shows only
+    // the hours and the nights; what was asked for stays in the log, for the tests and the story.
     stage: {
       kind: 'chart',
       from: 18,
@@ -178,7 +179,7 @@ export const PUZZLES = {
         { name: 'PARLOUR', busy: [[19, 22, 61, 'DRAFT: HEADS OF TERMS']] },
         { name: 'CRUX', busy: [[21, 24, 88, 'SEARCH: GREYWETHER']] },
         { name: 'ALMSHOUSE', busy: [[20, 21, 15, "READ ALOUD: TODAY'S CLUES"]] },
-        { name: 'REPOSITORY', busy: [[0, 2, 120, 'RUN: STYLOMETRY'], [2, 4, 34, 'BACK UP EVERYTHING']] },
+        { name: 'REPOSITORY', busy: [[0, 2, 226, 'RUN: STYLOMETRY'], [2, 4, 34, 'BACK UP EVERYTHING']] },
         { name: 'LODGE', busy: [[2, 4, 214, 'PLAY LECTURE 1987']] },
       ],
     },
@@ -294,7 +295,7 @@ export const PUZZLES = {
     ask: 'Which instrument is hers? (one word)',
     answers: ['SEXTANT', 'A SEXTANT', 'THE SEXTANT'],
     near: [{ match: ['OCTANT', 'QUADRANT', 'ASTROLABE', 'PROTRACTOR', 'GRAPHOMETER'], say: 'That is a real instrument, but measure its arc. Hers is a sixth of a circle.' }],
-    solved: "SEXTANT. Its arc is sixty degrees, a sixth of a circle, and sextans is Latin for a sixth.\n\nA navigator holds a sextant up to the noon sun to find her latitude. There is one in its box aboard the Meridian. Marguerite Sallow never kept anything just for decoration. That box is worth a look.",
+    solved: "A SEXTANT. Its arc is 60 degrees, which is a sixth of a circle, and 'sextant' comes from the Latin word for a sixth.\n\nSailors hold a sextant up to the sun at noon to work out how far north they are. There is a sextant in a wooden box on Marguerite Sallow's boat, the Meridian. She never kept anything just for show. That box is worth a look.",
     facts: ['sextant_clue'],
     lesson: 'navigation',
     hints: [
@@ -667,21 +668,21 @@ export const PUZZLES = {
     extra: true,
     if: 'examined:hall_clock',
     blocks: [
-      { p: 'The Hall clock has two minute hands. The black hand keeps Fold Time. The red one keeps Greenwich time, eleven minutes ahead.' },
-      { quote: "Before the railways, every town kept its own noon: the moment the sun was highest over it. The sun crosses one degree of longitude every four minutes. That's all you need. — Kit" },
+      { p: 'The Hall clock has two minute hands. The red hand shows Greenwich time, the time in London. The black hand shows Fold Time, which is eleven minutes behind.' },
+      { quote: "Before railways, every town set its clocks by its own sun. Noon was when the sun was highest over that town. The sun takes four minutes to move one degree from east to west. That's all you need. — Kit" },
     ],
     ask: 'How many degrees west of Greenwich is the Fold?',
     answers: ['2.75', '2 3/4', '2 AND 3/4', 'TWO AND THREE QUARTERS', '2.75 DEGREES', '2.75 W', '2.75 WEST', '2 3/4 DEGREES'],
     near: [{ match: ['11', '44', '3', '2.5', '2', '4'], say: 'Not quite. Four minutes for every degree: how many degrees make eleven minutes?' }],
-    solved: "Two and three-quarter degrees west of Greenwich: eleven minutes, at four minutes a degree.\n\nThat puts the Fold a little west of Bristol, whose clock on the Exchange still has two minute hands, one for London and one for Bristol. Until the railways came, every town in England kept the noon its own sun gave it. The Fold is the last place that never changed.",
+    solved: "2¾ degrees west of Greenwich.\n\nThe sun takes four minutes to move one degree. Noon comes to the Fold eleven minutes after it comes to Greenwich, and eleven minutes is two and three-quarter lots of four minutes.\n\nBefore railways, every town set its clocks by its own sun, so every town had a slightly different time. Trains needed one time for the whole country, so in 1880 Greenwich time became the law in Britain. The Fold never changed its clocks.",
     lesson: 'time',
     hints: [
-      'Drag the Fold along the line of longitude and watch the two minute hands.',
-      'The sun takes four minutes to cross one degree of longitude. The Fold is eleven minutes behind Greenwich.',
-      'Eleven minutes, divided by four minutes a degree.',
+      'The lines on the map are one degree apart. Greenwich is the red line.',
+      'Every degree west makes noon come four minutes later. The Fold is eleven minutes late.',
+      'Eleven divided by four: two whole degrees, and three quarters of the next one.',
       '2.75 degrees west: two and three-quarters.',
     ],
-    goal: 'Drag the Fold west until its black hand is eleven minutes behind the red.',
+    goal: 'Noon comes to the Fold 11 minutes after Greenwich. At 4 minutes a degree, how far west is it? Drag it there.',
     stage: { kind: 'sun', behind: 11, step: 0.25, west: 6 },
   },
   ferry: {
@@ -698,7 +699,7 @@ export const PUZZLES = {
     ask: 'What must go across first?',
     answers: ['GOOSE', 'THE GOOSE', 'A GOOSE'],
     near: [{ match: ['FOX', 'THE FOX', 'CORN', 'THE CORN', 'SACK', 'THE SACK'], say: 'Then the two left behind are alone together. Try again.' }],
-    solved: "The goose goes first, and the goose comes back. Goose over. Back alone. Fox over, and bring the goose back. Corn over. Back alone. Goose over. Seven crossings.\n\nAlcuin of York set this riddle around the year 800, in a book of puzzles 'to sharpen the young'. It is one of the oldest puzzles in Europe. His version had a wolf, a goat and a basket of cabbages.\n\n'Most children get it on the third try,' says Nell. 'The quick ones ask why he doesn't just take the fox home.'",
+    solved: "The goose has to go first. It is the only one that cannot be left with anything.\n\nThe whole trip: take the goose over. Come back alone. Take the fox over, and bring the goose back with you. Take the corn over. Come back alone. Take the goose over again. Seven crossings.\n\nAlcuin of York wrote this puzzle around the year 800. It is one of the oldest puzzles in Europe.",
     lesson: 'alcuin',
     hints: [
       'Only two pairs are dangerous when left alone. One thing is in both of them, and the other two are safe together.',
@@ -723,7 +724,7 @@ export const PUZZLES = {
     ask: 'Which medicine comes from which bed?',
     // The medicines, bed by bed, in the order the beds lie: willow, poppy, foxglove, nightshade, yew.
     answers: ['ASPIRIN MORPHINE DIGITOXIN ATROPINE PACLITAXEL'],
-    solved: "Willow bark gives salicin, from which aspirin was made in 1897. The opium poppy gives morphine. Foxglove gives digitoxin, which slows and steadies a failing heart. Deadly nightshade gives atropine, named after Atropos, the Fate who cuts the thread of every life. Yew gives paclitaxel, a medicine for cancer, found in 1971.\n\nEvery one of them is a poison at the wrong dose. The bed right under Dame Hesper's window is the foxgloves.",
+    solved: "Willow gives aspirin, for pain and fever. The poppy gives morphine, for very bad pain. Foxglove gives digitoxin, which slows and steadies the heart. Deadly nightshade gives atropine. Yew gives paclitaxel, which is used against some cancers.\n\nEvery one of these medicines is also a poison if you take too much. The foxgloves grow right under Dame Hesper's window.",
     facts: ['physic_foxglove'],
     lesson: 'foxglove',
     hints: [
@@ -765,7 +766,7 @@ export const PUZZLES = {
     ],
     ask: 'Whose cup is whose?',
     answers: ['PENDRY ARMS SALLOW CROSSWORD VOSS COMPASS CLAY CLOCK'],
-    solved: "Pendry drank from the coat of arms. Sallow from the crossword grid. Voss from the compass rose. The Warden from the clock face.\n\nNot one of them drinks from the cup that suits their trade. It was Dame Hesper's joke, and it has outlived her memory of making it. A stranger would pick every cup wrong. Only someone who sat at that table, or laid it every day, would know whose cup was whose.",
+    solved: "Pendry drank from the coat of arms. Sallow from the crossword. Voss from the compass rose. The Warden, Clay, from the clock face.\n\nNobody drinks from the cup that matches their own job. That was Dame Hesper's joke. A stranger would guess every cup wrong. Only someone who sat at this table, or set it out every day, would know whose cup was whose.",
     facts: ['cups_secret'],
     lesson: 'logic',
     hints: [
@@ -809,7 +810,7 @@ export const PUZZLES = {
       { match: ['NXG8', 'NG8'], say: 'The knight takes the rook, and the king takes the knight.' },
       { match: ['QD3', 'QG4', 'QE2', 'QC2', 'QH5'], say: "A good-looking move, but it is not check, and Black's queen is waiting." },
     ],
-    solved: "Knight to f7. Checkmate.\n\nThe black king cannot move: his own rook and his own pawns stand on every square he could run to, and nothing can take the knight or come between them. It is a smothered mate. Players have admired it since Gioachino Greco printed one around 1620.\n\nOttilie says Dame Hesper looked at the board for a long time, put on her coat, wrote the card, and never came back to it. 'She said the game was over, and that was enough.'",
+    solved: "Knight to f7. Checkmate.\n\nThe black king is trapped by his own pieces: his rook and his pawns fill every square around him. The knight attacks him, and nothing can take the knight or get in its way. Chess players call this a smothered mate.\n\nOttilie says Dame Hesper saw the move, put on her coat and left. 'She said the game was over, and that was enough for her.'",
     lesson: 'smothered',
     hints: [
       'Look at the black king. Every square next to him is filled by his own pieces.',
@@ -835,7 +836,7 @@ export const PUZZLES = {
     answers: ['TEACUP'],
     // A wrong guess is marked letter by letter, as the game in the paper does, and costs nothing.
     feedback: 'letters',
-    solved: "TEACUP.\n\nOttilie fills in the squares in pencil, so the next person can rub them out. 'Tomorrow's will be easier,' she says. 'It always is on a Friday.'",
+    solved: "TEACUP.\n\nOttilie fills in the squares in pencil, so the next person can rub them out. 'Tomorrow's will be easier,' she says.",
     lesson: 'wordgames',
     hints: [
       'Start with a word that uses common letters, such as E, A, T and R. Every colour tells you something.',
@@ -858,7 +859,7 @@ export const PUZZLES = {
     ],
     ask: 'Put the plates in order, oldest first.',
     answers: ['SOLVER'],
-    solved: "S, O, L, V, E, R: SOLVER, the rank every Novice is working for.\n\nGutenberg printed his Bible around 1455. Columbus crossed the Atlantic in 1492. Shakespeare died in 1616. London burned in 1666. The American colonies declared their independence in 1776. The Penny Black, the first postage stamp, was issued in 1840.",
+    solved: "S, O, L, V, E, R: SOLVER. That is the rank every new member of the Company is working towards.\n\nOldest first: Gutenberg printed his Bible around 1455. Columbus crossed the Atlantic in 1492. Shakespeare died in 1616. The Great Fire of London was in 1666. America declared independence in 1776. The first postage stamp, the Penny Black, came out in 1840.",
     lesson: 'dates',
     hints: [
       'Tap one plate, then another, to swap them. Read the first letters down the side when you think you have it.',
@@ -880,32 +881,42 @@ export const PUZZLES = {
     },
   },
   pendulum: {
-    title: "Pendry's Last Job",
+    title: "The Apprentice's Lesson",
     setter: 'fold',
     at: ['clocks'],
-    tier: 3,
+    tier: 2,
     extra: true,
     if: 'examined:clocks',
     blocks: [
-      { p: "Five pendulum clocks of the same make stand together at the end of the wall, waiting for their owners. A job card in Pendry's writing is tucked behind them: 'One of these loses six minutes an hour. The owner says somebody moved its bob. Find it.'" },
+      { p: 'By the wall of clocks, Pendry kept a lesson for his apprentice: five weights hanging on strings from a wooden beam. Three of the weights are heavy brass and two are light wood. The strings are not all the same length.' },
+      { quote: 'Two of these will always swing together, side by side. Find them, Wilf. — I.P.' },
     ],
-    ask: 'Which clock has been tampered with?',
-    answers: ['4', 'FOUR', 'CLOCK 4', 'CLOCK FOUR', 'NUMBER 4', 'NO 4'],
+    ask: 'Which two swing together?',
+    answers: ['B AND D', 'D AND B', 'B D', 'D B', 'BD', 'DB'],
     near: [
-      { match: ['1', 'ONE', 'CLOCK 1'], say: 'Its bob is heavier, but weight makes no difference to the swing. Time it.' },
-      { match: ['2', 'TWO', 'CLOCK 2'], say: 'It swings wider, but a wider swing takes the same time. Time it.' },
+      { match: ['A C', 'C A', 'AC', 'CA', 'A AND C', 'C AND A', 'A D', 'D A', 'AD', 'DA', 'C D', 'D C', 'CD', 'DC'], say: 'They are both heavy brass, but the same weight does not make them swing together. Watch them drift apart.' },
+      { match: ['B E', 'E B', 'BE', 'EB', 'B AND E', 'E AND B'], say: 'They are both light wood, but the same weight does not make them swing together. Watch them drift apart.' },
     ],
-    solved: "Clock 4. Somebody slid its bob down the rod. A longer pendulum swings more slowly, so the clock loses time.\n\nIts neighbours have a heavier bob and a wider swing, and they keep perfect time: neither weight nor width matters, only length. Galileo is said to have noticed this as a student in Pisa, timing a swinging lamp in the cathedral against his own pulse.\n\nOn the back of the card, Pendry had already written: '4. Bob down 2 cm. Raise it.' He finished every job.",
+    solved: "Their strings are the same length, and that is the only thing that matters.\n\nD has a heavy brass weight and B a light wooden one, but they swing at exactly the same speed. The weight makes no difference. The length does: a long string swings slowly, a short one quickly.\n\nThis is how a clock is kept on time. If a clock runs slow, the clockmaker moves the weight higher up, so the pendulum is shorter and swings faster. Galileo found this out about four hundred years ago.",
     lesson: 'pendulum',
     hints: [
-      'Tap Count, and watch how many times each pendulum swings in the same time.',
-      'A heavier bob or a wider swing makes no difference to how long a swing takes. Only the length does.',
-      'One of them swings fewer times than the rest. Its bob has been lowered.',
-      'Clock 4.',
+      'Choose two weights and let them go. A pair that belongs together stays side by side, swing after swing.',
+      'Try the two heavy brass weights together. Do they stay together? So what else could matter?',
+      'Only the length of the string changes how fast a weight swings.',
+      'B and D: the two strings that are the same length.',
     ],
-    goal: 'Tap Count and see which pendulum falls behind. Then tap that clock.',
-    // Each clock: how heavy its bob looks, how wide it swings, and how long one swing takes (seconds).
-    stage: { kind: 'pendulum', seconds: 12, clocks: [{ bob: 1.35, swing: 1, period: 1 }, { bob: 0.95, swing: 1.6, period: 1 }, { bob: 1, swing: 1, period: 1 }, { bob: 1, swing: 0.95, period: 1.11 }, { bob: 0.7, swing: 1.15, period: 1 }] },
+    goal: 'Tap two weights, then let them go. Find the two that keep swinging together.',
+    // Each weight: its letter, the length of its string in centimetres, and whether it is heavy brass or light wood.
+    stage: {
+      kind: 'pendulum',
+      bobs: [
+        { id: 'A', length: 30, heavy: true },
+        { id: 'B', length: 50, heavy: false },
+        { id: 'C', length: 70, heavy: true },
+        { id: 'D', length: 50, heavy: true },
+        { id: 'E', length: 90, heavy: false },
+      ],
+    },
   },
   piano: {
     title: 'If You Can Solve It, Play It',
@@ -921,7 +932,7 @@ export const PUZZLES = {
     ask: 'What is the tune?',
     answers: ['FUR ELISE', 'FÜR ELISE', 'FUER ELISE', 'FOR ELISE'],
     near: [{ match: ['BEETHOVEN', 'LUDWIG VAN BEETHOVEN'], say: 'Right composer. Now the name of the piece.' }],
-    solved: "Für Elise, by Beethoven, written around 1810.\n\nNobody is sure who Elise was. The music was found and printed in 1867, forty years after he died, and the name on it may have been misread. It has been played since by more beginners, music boxes and telephones than anything else he wrote.\n\nOttilie nods. 'Free coffee,' she says. 'That's the rule.'",
+    solved: "Für Elise, by Beethoven. He wrote it around 1810.\n\nNobody knows for sure who Elise was. The music was only found and printed forty years after Beethoven died. Today it is one of the first pieces many people learn on the piano.\n\nOttilie smiles. 'Free coffee,' she says. 'That's the rule.'",
     lesson: 'notes',
     hints: [
       'The lines of the staff, from the bottom, are E, G, B, D and F. The spaces between them spell FACE.',

@@ -294,13 +294,22 @@ test('the history board, put in order of the years, spells the answer', () => {
   assert.notEqual(PUZZLES.wardens.stage.items.map((i) => i.id).join(''), 'SOLVER', 'it does not start solved');
 });
 
-test("Pendry's clocks: exactly one swings at a different rate, and it is the answer", () => {
-  const { clocks } = PUZZLES.pendulum.stage;
-  const odd = clocks.map((c, i) => [c, i]).filter(([c]) => c.period !== 1);
-  assert.equal(odd.length, 1);
-  assert.ok(accepted('pendulum', String(odd[0][1] + 1)));
-  // The decoys differ in weight and width only.
-  assert.ok(clocks.some((c) => c.bob !== 1 && c.period === 1) && clocks.some((c) => c.swing !== 1 && c.period === 1));
+test("the apprentice's lesson: one pair hangs on equal strings, and only that pair is right", () => {
+  const { bobs } = PUZZLES.pendulum.stage;
+  const pairs = [];
+  for (let i = 0; i < bobs.length; i++) for (let j = i + 1; j < bobs.length; j++) pairs.push([bobs[i], bobs[j]]);
+  const together = pairs.filter(([x, y]) => x.length === y.length);
+  assert.equal(together.length, 1);
+  // The pair that swings together is one heavy weight and one light one: the weight is what fools you.
+  assert.notEqual(together[0][0].heavy, together[0][1].heavy);
+  // The words in front of the player count the weights right.
+  const words = ['no', 'one', 'two', 'three', 'four', 'five'];
+  const heavy = bobs.filter((b) => b.heavy).length;
+  assert.match(PUZZLES.pendulum.blocks[0].p.toLowerCase(), new RegExp(`${words[heavy]} of the weights are heavy brass and ${words[bobs.length - heavy]} are light wood`));
+  // The stage offers a pair as its two letters in order, with a space between.
+  for (const [x, y] of pairs) assert.equal(accepted('pendulum', `${x.id} ${y.id}`), x.length === y.length, `${x.id} ${y.id}`);
+  // Every pair of the same weight has its own word of help.
+  for (const [x, y] of pairs.filter(([x, y]) => x.heavy === y.heavy)) assert.ok(PUZZLES.pendulum.near.some((n) => n.match.includes(`${x.id} ${y.id}`)), `${x.id} ${y.id}`);
 });
 
 test('the piano: the line is the opening of Für Elise, and only that choice is right', () => {

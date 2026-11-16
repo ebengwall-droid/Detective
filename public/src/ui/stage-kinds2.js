@@ -149,7 +149,7 @@ export function chart(ctx) {
   const cols = Array.from({ length: hours }, (_, i) => mod(from + i, 24));
   const spanOf = (row, h) => row.busy.find(([a, b]) => h >= a && h < b) ?? null;
   const most = Math.max(...rows.flatMap((r) => r.busy.map((b) => b[2])));
-  const readout = el('div', { class: 'chart-read', role: 'status', 'aria-live': 'polite', text: 'Tap a square to read it, or an hour to see who was on.' });
+  const readout = el('div', { class: 'chart-read', role: 'status', 'aria-live': 'polite', text: 'Tap a square, or an hour along the top.' });
   const cells = [];
   let picked = null;
   const show = (lines) => readout.replaceChildren(...lines.map((l) => el('div', { class: 'chart-line' }, l)));
@@ -161,7 +161,8 @@ export function chart(ctx) {
       ctx.tap();
       cells.forEach((c) => c.node.classList.toggle('col', c.ci === ci));
       const busy = rows.map((r) => [r, spanOf(r, h)]).filter(([, b]) => b);
-      show(busy.length ? [`${pad(h)}:00 to ${pad(h + 1)}:00`, ...busy.map(([r, b]) => `${r.name.padEnd(11, ' ')} ${String(b[2]).padStart(3, ' ')} nights · ${b[3]}`)] : [`${pad(h)}:00 to ${pad(h + 1)}:00`, 'Nobody.']);
+      // Who was on at this hour, and on how many nights. What they asked for is not shown: the player reads the chart.
+      show(busy.length ? [`${pad(h)}:00 to ${pad(h + 1)}:00`, ...busy.map(([r, b]) => `${r.name.padEnd(11, ' ')} ${String(b[2]).padStart(3, ' ')} nights`)] : [`${pad(h)}:00 to ${pad(h + 1)}:00`, 'Nobody.']);
     });
     grid.append(head);
   });
@@ -181,7 +182,7 @@ export function chart(ctx) {
         ctx.tap();
         cells.forEach((x) => x.node.classList.remove('col', 'on'));
         c.classList.add('on');
-        show(b ? [`${row.name} · ${pad(h)}:00 to ${pad(h + 1)}:00`, `${b[2]} nights since March`, `Asked for: ${b[3]}`] : [`${row.name} · ${pad(h)}:00 to ${pad(h + 1)}:00`, 'Not used at this hour.']);
+        show(b ? [`${row.name} · ${pad(h)}:00 to ${pad(h + 1)}:00`, `Used on ${b[2]} nights since March`] : [`${row.name} · ${pad(h)}:00 to ${pad(h + 1)}:00`, 'Not used at this hour.']);
       });
       cells.push({ node: c, ci });
       grid.append(c);

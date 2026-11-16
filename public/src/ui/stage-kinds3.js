@@ -1,13 +1,13 @@
 // Puzzles about the world, handled on the stage.
 //
-//   sun        the Fold's longitude, found by dragging it until its noon is late enough
+//   sun        the Fold's longitude: the clock gives the minutes, the player works out the degrees
 //   ferry      Nell's oldest riddle: a fox, a goose and a sack of corn, and a small boat
 //   garden     the Physic Garden: put each medicine by the plant it comes from
 //   grid       a logic grid: whose cup is whose
 //   chess      Dame Hesper's adjourned game: find the move
 //   wordgame   the Crux's six-letter word game (the game core marks each guess)
 //   order      six brass plates to put in order of history
-//   pendulum   five clocks, one losing time: time their pendulums
+//   pendulum   five weights on strings: find the two that swing together
 //   piano      a line of music to play, then name
 //
 // Same contract as stage-kinds.js.
@@ -28,11 +28,20 @@ export function sun(ctx) {
   const x = (lon) => 16 + ((lon + west) / (west + east)) * (W - 32);
   const y = (lat) => 18 + ((53.6 - lat) / 3.8) * (H - 44);
   const lonAt = (px) => ((px - 16) / (W - 32)) * (west + east) - west;
+  // Degrees in whole numbers and quarters, the way the pin is read: 2¾°W.
+  const QUARTER = ['', '¼', '½', '¾'];
+  const degText = (d) => {
+    const whole = Math.floor(d + 1e-9);
+    const q = Math.round((d - whole) * 4);
+    return `${whole || !q ? whole : ''}${QUARTER[q]}°`;
+  };
   let deg = 0;
   const land = sv('path', { d: `M${BRITAIN.map(([lo, la]) => `${x(lo).toFixed(1)} ${y(la).toFixed(1)}`).join(' L')} Z`, class: 'sun-land' });
   const lines = [];
   for (let lon = -west; lon <= east; lon += 1) {
     lines.push(sv('line', { x1: x(lon), y1: 12, x2: x(lon), y2: H - 22, class: `sun-mer ${lon === 0 ? 'gw' : ''}` }));
+    // Quarter-degree marks between the whole degrees.
+    if (lon < east) for (const qq of [0.25, 0.5, 0.75]) lines.push(sv('line', { x1: x(lon + qq), y1: H - 26, x2: x(lon + qq), y2: H - 22, class: 'sun-q' }));
     const t = sv('text', { x: x(lon), y: H - 8, class: 'sun-deg', 'text-anchor': 'middle' });
     t.textContent = lon === 0 ? '0°' : `${Math.abs(lon)}°${lon < 0 ? 'W' : 'E'}`;
     lines.push(t);
@@ -41,21 +50,20 @@ export function sun(ctx) {
   gwLabel.textContent = 'GREENWICH';
   const sunMark = sv('g', { class: 'sun-sun', transform: `translate(${x(0)} 10)` }, sv('circle', { r: 6 }), Array.from({ length: 8 }, (_, i) => sv('line', { x1: 0, y1: -9, x2: 0, y2: -12, transform: `rotate(${i * 45})` })));
   const pinY = y(51.45);
-  const pin = sv('g', { class: 'sun-pin' }, sv('line', { x1: 0, y1: -40, x2: 0, y2: 40, class: 'sun-pin-line' }), sv('circle', { r: 7, class: 'sun-pin-dot' }), (() => {
-    const t = sv('text', { x: 10, y: -12, class: 'sun-pin-label' });
-    t.textContent = 'THE FOLD';
-    return t;
-  })());
+  const pinLabel = sv('text', { x: 10, y: -12, class: 'sun-pin-label' });
+  const pin = sv('g', { class: 'sun-pin' }, sv('line', { x1: 0, y1: -40, x2: 0, y2: 40, class: 'sun-pin-line' }), sv('circle', { r: 7, class: 'sun-pin-dot' }), pinLabel);
   const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, class: 'sun-strip', role: 'slider', tabindex: '0', 'aria-label': 'Where the Fold lies, west of Greenwich', 'aria-valuemin': '0', 'aria-valuemax': String(west) }, sv('rect', { x: 0, y: 0, width: W, height: H, class: 'sun-sea' }), land, lines, gwLabel, sunMark, pin);
 
-  // The clock: one hour hand, and two minute hands: red for Greenwich, black for the Fold.
+  // The Hall clock, stopped at Greenwich noon: the red hand at twelve, the black hand eleven minutes short of it.
+  // It does not move with the pin: the sum is the player's.
   const C = 70;
-  const red = sv('line', { x1: C, y1: C, x2: C, y2: C - 52, class: 'sc-red' });
-  const black = sv('line', { x1: C, y1: C, x2: C, y2: C - 48, class: 'sc-black' });
-  const hour = sv('line', { x1: C, y1: C, x2: C, y2: C - 30, class: 'sc-hour' });
+  const hand = (minutes, len, cls) => {
+    const a = (minutes * 6 * Math.PI) / 180;
+    return sv('line', { x1: C, y1: C, x2: C + len * Math.sin(a), y2: C - len * Math.cos(a), class: cls });
+  };
   const clock = sv(
     'svg',
-    { viewBox: '0 0 140 140', class: 'sun-clock', role: 'img', 'aria-label': 'The Hall clock' },
+    { viewBox: '0 0 140 140', class: 'sun-clock', role: 'img', 'aria-label': `The Hall clock. The red hand shows twelve o'clock, Greenwich time. The black hand shows ${behind} minutes to twelve, Fold Time.` },
     sv('circle', { cx: C, cy: C, r: 66, class: 'sc-rim' }),
     sv('circle', { cx: C, cy: C, r: 60, class: 'sc-face' }),
     Array.from({ length: 60 }, (_, i) => {
@@ -63,31 +71,20 @@ export function sun(ctx) {
       const r1 = i % 5 ? 55 : 50;
       return sv('line', { x1: C + r1 * Math.sin(a), y1: C - r1 * Math.cos(a), x2: C + 58 * Math.sin(a), y2: C - 58 * Math.cos(a), class: i % 5 ? 'sc-tick' : 'sc-tick big' });
     }),
-    hour,
-    red,
-    black,
+    hand(-behind / 12, 30, 'sc-hour'),
+    hand(0, 52, 'sc-red'),
+    hand(60 - behind, 48, 'sc-black'),
     sv('circle', { cx: C, cy: C, r: 4, class: 'sc-boss' }),
   );
-  const read = el('div', { class: 'sun-read' });
-  const setHand = (node, minutes, len) => {
-    const a = (minutes * 6 * Math.PI) / 180;
-    node.setAttribute('x2', String(C + len * Math.sin(a)));
-    node.setAttribute('y2', String(C - len * Math.cos(a)));
-  };
+  const fold = 12 * 60 - behind;
+  const hhmm = `${String(Math.floor(fold / 60)).padStart(2, '0')}:${String(fold % 60).padStart(2, '0')}`;
+  const legend = el('div', { class: 'sun-read' }, el('span', {}, el('b', { class: 'r', text: '12:00' }), ' Greenwich'), el('span', {}, el('b', { text: hhmm }), ' the Fold'));
   function draw() {
     pin.setAttribute('transform', `translate(${x(-deg)} ${pinY})`);
-    const lag = deg * 4;
-    // Noon by Greenwich: the red hand at twelve; the Fold's own noon is still to come.
-    setHand(red, 0, 52);
-    setHand(black, 60 - lag, 48);
-    setHand(hour, -lag / 12, 30);
-    const fold = 12 * 60 - lag;
-    const hh = Math.floor(fold / 60) % 24;
-    const mm = Math.round(fold % 60);
-    read.replaceChildren(el('span', {}, el('b', { class: 'r', text: '12:00' }), ' Greenwich'), el('span', {}, el('b', { text: `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}` }), ' the Fold'), el('span', { class: 'lag', text: lag ? `${lag % 1 ? lag.toFixed(0) : lag} minutes behind · ${deg}° west` : 'Same time · on the Greenwich line' }));
+    pinLabel.textContent = deg ? `THE FOLD · ${degText(deg)}W` : 'THE FOLD';
     svg.setAttribute('aria-valuenow', String(deg));
     svg.setAttribute('aria-valuetext', `${deg} degrees west`);
-    ctx.offer(deg ? String(deg) : null, deg ? `The Fold is ${deg}° west` : 'Answer');
+    ctx.offer(deg ? String(deg) : null, deg ? `The Fold is ${degText(deg)} west` : 'Answer');
   }
   const set = (d) => {
     const to = Math.max(0, Math.min(west, Math.round(d / step) * step));
@@ -118,9 +115,7 @@ export function sun(ctx) {
     e.preventDefault();
   });
   draw();
-  ctx.offer(null, 'Answer');
-  void behind;
-  return { node: el('div', { class: 'stage-sun' }, svg, el('div', { class: 'sun-row' }, clock, read)), focus: () => svg.focus({ preventScroll: true }) };
+  return { node: el('div', { class: 'stage-sun' }, svg, el('div', { class: 'sun-row' }, clock, legend)), focus: () => svg.focus({ preventScroll: true }) };
 }
 
 // =================================================================== the ferry
@@ -660,79 +655,112 @@ export function order(ctx) {
   return { node: el('div', { class: 'stage-order' }, el('div', { class: 'under-label', text: 'Oldest at the top' }), list), wrong: () => shake(list) };
 }
 
-// =================================================================== five clocks, one losing time
+// =================================================================== the apprentice's pendulums
 
+/**
+ * Five weights hang on strings from a beam. Choose two and let them go together:
+ * a pair that swings at the same speed stays side by side; any other pair drifts
+ * apart. Nothing is counted or measured for the player: they watch, and think.
+ */
 export function pendulum(ctx) {
-  const { clocks = [], seconds = 12 } = ctx.spec;
-  let picked = -1;
-  let t0 = performance.now();
+  const { bobs = [] } = ctx.spec;
+  const W = 360;
+  const beamY = 18;
+  // From the beam to the middle of the weight: the length that sets the swing.
+  const px = (cm) => 30 + cm * 2;
+  const xs = bobs.map((_, i) => 52 + (i * (W - 104)) / Math.max(1, bobs.length - 1));
+  // Every weight is pulled the same distance sideways, so the long ones stay inside the frame.
+  // How far a pendulum swings does not change how fast it swings, so this is fair to the puzzle.
+  const ampOf = (len) => Math.min(20, (Math.asin(Math.min(1, 32 / len)) * 180) / Math.PI);
+  const g = 9.81;
+  const chosen = [];
   let raf = 0;
-  let counting = null;
-  const cases = clocks.map((c, i) => {
-    const bob = sv('circle', { cx: 0, cy: 74, r: 7 * c.bob, class: 'pd-bob' });
-    const rod = sv('line', { x1: 0, y1: 0, x2: 0, y2: 74, class: 'pd-rod' });
-    const arm = sv('g', { class: 'pd-arm' }, rod, bob);
-    const svg = sv(
-      'svg',
-      { viewBox: '-30 -40 60 140', class: 'pd-svg', 'aria-hidden': 'true' },
-      sv('rect', { x: -26, y: -38, width: 52, height: 136, rx: 6, class: 'pd-case' }),
-      sv('circle', { cx: 0, cy: -16, r: 16, class: 'pd-face' }),
-      sv('line', { x1: 0, y1: -16, x2: 0, y2: -27, class: 'pd-hand' }),
-      sv('line', { x1: 0, y1: -16, x2: 7, y2: -16, class: 'pd-hand' }),
-      sv('rect', { x: -20, y: 6, width: 40, height: 86, rx: 3, class: 'pd-window' }),
-      sv('g', { transform: 'translate(0 6)' }, arm),
+  let t0 = 0;
+  let swinging = false;
+  const svg = sv('svg', { viewBox: `0 0 ${W} 268`, class: 'pend-svg', role: 'group', 'aria-label': 'Five weights hanging on strings from a beam' });
+  svg.append(sv('rect', { x: 14, y: beamY - 9, width: W - 28, height: 12, rx: 3, class: 'pend-beam' }));
+  const items = bobs.map((b, i) => {
+    const len = px(b.length);
+    const r = b.heavy ? 13 : 10;
+    const arm = sv(
+      'g',
+      { class: 'pend-arm', transform: `translate(${xs[i]} ${beamY})` },
+      sv('circle', { cx: 0, cy: 0, r: 3, class: 'pend-hook' }),
+      sv('line', { x1: 0, y1: 0, x2: 0, y2: len - r, class: 'pend-string' }),
+      sv('circle', { cx: 0, cy: len, r, class: b.heavy ? 'pend-bob brass' : 'pend-bob wood' }),
+      sv('circle', { cx: -r * 0.35, cy: len - r * 0.35, r: r * 0.28, class: 'pend-shine' }),
     );
-    const n = el('span', { class: 'pd-count', text: '' });
-    const b = el('button', { class: 'pd-clock', type: 'button', 'aria-label': `Clock ${i + 1}` }, svg, el('span', { class: 'pd-n', text: String(i + 1) }), n);
-    b.addEventListener('click', () => {
-      picked = i;
-      ctx.tap();
-      for (const x of cases) x.b.classList.toggle('on', x === cases[i]);
-      ctx.offer(String(i + 1), `Answer: clock ${i + 1}`);
-    });
-    return { c, arm, n, b, ticks: 0, last: 0 };
+    const tag = sv('text', { x: xs[i], y: 262, class: 'pend-tag', 'text-anchor': 'middle' });
+    tag.textContent = b.id;
+    const hit = sv('rect', { x: xs[i] - 30, y: beamY, width: 60, height: 268 - beamY, class: 'pend-hit', role: 'button', tabindex: '0', 'aria-pressed': 'false', 'aria-label': `Weight ${b.id}: ${b.heavy ? 'heavy brass' : 'light wood'}, on a string ${b.length} centimetres long` });
+    svg.append(arm, tag, hit);
+    hit.addEventListener('click', () => pick(i));
+    hit.addEventListener('keydown', (e) => (e.key === 'Enter' || e.key === ' ') && pick(i));
+    return { b, arm, tag, hit, amp: ampOf(len), period: 2 * Math.PI * Math.sqrt(b.length / 100 / g) };
   });
-  const status = el('div', { class: 'pd-status', text: 'Tap Count to count every swing for the same twelve seconds.' });
-  const countBtn = el('button', { class: 'btn pd-go', type: 'button', text: `Count for ${seconds} seconds` });
-  function frame(now) {
+  const go = el('button', { class: 'btn pend-go', type: 'button', text: 'Let them go', disabled: true });
+  const note = el('div', { class: 'pend-note', text: 'Tap two weights.' });
+  function draw(now) {
     const t = (now - t0) / 1000;
-    for (const x of cases) {
-      // One swing each way takes `period` seconds; the angle goes as a cosine.
-      const amp = still() ? 0 : 13 * x.c.swing;
-      const phase = (Math.PI * t) / x.c.period;
-      x.arm.setAttribute('transform', `rotate(${(amp * Math.cos(phase)).toFixed(2)})`);
-      if (counting) {
-        const swings = Math.floor((now - counting.start) / 1000 / x.c.period);
-        if (swings !== x.ticks) {
-          x.ticks = swings;
-          x.n.textContent = String(swings);
-        }
-      }
-    }
-    if (counting && now - counting.start >= seconds * 1000) {
-      counting = null;
-      countBtn.disabled = false;
-      countBtn.textContent = 'Count again';
-      status.textContent = `Swings in ${seconds} seconds. Which one fell behind?`;
-      ctx.game.audio.blip?.();
-    }
-    raf = requestAnimationFrame(frame);
+    items.forEach((it, i) => {
+      const on = swinging && chosen.includes(i);
+      // Pulled to the same angle and let go together; a little friction slowly takes the swing away.
+      const angle = on ? it.amp * Math.exp(-t / 60) * Math.cos((2 * Math.PI * t) / it.period) : 0;
+      it.arm.setAttribute('transform', `translate(${xs[i]} ${beamY}) rotate(${angle.toFixed(2)})`);
+    });
+    if (swinging) raf = requestAnimationFrame(draw);
   }
-  countBtn.addEventListener('click', () => {
-    countBtn.disabled = true;
-    status.textContent = 'Counting…';
-    t0 = performance.now();
-    counting = { start: t0 };
-    for (const x of cases) {
-      x.ticks = 0;
-      x.n.textContent = '0';
+  function stop() {
+    swinging = false;
+    cancelAnimationFrame(raf);
+    draw(performance.now());
+  }
+  function paint() {
+    items.forEach((it, i) => {
+      const on = chosen.includes(i);
+      it.arm.classList.toggle('on', on);
+      it.tag.classList.toggle('on', on);
+      it.hit.setAttribute('aria-pressed', String(on));
+    });
+    go.disabled = chosen.length !== 2;
+    go.textContent = swinging ? 'Stop them' : 'Let them go';
+    if (chosen.length === 2) {
+      const pair = chosen.map((i) => bobs[i].id).sort().join(' ');
+      ctx.offer(pair, `${pair.replace(' ', ' and ')} swing together`);
+    } else ctx.offer(null, 'Answer');
+    note.textContent = chosen.length < 2 ? 'Tap two weights.' : swinging ? 'Watch them. Do they stay side by side?' : 'Now let them go, both at once.';
+  }
+  function pick(i) {
+    stop();
+    // A new pair: whatever was said about the last one no longer applies.
+    ctx.say('');
+    const at = chosen.indexOf(i);
+    if (at >= 0) chosen.splice(at, 1);
+    else {
+      chosen.push(i);
+      if (chosen.length > 2) chosen.shift();
     }
+    ctx.tap();
+    paint();
+  }
+  go.addEventListener('click', () => {
+    if (swinging) {
+      stop();
+      paint();
+      return;
+    }
+    if (chosen.length !== 2) return;
+    // The swing is the puzzle, and the player starts it, so it moves even when motion is turned down.
+    swinging = true;
+    t0 = performance.now();
+    ctx.tick();
+    paint();
+    raf = requestAnimationFrame(draw);
   });
-  raf = requestAnimationFrame(frame);
-  ctx.offer(null, 'Answer');
-  void picked;
+  paint();
   return {
-    node: el('div', { class: 'stage-pendulum' }, el('div', { class: 'pd-row' }, cases.map((x) => x.b)), countBtn, status),
+    node: el('div', { class: 'stage-pend' }, el('div', { class: 'pend-frame' }, svg), el('div', { class: 'pend-controls' }, go, note)),
+    wrong: () => shake(svg),
     dispose: () => cancelAnimationFrame(raf),
   };
 }

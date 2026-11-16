@@ -169,7 +169,7 @@ What he will say readily: the Engine is a reference machine. It can explain any 
 
 WHAT HE HOLDS BACK until the detective shows they already doubt that the late work is all hers. The item's status below says when. In January he ran a stylometric analysis of the whole Lorimer corpus, to prepare it for Greywether. Stylometry compares writing style, such as how often the small words appear and the rhythm of the sentences. The corpus fell into two clean groups, with the break at 2012. Everything before 2012 is one author. The twelve Late Tithes are another. He wrote a memo. The Syndics told him to delete it and "clean the data". He did not delete it. He does not know who the second author is. His guess was that the Syndics set the late work themselves.
 
-Also: the Engine's log shows a session nearly every night since March. It comes from one terminal, between two and four in the morning. It only ever asks to hear the 1987 lectures. He has the log print terminals as raw bytes, so that the Syndics could not read it easily. He has never decoded which terminal it is. He assumed it was Dame Hesper herself, and he did not want to know.
+Also: the Engine's log shows a session nearly every night since March. It comes from one terminal, between two and four in the morning. It only ever asks to hear the 1987 lectures. He drew the log as a chart for the Syndics, one row for each terminal, and has never looked closely at it. He assumed it was Dame Hesper herself, and he did not want to know.
 
 On Monday night he was at the Stalemate, playing Go until eleven.`,
     voice: "Quick and modern. Short, clear sentences. When he uses a technical term, he explains it in plain words straight away. Sometimes ends a sentence with 'right?'. Bitter and funny about the Syndics.",
@@ -198,7 +198,7 @@ On Monday night he was at the Stalemate, playing Go until eleven.`,
       },
       {
         id: 'j_lodge', keys: ['night', 'log', 'sessions', 'terminal', 'two in the morning', '1987', 'who listens'], if: 'examined:server',
-        line: "I don't know who. It's one terminal, nearly every night since March, from two till four in the morning. All it ever asks is 'play lecture, 1987' and a number. I made the log print terminals as raw bytes, so the Warden couldn't read it easily. I've never decoded which terminal it is. I thought it was Dame Hesper, listening to herself. I didn't want to be the one who checked.",
+        line: "I don't know who. It's one terminal, nearly every night since March, from two till four in the morning. All it ever asks is 'play lecture, 1987' and a number. It's all on the chart I drew for the Syndics, by the server. I've never looked to see which terminal it is. I thought it was Dame Hesper, listening to herself. I didn't want to be the one who checked.",
       },
       {
         id: 'j_alibi', keys: ['monday', 'where were you', 'alibi', 'stalemate', 'go'],

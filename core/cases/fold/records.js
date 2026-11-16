@@ -258,9 +258,9 @@ Most mistakes in putting things in order come from two events that feel far apar
     kind: 'lecture',
     keys: ['pendulum', 'bob', 'swing', 'galileo', 'huygens', 'period', 'regulator', 'losing time', 'gaining time', 'clock loses'],
     body: `THE PENDULUM
-A pendulum's swing takes the same time whether it swings wide or narrow, as long as the swing is not too wide. A heavy bob and a light one, on the same length of rod, keep the same time.
-Only the length matters. A longer pendulum swings more slowly. To make a clock run slower, a clockmaker lowers the bob; to make it run faster, raises it. A pendulum that beats once a second is just under a metre long.
-Galileo Galilei is said to have noticed this as a young man in Pisa, timing a swinging lamp in the cathedral against his own pulse. Christiaan Huygens built the first pendulum clock in 1656. It kept time many times better than any clock before it.`,
+A pendulum is a weight on a string or a rod, free to swing. A heavy weight and a light one, on the same length of string, swing at exactly the same speed. The weight makes no difference.
+Only the length matters. A long pendulum swings slowly and a short one swings quickly. To make a clock run slower, the clockmaker lowers the weight. To make it run faster, they raise it. A pendulum that takes one second for each swing is just under a metre long.
+Galileo is said to have noticed this as a young man in Pisa. He watched a lamp swinging in the cathedral and timed it against his own pulse. Christiaan Huygens built the first pendulum clock in 1656. It kept time far better than any clock before it.`,
   },
   l_notes: {
     title: 'Lecture · Reading music',

@@ -116,6 +116,13 @@ test('the night log, the square, the bridges and the tray', () => {
   assert.equal(lecture.length, 1);
   assert.equal(lecture[0].name, answerOf('ascii'));
   assert.ok(log.filter((r) => r.busy.some(([from, to]) => from < 4 && to > 2)).length > 1, 'another terminal is busy then too');
+  // The chart shows only the hours and the nights. Between two and four the answer is used on far more nights
+  // than anyone else, and the darkest square on the whole chart is somewhere else, so the hour matters.
+  const late = log.map((r) => [r.name, Math.max(0, ...r.busy.filter(([from, to]) => from < 4 && to > 2).map((b) => b[2]))]).sort((a, b) => b[1] - a[1]);
+  assert.equal(late[0][0], answerOf('ascii'));
+  assert.ok(late[0][1] > 200 && late[1][1] < 60, 'nearly every night, against a few');
+  const darkest = log.flatMap((r) => r.busy.map((b) => [r.name, b[2]])).sort((a, b) => b[1] - a[1])[0];
+  assert.notEqual(darkest[0], answerOf('ascii'), 'the darkest square is not the answer');
   // Durer's square: every line makes 34 once the two gaps are filled.
   const rows = PUZZLES.tithe_square.blocks.find((b) => b.grid).grid.map((r) => r.trim().split(/\s+/).map((n) => (n === '?' ? null : Number(n))));
   rows[3][1] = 15;
