@@ -8,13 +8,16 @@
 /** @typedef {any} Kit */
 
 /**
- * A sound at this point of the timeline (or at `at`). It is heard when the step plays, and
- * kept quiet when the player jumps to the end of a step, which would sound every note at once.
+ * A sound at this point of the timeline (or at `at`). It is heard when the step plays, and kept
+ * quiet when the player jumps to the end of a step (the timeline is paused then), or hurries a
+ * playing step to its end: then the playhead is further past the sound than one frame moves it.
  */
-function sound(tl, play, at = tl.duration()) {
+function sound(k, tl, play, at = tl.duration()) {
   tl.call(
     () => {
-      if (!tl.paused() && tl.time() - at < 0.25) play();
+      if (tl.paused()) return;
+      const frame = (k.gsap.ticker.deltaRatio?.(60) ?? 1) / 60;
+      if (tl.time() - at <= frame + 0.05) play();
     },
     undefined,
     at,
@@ -682,7 +685,7 @@ export const PUZZLES = {
     k.hide(count, ask, verdict);
     const slide = (tl, n, r, c, at) => {
       tl.to(tiles[n], { ...pos(r, c), duration: 0.38, ease: 'power2.inOut' }, at);
-      sound(tl, () => k.audio?.tick?.());
+      sound(k, tl, () => k.audio?.tick?.());
     };
     return {
       steps: [
@@ -848,7 +851,7 @@ export const PUZZLES = {
       [142, 62],
     ])
       svg.append(P(`M${x} ${y} q6 -4 12 0 t12 0`, { s: '#a9c6d0', w: 1.3 }));
-    const thing = (label, fill) => G({}, R(-30, -13, 60, 26, { f: fill, s: COL.ink, w: 1, r: 13 }), T(0, 4.5, label, { c: 'u', z: 11.5, w: 700 }));
+    const thing = (label, fill) => G({}, R(-28, -13, 56, 26, { f: fill, s: COL.ink, w: 1, r: 13 }), T(0, 4.5, label, { c: 'u', z: 11, w: 700 }));
     const wolf = thing('wolf', '#c4beb2');
     const goat = thing('goat', '#fbf8f0');
     const cabbages = thing('cabbages', '#b5d69a');
@@ -860,7 +863,7 @@ export const PUZZLES = {
     const LEFT = 86;
     const RIGHT = 148;
     const BOAT_Y = 108;
-    const slot = R(26, -27, 60, 26, { s: COL.faint, w: 1.3, d: '3 3', r: 13 });
+    const slot = R(27, -27, 58, 26, { s: COL.faint, w: 1.3, d: '3 3', r: 13 });
     const slotSign = T(56, -9.5, '+1', { c: 'u', z: 11.5, w: 700, f: COL.faint });
     const hull = P('M0 0 Q44 14 88 0 L80 13 Q44 25 8 13 Z', { f: '#9a6b3e', s: COL.ink, w: 1 });
     const person = G({}, C(14, -28, 5.5, { f: '#e8c39e', s: COL.ink, w: 1 }), P('M14 -22 V-3 M7 -15 L14 -18 L21 -15', { s: COL.ink, w: 2.2 }));
@@ -873,9 +876,9 @@ export const PUZZLES = {
     const eats = (y) => T(50, y, 'eats', { c: 'u', z: 10.5, w: 700, f: COL.red, a: 'start' });
     const said1 = eats(78);
     const said2 = eats(130);
-    const glow = R(5, 28, 72, 92, { f: 'rgba(176,58,46,0.14)', s: COL.red, w: 2, r: 14 });
-    const pair1 = R(6, 29, 70, 88, { s: COL.red, w: 1.8, d: '5 4', r: 15 });
-    const pair2 = R(10, 83, 62, 86, { s: COL.red, w: 1.8, d: '5 4', r: 15 });
+    const glow = R(8, 30, 70, 87, { f: 'rgba(176,58,46,0.14)', s: COL.red, w: 2, r: 14 });
+    const pair1 = R(8, 30, 70, 87, { s: COL.red, w: 1.8, d: '5 4', r: 15 });
+    const pair2 = R(11, 84, 65, 84, { s: COL.red, w: 1.8, d: '5 4', r: 15 });
     const both = [L(102, 184, 218, 184, { s: COL.faint, w: 1.4, m: k.arrow('faint'), ms: k.arrow('faint') }), T(160, 175, 'over and back', { c: 'u', z: 11, f: COL.faint })];
     svg.append(glow, pair1, pair2, eat1, eat2, said1, said2, wolf, goat, cabbages, boat, ...both);
     k.hide(boat, slot, slotSign, eat1, eat2, said1, said2, glow, pair1, pair2, both);
@@ -1565,18 +1568,18 @@ export const PUZZLES = {
           const placed = gg({});
           pic.append(placed);
           const SPOTS = [
-            [10, 12],
-            [164, 12],
-            [10, 56],
-            [164, 56],
+            [13, 14],
+            [163, 14],
+            [13, 58],
+            [163, 58],
           ];
           const cards = EVENTS.map((ev, n) => {
             const [cx, cy] = SPOTS[n];
-            const box = r(0, 0, 146, 36, { f: CREAM, s: col.brass, w: 1.4, r: 6 });
+            const box = r(0, 0, 144, 36, { f: CREAM, s: col.brass, w: 1.4, r: 6 });
             const dot = k2.C(4, 4, 9, { f: col.green, s: 'none' });
             const badge = t(4, 8, '', { c: 'u', z: 11, w: 800, f: '#fff' });
             const sticker = gg({ opacity: 0 }, dot, badge);
-            const g = gg({}, box, t(73, 23, ev.name, { c: 'u', z: 11.5, w: 600 }), sticker);
+            const g = gg({}, box, t(72, 23, ev.name, { c: 'u', z: 11, w: 600 }), sticker);
             gs.set(g, { x: cx, y: cy });
             tap(g, ev.name, () => pick(n));
             pic.append(g);
@@ -1665,7 +1668,7 @@ export const PUZZLES = {
       const name = T(x, 104, NOTE_NAMES[p], { z: 13, w: 700, f });
       written.append(h, name);
       k.hide(h, name);
-      sound(tl, () => k.audio?.piano?.(NOTE_HZ[p]), at);
+      sound(k, tl, () => k.audio?.piano?.(NOTE_HZ[p]), at);
       tl.fromTo(h, { opacity: 0, scale: 0.2, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, transformOrigin: '50% 50%', duration: 0.22, ease: 'back.out(2.5)' }, at)
         .to(name, { opacity: 1, duration: 0.15 }, at)
         .to(keys[p], { attr: { fill: keyFill }, duration: 0.12 }, at)
@@ -1918,7 +1921,7 @@ export const PUZZLES = {
     const punch = (tl, row, which) => {
       for (const i of which) {
         tl.to(holes[row][i], { attr: { fill: COL.ink, stroke: COL.ink }, scale: 1.3, transformOrigin: '50% 50%', duration: 0.12 }).to(holes[row][i], { scale: 1, duration: 0.15 });
-        sound(tl, () => k.audio?.tick?.());
+        sound(k, tl, () => k.audio?.tick?.());
       }
     };
     const strike = (tl) => tl.to(pin, { y: 7, duration: 0.1, yoyo: true, repeat: 1, ease: 'power2.in' });
