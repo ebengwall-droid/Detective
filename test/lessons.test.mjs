@@ -68,7 +68,9 @@ test("the page gets each open puzzle's method by id, which is what Milo and the 
 
 test('the how-tos use their own examples: no puzzle answer appears in them', () => {
   const dir = new URL('../public/src/ui/demos/', import.meta.url);
-  const src = fs.readdirSync(dir).filter((f) => f.endsWith('.js')).map((f) => fs.readFileSync(new URL(f, dir), 'utf8')).join('\n').toUpperCase();
+  const code = fs.readdirSync(dir).filter((f) => f.endsWith('.js')).map((f) => fs.readFileSync(new URL(f, dir), 'utf8')).join('\n');
+  // Only what a player could read: the strings, not the code around them (a 1200 ms pause is not an answer).
+  const src = [...code.matchAll(/(['"`])((?:\\.|(?!\1)[^\\])*)\1/g)].map((m) => m[2]).join('\n').toUpperCase();
   // Ordinary words the lessons themselves use (the noon sun, Königsberg's south bank, a walk that
   // can never be done), and the instrument the navigation lesson names alongside the others.
   const allowed = new Set(['SEXTANT', 'NOON', 'MIDDAY', 'TWELVE', 'SOUTH', 'SOUTH BANK', 'THE SOUTH BANK', 'NEVER', 'CANNOT', 'IT CANNOT', 'IMPOSSIBLE']);

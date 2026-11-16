@@ -70,10 +70,11 @@ const PICS = {
     cross(276, 45, 'WXYZ', true);
     // Three letters, written.
     const y = 104;
-    svg.append(T(26, y + 22, 'A =', { c: 'u', z: 12, a: 'start' }), P(`M52 ${y + 6} H66 V${y + 26} H52`, { w: 2, s: BRASS }));
+    // A sits top left: the grid's lines are on its right and below it, so its sign is a backwards L.
+    svg.append(T(26, y + 22, 'A =', { c: 'u', z: 12, a: 'start' }), P(`M66 ${y + 6} V${y + 26} H52`, { w: 2, s: BRASS }));
     svg.append(T(104, y + 22, 'E =', { c: 'u', z: 12, a: 'start' }), R(130, y + 6, 18, 20, { s: BRASS, w: 2, r: 0 }));
     svg.append(T(184, y + 22, 'S =', { c: 'u', z: 12, a: 'start' }), P(`M208 ${y + 6} L218 ${y + 26} L228 ${y + 6}`, { w: 2, s: BRASS }));
-    svg.append(T(258, y + 22, 'J =', { c: 'u', z: 12, a: 'start' }), P(`M282 ${y + 6} H296 V${y + 26} H282`, { w: 2, s: BRASS }), C(290, y + 16, 2, { f: BRASS, s: 'none' }));
+    svg.append(T(258, y + 22, 'J =', { c: 'u', z: 12, a: 'start' }), P(`M296 ${y + 6} V${y + 26} H282`, { w: 2, s: BRASS }), C(289, y + 16, 2, { f: BRASS, s: 'none' }));
     svg.append(T(160, 150, 'each letter is drawn as the lines around its own space', { c: 'u', z: 10.5, f: FAINT }));
     return { svg, caption: 'The key: two grids and two crosses, the second of each with dots.' };
   },
