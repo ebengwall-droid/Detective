@@ -5,7 +5,8 @@ import { World, STEP_DOWN } from './world/world.js';
 import { assets } from './world/assets.js';
 import { Audio } from './audio.js';
 import { el } from './ui/dom.js';
-import { createHud, showHere, showInspect, showThink, showCard, confirmCard, showArrival } from './ui/hud.js';
+import { createHud, showHere, showInspect, showCard, confirmCard, showArrival } from './ui/hud.js';
+import { showNextSteps } from './ui/help.js';
 import { createDialogue } from './ui/dialogue.js';
 import { createNotebook } from './ui/notebook.js';
 import { createLaptop } from './ui/laptop.js';
@@ -672,13 +673,13 @@ export class Game {
   afterStage(ids, then) {
     this.queue = this.queue.filter((e) => !(e.type === 'puzzle' && ids.includes(e.id)));
     this.flushEvents();
-    if (then?.lectern) this.askLectern(then.lectern);
+    if (then?.lectern) this.askLectern(then.about ? `How is “${then.about}” done?` : then.lectern, then.lectern);
   }
 
-  /** Put a question to the Lectern, from anywhere. */
-  askLectern(query) {
+  /** Put a question to the Lectern, from anywhere; from a puzzle, `lesson` names its card. */
+  askLectern(query, lesson = null) {
     this.open('laptop', 'ask');
-    this.laptop.ask(query);
+    this.laptop.ask(query, lesson);
   }
 
   openEvidence(id) {
@@ -829,7 +830,7 @@ export class Game {
           // Answered puzzles stay where they were, to look at again.
           if (here.length) actions.push({ id: here.length === 1 ? `puzzle:${here[0].id}` : `surface:${id}`, label: here.length === 1 ? 'Look at it again' : 'Look at them again' });
           if (more) actions.push({ id: 'look', label: 'What else is here?' });
-          const choice = await showInspect(this.panels, { title: res.title, text: res.text, figure: res.figure, taken, actions });
+          const choice = await showInspect(this.panels, { title: res.title, text: res.text, figure: res.figure, paper: res.paper, taken, actions });
           if (choice === 'look') next = 'look';
           else if (choice?.startsWith('puzzle:') || choice?.startsWith('surface:')) next = choice;
         }
@@ -923,12 +924,45 @@ export class Game {
     this.flushEvents();
   }
 
+  /** Help: what to do now, step by step, and a way to be taken to the next step. */
   async think() {
     if (this.blockers.size) return;
     this.block('think');
     this.audio.click();
-    await showThink(this.panels, (onText) => this.call('think', {}, { onText }));
+    // The notices are in the notebook; here they would only cover the steps.
+    this.hud.clearToasts?.();
+    const target = await showNextSteps(this.panels, this);
     this.unblock('think');
+    if (target) await this.goTo(target);
+  }
+
+  /**
+   * Take the player to a step: open the panel it happens in, or walk to the thing or person
+   * here, or travel to their place first and walk on once any arrival card is read.
+   */
+  async goTo(t) {
+    if (!t || this.blockers.size) return;
+    if (t.type === 'lab') return this.open('laptop', 'lab');
+    if (t.type === 'lectern') return this.open('laptop', 'ask');
+    if (t.type === 'board') return this.open('notebook', 'board');
+    if (t.type === 'map') return this.open('map');
+    if (!t.here) {
+      if (!t.open) return this.open('map');
+      await this.travel(t.loc);
+      if (this.view.location.id !== t.loc || t.type === 'place') return;
+      const until = performance.now() + 120000;
+      const ready = await new Promise((done) => {
+        const tick = () => {
+          if (this.view.location.id !== t.loc || performance.now() > until) return done(false);
+          if (this.free && this.world.mode === 'explore') return done(true);
+          setTimeout(tick, 250);
+        };
+        tick();
+      });
+      if (!ready) return;
+    }
+    if (t.type === 'place') return;
+    this.world.interact({ type: t.type === 'npc' ? 'npc' : 'hotspot', id: t.id });
   }
 
   async runEnding() {

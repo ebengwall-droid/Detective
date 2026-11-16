@@ -245,8 +245,8 @@ export class Brain {
     if (!top.length) {
       return { answer: this.case.laptop.none, open: [] };
     }
-    const titles = top.map((t) => `  ${t.rec.title}`).join('\n');
-    return { answer: `${this.case.laptop.found(top.length)}\n${titles}`, open: top.map((t) => t.id) };
+    // The cards themselves open under the answer, so the answer need not list them.
+    return { answer: this.case.laptop.found(top.length), open: top.map((t) => t.id) };
   }
 
   // ---------------------------------------------------------- inner voice

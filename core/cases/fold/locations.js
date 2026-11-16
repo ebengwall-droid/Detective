@@ -218,8 +218,10 @@ export const LOCATIONS = {
       {
         id: 'tube_pendry', at: 'tube_pendry', label: 'Bellows tube', kind: 'take',
         views: [{
-          text: "The Bellows outlet by the bench. Its flap is open, and an open carrier lies in the tray. The sheet that came in it is on the bench, where it was found under his hand. It is one page in green ink, laid out as an exam paper.",
+          text: "The Bellows tube by his bench. The carrier is open. This Paper was found under his hand.",
           ev: ['paper_pendry'],
+          // The Paper itself is shown on the card, to be read where it was found.
+          read: 'paper_pendry',
         }],
       },
       {
@@ -370,8 +372,9 @@ export const LOCATIONS = {
       {
         id: 'tube_sallow', at: 'tube_sallow', label: 'Bellows tube', kind: 'take',
         views: [{
-          text: "A brass Bellows pipe comes aboard at the mooring ring. There is a carrier in the tray. The sheet that came in it was under her hand: one page, in green ink.",
+          text: "A Bellows pipe comes aboard at the mooring ring. This Paper was found under her hand.",
           ev: ['paper_sallow'],
+          read: 'paper_sallow',
         }],
       },
       {
@@ -520,7 +523,7 @@ export const LOCATIONS = {
       },
       {
         id: 'tube_voss', at: 'tube_voss', label: 'Bellows tube', kind: 'take',
-        views: [{ text: 'The Bellows outlet over his desk. The sheet that came out of it at eight is one page, in green ink.', ev: ['paper_voss'] }],
+        views: [{ text: 'The Bellows outlet over his desk. This Paper came out of it at eight.', ev: ['paper_voss'], read: 'paper_voss' }],
       },
       {
         id: 'flask_voss', at: 'flask_voss', label: 'Cup', kind: 'look',

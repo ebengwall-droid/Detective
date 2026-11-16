@@ -235,6 +235,8 @@ export const OBJECTIVES = [
   {
     id: 'o_sextant', text: "Look in Sallow's sextant box", if: 'puz:paper2b',
     done: 'fact:dame_incapable',
+    // The guide points at the box itself, not at the nurse who can also say it.
+    go: 'ev:capacity_report',
     hints: ['Sallow did not keep anything just for show. The box may hold more than a sextant.', 'Examine the sextant aboard the Meridian.'],
   },
   {
@@ -342,6 +344,7 @@ export const OBJECTIVES = [
   {
     id: 'o_finale', text: 'Stop the fourth Paper', if: 'visited:lantern',
     done: 'flag:finale_done',
+    go: 'puz:grille',
     hints: ['There is a lock on the grille. There is also a man on a chair at the back of the room. Try the lock, and talk to the man.', 'If you know the word, set it on the grille lock. Talk to him too: about Dame Hesper, about his daughter, and about what you can prove.'],
   },
 ];
@@ -685,10 +688,10 @@ export const LAPTOP_HINTS = [
 export const LAPTOP = {
   empty: 'Ask the Lectern something.',
   none: "I have no card on that. Try a name, a place, an object, or a method, such as 'pigpen', 'Vigenère' or 'foxglove'.",
-  found: (n) => (n > 1 ? `I have ${n} cards on that. They are open below and filed under Records.` : 'I have a card on that. It is open below and filed under Records.'),
+  found: (n) => (n > 1 ? `I have ${n} cards on that. The first is open below. They are all kept under Cards.` : 'I have a card on that. It is open below, and kept under Cards.'),
   ui: {
     name: 'The Lectern',
-    intro: "THE LECTERN · the Lorimer Engine\nRepository of the Worshipful Company of Setters and Solvers.\n\nAsk me anything in plain words: a person, a place, an object from the case, or how something works. I will not solve a Paper for you. I will explain how the method works.",
+    intro: "Ask me how something works, or about a person or a place in the case. I will not solve a Paper for you, but I will show you how its method works, with a picture.",
     placeholder: 'Ask the Lectern…',
     lab: 'County lab',
   },
@@ -699,7 +702,7 @@ export const PROMPTS = {
   genre: 'an interactive puzzle-mystery about a real murder case, with no magic in it, told in plain, simple English',
   thinkVoice: 'in plain, simple English: short sentences, everyday words, no figures of speech, and no wordplay unless a clue needs it. Write as a capable detective who knows they are out of their depth in a very clever place. Being clear matters more than being clever.',
   epilogueVoice: 'Write in plain, simple English: short sentences, everyday words, no figures of speech, and no wordplay. Be warm and exact, but not sentimental. You may use small, concrete details such as brass, rain, tea, chalk and the two hands of a clock.',
-  laptopLength: 'two to six short sentences in plain, simple English, in the voice described above',
+  laptopLength: 'two to four short, complete sentences in plain, simple English, in the voice described above. The card it opens carries a picture and the details, so do not repeat them',
   laptop: `You are THE LECTERN, also called the Lorimer Engine. You are the reference machine in the Repository of the Worshipful Company of Setters and Solvers, in a puzzle-mystery game. You were built from forty years of Dame Hesper Lorimer's lectures and the Company's papers. You answer in something like her teaching voice. You are brisk and exact. You are kind to honest ignorance, a little dry about laziness, and fond of the history of things. A detective from outside the Fold is asking you questions.
 
 How to write: plain, simple English that a reader on a phone understands at once. Use short sentences and everyday words. Explain any technical term the first time you use it. Use no figures of speech, and no wordplay unless a clue needs it.

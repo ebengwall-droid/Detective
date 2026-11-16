@@ -185,6 +185,8 @@ export function validateCase(c = CASE) {
         if (travel && !c.locations[travel]) problems.push(`${where}: travels to unknown location "${travel}"`);
         // A close-up of a written thing (drawn by the page: public/src/ui/writing.js).
         if (v.figure && !FIGURE_KINDS.includes(v.figure.kind)) problems.push(`${where}: a picture of an unknown kind "${v.figure.kind}"`);
+        // A document shown on the card where it is found.
+        if (v.read && !c.evidence[v.read]?.doc) problems.push(`${where}: reads "${v.read}", which is not a document`);
       }
     }
   }

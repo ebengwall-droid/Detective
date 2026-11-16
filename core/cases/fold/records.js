@@ -16,6 +16,8 @@ export const RECORDS = {
   l_caesar: {
     title: 'Lecture · The Caesar cipher',
     kind: 'lecture',
+    short: "Every letter moves the same number of places along the alphabet. With a shift of three, A becomes D and B becomes E. To read the message, move each letter back by the same number.",
+    pic: 'caesar',
     keys: ['caesar', 'shift', 'shift cipher', 'three back', 'substitution', 'alphabet', 'gate cipher', 'suetonius'],
     body: `THE CAESAR CIPHER
 A Caesar cipher moves every letter the same number of places along the alphabet.
@@ -28,6 +30,8 @@ There are only twenty-five possible shifts. So anyone can break the cipher by tr
   l_rot13: {
     title: 'Lecture · ROT13',
     kind: 'lecture',
+    short: "This is a Caesar cipher with a shift of thirteen, which is half the alphabet. A and N swap, B and O swap, and so on. Doing it twice brings the message back.",
+    pic: 'rot13',
     keys: ['rot13', 'thirteen', 'halfway', 'usenet', 'self-inverse'],
     body: `ROT13
 ROT13 is a Caesar cipher with a shift of thirteen. Thirteen is exactly half the alphabet.
@@ -39,6 +43,8 @@ Its only job was to stop people reading something by accident. It was never mean
   l_frequency: {
     title: 'Lecture · Counting letters',
     kind: 'lecture',
+    short: "In English, E is the most common letter. In a simple cipher, the most common sign probably stands for E. Count how many places it is from E, and that is the shift.",
+    pic: 'frequency',
     keys: ['frequency', 'count', 'counting letters', 'commonest', 'common letter', 'break', 'al-kindi', 'kindi', 'cryptanalysis', 'etaoin'],
     body: `COUNTING LETTERS
 In any long piece of English, E is the most common letter. After E come T, A, O, I and N.
@@ -53,6 +59,8 @@ Example: if the most common letter is H, it is three places after E. So the shif
   l_pigpen: {
     title: 'Lecture · The pigpen',
     kind: 'lecture',
+    short: "Each letter is drawn as the lines around its place in a grid or a cross. The second grid and the second cross have a dot in every space. Match each shape to the key to read the message.",
+    pic: 'pigpen',
     keys: ['pigpen', 'pig pen', 'masonic', 'freemason', 'grid cipher', 'tic-tac-toe', 'noughts and crosses', 'signs', 'symbols'],
     body: `THE PIGPEN CIPHER
 The pigpen cipher writes each letter as a small shape.
@@ -69,6 +77,8 @@ It looks mysterious, but it is no stronger than Caesar's cipher. Each sign alway
   l_polybius: {
     title: 'Lecture · The five-by-five square',
     kind: 'lecture',
+    short: "The alphabet goes into a square of five rows and five columns. I and J share a cell. Each letter becomes two numbers: its row, then its column.",
+    pic: 'polybius',
     keys: ['polybius', 'square', 'five by five', '5x5', 'pairs of numbers', 'row and column', 'tap code', 'punched', 'collar'],
     body: `THE POLYBIUS SQUARE
 Write the alphabet into a square of five rows and five columns. I and J share a cell, so the 26 letters fit into 25 cells.
@@ -84,6 +94,8 @@ It is still used. Small numbers can be sent by almost anything: knocks, flashes 
   l_transposition: {
     title: 'Lecture · The rail fence and the scytale',
     kind: 'lecture',
+    short: "The letters stay the same, but their order changes. In a rail fence, the message is written in a zigzag over a few lines, then read off one line at a time. To read it, rebuild the zigzag.",
+    pic: 'railfence',
     keys: ['rail fence', 'railfence', 'zigzag', 'transposition', 'scytale', 'spartan', 'sparta', 'out of order', 'fence', 'rails'],
     body: `TRANSPOSITION
 A substitution cipher changes the letters. A transposition cipher keeps every letter as it is and only changes their order.
@@ -102,6 +114,8 @@ Counting letters shows at once that a cipher is a transposition. E is still the 
   l_vigenere: {
     title: 'Lecture · The Vigenère cipher',
     kind: 'lecture',
+    short: "A key word gives each letter its own shift. Write the key over the message, again and again. Shift each letter by the key letter above it: A means no shift, B one place, C two places.",
+    pic: 'vigenere',
     keys: ['vigenere', 'vigenère', 'indechiffrable', 'indéchiffrable', 'polyalphabetic', 'key word', 'keyword', 'bellaso', 'tabula recta', 'kasiski', 'babbage', 'square'],
     body: `THE VIGENÈRE CIPHER
 The Vigenère cipher is a Caesar cipher whose shift changes with every letter. A key word sets the shifts.
@@ -124,6 +138,8 @@ With the key word, the message is easy to read.`,
   l_playfair: {
     title: 'Lecture · The Playfair cipher',
     kind: 'lecture',
+    short: "Letters are changed in pairs, using a five-by-five square built from a key word. If the pair is in one row, take the letters to their right. If it is in one column, take the letters below. Otherwise, take the other two corners of their rectangle.",
+    pic: 'playfair',
     keys: ['playfair', 'wheatstone', 'pairs', 'two by two', 'digraph', 'key square', 'frame'],
     body: `THE PLAYFAIR CIPHER
 Charles Wheatstone invented this cipher in 1854. He also invented the concertina. The cipher is named after his friend Lord Playfair, who persuaded the British government to use it. The British army used it in the Boer War and the First World War.
@@ -144,6 +160,8 @@ Because it works on pairs, counting single letters does not help a code-breaker.
   l_bacon: {
     title: "Lecture · Bacon's two-letter cipher",
     kind: 'lecture',
+    short: "Every letter has a code of five marks, each one a or b. A harmless sentence is written in two kinds of letter: one kind means a, the other means b. Every five letters of the sentence hide one letter of the secret.",
+    pic: 'bacon',
     keys: ['bacon', 'biliteral', 'bilateral', 'two typefaces', 'capitals', 'hidden in the letters', 'steganography', 'epigraph', 'francis bacon'],
     body: `BACON'S CIPHER
 Francis Bacon published this cipher in 1623. It hides a message in the way the letters of a sentence look. What the sentence says does not matter.
@@ -158,6 +176,8 @@ Bacon said his method could hide anything inside anything. Hiding a message insi
   l_ascii: {
     title: 'Lecture · Letters as numbers',
     kind: 'lecture',
+    short: "Computers store each letter as a number. A is 65 and Z is 90. Engineers often write these numbers in hexadecimal, where A is 41 and Z is 5A.",
+    pic: 'ascii',
     keys: ['ascii', 'hex', 'hexadecimal', 'bytes', 'binary', 'computer', 'code for letters', '4c', 'base sixteen'],
     body: `LETTERS AS NUMBERS
 A computer stores each letter as a number. Nearly all computers use the same table for this. It is called ASCII, and it was agreed in America in 1963.
@@ -172,6 +192,8 @@ To read them:
   l_binary: {
     title: 'Lecture · Counting in holes',
     kind: 'lecture',
+    short: "In binary, each place is worth twice the place to its right: 1, 2, 4, 8, 16. A hole means that place counts. Add up the places with holes to get the number.",
+    pic: 'binary',
     keys: ['binary', 'base two', 'holes', 'punched', 'punch card', 'punched card', 'collar', 'jacquard', 'hollerith', 'leibniz', 'bits', 'twenty-four hour', 'carrier'],
     body: `COUNTING IN HOLES
 We count in tens: each place in a number is worth ten times the place to its right. Binary counts in twos: each place is worth twice the place to its right.
@@ -184,17 +206,21 @@ A clock of twenty-four hours is read like a railway timetable: 12 is noon, 20 is
   l_charts: {
     title: 'Lecture · Reading a chart',
     kind: 'lecture',
+    short: "A chart turns a long list of numbers into a picture. Find the column for the hour you care about, then look down it for the brightest squares. The busiest square on the whole chart may be at the wrong hour.",
+    pic: 'chart',
     keys: ['chart', 'graph', 'log', 'data', 'heat map', 'heatmap', 'bar chart', 'pie chart', 'nightingale', 'john snow', 'cholera', 'william playfair', 'night log', 'terminal'],
     body: `READING A CHART
 A chart turns a long list of numbers into a picture, so the eye finds the pattern before the mind does.
 William Playfair, a Scottish engineer, drew the first bar charts and line graphs in 1786, and the first pie chart in 1801. He was not the Playfair of the cipher: that was Lyon Playfair, a chemist, born in 1818.
 In 1854 the doctor John Snow marked every death from cholera in one part of London on a street map. The deaths crowded around one water pump, in Broad Street. The pump's handle was taken off.
 In 1858 Florence Nightingale drew her "rose" diagrams. They showed that more soldiers in the Crimean War died of disease than of their wounds.
-To read a log drawn as a grid: find the column for the hour you care about, and look down it for the darkest squares. Then check what was actually asked for, because the busiest square is not always the one you want.`,
+To read a log drawn as a grid: find the column for the hour you care about, and look down it for the brightest squares. The busiest square on the whole chart is not always the one you want.`,
   },
   l_navigation: {
     title: 'Lecture · Finding your latitude',
     kind: 'lecture',
+    short: "At noon the sun is at its highest. Measuring how high it stands tells a sailor how far north or south they are. The brass instruments for this are named after how much of a circle their arc is.",
+    pic: 'noonsight',
     keys: ['sextant', 'octant', 'quadrant', 'astrolabe', 'latitude', 'navigator', 'navigation', 'noon sight', 'noon sun', 'arc', 'instrument', 'hadley', 'campbell'],
     body: `THE NOON SIGHT
 At noon the sun is at its highest. Measure how high it stands above the horizon, look up the sun's position for that day in a table, and you have your latitude: how far north or south of the equator you are.
@@ -208,6 +234,8 @@ The names are Latin: quadrans means a quarter, sextans a sixth, and octans an ei
   l_alcuin: {
     title: 'Lecture · The river crossing',
     kind: 'lecture',
+    short: "A boat carries the traveller and one thing at a time. Some things cannot be left alone together. Look for the one thing that is in both dangerous pairs, and remember the boat can bring something back.",
+    pic: 'river',
     keys: ['river crossing', 'fox goose', 'goose', 'wolf goat cabbage', 'ferry', 'ferryman', 'alcuin', 'york', 'riddle', 'crossing puzzle'],
     body: `THE RIVER CROSSING
 A traveller must take a wolf, a goat and a basket of cabbages across a river. The boat holds the traveller and one thing more. Left alone, the wolf eats the goat, and the goat eats the cabbages.
@@ -218,6 +246,8 @@ Other crossings in the same book have jealous husbands, and a hedgehog family. L
   l_logic: {
     title: 'Lecture · Logic grids',
     kind: 'lecture',
+    short: "Write the people down the side and the things across the top. Put a cross where a clue rules something out, and a tick where you are sure. Each tick crosses out the rest of its row and its column.",
+    pic: 'logic',
     keys: ['logic', 'logic grid', 'grid puzzle', 'einstein', 'zebra', 'deduction', 'four o\'clock problem', 'whose cup', 'cups', 'tick and cross'],
     body: `LOGIC GRIDS
 A logic grid sorts a few people and a few things using nothing but clues. Write the people down the side and the things across the top. Put a cross in every square a clue rules out, and a tick where you are certain. Each tick lets you cross out the rest of its row and its column.
@@ -227,6 +257,8 @@ Begin with the clue that is certain, not the clue that is long.`,
   l_smothered: {
     title: 'Lecture · The smothered mate',
     kind: 'lecture',
+    short: "The king cannot move, because his own pieces are all around him. A knight gives check, and a knight's check cannot be blocked. That is a smothered mate.",
+    pic: 'smothered',
     keys: ['smothered', 'smothered mate', 'checkmate', 'mate in one', 'greco', 'philidor', 'adjourned', 'adjournment', 'chess problem', 'knight check'],
     body: `THE SMOTHERED MATE
 Checkmate is when the king is attacked and has no way out: he cannot move, the attacker cannot be taken, and nothing can be put in the way.
@@ -237,6 +269,8 @@ Until the 1990s long games were adjourned: a player sealed their next move in an
   l_wordgames: {
     title: 'Lecture · Guess-the-word games',
     kind: 'lecture',
+    short: "Each guess shows which letters are in the right place, which are in the word but in the wrong place, and which are not in the word at all. Keep the right ones, move the misplaced ones, and drop the rest.",
+    pic: 'wordgame',
     keys: ['word game', 'guess the word', 'six letters', 'five letters', 'green', 'gold', 'mastermind', 'jotto', 'lingo', 'bulls and cows', 'crux six'],
     body: `GUESS-THE-WORD GAMES
 In these games you guess a hidden word, and each guess tells you which letters are in the right place, which are in the word but misplaced, and which are not in it at all.
@@ -246,6 +280,8 @@ A good first guess uses common letters. In English the commonest are E, A, R, I,
   l_dates: {
     title: 'Lecture · Pegs for history',
     kind: 'lecture',
+    short: "Learn a few dates as pegs. For anything else, ask: did it happen before or after this peg? Then put the oldest first.",
+    pic: 'timeline',
     keys: ['dates', 'history', 'timeline', 'order of events', 'which came first', 'history board', 'novice test', 'pegs'],
     body: `PEGS FOR HISTORY
 Nobody remembers every date. Historians and quiz-setters keep a few as pegs, and hang everything else between them.
@@ -256,6 +292,8 @@ Most mistakes in putting things in order come from two events that feel far apar
   l_pendulum: {
     title: 'Lecture · The pendulum',
     kind: 'lecture',
+    short: "How fast a pendulum swings depends only on its length. A heavy weight and a light one, on strings of the same length, swing together. A longer string swings more slowly.",
+    pic: 'pendulum',
     keys: ['pendulum', 'bob', 'swing', 'galileo', 'huygens', 'period', 'regulator', 'losing time', 'gaining time', 'clock loses'],
     body: `THE PENDULUM
 A pendulum is a weight on a string or a rod, free to swing. A heavy weight and a light one, on the same length of string, swing at exactly the same speed. The weight makes no difference.
@@ -265,6 +303,8 @@ Galileo is said to have noticed this as a young man in Pisa. He watched a lamp s
   l_notes: {
     title: 'Lecture · Reading music',
     kind: 'lecture',
+    short: "On a treble staff, the lines from the bottom are E, G, B, D and F. The spaces between them spell FACE. The higher a note sits, the higher it sounds.",
+    pic: 'staff',
     keys: ['music', 'notes', 'staff', 'stave', 'treble clef', 'piano', 'keys', 'sharp', 'flat', 'face', 'every good boy', 'fur elise', 'für elise', 'beethoven', 'tune'],
     body: `READING MUSIC
 Music is written on five lines, called a staff or stave. The higher a note sits, the higher it sounds.
@@ -276,6 +316,8 @@ The A above middle C sounds at 440 vibrations a second, and every orchestra tune
   l_atlas: {
     title: 'Lecture · Latitude, longitude and an island that is not there',
     kind: 'lecture',
+    short: "Latitude says how far north or south of the equator a place is. Longitude says how far east or west of Greenwich it is. Latitude is always written first.",
+    pic: 'latlong',
     keys: ['latitude', 'longitude', 'coordinates', 'null island', '0 n 0 e', 'equator', 'prime meridian', 'where is', 'atlas', 'degrees', 'what lies at'],
     body: `FINDING A PLACE BY TWO NUMBERS
 Any place on Earth can be found with two numbers.
@@ -299,13 +341,15 @@ Agloe, New York, was invented by two map-makers in the 1930s. Later, to their su
   l_time: {
     title: 'Lecture · Why the Fold is eleven minutes slow',
     kind: 'lecture',
+    short: "Noon is when the sun is highest. It comes four minutes later for every degree you go west. So the difference between two places' noons tells you how far apart they are.",
+    pic: 'noon',
     keys: ['time', 'eleven minutes', 'fold time', 'local time', 'railway time', 'greenwich', 'two minute hands', 'longitude and time', 'harrison', 'chronometer'],
     body: `LOCAL TIME
 Noon is the moment when the sun is highest in the sky. That moment moves west with the sun, at four minutes for every degree of longitude.
 Until the 1840s, every town in England kept its own noon. Bristol's clocks ran ten minutes behind London's. Nobody minded, because the journey between them took most of a day.
 The railways changed that, because trains need a single timetable. The Great Western Railway adopted London time in 1840, and other lines followed. In 1880 Greenwich time became the law.
 The clock on the Exchange in Bristol was given two minute hands: one for London, one for Bristol. It still has them.
-The Fold lies two and three-quarter degrees west of Greenwich. At four minutes a degree, that is eleven minutes. The Fold has never agreed to keep another town's noon. So its clocks still run eleven minutes behind.
+The Fold has never agreed to keep another town's noon. So its clocks still run eleven minutes behind Greenwich. How far west that puts it is a sum you can do yourself.
 Ships used the same sum to find their longitude. Carry a clock that keeps Greenwich time, and compare it with your own noon. The difference gives your longitude.
 Example: the sun is highest when your Greenwich clock says 12:44. That is 44 minutes late, so you are 11 degrees west of Greenwich.
 John Harrison, a carpenter's son, spent his life building a clock accurate enough to do this at sea. He finished it in 1759.`,
@@ -313,6 +357,7 @@ John Harrison, a carpenter's son, spent his life building a clock accurate enoug
   l_turk: {
     title: 'Lecture · The chess-player of 1770',
     kind: 'lecture',
+    short: "A famous chess-playing machine of 1770 seemed to think. In fact a person was hidden inside it. When a machine seems to do a person's work, look for the person.",
     keys: ['turk', 'chess automaton', 'chess-player', 'kempelen', 'maelzel', 'automaton', 'lodger', '1770', 'poe', 'man inside', 'mechanical'],
     body: `THE AUTOMATON CHESS-PLAYER
 In 1770 Wolfgang von Kempelen showed the court in Vienna a life-size mechanical figure. It sat at a cabinet and played chess, and it won.
@@ -324,6 +369,7 @@ The machine burned in a fire in Philadelphia in 1854. Its lesson survives: when 
   l_ai: {
     title: 'Lecture · Can a machine think?',
     kind: 'lecture',
+    short: "A machine like the Lectern learns by reading a huge amount of text. It can explain things and copy a writer's style. But it only repeats what it was given, whether that is true or not.",
     keys: ['turing', 'turing test', 'imitation game', 'eliza', 'artificial intelligence', 'can a machine think', 'ai', 'language model', 'are you alive', 'what are you'],
     body: `THE IMITATION GAME
 In 1950 Alan Turing proposed a test. During the war he had broken ciphers at Bletchley Park.
@@ -335,6 +381,7 @@ But it is only as honest as what it was given to read. If it was told that one p
   l_stylometry: {
     title: 'Lecture · Stylometry',
     kind: 'lecture',
+    short: "Every writer has small habits, such as how often they use words like 'the' and 'upon', and how long their sentences are. Counting these habits shows whether two texts have the same writer.",
     keys: ['stylometry', 'authorship', 'who wrote', 'two authors', 'function words', 'federalist', 'style', 'clusters'],
     body: `WHO WROTE IT?
 Every writer has small habits they never notice. One is how often they use words such as "the", "of", "but" and "upon". Another is how long their sentences are. Nobody chooses these habits, so they are hard to disguise.
@@ -345,6 +392,8 @@ Two clouds mean two writers, whatever name is on the title page.`,
   l_nina: {
     title: 'Lecture · The Nina',
     kind: 'lecture',
+    short: "A Nina is something a setter hides in a finished grid, apart from the answers. It might be a name around the edge, or a word from corner to corner. It is a signature for solvers who keep looking.",
+    pic: 'nina',
     keys: ['nina', 'hidden word', 'hidden message', 'hirschfeld', 'diagonal', 'in the grid', 'signature', 'slantwise'],
     body: `THE NINA
 The American cartoonist Al Hirschfeld had a daughter, Nina, born in 1945. After that, he hid her name in the lines of his drawings. It might be in a sleeve, a curl of hair or the fold of a curtain. He wrote a small number next to his signature to say how many times.
@@ -355,6 +404,8 @@ Some setters never use one. Others hide one in everything they set, as a signatu
   l_cryptic: {
     title: 'Lecture · How a cryptic clue works',
     kind: 'lecture',
+    short: "A cryptic clue has two parts. At one end is a plain definition of the answer. The rest is a recipe for making the same word another way. The number in brackets is the length of the answer.",
+    pic: 'cryptic',
     keys: ['cryptic', 'cryptic clue', 'crossword clue', 'definition', 'wordplay', 'charade', 'anagram', 'torquemada', 'ximenes', 'how do clues work'],
     body: `THE CRYPTIC CLUE
 Arthur Wynne, from Liverpool, invented the crossword for a New York newspaper in December 1913. The cryptic crossword is a British form from the 1920s.
@@ -384,6 +435,8 @@ The Company used pen-names long before there were crosswords. Each member's pen-
   l_knight: {
     title: 'Lecture · Reading the chessboard',
     kind: 'lecture',
+    short: "Each square has a letter for its column (a to h) and a number for its row (1 to 8). So a1 is the bottom left corner. A knight, written N, moves in an L: two squares one way, then one to the side.",
+    pic: 'knight',
     keys: ['chess notation', 'algebraic', 'knight', 'knight\'s tour', 'knights tour', 'b1', 'files and ranks', 'how do i read chess', 'euler'],
     body: `THE BOARD AND THE KNIGHT
 Every square on a chessboard has a name: a letter and a number.
@@ -398,6 +451,8 @@ Setters have long used the knight to hide messages. They write a letter on every
   l_magic: {
     title: 'Lecture · Magic squares',
     kind: 'lecture',
+    short: "In a magic square, every row, every column and both long diagonals add up to the same total. In a three-by-three square the total is 15. In a four-by-four square it is 34.",
+    pic: 'magic',
     keys: ['magic square', 'lo shu', 'durer', 'dürer', 'melencolia', '34', 'rows and columns'],
     body: `MAGIC SQUARES
 A magic square is a grid of different numbers. Every row, every column and both long diagonals add up to the same total.
@@ -406,11 +461,13 @@ The oldest is the Lo Shu square of ancient China. It is three by three, and ever
   3 5 7
   8 1 6
 The legend says it was first seen on the shell of a turtle.
-The most famous magic square in Europe is in Albrecht Dürer's engraving Melencolia I. It hangs on the wall behind the angel. It is four by four, and every line adds up to thirty-four. Dürer arranged it so that the two middle numbers of the bottom row give the year he made it.`,
+The most famous magic square in Europe is in Albrecht Dürer's engraving Melencolia I. It hangs on the wall behind the angel. It is four by four, and every line adds up to thirty-four.`,
   },
   l_bridges: {
     title: 'Lecture · The seven bridges of Königsberg',
     kind: 'lecture',
+    short: "Count the bridges that touch each piece of land. A walk over every bridge once is possible only if no place, or exactly two places, have an odd number. If two do, start at one of them and finish at the other.",
+    pic: 'bridges',
     keys: ['bridges', 'konigsberg', 'königsberg', 'euler', 'seven bridges', 'graph', 'cross each once'],
     body: `THE BRIDGES OF KÖNIGSBERG
 The Prussian city of Königsberg had a river, two islands and seven bridges. On Sundays, people tried to find a walk that crossed every bridge exactly once.
@@ -426,21 +483,23 @@ This was the start of a whole branch of mathematics, called graph theory. Today,
   l_fifteen: {
     title: 'Lecture · The fifteen puzzle',
     kind: 'lecture',
+    short: "You slide tiles into the gap to put them in order. Count the pairs of tiles that are in the wrong order. If that count is odd when the gap is in its corner, the tray can never be solved.",
+    pic: 'fifteen',
     keys: ['fifteen puzzle', '15 puzzle', 'sliding', 'tiles', 'sam loyd', '14 and 15', 'hundred guineas', 'impossible', 'parity'],
     body: `THE FIFTEEN PUZZLE
 Fifteen numbered tiles sit in a tray made for sixteen. You slide the tiles into the gap, one at a time, to put them in order.
 A postmaster in New York State made it. In 1880 it became a craze, first in America and then in Europe.
-The famous version starts with every tile in order except 14 and 15, which have swapped places. The American puzzle-maker Sam Loyd later claimed he had invented it. He offered a thousand dollars to anyone who could put the tiles right. Nobody ever collected.
-He knew nobody would. Two mathematicians had already proved it impossible in 1879. Here is the idea:
+The American puzzle-maker Sam Loyd later claimed he had invented it, and offered a thousand dollars for the solution to one famous starting position.
+In 1879 two mathematicians proved that half of all starting positions can never be solved, however you slide. Here is the test:
 1. Read the tiles row by row. Count the pairs in the wrong order, where a bigger number comes before a smaller one.
 2. Whenever the gap is back in its own corner, that count has changed by an even number.
 3. So if the count starts odd, it can never reach zero, which is the solved tray.
-With 14 and 15 swapped, exactly one pair is in the wrong order. One is odd, so no series of slides can solve it.
 A puzzle with no solution is different from a hard puzzle. It is worth knowing which kind you have been given.`,
   },
   l_meta: {
     title: 'Lecture · Puzzles made of puzzles',
     kind: 'lecture',
+    short: "In a puzzle hunt, the earlier answers are the pieces of one last puzzle, called the meta. Often you take one letter from each answer and read the letters in order.",
     keys: ['meta', 'metapuzzle', 'puzzle hunt', 'answers together', 'order of the papers', 'seven answers'],
     body: `THE META-PUZZLE
 In a puzzle hunt, the answers to all the puzzles are the pieces of one final puzzle. That final puzzle is called the meta.
@@ -451,6 +510,7 @@ In a well-made meta, every earlier answer was chosen for it from the start. Once
   l_clue: {
     title: 'Lecture · Ariadne, and the word "clue"',
     kind: 'lecture',
+    short: "In the Greek story, Ariadne gave Theseus a ball of thread to find his way out of the labyrinth. A ball of thread was called a clew, and that is where the word clue comes from.",
     keys: ['ariadne', 'clue', 'clew', 'thread', 'theseus', 'labyrinth', 'minotaur', 'etymology', 'whose thread'],
     body: `ARIADNE AND THE CLEW
 In the old Greek story, the Minotaur was kept in the middle of a labyrinth on Crete. Nobody who went in had ever found the way out.
@@ -461,6 +521,7 @@ So the word "clue" comes from Ariadne's thread.`,
   l_invigilator: {
     title: 'Lecture · Invigilator',
     kind: 'lecture',
+    short: "An invigilator watches over an exam. They do not set the questions. They sit at the back of the room, keep the time, and say nothing.",
     keys: ['invigilator', 'invigilate', 'proctor', 'what is an invigilator', 'vigil'],
     body: `INVIGILATOR
 In Britain, an invigilator is the person who watches over an examination. They give out the papers, start the clock, and make sure nobody cheats. In America the word is proctor. It comes from the Latin vigilare, to stay awake and keep watch.
@@ -470,6 +531,8 @@ At the Company's Proving, the candidates face the front. They are not allowed to
   l_foxglove: {
     title: 'Lecture · Foxglove',
     kind: 'lecture',
+    short: "Foxglove is a tall purple flower and an old heart medicine. The dose that helps is close to the dose that kills. It works slowly, over several hours, and hospitals keep an antidote.",
+    pic: 'foxglove',
     keys: ['foxglove', 'digitalis', 'digoxin', 'withering', 'poison', 'heart', 'physic garden'],
     body: `FOXGLOVE
 Foxglove (Digitalis purpurea) is a tall purple flower that grows in English hedgerows. It is one of the oldest heart medicines.
@@ -482,6 +545,8 @@ The Company's Physic Garden, at the Almshouses, has grown foxglove since the gar
   l_bellows: {
     title: 'Lecture · The Bellows',
     kind: 'lecture',
+    short: "The Bellows is a pneumatic post: messages travel through pipes in brass carriers. A carrier can wait in the hold-rack in the Hall and be sent later. Holes punched in its collar record, in binary, the hour it went in and the hour it came out.",
+    pic: 'carrier',
     keys: ['bellows', 'pneumatic', 'tube', 'tubes', 'carrier', 'exchange', 'hold-rack', 'hold rack', 'post'],
     body: `THE PNEUMATIC POST
 A pneumatic post sends messages through pipes. The message goes inside a capsule, called a carrier, and air blows the carrier along the pipe.
@@ -493,6 +558,8 @@ As each carrier passes the exchange, holes are punched in its brass collar: the 
   l_letterlock: {
     title: 'Lecture · Letter-locks',
     kind: 'lecture',
+    short: "A letter-lock opens with a word instead of a key. Each ring carries the alphabet, and the bolt moves only when the right letters line up.",
+    pic: 'letterlock',
     keys: ['letter-lock', 'letter lock', 'combination', 'seven rings', 'setting-pin', 'setting pin', 'word lock'],
     body: `LETTER-LOCKS
 A letter-lock opens with a word instead of a key. It has a row of rings, each engraved with the alphabet. The bolt only moves when the right letters are lined up.
@@ -503,6 +570,7 @@ The word is changed from the back of the lock, using a thin steel setting-pin. T
   l_proving: {
     title: 'Lecture · The Proving',
     kind: 'lecture',
+    short: "The Proving is the Company's examination, held every October in the Hall. Candidates sit it in silence for three hours, facing the front.",
     keys: ['proving', 'examination', 'rank', 'novice', 'solver', 'setter', 'grand setter', 'tithe', 'company', 'worshipful'],
     body: `THE PROVING
 The Proving is the Company's examination. Since 1611 it has been held in the Hall on the Thursday of the second full week of October.

@@ -2,6 +2,14 @@
 // plain language, read what it turns up, and follow the lab queue.
 
 import { el, add, clear, icon, leave, setThumb } from './dom.js';
+import { drawLesson } from './lessons.js';
+import { enlargePicture } from './guide.js';
+
+/** A lecture starts with its title in capitals; under the card's own title that line says it twice. */
+function withoutHeading(body) {
+  const [first, ...rest] = body.split('\n');
+  return first === first.toUpperCase() && /[A-Z]/.test(first) && rest.length ? rest.join('\n') : body;
+}
 
 export function createLaptop(panels, game) {
   let panel = null;
@@ -14,9 +22,9 @@ export function createLaptop(panels, game) {
   const fresh = new Set();
 
   const tabs = [
-    { id: 'ask', label: 'ASK' },
-    { id: 'records', label: 'RECORDS' },
-    { id: 'lab', label: 'LAB' },
+    { id: 'ask', label: 'Ask' },
+    { id: 'records', label: 'Cards' },
+    { id: 'lab', label: 'Lab' },
   ];
 
   function renderTabs() {
@@ -29,8 +37,24 @@ export function createLaptop(panels, game) {
     }
   }
 
+  /**
+   * A card from the shelf. A lesson shows its picture and a few plain sentences first;
+   * the full lecture waits behind Read more. Other cards are short, and show in full.
+   */
   function recordNode(rec, open = false) {
-    const d = el('details', { class: `rec ${fresh.has(rec.id) ? 'new' : ''}` }, el('summary', { text: rec.title }), el('div', { class: 'rec-body', text: rec.body }));
+    const pic = rec.pic ? drawLesson(rec.pic) : null;
+    const figure = pic
+      ? el(
+          'figure',
+          { class: 'rec-fig' },
+          // The caption is read aloud and shown when the picture is enlarged; on the card the few sentences under it say the same.
+          el('button', { class: 'rec-pic', type: 'button', 'aria-label': `${pic.caption} Tap to see it larger.`, onClick: () => enlargePicture(pic.svg, pic.caption, panels.parentElement?.querySelector('#cards') ?? panels) }, pic.svg),
+        )
+      : null;
+    const inner = rec.short
+      ? [figure, el('p', { class: 'rec-short', text: rec.short }), el('details', { class: 'rec-more' }, el('summary', { text: 'Read more' }), el('div', { class: 'rec-body', text: withoutHeading(rec.body) }))]
+      : [figure, el('div', { class: 'rec-body', text: rec.body })];
+    const d = el('details', { class: `rec ${fresh.has(rec.id) ? 'new' : ''}` }, el('summary', { text: rec.title.replace(/^Lecture · /, '') }), el('div', { class: 'rec-inner' }, inner));
     d.open = open;
     d.addEventListener('toggle', () => {
       if (d.open) {
@@ -55,10 +79,11 @@ export function createLaptop(panels, game) {
       else a.textContent = h.a;
       h.node = a;
       add(body, a);
-      for (const id of h.opened) {
+      // Only the first card of the newest answer opens by itself; any others wait, folded.
+      h.opened.forEach((id, i) => {
         const rec = v.records.find((r) => r.id === id);
-        if (rec) add(body, recordNode(rec, h === history[history.length - 1]));
-      }
+        if (rec) add(body, recordNode(rec, i === 0 && h === history[history.length - 1]));
+      });
     }
     clear(chips);
     chips.hidden = busy || !v.laptopHints.length;
@@ -72,7 +97,7 @@ export function createLaptop(panels, game) {
     form.hidden = true;
     chips.hidden = true;
     if (!v.records.length) {
-      add(body, el('div', { class: 'empty', text: 'NO RECORDS OPENED.\nUse ASK to search.' }));
+      add(body, el('div', { class: 'empty', text: 'You have no cards yet. Ask the Lectern a question, and every card it finds is kept here.' }));
       return;
     }
     for (const rec of v.records) add(body, recordNode(rec));
@@ -84,14 +109,14 @@ export function createLaptop(panels, game) {
     chips.hidden = true;
     const items = v.evidence.filter((e) => e.lab);
     if (!items.length) {
-      add(body, el('div', { class: 'empty', text: 'LAB QUEUE EMPTY.\nNothing you are holding needs the laboratory yet.' }));
+      add(body, el('div', { class: 'empty', text: 'Nothing you are carrying needs the lab yet.' }));
       return;
     }
-    add(body, el('div', { class: 'term-out', text: 'FORENSIC LABORATORY // SUBMISSIONS\nResults take a while. Keep working. The lab will call you.' }));
+    add(body, el('div', { class: 'term-out', text: 'Send things to the county lab from here. Results take a while, so keep working. The lab will call you.' }));
     for (const e of items) {
       const row = el('div', { class: 'row' }, icon(e.icon, 20), el('div', { class: 'row-main' }, el('div', { class: 'row-title', text: e.name }), el('div', { class: 'row-sub', text: e.lab.status === 'done' ? e.lab.result : e.lab.status === 'pending' ? 'In the queue.' : 'Not submitted.' })));
       if (e.lab.status === 'none') {
-        const btn = el('button', { class: 'btn small', type: 'button', text: 'SUBMIT' });
+        const btn = el('button', { class: 'btn small', type: 'button', text: 'Send' });
         btn.addEventListener('click', async () => {
           btn.disabled = true;
           await game.call('labSubmit', { id: e.id }).catch(() => {});
@@ -99,14 +124,14 @@ export function createLaptop(panels, game) {
         });
         add(row, btn);
       } else {
-        add(row, el('span', { class: `pill ${e.lab.status === 'done' ? 'ok' : 'go'}`, text: e.lab.status === 'done' ? 'RESULT' : 'PENDING' }));
+        add(row, el('span', { class: `pill ${e.lab.status === 'done' ? 'ok' : 'go'}`, text: e.lab.status === 'done' ? 'Result' : 'Waiting' }));
       }
       if (e.lab.status === 'done') row.querySelector('.row-sub').style.webkitLineClamp = 'unset';
       add(body, row);
     }
   }
 
-  async function ask(text) {
+  async function ask(text, lesson = null) {
     const q = (text ?? input.value).trim();
     if (!q || busy) return;
     input.value = '';
@@ -116,7 +141,7 @@ export function createLaptop(panels, game) {
     if (history.length > 30) history.shift();
     api.refresh();
     try {
-      const res = await game.call('laptopAsk', { query: q }, {
+      const res = await game.call('laptopAsk', lesson ? { query: q, lesson } : { query: q }, {
         onText: (soFar) => {
           if (entry.node) entry.node.textContent = soFar;
           body.scrollTop = body.scrollHeight;
@@ -126,7 +151,7 @@ export function createLaptop(panels, game) {
       entry.opened = res.opened;
       for (const id of res.opened) fresh.add(id);
     } catch (err) {
-      entry.a = `ERROR: ${err.message}`;
+      entry.a = `Sorry, that did not work: ${err.message}`;
     }
     entry.pending = false;
     busy = false;
@@ -182,10 +207,10 @@ export function createLaptop(panels, game) {
       renderers[tab]();
     },
 
-    /** Open on the question box and put a question to it. */
-    ask(text) {
+    /** Open on the question box and put a question to it; from a puzzle, name its lesson card. */
+    ask(text, lesson = null) {
       api.open('ask');
-      ask(text);
+      ask(text, lesson);
     },
 
     close() {

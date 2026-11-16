@@ -64,6 +64,8 @@ export const NPCS = {
       { if: 'act:3', text: "You've heard, then. Dame Hesper has 'confessed'. I don't believe it. She can't even butter her own toast. And the Warden has already phoned the Superintendent." },
       { if: 'act:2', text: "It's Mrs Sallow. She died the same way as Pendry: the tea, the locked door, the green-ink letter. Nell found her. Don't worry about the cat." },
       { if: ['flag:through_gate', 'met:kit'], text: 'Well? What have you found?' },
+      // Met for the first time after the gate: the Turnstile is behind you both.
+      { if: 'flag:through_gate', text: "I'm Kit Quoin, your partner on this. I grew up in the Fold, so they've put me with you. You got through the Turnstile without me, then. Good. This is Pendry's shop. Look at everything, and tell me what you find." },
       { if: 'met:kit', text: "Any luck with the lock? Look at the slate and the stone sign together. The sign says how to undo what's on the slate." },
       { text: "I'm Kit Quoin. I grew up in the Fold, so they've put me with you. This is the Turnstile, the only way in. The lock opens to a new word every morning, and I don't know today's either. Somebody chalks it on that slate in code, and the stone sign says how to undo the code. Let's work it out." },
     ],
@@ -85,7 +87,7 @@ She does not know the answer to any puzzle the detective faces. She has not been
       },
       {
         id: 'k_how', keys: ['how', 'what do i do', 'where do i start', 'help', 'next', 'stuck', 'advice', 'work'],
-        line: "Same as anywhere. Look at everything. If something stands out, it's there for a reason. Bag what matters and send it to the lab from your desk at the Hall. Talk to anyone who was nearby. There's one extra rule here: if someone sets you a paper, you answer it. Your Papers are in your notebook. And get a cipher wheel from my gran. Doing ciphers on your fingers is embarrassing.",
+        line: "Same as anywhere. Look at everything. If something stands out, it's there for a reason. Bag what matters and send it to the lab from your desk at the Hall. Talk to anyone who was nearby. There's one extra rule here: if someone sets you a paper, you answer it. Your Papers come to your desk at the Hall. And get a cipher wheel from my gran. Doing ciphers on your fingers is embarrassing.",
       },
       {
         id: 'k_fold', keys: ['fold', 'flat', 'map', 'this place', 'company', 'setters', 'why hidden', 'where are we'],

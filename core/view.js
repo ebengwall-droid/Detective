@@ -121,7 +121,7 @@ export function buildView(state, caseData, ai) {
     .sort((a, b) => b.at - a.at);
 
   const records = Object.entries(s.records)
-    .map(([id, at]) => ({ id, title: caseData.records[id].title, kind: caseData.records[id].kind, body: caseData.records[id].body, at }))
+    .map(([id, at]) => ({ id, title: caseData.records[id].title, kind: caseData.records[id].kind, body: caseData.records[id].body, short: caseData.records[id].short ?? null, pic: caseData.records[id].pic ?? null, at }))
     .sort((a, b) => b.at - a.at);
 
   const deductions = Object.entries(caseData.deductions)

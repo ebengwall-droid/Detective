@@ -14,11 +14,12 @@ import { itemUnlocked } from './prompts.js';
 import { clone, clamp, sanitizePlayerText, GameError, hashString } from './util.js';
 import { openLeads, threadsIn, intentOf } from './talk.js';
 import { normalise, markLetters } from './ciphers.js';
+import { guideSteps } from './guide.js';
 
 export const RPC_METHODS = new Set([
   'newGame', 'view', 'travel', 'examine', 'observe', 'talk', 'say', 'present',
   'laptopAsk', 'labSubmit', 'readLetter', 'deduce', 'accuse', 'think', 'rest',
-  'finaleSay', 'epilogue', 'note', 'solve', 'hint',
+  'finaleSay', 'epilogue', 'note', 'solve', 'hint', 'guide',
 ]);
 export const STREAMING_METHODS = new Set(['say', 'present', 'laptopAsk', 'readLetter', 'think', 'finaleSay', 'epilogue']);
 
@@ -378,7 +379,8 @@ export class GameSession {
     const v = h.views[index];
     const key = `${id}#${index}`;
     const first = s.examined[key] === undefined;
-    const out = { title: h.label, text: v.text, figure: v.figure ?? null, kind: h.kind, action: v.action ?? h.action ?? null, taken: [], letter: false };
+    const doc = v.read ? this.evidenceDef(v.read) : null;
+    const out = { title: h.label, text: v.text, figure: v.figure ?? null, paper: doc?.doc ? { name: doc.name, doc: doc.doc } : null, kind: h.kind, action: v.action ?? h.action ?? null, taken: [], letter: false };
     if (first || v.repeat) {
       if (first) {
         s.examined[key] = s.steps;
@@ -571,13 +573,16 @@ export class GameSession {
     });
   }
 
-  async laptopAsk({ query } = {}, hooks = {}) {
+  async laptopAsk({ query, lesson = null } = {}, hooks = {}) {
     const s = this.requireState();
     const q = sanitizePlayerText(query, 300);
     if (!q) throw new GameError(this.case.laptop.empty);
     s.steps += 1;
     this.log('laptop', { q });
-    const result = await this.brain.laptop(s, q, hooks);
+    // Asked from a puzzle, the Lectern opens that puzzle's own lesson card: no search to go astray.
+    const card = lesson ? `l_${String(lesson).replace(/[^a-z0-9_]/gi, '')}` : null;
+    const direct = card && this.case.records[card] && check(this.case.records[card].if, s) ? card : null;
+    const result = direct ? { answer: this.case.laptop.found(1), open: [direct] } : await this.brain.laptop(s, q, hooks);
     const opened = [];
     for (const rid of result.open ?? []) {
       const rec = this.case.records[rid];
@@ -699,9 +704,9 @@ export class GameSession {
    * specific. Thinking and asking the guide share the ladder, and both count as a hint.
    * @returns {{ target: any, tier: number }|null}
    */
-  takeHint() {
+  takeHint(id = null) {
     const s = this.requireState();
-    const target = this.newestObjective();
+    const target = this.openObjective(id) ?? this.newestObjective();
     if (!target?.hints?.length) return null;
     const tier = clamp(s.hints[target.id] ?? 0, 0, target.hints.length - 1);
     s.hints[target.id] = (s.hints[target.id] ?? 0) + 1;
@@ -709,12 +714,43 @@ export class GameSession {
     return { target, tier };
   }
 
-  /** The detective's own inner voice: a hint toward the nearest open objective. */
-  async think(_args = {}, hooks = {}) {
-    const got = this.takeHint();
+  /** An open goal by id, if it is open. */
+  openObjective(id) {
+    if (!id) return null;
+    const s = this.requireState();
+    const o = this.case.objectives.find((x) => x.id === id);
+    return o && s.objectives[o.id]?.seen !== undefined && s.objectives[o.id]?.done === undefined ? o : null;
+  }
+
+  /**
+   * A hint toward an open goal (the one named, or the newest). `plain` gives the case file's own
+   * short hint rather than a written-out thought: the guide wants one clear sentence.
+   */
+  async think({ id = null, plain = false } = {}, hooks = {}) {
+    const got = this.takeHint(id);
     if (!got) return this.done({ text: 'Nothing nags at you. For once.', objective: null });
-    const text = await this.brain.think(this.requireState(), got.target, got.tier, hooks);
-    return this.done({ text, objective: got.target.text });
+    const text = plain ? got.target.hints[got.tier] : await this.brain.think(this.requireState(), got.target, got.tier, hooks);
+    return this.done({ text, objective: got.target.text, hintsLeft: got.target.hints.length - (this.requireState().hints[got.target.id] ?? 0) });
+  }
+
+  /**
+   * What to do now: the goal shown at the top of the screen (the newest open one), or the one
+   * asked for, as steps that can be ticked off and travelled to; the hints already taken on it;
+   * and the other open goals, in story order.
+   */
+  guide({ id = null } = {}) {
+    const s = this.requireState();
+    const open = this.case.objectives.filter((o) => s.objectives[o.id]?.seen !== undefined && s.objectives[o.id]?.done === undefined);
+    const o = this.openObjective(id) ?? this.newestObjective();
+    if (!o) return this.done({ objective: null, steps: [], hints: [], hintsLeft: 0, others: [] });
+    const taken = clamp(s.hints[o.id] ?? 0, 0, o.hints.length);
+    return this.done({
+      objective: { id: o.id, text: o.text },
+      steps: guideSteps(this.case, s, o),
+      hints: o.hints.slice(0, taken),
+      hintsLeft: o.hints.length - taken,
+      others: open.filter((x) => x !== o).map((x) => ({ id: x.id, text: x.text })),
+    });
   }
 
   // ------------------------------------------------------------- puzzles

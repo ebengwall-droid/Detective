@@ -58,9 +58,14 @@ It is a few hours long, longer if you refuse the hints.
   at the moment you open it, about what you actually did that day and what
   you missed.
 - **The Lectern teaches.** Ask it how any cipher works, what lies at a
-  latitude and longitude, or who somebody in the guild is. It answers in the
-  voice of the woman it was built from. Ask it to solve your Paper and it
-  will ask you a question back.
+  latitude and longitude, or who somebody in the guild is. Each lesson card
+  shows a picture of the method and a few plain sentences; the history waits
+  behind Read more. Ask it to solve your Paper and it will ask you a question
+  back.
+- **Help shows the way.** Help (or the goal at the top of the screen) lists
+  what the current goal needs, ticks each step off as you do it, gives one
+  short hint at a time if you ask, and takes you to the next step: it walks you
+  to the thing or the person, or travels to their place first.
 - **The ending is a negotiation.** The last scene is a conversation with the
   killer, with a life depending on it. What you learned decides what you can
   say that lands.
@@ -113,7 +118,7 @@ nothing needs careful steering.
 - **Look** lists everyone and everything in the room. Tap a name and you walk
   straight to it. With Look and the Map you can play the whole case without
   steering at all.
-- **Tools sit in a dock along the bottom**: Look, Think, Notes, Lectern, Map.
+- **Tools sit in a dock along the bottom**: Look, Help, Notes, Lectern, Map.
   Panels are sheets of glass over the room, and close from the bottom.
 - **Conversations are close-ups.** The person fills the screen, a soft light
   comes up on their face and the room falls out of focus behind them; what
@@ -159,7 +164,7 @@ or host the `dist/app` folder from `npm run build` (below) on any static host.
 | Follow something up | Tap an underlined word in what they said | Click it |
 | Catch a lie | In a conversation, **Show** puts evidence in front of them | The same |
 | Notebook (and Papers), Lectern, map | Dock along the bottom | `N`, `L`, `M` |
-| A nudge on the case | **Think** | `T` |
+| What to do now, and a way there | **Help**, or the goal at the top | `T` |
 | Work a puzzle | Tap the thing (a lock, a slate); swipe rings, turn the wheel, tap codes | Arrow keys turn a ring or the wheel; type letters onto rings |
 | A hint on a puzzle | The bulb on the puzzle | The same |
 
