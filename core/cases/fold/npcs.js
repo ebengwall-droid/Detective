@@ -87,7 +87,7 @@ She does not know the answer to any puzzle the detective faces. She has not been
       },
       {
         id: 'k_how', keys: ['how', 'what do i do', 'where do i start', 'help', 'next', 'stuck', 'advice', 'work'],
-        line: "Same as anywhere. Look at everything. If something stands out, it's there for a reason. Bag what matters and send it to the lab from your desk at the Hall. Talk to anyone who was nearby. There's one extra rule here: if someone sets you a paper, you answer it. Your Papers come to your desk at the Hall. And get a cipher wheel from my gran. Doing ciphers on your fingers is embarrassing.",
+        line: "Same as anywhere. Look at everything. If something stands out, it's there for a reason. Bag what matters and send it to the lab from your desk at the Hall. Talk to anyone who was nearby. There's one extra rule here: if someone sets you a paper, you answer it. Your Papers come to your desk at the Hall. If one beats you, call Milo at the station from the Lectern. He lives for this stuff. And get a cipher wheel from my gran.",
       },
       {
         id: 'k_fold', keys: ['fold', 'flat', 'map', 'this place', 'company', 'setters', 'why hidden', 'where are we'],

@@ -11,6 +11,7 @@ import { NPCS, PEOPLE } from './npcs.js';
 import { SMALL } from './smalltalk.js';
 import { PUZZLES, FEEDS, TOOLS } from './puzzles.js';
 import { META, START, WORLD, ACTS, ACT4_CARDS, BEATS, OBJECTIVES, REST, DEDUCTIONS, ACCUSE, FINALE, LAPTOP_HINTS, LAPTOP, PROMPTS, PUZZLE_MISS, DIRECTOR, ENDINGS } from './story.js';
+import { TECHIE } from './techie.js';
 import { conditionRefs } from '../../conditions.js';
 
 // Each person's small talk travels with them; the detective's partner is the one who answers "what do I do?".
@@ -50,6 +51,7 @@ export const CASE = {
   finale: FINALE,
   laptopHints: LAPTOP_HINTS,
   laptop: LAPTOP,
+  techie: TECHIE,
   prompts: PROMPTS,
   director: DIRECTOR,
   endings: ENDINGS,
@@ -264,6 +266,9 @@ export function validateCase(c = CASE) {
     for (const o of d.options) checkCond(o.needs, `deduction ${id}.${o.id}`);
     for (const f of d.facts ?? []) checkFact(f, `deduction ${id}`);
   }
+  // Milo can talk about the method of every puzzle, and every method he knows has a lesson card.
+  for (const [id, p] of Object.entries(c.puzzles)) if (p.lesson && !c.techie?.lessons?.[p.lesson]) problems.push(`puzzle ${id}: Milo has no lines for its lesson "${p.lesson}"`);
+  for (const id of Object.keys(c.techie?.lessons ?? {})) if (!c.records[`l_${id}`]) problems.push(`Milo knows "${id}", but there is no lesson card l_${id}`);
   for (const [id, p] of Object.entries(c.puzzles)) {
     const where = `puzzle ${id}`;
     checkCond(p.if, where);

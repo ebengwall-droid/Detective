@@ -2,56 +2,9 @@
 // paper card: the idea at a glance, with an example that is never the answer to a puzzle
 // in the game. drawLesson(name) returns { svg, caption }, or null for a name it does not know.
 
-import { PIECE_PATHS } from './stage-kinds3.js';
+import { COL, ABC, s, T, L, R, C, P, chessman, card } from './ink.js';
 
-const NS = 'http://www.w3.org/2000/svg';
-let uid = 0;
-
-const INK = '#2b2620';
-const FAINT = '#8a7f6c';
-const RULE = '#cfc2a6';
-const BRASS = '#a8691c';
-const GREEN = '#2f7a52';
-const RED = '#b03a2e';
-const BLUE = '#2d5f8a';
-const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-function s(tag, attrs = {}, ...children) {
-  const node = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs)) if (v !== undefined && v !== null) node.setAttribute(k, String(v));
-  for (const c of children.flat()) if (c) node.append(c);
-  return node;
-}
-
-/** Text. `c`: font (m mono, u sans, d display); `a`: anchor; `z`: size; `f`: colour; `w`: weight. */
-function T(x, y, str, o = {}) {
-  const n = s('text', { x, y, 'text-anchor': o.a ?? 'middle', class: `lt ${o.c ?? 'm'}`, fill: o.f ?? INK, 'font-size': o.z ?? 13, 'font-weight': o.w ?? null, 'font-style': o.i ? 'italic' : null });
-  n.textContent = str;
-  return n;
-}
-const L = (x1, y1, x2, y2, o = {}) => s('line', { x1, y1, x2, y2, stroke: o.s ?? INK, 'stroke-width': o.w ?? 1.4, 'stroke-linecap': 'round', 'stroke-dasharray': o.d ?? null, 'marker-end': o.m ?? null, 'marker-start': o.ms ?? null });
-const R = (x, y, w, h, o = {}) => s('rect', { x, y, width: w, height: h, rx: o.r ?? 3, fill: o.f ?? 'none', stroke: o.s ?? INK, 'stroke-width': o.w ?? 1.2, 'stroke-dasharray': o.d ?? null });
-const C = (cx, cy, r, o = {}) => s('circle', { cx, cy, r, fill: o.f ?? 'none', stroke: o.s ?? INK, 'stroke-width': o.w ?? 1.2 });
-const P = (d, o = {}) => s('path', { d, fill: o.f ?? 'none', stroke: o.s ?? INK, 'stroke-width': o.w ?? 1.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-dasharray': o.d ?? null, 'marker-end': o.m ?? null });
-
-/** A chess piece, drawn in a square of `size` at (x, y). Upper case is White. */
-function chessman(code, x, y, size) {
-  const white = code === code.toUpperCase();
-  return s('g', { transform: `translate(${x} ${y}) scale(${size / 45})` }, s('path', { d: PIECE_PATHS[code.toLowerCase()], fill: white ? '#fbf6ea' : '#1c140c', stroke: white ? '#1c140c' : '#e8d6b0', 'stroke-width': white ? 1.5 : 1.1, 'stroke-linejoin': 'round' }));
-}
-
-/** A card of the given size, with arrowheads in each colour ready to use as url(#id-colour). */
-function card(w, h) {
-  const id = `ls${++uid}`;
-  const defs = s('defs');
-  for (const [name, col] of Object.entries({ ink: INK, brass: BRASS, red: RED, green: GREEN, faint: FAINT })) {
-    defs.append(s('marker', { id: `${id}-${name}`, viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, s('path', { d: 'M0 0 L10 5 L0 10 z', fill: col })));
-  }
-  // The paper is part of the picture, so it reads the same enlarged, on any background.
-  const svg = s('svg', { viewBox: `0 0 ${w} ${h}`, class: 'lesson-svg', role: 'img' }, defs, s('rect', { x: 0, y: 0, width: w, height: h, rx: 8, fill: '#f3ecdb' }));
-  const arrow = (name = 'ink') => `url(#${id}-${name})`;
-  return { svg, arrow };
-}
+const { ink: INK, faint: FAINT, rule: RULE, brass: BRASS, green: GREEN, red: RED, blue: BLUE } = COL;
 
 const PICS = {
   caesar() {

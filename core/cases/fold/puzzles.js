@@ -241,7 +241,7 @@ export const PUZZLES = {
     hints: [
       'These signs are the pigpen cipher. Each letter is drawn as the lines around its cell in a grid. The key is under the message.',
       'The alphabet is spread over two noughts-and-crosses grids and two X shapes. Letters in the second grid and the second X have a dot.',
-      'Decoded, it asks who signs for Dame Hesper now. It wants his office, meaning his title. Ask the Lectern about her, or ask people in the Hall.',
+      'Decoded, it asks who signs for Dame Hesper now. It wants his office, meaning his title. Ask Milo to look her up, or ask people in the Hall.',
       'The court made the WARDEN her deputy.',
     ],
   },
@@ -274,7 +274,7 @@ export const PUZZLES = {
     facts: ['follow_money'],
     lesson: 'atlas',
     hints: [
-      'Each pair of numbers is a latitude, then a longitude. Find each place on a real map, or ask the Lectern what lies at those numbers.',
+      'Each pair of numbers is a latitude, then a longitude. Find each place on a real map, or open the card on latitude in the Lectern: it lists famous places by their numbers.',
       'Number three is a joke among people who make maps: the point where the equator meets the prime meridian. It has a name.',
       'Mecca, Oslo, Null Island, Everest, York.',
       'M, O, N, E, Y. The answer is MONEY.',

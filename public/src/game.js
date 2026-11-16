@@ -673,13 +673,13 @@ export class Game {
   afterStage(ids, then) {
     this.queue = this.queue.filter((e) => !(e.type === 'puzzle' && ids.includes(e.id)));
     this.flushEvents();
-    if (then?.lectern) this.askLectern(then.about ? `How is “${then.about}” done?` : then.lectern, then.lectern);
+    if (then?.lectern) this.askLectern(then.about ?? then.lectern, then.lectern, then.about ?? null);
   }
 
-  /** Put a question to the Lectern, from anywhere; from a puzzle, `lesson` names its card. */
-  askLectern(query, lesson = null) {
-    this.open('laptop', 'ask');
-    this.laptop.ask(query, lesson);
+  /** Call Milo from the Lectern about something; from a puzzle, `lesson` names its method. */
+  askLectern(query, lesson = null, about = null) {
+    this.open('laptop', 'call');
+    this.laptop.ask(query, lesson, about);
   }
 
   openEvidence(id) {
@@ -943,7 +943,7 @@ export class Game {
   async goTo(t) {
     if (!t || this.blockers.size) return;
     if (t.type === 'lab') return this.open('laptop', 'lab');
-    if (t.type === 'lectern') return this.open('laptop', 'ask');
+    if (t.type === 'lectern') return this.open('laptop', 'call');
     if (t.type === 'board') return this.open('notebook', 'board');
     if (t.type === 'map') return this.open('map');
     if (!t.here) {

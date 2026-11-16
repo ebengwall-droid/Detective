@@ -813,6 +813,94 @@ button.row:active, .map-row:active { background: var(--glass-fill-2); transform:
 .rec > summary::after { content: ''; flex: none; order: 2; margin-left: auto; width: 8px; height: 8px; margin-right: 4px; border-right: 1.5px solid var(--text-3); border-bottom: 1.5px solid var(--text-3); transform: rotate(-45deg); transition: transform 0.3s var(--spring); }
 .rec[open] > summary::after { transform: rotate(45deg); }
 .rec-body { padding: 0 0 18px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 16px; line-height: 1.6; color: #cfeedd; }
+/* A video call with Milo from the Lectern: his face, what he says, his screen, and what to show him. */
+.call { display: flex; flex-direction: column; gap: 14px; max-width: 560px; margin: 0 auto; padding: 4px 0 8px; }
+.call-head { display: flex; align-items: center; gap: 14px; }
+.call-avatar { position: relative; width: 64px; height: 64px; flex: none; }
+.call-face { position: relative; z-index: 1; width: 64px; height: 64px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(143, 224, 176, 0.5), 0 8px 18px -8px rgba(0, 0, 0, 0.8); }
+.call-rings { position: absolute; inset: 0; pointer-events: none; }
+.call-rings i { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(143, 224, 176, 0.6); opacity: 0; }
+.call.ringing .call-rings i { animation: call-ring 1.5s ease-out infinite; }
+.call.ringing .call-rings i:nth-child(2) { animation-delay: 0.5s; }
+.call.ringing .call-rings i:nth-child(3) { animation-delay: 1s; }
+@keyframes call-ring { from { transform: scale(1); opacity: 0.9; } to { transform: scale(1.7); opacity: 0; } }
+.call.idle .call-face { filter: saturate(0.7); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18); }
+.call-mouth { transform-box: fill-box; transform-origin: center; }
+.call.talking .call-mouth { animation: call-talk 0.22s ease-in-out infinite alternate; }
+@keyframes call-talk { from { transform: scaleY(0.6); } to { transform: scaleY(2.1); } }
+.call-eye { transform-box: fill-box; transform-origin: center; animation: call-blink 4.6s infinite; }
+@keyframes call-blink { 0%, 95%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
+.call-who { flex: 1; min-width: 0; }
+.call-name { font-size: 18px; font-weight: 700; color: var(--text-1); }
+.call-role { font-size: 13.5px; color: var(--text-2); }
+.call-time { font-family: var(--mono); font-size: 12.5px; color: var(--green); }
+.call-btn { width: 48px; height: 48px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff; transition: transform 0.2s var(--spring), opacity 0.2s; }
+.call-btn.end { background: #c8433a; box-shadow: 0 8px 18px -8px rgba(200, 67, 58, 0.8); }
+.call-btn.end svg { transform: rotate(135deg); }
+.call-btn:active { transform: scale(0.92); }
+.call.idle .call-btn.end { opacity: 0; pointer-events: none; }
+.call-say { position: relative; min-height: 52px; padding: 13px 16px; border-radius: 18px; border-top-left-radius: 6px; background: rgba(143, 224, 176, 0.09); box-shadow: inset 0 0 0 1px rgba(143, 224, 176, 0.18); font-size: 17px; line-height: 1.45; color: var(--text-1); }
+.call.idle .call-say { background: var(--glass-fill); box-shadow: none; color: var(--text-2); }
+.call-stage:empty { display: none; }
+.call-search { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 26px; background: #f3ecdb; color: #2b2620; font-family: var(--mono); font-size: 15px; box-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.8); }
+.call-spark { color: #a8691c; font-size: 16px; }
+.call-q { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.call-caret { width: 2px; height: 18px; background: #2b2620; animation: call-caret 0.9s steps(1) infinite; }
+@keyframes call-caret { 50% { opacity: 0; } }
+.call-progress { height: 3px; margin: 10px 18px 0; border-radius: 2px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+.call-bar { display: block; width: 0; height: 100%; background: linear-gradient(90deg, var(--green), var(--lamp)); transition: width 0.9s cubic-bezier(0.3, 0.7, 0.2, 1); }
+.call-bar.go { width: 100%; }
+.call-stage .demo { margin: 0 auto; }
+.call-cards { display: flex; flex-direction: column; gap: 12px; }
+.call-card { padding: 14px 16px; border-radius: 16px; background: var(--glass-fill); }
+.call-card-title { margin-bottom: 8px; font-size: 16px; font-weight: 700; color: var(--text-1); }
+.call-card p { margin: 0; font-size: 15.5px; line-height: 1.5; color: var(--text-1); white-space: pre-wrap; }
+.call-pic { margin-bottom: 10px; border-radius: 10px; overflow: hidden; max-width: 520px; }
+.call-pick { display: flex; flex-direction: column; gap: 8px; }
+.call-sec { margin-top: 2px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); }
+.call-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.call-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 14px; border-radius: 22px; background: var(--glass-fill); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08); font-size: 15px; font-weight: 600; color: var(--text-1); text-align: left; transition: transform 0.2s var(--spring), background 0.2s; }
+.call-chip.found { background: rgba(255, 179, 71, 0.13); box-shadow: inset 0 0 0 1px rgba(255, 179, 71, 0.3); }
+.call-chip:active { transform: scale(0.96); }
+.call-chip .ico { color: var(--lamp-2); }
+.call-ask { display: flex; gap: 8px; margin-top: 6px; }
+.call-input { flex: 1; min-width: 0; }
+.call-send { width: 48px; padding: 0; justify-content: center; }
+.call-row { display: flex; gap: 10px; }
+.call-row .btn { flex: 1; min-width: 0; padding-left: 12px; padding-right: 12px; white-space: nowrap; }
+.laptop.calling .term-foot { display: none; }
+.call-go { gap: 8px; min-height: 52px; font-size: 16.5px; }
+.call-more { margin-top: 8px; }
+.call-more .rec-body { font-size: 15.5px; }
+.rec-watch { margin: 0 0 12px; }
+.rec-demo:empty { display: none; }
+.rec-demo { margin-bottom: 12px; }
+/* The how-to player: a paper screen, one short line, and the controls. */
+.demo { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 520px; }
+.demo-screen { border-radius: 12px; overflow: hidden; box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08); background: #f3ecdb; }
+.demo-svg { display: block; width: 100%; height: auto; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.demo-say { min-height: 46px; font-size: 17px; font-weight: 600; line-height: 1.35; color: var(--text-1); text-wrap: balance; }
+.demo-bar { display: flex; align-items: center; gap: 8px; }
+.demo-dots { flex: 1; display: flex; gap: 6px; justify-content: center; }
+.demo-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, 0.18); transition: background 0.25s, transform 0.25s; }
+.demo-dots i.done { background: rgba(143, 224, 176, 0.55); }
+.demo-dots i.on { background: var(--lamp); transform: scale(1.3); }
+.demo-ibtn { min-width: 40px; height: 40px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 20px; color: var(--text-1); background: var(--glass-fill); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1); font-size: 14px; font-weight: 600; transition: background 0.2s, transform 0.2s var(--spring); }
+.demo-ibtn:active { transform: scale(0.94); background: var(--glass-fill-2); }
+.demo-ibtn:disabled { opacity: 0.35; }
+.demo-ibtn.big { min-width: 52px; height: 52px; border-radius: 26px; font-size: 26px; font-weight: 500; }
+.demo-next { min-width: 120px; }
+.demo-try { display: flex; flex-direction: column; gap: 10px; padding: 0 0 12px; background: #f3ecdb; }
+.demo-try .demo-svg { border-radius: 0; }
+.demo-controls { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 2px 10px; }
+.demo-controls.wrap { flex-wrap: wrap; gap: 8px 14px; }
+.demo-controls .demo-ibtn { color: #2b2620; background: #e6dbc2; box-shadow: inset 0 0 0 1px #cbb98f; }
+.demo-group { display: flex; align-items: center; gap: 6px; }
+.demo-tag { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8a7f6c; }
+.demo-num { min-width: 34px; text-align: center; font-family: var(--mono); font-size: 24px; color: #2b2620; }
+.demo-note, .demo-goal { min-height: 22px; padding: 0 14px; text-align: center; font-size: 15px; font-weight: 700; color: #2f7a52; }
+.demo-goal { padding-top: 12px; color: #2b2620; }
+.demo-goal.ok { color: #2f7a52; }
 /* A lesson card: its picture on paper, a few plain sentences, and the full lecture folded away. */
 .rec-inner { padding: 0 0 18px; }
 .rec-fig { margin: 2px 0 12px; max-width: 520px; }

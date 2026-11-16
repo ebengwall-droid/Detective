@@ -57,11 +57,14 @@ It is a few hours long, longer if you refuse the hints.
 - **The killer writes to you.** Each Paper comes with a covering note written
   at the moment you open it, about what you actually did that day and what
   you missed.
-- **The Lectern teaches.** Ask it how any cipher works, what lies at a
-  latitude and longitude, or who somebody in the guild is. Each lesson card
-  shows a picture of the method and a few plain sentences; the history waits
-  behind Read more. Ask it to solve your Paper and it will ask you a question
-  back.
+- **Call Milo when you are stuck.** From the Lectern you video-call Milo Hart,
+  the tech at Ravel CID. Show him what you found (any puzzle you have open) and
+  he recognises it in a line ("Letters moved along the alphabet? That's a
+  Caesar shift"), searches it, and a short animated how-to plays: a few steps,
+  one short line each, then a hands-on try-it (turn a shift dial, punch holes,
+  swing pendulums). Then one tip. He can also look up people and places, and
+  every card he finds is kept, with its how-to, under Cards. He shows you how a
+  method works; he never solves a puzzle for you.
 - **Help shows the way.** Help (or the goal at the top of the screen) lists
   what the current goal needs, ticks each step off as you do it, gives one
   short hint at a time if you ask, and takes you to the next step: it walks you

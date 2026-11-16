@@ -11,6 +11,16 @@ export function npcPlace(npc, state) {
   return w ?? null;
 }
 
+/** Milo's lines, with only the methods the detective has come across. */
+function techieFor(caseData, s) {
+  const t = caseData.techie;
+  if (!t) return null;
+  const met = new Set();
+  for (const [id, st] of Object.entries(s.puzzles ?? {})) if (st?.open !== undefined && caseData.puzzles[id]?.lesson) met.add(caseData.puzzles[id].lesson);
+  for (const id of Object.keys(s.records ?? {})) if (id.startsWith('l_')) met.add(id.slice(2));
+  return { ...t, lessons: Object.fromEntries(Object.entries(t.lessons).filter(([id]) => met.has(id))) };
+}
+
 /** Everything the detective can put in front of someone: evidence, then opened records. */
 export function presentables(state, caseData) {
   const out = [];
@@ -193,6 +203,8 @@ export function buildView(state, caseData, ai) {
         hints: def.hints.slice(0, st.hints),
         hintsLeft: def.hints.length - st.hints,
         lesson: def.lesson ? caseData.records[`l_${def.lesson}`]?.title.replace(/^Lecture · /, '') ?? null : null,
+        // The method's id (caesar, binary…): what Milo is asked about, and the how-to to play.
+        lessonId: def.lesson ?? null,
         at: st.solved ?? st.open,
       };
     })
@@ -237,6 +249,9 @@ export function buildView(state, caseData, ai) {
     puzzles,
     tools,
     laptop: caseData.laptop.ui,
+    // The voice on the help line. His lines about a method travel only once the detective has
+    // met it, in a puzzle or on a card: a line about foxglove must not arrive on the first morning.
+    techie: techieFor(caseData, s),
     hub: caseData.start.hub,
     ending: s.ending,
     notes: s.notes ?? '',

@@ -337,6 +337,20 @@ export class Audio {
     this.noiseBurst({ gain: 0.035, freq: 3400 + Math.random() * 500, q: 5, decay: 0.018 });
   }
 
+  /** The phone ringing at the other end: a short double burble. */
+  ring() {
+    for (const w of [0, 0.36]) {
+      this.tone(440, { gain: 0.035, decay: 0.28, when: w, wet: 0.1 });
+      this.tone(480, { gain: 0.035, decay: 0.28, when: w, wet: 0.1 });
+    }
+  }
+
+  /** Hanging up: two falling notes. */
+  hangUp() {
+    this.tone(620, { gain: 0.03, decay: 0.12, wet: 0.1 });
+    this.tone(470, { gain: 0.03, decay: 0.16, when: 0.12, wet: 0.1 });
+  }
+
   /** The bolt that does not move. */
   clunk() {
     this.noiseBurst({ gain: 0.09, freq: 300, q: 1.2, decay: 0.12, type: 'lowpass' });

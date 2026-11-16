@@ -115,9 +115,9 @@ export const SMALL = {
     who: "Jonah Okafor-Reed. I'm a Solver of the Company, technically. I built the Lorimer Engine, the Lectern. It's the thing everybody thinks did it.",
     ack: ['*He turns the Go stone over.* Right.', 'Yeah. *He looks back at the screen.* Yeah.'],
     thanks: "Sure. Just tell people it wasn't the machine. Nobody listens when I say it.",
-    bye: "See you. Ask the Lectern if you get stuck. It explains things better than I do.",
+    bye: "See you. Use the Lectern if you get stuck. It shows how things work better than I can.",
     accuse: "*He laughs.* No. I can't set a crossword. I can barely finish one. I built a machine that explains them. Read its log. It's on the cabinet.",
-    next: "Ask the Lectern how a thing is done, then go and do it. That's what it's for. It won't give you the answer, though. I made sure of that.",
+    next: "Have the Lectern show you how a thing is done, then go and do it. That's what it's for. It won't give you the answer, though. I made sure of that.",
     case: "Two Syndics are dead, and everyone's looking at my machine. Ask me about the Engine, and I'll tell you why it wasn't that.",
   },
   hesper: {

@@ -228,7 +228,7 @@ export function openStage(host, game, id, { intro = null, figure = null } = {}) 
           });
           list.append(btn);
         }
-        if (p.lesson) list.append(el('button', { class: 'btn small quiet', type: 'button', onClick: () => close({ lectern: p.lesson, about: p.title }) }, icon('laptop', 16), 'Ask the Lectern how this is done'));
+        if (p.lessonId) list.append(el('button', { class: 'btn small quiet', type: 'button', onClick: () => close({ lectern: p.lessonId, about: p.title }) }, icon('phone', 16), 'Call Milo: he can show you how'));
       };
       draw();
       openSheet('hints', [el('div', { class: 'sheet-kicker', text: 'Hints' }), el('h3', { class: 'sheet-title', text: p.title }), list]);

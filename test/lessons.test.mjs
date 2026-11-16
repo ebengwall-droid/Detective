@@ -52,3 +52,31 @@ test('asked from a puzzle, the Lectern opens that puzzle\'s own lesson card', as
     assert.deepEqual(res.opened, [`l_${p.lesson}`], id);
   }
 });
+
+test("the page gets each open puzzle's method by id, which is what Milo and the Lectern are asked with", async () => {
+  const { GameSession } = await import('../core/engine.js');
+  const s = new GameSession({ ai: null });
+  await s.newGame({ name: 'Lessons' }, {});
+  const res = await s.examine({ id: 'turnstile' });
+  const gate = res.view.puzzles.find((p) => p.id === 'gate');
+  assert.equal(gate.lessonId, CASE.puzzles.gate.lesson);
+  // Milo's lines for it travel with the view, and asking with that id opens its card.
+  assert.ok(res.view.techie.lessons[gate.lessonId], 'Milo knows the method of an open puzzle');
+  const asked = await s.laptopAsk({ query: gate.title, lesson: gate.lessonId });
+  assert.deepEqual(asked.opened, [`l_${gate.lessonId}`]);
+});
+
+test('the how-tos use their own examples: no puzzle answer appears in them', () => {
+  const dir = new URL('../public/src/ui/demos/', import.meta.url);
+  const src = fs.readdirSync(dir).filter((f) => f.endsWith('.js')).map((f) => fs.readFileSync(new URL(f, dir), 'utf8')).join('\n').toUpperCase();
+  // Ordinary words the lessons themselves use (the noon sun, Königsberg's south bank, a walk that
+  // can never be done), and the instrument the navigation lesson names alongside the others.
+  const allowed = new Set(['SEXTANT', 'NOON', 'MIDDAY', 'TWELVE', 'SOUTH', 'SOUTH BANK', 'THE SOUTH BANK', 'NEVER', 'CANNOT', 'IT CANNOT', 'IMPOSSIBLE']);
+  for (const [id, p] of Object.entries(CASE.puzzles)) {
+    for (const a of p.answers) {
+      const word = a.toUpperCase().replace(/[^A-Z0-9 ]/g, '').trim();
+      if (word.replace(/ /g, '').length < 4 || allowed.has(word)) continue;
+      assert.doesNotMatch(src, new RegExp(`\\b${word.replace(/ /g, '\\s*')}\\b`), `${id}: "${a}" appears in a how-to`);
+    }
+  }
+});
