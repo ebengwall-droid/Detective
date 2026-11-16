@@ -9,7 +9,6 @@ const GROUPS = [
   ['invigilator', "The Invigilator's Papers"],
   ['fold', "The Fold's own"],
   ['hesper', 'Dame Hesper'],
-  ['extra', 'Around the Fold'],
 ];
 
 const tierDots = (n) => el('span', { class: 'tier', title: `Difficulty ${n} of 5`, 'aria-label': `Difficulty ${n} of 5` }, [1, 2, 3, 4, 5].map((i) => el('i', { class: i <= n ? 'on' : '' })));
@@ -29,7 +28,7 @@ export function renderPapers(body, game) {
   const open = puzzles.filter((p) => !p.solved);
   add(body, el('p', { class: 'muted papers-count' }, open.length ? `${open.length} unanswered. Each one waits where you found it: go there and tap it.` : 'Nothing unanswered. For now.'));
   for (const [key, label] of GROUPS) {
-    const list = puzzles.filter((p) => (key === 'extra' ? p.extra : !p.extra && p.setter === key));
+    const list = puzzles.filter((p) => p.setter === key);
     if (!list.length) continue;
     add(body, el('div', { class: 'section-label list-label', text: label }));
     add(

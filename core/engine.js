@@ -33,9 +33,17 @@ const SAVE_VERSION = 5;
  * would keep imitating) the old wording. Those are cleared and every conversation
  * starts again with today's greeting; what the detective has learned is kept.
  */
+/** A save may hold puzzles, cards or facts the case no longer has: they are dropped, not shown. */
+function pruneSave(state, caseData) {
+  for (const [key, defs] of [['puzzles', caseData.puzzles], ['records', caseData.records], ['facts', caseData.facts]]) {
+    for (const id of Object.keys(state[key] ?? {})) if (!defs[id]) delete state[key][id];
+  }
+  return state;
+}
+
 function upgradeSave(state, caseData) {
   if (!state || state.caseId !== caseData.meta.id) return null;
-  if (state.v === SAVE_VERSION) return state;
+  if (state.v === SAVE_VERSION) return pruneSave(state, caseData);
   if (state.v !== 4) return null;
   for (const npc of Object.values(state.npcs ?? {})) {
     npc.log = [];
@@ -44,7 +52,7 @@ function upgradeSave(state, caseData) {
     delete npc.pendingOpen;
   }
   state.v = SAVE_VERSION;
-  return state;
+  return pruneSave(state, caseData);
 }
 const MAX_LOG = 120;
 const MAX_CONVO = 70;
@@ -906,7 +914,7 @@ export class GameSession {
     let score = (found / truths.length) * 60;
     score += E.bonus.how[how] ?? 0;
     score += E.bonus.verdict[s.verdict] ?? (s.flags.knew_killer ? E.bonus.knew : 0);
-    // Puzzles: every one on the case counts for a little, and the ones around the Fold are a bonus on top;
+    // Puzzles: every one on the case counts for a little (any marked extra would be a bonus on top);
     // hints and given-away answers count against.
     const all = Object.entries(this.case.puzzles);
     const main = all.filter(([, p]) => !p.extra);

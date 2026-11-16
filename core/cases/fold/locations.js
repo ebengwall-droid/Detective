@@ -132,10 +132,10 @@ export const LOCATIONS = {
         ],
       },
       {
-        id: 'tithe_wall', at: 'tithe_wall', label: 'The Wall of Tithes', kind: 'look', surface: 'wall',
+        id: 'tithe_wall', at: 'tithe_wall', label: 'The Wall of Tithes', kind: 'look',
         views: [{
-          text: "Every member owes the Company one new puzzle a year, called a Tithe. Here they are: four hundred sheets, pinned from the floor to far above your head. There are mazes, ciphers, chess problems, and a knitting pattern that is said to be a joke. At the very top, behind glass, is a tray of numbered tiles.\n\nThree of the puzzles have hung here for a very long time, and nobody has taken them down. You could try them.",
-          facts: ['tithe_custom'],
+          text: "Every member owes the Company one new puzzle a year, called a Tithe. Here they are: four hundred sheets, pinned from the floor to far above your head. There are mazes, ciphers, chess problems, and a knitting pattern that is said to be a joke.\n\nAt the very top, behind glass, is a tray of fifteen numbered tiles with its last two swapped: the Hundred Guineas puzzle of 1911. No sliding can ever put it right, and the Warden who set it knew that. It hangs here to teach the Fold's oldest rule: a puzzle must have a way out, or it is not a fair puzzle.",
+          facts: ['tithe_custom', 'unfair_known'],
         }],
       },
       {
@@ -458,7 +458,7 @@ export const LOCATIONS = {
       },
       {
         id: 'piano', at: 'piano', label: 'Piano', kind: 'look',
-        views: [{ figure: {kind: "card", text: "IF YOU CAN SOLVE IT YOU CAN PLAY IT.", alt: "A sign on the piano lid: IF YOU CAN SOLVE IT YOU CAN PLAY IT."}, text: "An upright piano. The sheet on the stand looks like music, but it is really a puzzle. A sign on the lid says: 'IF YOU CAN SOLVE IT YOU CAN PLAY IT.'" }],
+        views: [{ figure: {kind: "card", text: "IF YOU CAN SOLVE IT YOU CAN PLAY IT.", alt: "A sign on the piano lid: IF YOU CAN SOLVE IT YOU CAN PLAY IT."}, text: "An upright piano with a stack of old music on the lid. Ottilie plays it on quiet afternoons. Nobody is playing it today." }],
       },
       {
         id: 'score_book', at: 'score_book', label: "Ottilie's score-book", kind: 'look',

@@ -109,7 +109,7 @@ test('the epigraph hides the same name in its capitals', () => {
   assert.equal(marked.toLowerCase(), 'nothing is hidden that a patient eye will not find.');
 });
 
-test('the night log, the square, the bridges and the tray', () => {
+test('the night log', () => {
   // The night log: only one terminal asks for the lecture between two and four, and it is the answer.
   const log = PUZZLES.ascii.stage.rows;
   const lecture = log.filter((r) => r.busy.some(([from, to, , asked]) => from <= 2 && to >= 4 && /LECTURE 1987/.test(asked)));
@@ -123,21 +123,6 @@ test('the night log, the square, the bridges and the tray', () => {
   assert.ok(late[0][1] > 200 && late[1][1] < 60, 'nearly every night, against a few');
   const darkest = log.flatMap((r) => r.busy.map((b) => [r.name, b[2]])).sort((a, b) => b[1] - a[1])[0];
   assert.notEqual(darkest[0], answerOf('ascii'), 'the darkest square is not the answer');
-  // Durer's square: every line makes 34 once the two gaps are filled.
-  const rows = PUZZLES.tithe_square.blocks.find((b) => b.grid).grid.map((r) => r.trim().split(/\s+/).map((n) => (n === '?' ? null : Number(n))));
-  rows[3][1] = 15;
-  rows[3][2] = 14;
-  const sums = [...rows.map((r) => r.reduce((a, b) => a + b)), ...[0, 1, 2, 3].map((c) => rows.reduce((a, r) => a + r[c], 0)), rows.reduce((a, r, i) => a + r[i], 0), rows.reduce((a, r, i) => a + r[3 - i], 0)];
-  assert.deepEqual(new Set(sums), new Set([34]));
-  // The bridges: exactly two places have an odd number.
-  const bridges = { 'North Bank': 2 + 1 + 1, Fold: 2 + 1, Eyot: 1 + 2 + 1, 'South Bank': 2 + 1 };
-  assert.deepEqual(Object.entries(bridges).filter(([, n]) => n % 2).map(([k]) => k), ['Fold', 'South Bank']);
-  assert.equal(Object.values(bridges).reduce((a, b) => a + b) / 2, 7);
-  // The tray: one pair out of order with the gap in its home corner cannot be solved.
-  const tiles = PUZZLES.tithe_fifteen.blocks.find((b) => b.grid).grid.join(' ').trim().split(/\s+/).filter((t) => t !== '_').map(Number);
-  let inversions = 0;
-  for (let i = 0; i < tiles.length; i++) for (let j = i + 1; j < tiles.length; j++) if (tiles[i] > tiles[j]) inversions++;
-  assert.equal(inversions % 2, 1, 'an odd number of inversions: unreachable');
 });
 
 test('every puzzle can be finished from its own hints, and says what it teaches', () => {

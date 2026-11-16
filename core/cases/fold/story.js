@@ -673,15 +673,6 @@ export const LAPTOP_HINTS = [
   { if: 'fact:two_hands', q: 'Stylometry', done: 'rec:l_stylometry' },
   { if: 'ev:paper_4', q: 'The Playfair cipher', done: 'rec:l_playfair' },
   { if: 'ev:paper_4', q: "Bacon's two-letter cipher", done: 'rec:l_bacon' },
-  { if: 'examined:tithe_wall', q: 'The fifteen puzzle', done: 'rec:l_fifteen' },
-  { if: 'examined:tithe_wall', q: 'The seven bridges of Königsberg', done: 'rec:l_bridges' },
-  { if: 'examined:riddle_book', q: 'The oldest river-crossing riddle', done: 'rec:l_alcuin' },
-  { if: 'examined:tea_table', q: 'How do logic grids work?', done: 'rec:l_logic' },
-  { if: 'examined:chess_tables', q: 'What is a smothered mate?', done: 'rec:l_smothered' },
-  { if: 'examined:clocks', q: 'Why does a pendulum keep time?', done: 'rec:l_pendulum' },
-  { if: 'examined:piano', q: 'How do I read music?', done: 'rec:l_notes' },
-  { if: 'examined:noticeboard', q: 'Guess-the-word games', done: 'rec:l_wordgames' },
-  { if: 'examined:portraits', q: 'How do I put history in order?', done: 'rec:l_dates' },
 ];
 
 /** What the reference desk says when it has nothing, and how it presents itself. */
@@ -822,7 +813,7 @@ Whatever people say about me afterwards, remember this: on Monday you could not 
     { if: 'puz:paper2a', text: 'found the five places on the map without any help' },
     { if: 'puz:bellows', text: 'read the punched collar on the carrier' },
     { if: 'puz:paper1a', text: 'counted the letters on Paper I instead of guessing' },
-    { if: 'puz:tithe_fifteen', text: 'learned why nobody has claimed the hundred guineas' },
+    { if: 'fact:unfair_known', text: 'learned why nobody has claimed the hundred guineas' },
     { if: 'met:hesper', text: 'went and sat with Dame Hesper, which is more than her Warden has done' },
     { if: 'examined:lodger', text: 'looked inside the chess-playing machine' },
     { if: 'puz:fitting', text: 'got fitted for a cipher wheel' },

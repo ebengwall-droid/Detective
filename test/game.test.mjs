@@ -171,9 +171,6 @@ test('a wrong answer costs a little time and nothing else; hints end in the answ
 });
 
 test('an answer that is nearly right is told so', async () => {
-  const session = await playUntil(isRest(1));
-  const out = await session.solve({ id: 'tithe_bridges', answer: 'the fold' });
-  assert.equal(out.ok, false);
   const session2 = await playUntil((s) => s.method === 'solve' && s.args.id === 'paper1b');
   const near = await session2.solve({ id: 'paper1b', answer: 'Clay' });
   assert.equal(near.ok, false);

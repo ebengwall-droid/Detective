@@ -18,7 +18,6 @@ export const FACTS = {
   lodger_trick: { tag: 'pattern', about: ['pendry'], text: "Pendry's chess machine, the Lodger, is a copy of a famous machine from 1770. That machine could not think: a man hidden inside it made the moves." },
   basket: { tag: 'pattern', about: ['hesper'], text: "Dame Hesper's old waste-paper basket is on display. Its label says more good clues were rescued from it than most setters ever write. It does not say who rescued them." },
   lunch_tin: { tag: 'testimony', about: ['hob', 'kit'], text: "When Kit was a child, the Porter left a puzzle in her lunch tin every Monday. She thought all porters did that." },
-  tithe_done: { tag: 'record', text: 'You solved one of the old puzzles on the Wall of Tithes.' },
   unfair_known: { tag: 'pattern', key: true, text: "The Hundred Guineas puzzle of 1911 cannot be solved, and the Warden who set it knew that. The Fold's oldest rule is that a puzzle must have a solution, or it is not a fair puzzle." },
 
   // --------------------------------------------- 4 Nonesuch Row (Pendry)
@@ -43,7 +42,6 @@ export const FACTS = {
   locks_oiled: { tag: 'insider', key: true, text: "On Saturday the Syndics' letter-locks were oiled and re-pinned, as they are every October before the Proving. This included Pendry's, Sallow's, Voss's, the Warden's and the Lantern grille. It is written in the Porter's daybook." },
   pins_open: { tag: 'insider', text: "A setting-pin can change a letter-lock's word in a minute. The pins hang on open hooks in the Porter's Lodge, a yard from the tea table. Anyone could take one." },
   own_cups: { tag: 'insider', text: "Each Syndic has their own cup at the four o'clock tea. Anyone who knew the cups could poison one person and nobody else." },
-  cups_secret: { tag: 'insider', text: "The Syndics' cups do not match their trades: Dame Hesper laid them as a puzzle. A stranger would pick every cup wrong. Only someone who sat at that table, or laid it every day, knew whose cup was whose." },
   tea_porter: { tag: 'insider', about: ['hob'], key: true, text: "The Porter has set out and poured the Syndics' tea for forty years. Nobody watches him do it. Several people had to stop and think before they could say who does it." },
   rack_wound: { tag: 'insider', about: ['hob'], text: "Anyone can leave a carrier in the hold-rack at the Bellows exchange, to be sent at a later time. The rack runs on clockwork, and the Porter winds it on Mondays." },
   held_carrier: { tag: 'pattern', key: true, text: 'Paper I was put in the hold-rack at noon, and the clockwork sent it at eight. Whoever sent the Papers could have been anywhere when they arrived.' },

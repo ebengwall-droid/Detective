@@ -55,7 +55,7 @@ export function openStage(host, game, id, { intro = null, figure = null } = {}) 
         'header',
         { class: 'stage-top' },
         el('button', { class: 'stage-icon', type: 'button', 'aria-label': 'Put it down', 'data-back': '', onClick: () => close() }, icon('back', 20)),
-        el('div', { class: 'stage-title' }, el('div', { class: 'stage-kicker', text: p.on?.includes('tithe_wall') ? 'From the Wall of Tithes' : SETTERS[p.setter] ?? '' }), el('div', { class: 'stage-name', text: p.title })),
+        el('div', { class: 'stage-title' }, el('div', { class: 'stage-kicker', text: SETTERS[p.setter] ?? '' }), el('div', { class: 'stage-name', text: p.title })),
         el('button', { class: 'stage-icon', type: 'button', 'aria-label': 'What is this?', onClick: () => about() }, icon('help', 20)),
         p.solved ? null : el('button', { class: 'stage-icon', type: 'button', 'aria-label': 'Hints', onClick: () => hints() }, icon('bulb', 20), hintCount),
       ),

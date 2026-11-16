@@ -58,17 +58,6 @@ async function go(to) {
   note(`\n-> ${to}`);
   await act('travel', { to });
   expect(session.state.location === to, `could not travel to ${to}`);
-  await extras();
-}
-/** The puzzles around the Fold: pick up any that lie here, the way a curious player would, and solve them. */
-async function extras() {
-  const here = new Set((session.case.locations[session.state.location].hotspots ?? []).map((h) => h.id));
-  for (const [id, p] of Object.entries(session.case.puzzles)) {
-    // The Tithes on the wall have their own places in the script below.
-    if (!p.extra || has.puz(id) || p.at.includes('tithe_wall') || !p.at.some((a) => here.has(a))) continue;
-    if (!has.open(id)) await look(p.at.find((a) => here.has(a)));
-    if (has.open(id) && !has.puz(id)) await solve(id, p.answers[0]);
-  }
 }
 async function look(...ids) {
   for (const id of ids) {
@@ -166,8 +155,6 @@ async function main() {
   await solve('bellows', 'held since noon');
   await deduce('locked', 'remote');
   await ask('How does a Caesar cipher work?');
-  await solve('tithe_square', '1514');
-  await solve('tithe_fifteen', 'impossible');
 
   const early = await act('rest');
   expect(early.ok, 'Monday can end once the scene, the doctor and the Hall are done');
@@ -203,7 +190,6 @@ async function main() {
   await look('tube');
   await solve('paper2a', 'money');
   await solve('paper2b', 'sextant');
-  await solve('tithe_bridges', 'South Bank');
   await go('meridian');
   await look('atlas', 'sextant');
   expect(has.ev('escrow_letter') && has.ev('capacity_report'), 'what Sallow hid');
@@ -296,7 +282,7 @@ async function main() {
   const epi = await act('epilogue');
   note(`\n${epi.ending.text}\n`);
   console.log(`\nEnding: ${end?.how} · score ${end?.score} · rank "${end?.rank}" · ${session.state.steps} steps`);
-  console.log(`Truths: ${end?.truths.filter((t) => t.found).length}/${end?.truths.length} · puzzles ${end?.puzzles.solved}/${end?.puzzles.of} · around the Fold ${end?.puzzles.extra?.solved}/${end?.puzzles.extra?.of}`);
+  console.log(`Truths: ${end?.truths.filter((t) => t.found).length}/${end?.truths.length} · puzzles ${end?.puzzles.solved}/${end?.puzzles.of}`);
   const facts = Object.keys(session.state.facts).length;
   const total = Object.keys(session.case.facts).length;
   console.log(`Facts found: ${facts}/${total}`);

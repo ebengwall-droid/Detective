@@ -2,7 +2,7 @@
 // paper card: the idea at a glance, with an example that is never the answer to a puzzle
 // in the game. drawLesson(name) returns { svg, caption }, or null for a name it does not know.
 
-import { COL, ABC, s, T, L, R, C, P, chessman, card } from './ink.js';
+import { COL, ABC, T, L, R, C, P, chessman, card } from './ink.js';
 
 const { ink: INK, faint: FAINT, rule: RULE, brass: BRASS, green: GREEN, red: RED, blue: BLUE } = COL;
 
@@ -213,111 +213,6 @@ const PICS = {
     return { svg, caption: 'Measure how high the sun stands at noon. With a table for the day, that gives your latitude.' };
   },
 
-  river() {
-    const { svg, arrow } = card(320, 150);
-    svg.append(R(0, 0, 320, 150, { f: '#cfe0e6', s: 'none', r: 0 }), R(0, 0, 92, 150, { f: '#e6d6b4', s: 'none', r: 0 }), R(240, 0, 80, 150, { f: '#e6d6b4', s: 'none', r: 0 }));
-    const thing = (x, y, label, col) => [C(x, y, 17, { f: col, s: INK, w: 1 }), T(x, y + 4, label, { c: 'u', z: 10.5, w: 700 })];
-    svg.append(...thing(46, 28, 'fox', '#e7a35c'), ...thing(46, 76, 'goose', '#fbf8f0'), ...thing(46, 124, 'corn', '#f2d36b'));
-    svg.append(L(46, 46, 46, 57, { s: RED, w: 2, m: arrow('red') }), T(72, 56, 'eats', { c: 'u', z: 10, f: RED, a: 'start', w: 700 }), L(46, 94, 46, 105, { s: RED, w: 2, m: arrow('red') }), T(72, 104, 'eats', { c: 'u', z: 10, f: RED, a: 'start', w: 700 }));
-    svg.append(P('M120 86 Q166 104 212 86 L204 98 Q166 112 128 98 Z', { f: '#9a6b3e', s: INK, w: 1 }), T(166, 78, 'you + one thing', { c: 'u', z: 10.5, w: 600 }), L(150, 120, 196, 120, { s: FAINT, m: arrow('faint'), ms: arrow('faint') }), T(173, 136, 'over and back', { c: 'u', z: 9.5, f: FAINT }));
-    return { svg, caption: 'Never leave a dangerous pair alone. The boat can carry something back as well as over.' };
-  },
-
-  logic() {
-    const { svg } = card(320, 150);
-    const people = ['Ann', 'Ben', 'Cat'];
-    const drinks = ['tea', 'coffee', 'milk'];
-    const x0 = 100;
-    const y0 = 36;
-    const cw = 58;
-    const ch = 32;
-    drinks.forEach((d, j) => svg.append(T(x0 + j * cw + cw / 2, y0 - 10, d, { c: 'u', z: 12, w: 600 })));
-    people.forEach((p, i) => {
-      svg.append(T(x0 - 12, y0 + i * ch + ch / 2 + 4, p, { c: 'u', z: 12, w: 600, a: 'end' }));
-      drinks.forEach((_, j) => svg.append(R(x0 + j * cw, y0 + i * ch, cw, ch, { s: RULE, r: 0 })));
-    });
-    const mark = (i, j, yes) => {
-      const cx = x0 + j * cw + cw / 2;
-      const cy = y0 + i * ch + ch / 2;
-      return yes ? P(`M${cx - 9} ${cy} L${cx - 2} ${cy + 7} L${cx + 10} ${cy - 8}`, { s: GREEN, w: 3 }) : P(`M${cx - 7} ${cy - 7} L${cx + 7} ${cy + 7} M${cx + 7} ${cy - 7} L${cx - 7} ${cy + 7}`, { s: RED, w: 2 });
-    };
-    svg.append(mark(0, 0, true), mark(0, 1, false), mark(0, 2, false), mark(1, 0, false), mark(2, 0, false));
-    svg.append(T(160, 144, 'Ann drinks tea: cross out the rest of her row and the tea column', { c: 'u', z: 9.5, f: FAINT }));
-    return { svg, caption: 'A tick lets you cross out everything else in its row and its column.' };
-  },
-
-  smothered() {
-    const { svg, arrow } = card(320, 168);
-    const g = 34;
-    const x0 = 34;
-    const y0 = 12;
-    const files = 'abcd';
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 4; c++) svg.append(R(x0 + c * g, y0 + r * g, g, g, { f: (r + c) % 2 ? '#b89466' : '#ecdfc4', s: 'none', r: 0 }));
-      svg.append(T(x0 - 9, y0 + r * g + g / 2 + 4, String(8 - r), { z: 10, f: FAINT }));
-    }
-    files.split('').forEach((f, c) => svg.append(T(x0 + c * g + g / 2, y0 + 4 * g + 13, f, { z: 10, f: FAINT })));
-    const put = (code, c, r) => svg.append(chessman(code, x0 + c * g + 2, y0 + r * g + 2, g - 4));
-    put('k', 0, 0);
-    put('r', 1, 0);
-    put('p', 0, 1);
-    put('p', 1, 1);
-    put('N', 2, 1);
-    svg.append(L(x0 + 2 * g + 8, y0 + g + 10, x0 + g / 2 + 10, y0 + g / 2 + 4, { s: RED, w: 2.4, m: arrow('red') }));
-    svg.append(T(186, 50, 'The king cannot', { c: 'u', z: 11.5, a: 'start' }), T(186, 65, 'move: his own', { c: 'u', z: 11.5, a: 'start' }), T(186, 80, 'pieces block him.', { c: 'u', z: 11.5, a: 'start' }), T(186, 108, 'A knight jumps,', { c: 'u', z: 11.5, a: 'start', f: RED, w: 600 }), T(186, 123, 'so its check', { c: 'u', z: 11.5, a: 'start', f: RED, w: 600 }), T(186, 138, 'cannot be blocked.', { c: 'u', z: 11.5, a: 'start', f: RED, w: 600 }));
-    return { svg, caption: 'A smothered mate: the king is boxed in by his own pieces, and a knight gives check.' };
-  },
-
-  wordgame() {
-    const { svg } = card(320, 120);
-    const tiles = [['C', '#8b8b86'], ['R', '#c9a227'], ['A', GREEN], ['N', '#8b8b86'], ['E', '#c9a227']];
-    tiles.forEach(([ch, col], i) => {
-      const x = 46 + i * 48;
-      svg.append(R(x, 14, 42, 42, { f: col, s: 'none', r: 5 }), T(x + 21, 43, ch, { c: 'u', z: 22, w: 800, f: '#fff' }));
-    });
-    const key = [[GREEN, 'right letter, right place'], ['#c9a227', 'in the word, wrong place'], ['#8b8b86', 'not in the word']];
-    key.forEach(([col, text], i) => svg.append(R(56, 70 + i * 16, 11, 11, { f: col, s: 'none', r: 2 }), T(74, 79 + i * 16, text, { c: 'u', z: 11, a: 'start' })));
-    return { svg, caption: 'Every guess tells you something about each letter. Keep the greens, move the golds, drop the greys.' };
-  },
-
-  timeline() {
-    const { svg, arrow } = card(320, 130);
-    const x = (yr) => 20 + ((yr - 1000) / 1000) * 280;
-    svg.append(L(14, 64, 306, 64, { s: INK, w: 1.6, m: arrow('ink') }), T(16, 84, 'older', { c: 'u', z: 10, f: FAINT, a: 'start' }), T(304, 84, 'newer', { c: 'u', z: 10, f: FAINT, a: 'end' }));
-    const pegs = [[1066, 'Hastings', -1], [1215, 'Magna Carta', 1], [1348, 'Black Death', -1], [1588, 'Armada', 1], [1815, 'Waterloo', -1]];
-    for (const [yr, name, side] of pegs) {
-      const px = x(yr);
-      svg.append(L(px, 58, px, 70, { s: BRASS, w: 2.2 }), T(px, side < 0 ? 40 : 102, String(yr), { z: 12, w: 700, f: BRASS }), T(px, side < 0 ? 26 : 116, name, { c: 'u', z: 10.5 }));
-    }
-    return { svg, caption: 'Keep a few dates as pegs. For anything else, ask: before or after this one?' };
-  },
-
-  pendulum() {
-    const { svg } = card(320, 168);
-    svg.append(R(14, 8, 292, 10, { f: '#7a5332', s: 'none', r: 3 }));
-    const bob = (x, len, deg, r, col) => {
-      const a = (deg * Math.PI) / 180;
-      const bx = x + len * Math.sin(a);
-      const by = 18 + len * Math.cos(a);
-      return [P(`M${x - len * Math.sin(a)} ${18 + len * Math.cos(a)} A${len} ${len} 0 0 0 ${bx} ${by}`, { s: RULE, w: 1, d: '3 4' }), L(x, 18, bx, by, { s: FAINT, w: 1.2 }), C(bx, by, r, { f: col, s: INK, w: 1 })];
-    };
-    svg.append(...bob(56, 54, -14, 9, '#d9b46a'), ...bob(166, 108, 13, 8, '#a8743f'), ...bob(254, 108, 13, 13, '#d9b46a'));
-    svg.append(T(56, 104, 'short:', { c: 'u', z: 10.5, f: FAINT }), T(56, 117, 'quick', { c: 'u', z: 10.5, f: FAINT }));
-    svg.append(P('M150 146 V152 H270 V146', { s: GREEN, w: 1.6 }), T(210, 164, 'same length: they swing together', { c: 'u', z: 10.5, f: GREEN, w: 600 }));
-    return { svg, caption: 'Only the length of the string matters. A light weight and a heavy one on the same length swing together.' };
-  },
-
-  staff() {
-    const { svg } = card(320, 146);
-    const line = (i) => 92 - i * 12;
-    for (let i = 0; i < 5; i++) svg.append(L(18, line(i), 302, line(i), { s: INK, w: 1 }));
-    const note = (x, y, col) => s('ellipse', { cx: x, cy: y, rx: 7.2, ry: 5.4, fill: col, transform: `rotate(-18 ${x} ${y})` });
-    'EGBDF'.split('').forEach((n, i) => svg.append(note(52 + i * 28, line(i), INK), T(52 + i * 28, 118, n, { z: 13, w: 700, f: BRASS })));
-    'FACE'.split('').forEach((n, i) => svg.append(note(210 + i * 26, line(i) - 6, INK), T(210 + i * 26, 118, n, { z: 13, w: 700, f: GREEN })));
-    svg.append(T(108, 138, 'lines: Every Good Boy Deserves Fruit', { c: 'u', z: 9.5, f: BRASS }), T(249, 138, 'spaces: FACE', { c: 'u', z: 9.5, f: GREEN }));
-    return { svg, caption: 'With a treble clef, the lines and the spaces each have a letter. Higher on the staff sounds higher.' };
-  },
-
   latlong() {
     const { svg, arrow } = card(320, 164);
     svg.append(R(20, 14, 280, 132, { f: '#dfe9ee', s: '#9db3bf', r: 6 }));
@@ -387,50 +282,6 @@ const PICS = {
     }
     svg.append(T(258, 150, 'From b1:', { c: 'u', z: 10.5, a: 'start' }), T(258, 164, 'a3, c3, d2', { c: 'u', z: 10.5, a: 'start', f: GREEN, w: 700 }), T(30, 40, 'rank', { c: 'u', z: 10, f: FAINT }), T(30, 52, '(row)', { c: 'u', z: 10, f: FAINT }), T(176, 194, 'file (column)', { c: 'u', z: 10, f: FAINT }));
     return { svg, caption: 'Squares are named by column letter, then row number. A knight moves two squares one way and one to the side.' };
-  },
-
-  magic() {
-    const { svg } = card(320, 156);
-    const g = 36;
-    const x0 = 106;
-    const y0 = 12;
-    const sq = [[4, 9, 2], [3, 5, 7], [8, 1, 6]];
-    sq.forEach((row, r) => row.forEach((n, c) => svg.append(R(x0 + c * g, y0 + r * g, g, g, { s: INK, r: 0 }), T(x0 + c * g + g / 2, y0 + r * g + g / 2 + 6, String(n), { c: 'd', z: 18, w: 600 }))));
-    for (let i = 0; i < 3; i++) svg.append(T(x0 + 3 * g + 18, y0 + i * g + g / 2 + 5, '15', { z: 12, w: 700, f: BRASS }), T(x0 + i * g + g / 2, y0 + 3 * g + 18, '15', { z: 12, w: 700, f: BRASS }));
-    svg.append(T(x0 + 3 * g + 18, y0 + 3 * g + 18, '15', { z: 12, w: 700, f: GREEN }), T(x0 - 18, y0 + 3 * g + 18, '15', { z: 12, w: 700, f: GREEN }), T(160, 150, 'every row, column and long diagonal', { c: 'u', z: 10, f: FAINT }));
-    return { svg, caption: 'The Lo Shu square: every line adds up to the same total, 15.' };
-  },
-
-  bridges() {
-    const { svg } = card(320, 172);
-    const N = { n: [160, 22], s: [160, 150], i: [92, 86], e: [254, 86] };
-    const edge = (a, b, bend = 0) => {
-      const [x1, y1] = N[a];
-      const [x2, y2] = N[b];
-      const mx = (x1 + x2) / 2 + bend * (y2 - y1) * 0.25;
-      const my = (y1 + y2) / 2 - bend * (x2 - x1) * 0.25;
-      return P(`M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}`, { s: '#8a5a2e', w: 2.4 });
-    };
-    svg.append(edge('n', 'i', 0.6), edge('n', 'i', -0.6), edge('s', 'i', 0.6), edge('s', 'i', -0.6), edge('n', 'e'), edge('s', 'e'), edge('i', 'e'));
-    const node = (k, label, count) => [C(N[k][0], N[k][1], 15, { f: '#f3ecdb', s: INK, w: 1.4 }), T(N[k][0], N[k][1] + 5, String(count), { z: 14, w: 800, f: RED }), T(N[k][0] + (k === 'e' ? 0 : k === 'i' ? -2 : 24), N[k][1] + (k === 'e' || k === 'i' ? 32 : 5), label, { c: 'u', z: 10, f: FAINT, a: k === 'n' || k === 's' ? 'start' : 'middle' })];
-    svg.append(...node('n', 'north bank', 3), ...node('s', 'south bank', 3), ...node('i', 'island', 5), ...node('e', 'east', 3));
-    return { svg, caption: 'Königsberg: each place shows how many bridges touch it. All four are odd, so no walk crosses every bridge once.' };
-  },
-
-  fifteen() {
-    const { svg, arrow } = card(320, 160);
-    const g = 34;
-    const x0 = 92;
-    const y0 = 10;
-    svg.append(R(x0 - 6, y0 - 6, 4 * g + 12, 4 * g + 12, { f: '#7a5332', s: 'none', r: 8 }));
-    for (let i = 0; i < 15; i++) {
-      const r = Math.floor(i / 4);
-      const c = i % 4;
-      svg.append(R(x0 + c * g + 1.5, y0 + r * g + 1.5, g - 3, g - 3, { f: '#efe3c6', s: '#b49863', r: 4 }), T(x0 + c * g + g / 2, y0 + r * g + g / 2 + 5, String(i + 1), { c: 'd', z: 14, w: 700 }));
-    }
-    svg.append(L(x0 + 3 * g + g / 2, y0 + 2 * g + g - 2, x0 + 3 * g + g / 2, y0 + 3 * g + g / 2 + 4, { s: BRASS, w: 2.4, m: arrow('brass') }));
-    svg.append(T(258, 74, 'slide a tile', { c: 'u', z: 10.5, f: BRASS, a: 'start' }), T(258, 88, 'into the gap', { c: 'u', z: 10.5, f: BRASS, a: 'start' }));
-    return { svg, caption: 'Count the pairs of tiles in the wrong order. If the count is odd, no amount of sliding will solve it.' };
   },
 
   letterlock() {

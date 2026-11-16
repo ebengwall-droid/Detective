@@ -19,7 +19,7 @@ for (const [id, npc] of Object.entries(NPCS)) npc.small = SMALL[id] ?? {};
 NPCS.kit.guide = true;
 
 /** The kinds of written thing the page can draw for a view's `figure`. */
-const STAGE_KINDS = ['lock', 'wheel', 'fence', 'keyed', 'pairs', 'codes', 'pigpen', 'bacon', 'knight', 'column', 'grids', 'clue', 'magic', 'bridges', 'slide', 'places', 'write', 'collar', 'chart', 'instruments', 'sun', 'ferry', 'garden', 'grid', 'chess', 'wordgame', 'order', 'pendulum', 'piano'];
+const STAGE_KINDS = ['lock', 'wheel', 'fence', 'keyed', 'pairs', 'codes', 'pigpen', 'bacon', 'knight', 'column', 'grids', 'clue', 'places', 'write', 'collar', 'chart', 'instruments'];
 const FIGURE_KINDS = ['blotter', 'slate', 'stone', 'board', 'card', 'certificate', 'ledger', 'plate', 'newsprint', 'typed', 'label', 'plan'];
 
 // A lecture should always be found by its own title.
